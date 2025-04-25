@@ -17,8 +17,9 @@ Pingo: Bingo game where AI judges based on photos
   - [Setup](#setup)
   - [Development](#development)
   - [Build for Production](#build-for-production)
-  - [Linting](#linting)
-  - [Local Docker Testing](#local-docker-testing)
+  - [Lint \& Format](#lint--format)
+  - [Local Docker](#local-docker)
+- [Test](#test)
 - [Deploy](#deploy)
 - [Misc](#misc)
 
@@ -29,7 +30,7 @@ Pingo: Bingo game where AI judges based on photos
 - TypeScript (v5 or higher)
 - [Next.js](https://nextjs.org) (v15.3.0)
   - [React](https://ja.react.dev) (v19.1.0)
-<!-- - [Storybook](https://storybook.js.org) (v8.6.12) -->
+- [Storybook](https://storybook.js.org) (v8.6.12)
 
 ### Tool
 
@@ -84,14 +85,14 @@ npm run build
 npm run start
 ```
 
-### Linting
+### Lint & Format
 
 ```shell
-# Run linter
-npm run lint
+# Run Biome
+npm run check
 ```
 
-### Local Docker Testing
+### Local Docker
 
 ```shell
 # Build the Docker image
@@ -100,6 +101,22 @@ docker build -t pingo .
 # Run the Docker container
 # Replace 3000 with your desired host port if needed
 docker run -p 3000:8080 pingo
+```
+
+## Test
+
+```shell
+# Run Vitest only once
+npm test
+
+# Run Vitest watch mode
+npm run test:watch
+
+# Run Vitest with Web UI
+npm run test:ui
+
+# Run Storybook tests
+npm run test:storybook
 ```
 
 ## Deploy

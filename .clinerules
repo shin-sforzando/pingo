@@ -1,13 +1,16 @@
-# Cline's Project-Specific Rules & Intelligence (Pingo)
+# Cline's Project-Specific Rules & Intelligence
 
-- All Markdown files will be in GitHub Flavored Markdown format, with no markdownlint violations
-- Documents other than README.md are written in Japanese, while README.md is written in English
-- All UI elements, comments in source code, and output should be in English
+- If you have questions or concerns about a user's instructions, ask the right questions before you do anything.
+- All Markdown files will be in GitHub Flavored Markdown format, with no markdownlint violations.
+- Documents other than README.md are written in Japanese, while README.md is written in English.
+- All comments in source code, and log outputs should be in English.
 - All comments should only be useful to co-developers and to Cline, which has amnesia after a reset, and should not be self-explanatory from the source code and its change history.
-  - In other words, comments that explain why are good comments, and comments that explain what, how, or when should not exist
-- Never ignore Linter warnings
-- Utilize type definitions aggressively and be as rigorous as possible
-- All source code should be robust with automated tests and all components should be individually viewable in the Storybook
+  - In other words, comments that explain why are good comments, and comments that explain what, how, or when should not exist.
+- Use standard libraries whenever possible, and reduce the number of tools and libraries that depend on them.
+- If it is unavoidable to use external libraries, check the latest official documentation.
+- Never ignore Linter warnings.
+- Utilize type definitions aggressively and be as rigorous as possible.
+- All source code should be robust with automated tests and all components should be individually viewable in the Storybook.
 - To avoid rework, implementations should be tested and verified frequently and persistently.
-  - Wait for user confirmation of completion before updating memory banks or starting the next task
+  - Wait for user confirmation of completion before updating memory banks or starting the next task.
 - If a similar problem cannot be corrected after three attempts, consider the possibility that the approach itself is incorrect.
