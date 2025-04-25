@@ -1,0 +1,17 @@
+{
+  "recommendations": [
+    "bierner.markdown-mermaid",
+    "biomejs.biome",
+    "bradlc.vscode-tailwindcss",
+    "chakrounanas.turbo-console-log",
+    "davidanson.vscode-markdownlint",
+    "editorconfig.editorconfig",
+    "humao.rest-client",
+    "shd101wyy.markdown-preview-enhanced",
+    "streetsidesoftware.code-spell-checker",
+    "vivaxy.vscode-conventional-commits",
+    "wayou.vscode-todo-highlight",
+    "yusukehirao.vscode-markuplint",
+    "yzhang.markdown-all-in-one"
+  ]
+}

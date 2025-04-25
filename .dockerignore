@@ -1,0 +1,39 @@
+# Git files
+.git
+.gitignore
+
+# Node modules
+node_modules
+
+# Build artifacts
+.next
+out
+
+# Development files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnp/
+.pnp.js
+
+# Editor configuration
+.vscode
+.idea
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Cline documentation
+cline_docs/
+
+# Lefthook configuration
+.lefthook/
+lefthook.yml
+
+# Storybook files
+.storybook
+
+# Environment files
+.env*.local
+.env

@@ -1,0 +1,21 @@
+#   Refer for explanation to following link:
+#   https://lefthook.dev/configuration/
+
+pre-commit:
+  commands:
+    hide:
+      run: git secret hide -mF
+    check:
+      glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}"
+      run: npx @biomejs/biome check --write --no-errors-on-unmatched --files-ignore-unknown=true --colors=off {staged_files}
+      stage_fixed: true
+    # test:
+    #   glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx}"
+    #   run: npm test
+
+post-merge:
+  commands:
+    reveal:
+      run: git secret reveal -v
+    install:
+      run: npm install
