@@ -1,4 +1,4 @@
-import Image from "next/legacy/image";
+import Image from "next/image";
 
 export default function Home() {
   return (
@@ -9,6 +9,11 @@ export default function Home() {
         width={180}
         height={38}
         priority
+        style={{
+          maxWidth: "100%",
+          width: "auto",
+          height: "auto",
+        }}
       />
       <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left">
         <li className="mb-2 tracking-[-.01em]">
