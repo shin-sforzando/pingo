@@ -231,10 +231,12 @@ Copyright表記に加えて、 `/privacy` `/terms` `contact` へのリンク。
 #### Image pop-up
 
 ビンゴの列をそろえた時や、提出した画像が合格した場合、または不合格だった場合に最前面に表示されるポップアップ。
+デバイスの解像度に合わせて自動サイズ調整し、画面中央に表示。
 指定時間後にフェードアウト。
 指定時間を待たずに消すためのクローズボタン付き。
 
 「Bingo!」「Clear!」「OK！」「NG！」などを想定。
+画像は透過PNGで用意する。
 
 余力があれば、ブラウザのVibration APIを使って振動でも提示したい。
 
@@ -375,6 +377,8 @@ GitHubのIssue Templateは `.github/ISSUE_TEMPLATE/feat.md` `.github/ISSUE_TEMPL
 - しばらくはCloud Runから発行されるURLを本番環境URLとし、将来的にはドメインを取得、設定したい
 - CI/CDについて、GitHub mainブランチへのPushをトリガーに動くGoogle Cloud Buildを用意してCloud Runにデプロイ
 - デプロイ以外の自動テストや静的解析にはGitHub Actionsを活用したい
+- テスト時にデータベースやストレージに作成されるテストデータを一括で削除する機能が欲しい
+- 認証の実装にはNextAuth.jsを利用した方が良いか
 - データモデルの定義にはZodを利用したほうが良いか
 - 状態管理はReact Context APIで良いか
 - バナー広告を掲載し、クラウド利用料の足しにしたい
