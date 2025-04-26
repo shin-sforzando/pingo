@@ -3,6 +3,7 @@
 - If you have questions or concerns about a user's instructions, ask the right questions before you do anything.
 - All Markdown files will be in GitHub Flavored Markdown format, with no markdownlint violations.
 - Documents other than README.md are written in Japanese, while README.md is written in English.
+- GitHub Issues and Pull Requests should be in English, follow the templates in `/.github`.
 - All comments in source code, and log outputs should be in English.
 - All comments should only be useful to co-developers and to Cline, which has amnesia after a reset, and should not be self-explanatory from the source code and its change history.
   - In other words, comments that explain **why** are good comments, and comments that explain what, how, or when should not exist.
