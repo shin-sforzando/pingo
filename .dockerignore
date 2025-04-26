@@ -1,6 +1,24 @@
 # Git files
 .git
+.github
 .gitignore
+.gitsecret
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Editor configuration
+.vscode
+.idea
+
+# Cline documentation
+cline_docs/
+.clinerules
+
+# Lefthook configuration
+.lefthook/
+lefthook.yml
 
 # Node modules
 node_modules
@@ -16,24 +34,10 @@ yarn-error.log*
 .pnp/
 .pnp.js
 
-# Editor configuration
-.vscode
-.idea
-
-# OS generated files
-.DS_Store
-Thumbs.db
-
-# Cline documentation
-cline_docs/
-
-# Lefthook configuration
-.lefthook/
-lefthook.yml
-
 # Storybook files
 .storybook
 
 # Environment files
 .env*.local
 .env
+*.secret
