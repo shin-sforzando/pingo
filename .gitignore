@@ -161,3 +161,6 @@ storybook-static/
 .gitsecret/keys/random_seed
 !*.secret
 pingo-456817-ddc416f0394a.json
+
+# Lefthook local
+lefthook-local.yml
