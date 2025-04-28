@@ -81,7 +81,7 @@ flowchart TD
     
     /notifications/
       /{notificationId}/
-        - id: string
+        - id: string (ULID)
         - type: string (通知タイプ)
         - displayType: string ("toast" または "popup")
         - message: string (表示メッセージ)
@@ -124,26 +124,28 @@ flowchart TD
     - status: string ("active", "ended")
     
     /board/
+    # ゲーム作成時に作成される共通のビンゴボード
       - cells: array<{
-        id: string,
-        position: {x: number, y: number} (0-4, 0-4の座標),
-        subject: string (被写体の説明),
+        id: string
+        position: {x: number, y: number} (0-4, 0-4の座標)
+        subject: string (被写体の説明)
         isFree: boolean (中央のFREEセルかどうか)
-      }> (ゲーム作成時に設定される共通のビンゴボード)
+      }
     
     /playerBoards/
+    # 参加プレイヤー別のビンゴボード
       /{userId}/
         - userId: string (プレイヤーID)
         - cellStates: map<string, {
-          isOpen: boolean (セルがOPENされているかどうか),
-          openedAt: timestamp (OPENされた時刻、未OPENの場合はnull),
+          isOpen: boolean (セルがOPENされているかどうか)
+          openedAt: timestamp (OPENされた時刻、未OPENの場合はnull)
           openedBySubmissionId: string (OPENに至った提出ID、未OPENの場合はnull)
-        }> (セルIDをキーとしたマップ)
+        }
         - completedLines: array<{
-          type: string ("row", "column", "diagonal"),
-          index: number (行/列のインデックス、対角線の場合は0または1),
+          type: string ("row", "column", "diagonal")
+          index: number (行/列のインデックス、対角線の場合は0または1)
           completedAt: timestamp (列が完成した時刻)
-        }> (完成した列の情報)
+        }
     
     /participants/
       /{userId}/
@@ -155,7 +157,7 @@ flowchart TD
     
     /submissions/
       /{submissionId}/
-        - id: string
+        - id: string (ULID)
         - userId: string (提出したユーザーID)
         - imageUrl: string (Cloud Storageへのパス)
         - submittedAt: timestamp (アップロード完了時刻)
@@ -169,7 +171,7 @@ flowchart TD
     
     /events/
       /{eventId}/
-        - id: string
+        - id: string (ULID)
         - type: string (例: "join", "submit", "complete_line", "complete_game")
         - userId: string (イベント発生ユーザー)
         - timestamp: timestamp
