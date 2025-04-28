@@ -72,7 +72,7 @@ flowchart TD
 ```yaml
 /users/
   /{userId}/
-    - id: string (UUIDv4)
+    - id: string (Firebase独自の可変長文字列、通常28文字程度)
     - handle: string (ユニークなハンドルネーム)
     - createdAt: timestamp
     - lastLoginAt: timestamp
