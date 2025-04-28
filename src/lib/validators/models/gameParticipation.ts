@@ -19,13 +19,13 @@ export const gameParticipationSchema = z.object({
   // Timestamp when the user joined the game.
   joinedAt: timestampSchema,
   // Denormalized count of completed lines for this user in this game.
-  // Matches the value in /games/{gameId}/participants/{userId}.
+  // Matches the value in /games/{gameId}/participants/{userId}. Defaults to 0.
   // Useful for quickly displaying progress without reading the participant sub-collection.
   completedLines: z.number().int().gte(0).default(0),
-  // Denormalized timestamp of the last completed line.
+  // Denormalized timestamp of the last completed line. Defaults to null.
   // Matches the value in /games/{gameId}/participants/{userId}. Null if none completed.
-  lastCompletedAt: timestampSchema.nullable(),
-  // Denormalized count of submissions for this user in this game.
+  lastCompletedAt: timestampSchema.nullable().default(null),
+  // Denormalized count of submissions for this user in this game. Defaults to 0.
   // Matches the value in /games/{gameId}/participants/{userId}. Max 30.
   submissionCount: z.number().int().gte(0).lte(30).default(0),
 });

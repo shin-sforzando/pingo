@@ -53,14 +53,28 @@ export type PlayerBoardCellState = z.infer<typeof playerBoardCellStateSchema>;
 /**
  * Schema representing a completed line (row, column, or diagonal) on a player's board.
  */
-export const completedLineSchema = z.object({
-  // Type of the completed line.
-  type: z.enum(["row", "column", "diagonal"]),
-  // Index of the row/column (0-4) or diagonal (0 for TL-BR, 1 for TR-BL).
-  index: z.number().int().gte(0).lte(4),
-  // Timestamp when the line was completed.
-  completedAt: timestampSchema,
-});
+export const completedLineSchema = z
+  .object({
+    // Type of the completed line.
+    type: z.enum(["row", "column", "diagonal"]),
+    // Index representing the line:
+    // - For 'row': Row index (0-4)
+    // - For 'column': Column index (0-4)
+    // - For 'diagonal': Starting cell index (0 for TL-BR, 4 for TR-BL)
+    index: z.number().int().gte(0).lte(4),
+    // Timestamp when the line was completed.
+    completedAt: timestampSchema,
+  })
+  .refine(
+    (data) => {
+      // If type is diagonal, index must be 0 or 4. Otherwise, it's 0-4.
+      return data.type !== "diagonal" || data.index === 0 || data.index === 4;
+    },
+    {
+      message: "Diagonal line index must be 0 (TL-BR) or 4 (TR-BL)",
+      path: ["index"], // Point the error to the index field
+    },
+  );
 
 export type CompletedLine = z.infer<typeof completedLineSchema>;
 
@@ -94,9 +108,9 @@ export const participantSchema = z.object({
   joinedAt: timestampSchema,
   // Number of lines the participant has completed. Denormalized for quick access.
   completedLines: z.number().int().gte(0).default(0),
-  // Timestamp of the last completed line. Null if no lines completed.
-  lastCompletedAt: timestampSchema.nullable(),
-  // Count of image submissions made by this participant. Max 30 as per spec.
+  // Timestamp of the last completed line. Null if no lines completed. Defaults to null.
+  lastCompletedAt: timestampSchema.nullable().default(null),
+  // Count of image submissions made by this participant. Max 30 as per spec. Defaults to 0.
   submissionCount: z.number().int().gte(0).lte(30).default(0),
 });
 

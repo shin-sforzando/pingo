@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { expect, within } from "@storybook/test";
 
 import Home from "@/app/page";
+import { waitFor } from "@testing-library/dom";
 
 const meta = {
   title: "Page/HomePage",
@@ -18,6 +19,8 @@ export const Default: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const getStarted = canvas.getByText(/Get started by editing/i);
-    await expect(getStarted).toBeInTheDocument();
+    await waitFor(() => {
+      expect(getStarted).toBeInTheDocument();
+    });
   },
 };

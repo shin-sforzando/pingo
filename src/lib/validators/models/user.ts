@@ -25,7 +25,7 @@ export const notificationSchema = z.object({
   // Determines how the notification should be presented to the user.
   displayType: z.enum(["toast", "popup", "inline"]),
   // The main content of the notification message.
-  message: z.string().min(1).max(250), // Reasonable limits for display
+  message: z.string().min(1).max(120), // Reasonable limits for display
   // Timestamp when the notification was created.
   createdAt: timestampSchema,
   // Flag indicating if the user has viewed the notification.
@@ -77,7 +77,7 @@ export const userSchema = z.object({
     .object({
       displayName: z.string().max(50).optional(),
       avatarUrl: z.string().url().optional(),
-      bio: z.string().max(160).optional(),
+      bio: z.string().max(250).optional(),
     })
     .optional(),
 });
