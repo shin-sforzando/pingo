@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { gameIdSchema } from "../common"; // For valid IDs
+import { gameIdSchema } from "../common";
 import { gameParticipationSchema } from "./gameParticipation";
 
 describe("GameParticipation Zod Schema", () => {

@@ -1,6 +1,6 @@
+import { gameIdSchema, ulidSchema } from "@/lib/validators/common";
 import { http, HttpResponse } from "msw";
 import { z } from "zod";
-import { gameIdSchema, ulidSchema } from "../../validators/common";
 // Accessing mock data defined in other handlers is complex and creates coupling.
 // For a robust mock setup, consider a dedicated shared mock data module/store.
 // For now, we'll simulate results without deep interaction with other mock stores.

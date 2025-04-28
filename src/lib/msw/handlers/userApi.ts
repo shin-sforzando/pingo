@@ -1,9 +1,9 @@
+import { ulidSchema } from "@/lib/validators/common";
+import type { gameSchema as gameSchemaType } from "@/lib/validators/models/game";
+import { submissionSchema } from "@/lib/validators/models/game";
+import { notificationSchema, userSchema } from "@/lib/validators/models/user";
 import { http, HttpResponse } from "msw";
 import { z } from "zod";
-import { ulidSchema } from "../../validators/common";
-import type { gameSchema as gameSchemaType } from "../../validators/models/game";
-import { submissionSchema } from "../../validators/models/game";
-import { notificationSchema, userSchema } from "../../validators/models/user";
 
 // --- Mock Data Store (Simplified for User API) ---
 // This store is local to these handlers. In a real app or more complex mock setup,

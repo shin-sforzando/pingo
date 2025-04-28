@@ -6,6 +6,9 @@
     "type": "git",
     "url": "git+https://github.com/shin-sforzando/pingo.git"
   },
+  "msw": {
+    "workerDirectory": ["public"]
+  },
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",

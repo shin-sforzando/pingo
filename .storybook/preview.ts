@@ -1,6 +1,6 @@
 import { MINIMAL_VIEWPORTS } from "@storybook/addon-viewport";
 import type { Preview } from "@storybook/react";
-import { initialize } from "msw-storybook-addon"; // Import MSW addon
+import { initialize, mswLoader } from "msw-storybook-addon"; // Import MSW addon
 import { handlers } from "../src/lib/msw/handlers"; // Import your MSW handlers
 import "../src/app/globals.css";
 
@@ -11,6 +11,7 @@ initialize({
 });
 
 const preview: Preview = {
+  loaders: [mswLoader], // Add MSW loader to Storybook
   parameters: {
     // Pass the handlers to the msw parameter
     msw: {

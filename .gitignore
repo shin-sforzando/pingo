@@ -164,3 +164,6 @@ pingo-456817-ddc416f0394a.json
 
 # Lefthook local
 lefthook-local.yml
+
+# MSW mockServiceWorker
+mockServiceWorker.js

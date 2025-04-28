@@ -1,6 +1,6 @@
+import { userSchema } from "@/lib/validators/models/user";
 import { http, HttpResponse } from "msw";
 import { z } from "zod";
-import { userSchema } from "../../validators/models/user";
 
 // --- Mock Data Store ---
 // Simple in-memory store for mock users. Reset on server restart.
@@ -298,7 +298,13 @@ export const authHandlers = [
       );
       return HttpResponse.json(null, { status: 200 }); // Still return null
     }
-    // Return the current user's data.
-    return HttpResponse.json(user);
+    // Convert Date objects to ISO strings before returning JSON,
+    // mimicking standard JSON serialization behavior.
+    const userForJson = {
+      ...user,
+      createdAt: user.createdAt.toISOString(),
+      lastLoginAt: user.lastLoginAt.toISOString(),
+    };
+    return HttpResponse.json(userForJson);
   }),
 ];

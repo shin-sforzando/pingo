@@ -1,14 +1,14 @@
-import { http, HttpResponse } from "msw";
-import { z } from "zod";
-import { gameIdSchema } from "../../validators/common";
+import { gameIdSchema } from "@/lib/validators/common";
 import {
   boardSchema,
   gameSchema,
   participantSchema,
   playerBoardSchema,
-} from "../../validators/models/game";
-import { gameParticipationSchema } from "../../validators/models/gameParticipation";
-import { userSchema } from "../../validators/models/user";
+} from "@/lib/validators/models/game";
+import { gameParticipationSchema } from "@/lib/validators/models/gameParticipation";
+import { userSchema } from "@/lib/validators/models/user";
+import { http, HttpResponse } from "msw";
+import { z } from "zod";
 import { mockUsersDb } from "./userApi";
 
 // --- Mock Data Store ---
