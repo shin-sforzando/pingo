@@ -16,6 +16,7 @@ Pingo: Bingo game where AI judges based on photos
 - [How to](#how-to)
   - [Setup](#setup)
   - [Development](#development)
+  - [Storybook](#storybook)
   - [Build for Production](#build-for-production)
   - [Lint \& Format](#lint--format)
   - [Local Docker](#local-docker)
@@ -63,7 +64,7 @@ npm run dev
 # The application will be available at http://localhost:3000
 ```
 
-<!-- ### Storybook
+### Storybook
 
 Pingo uses [Storybook](https://storybook.js.org) for UI component development and documentation.
 Each UI component has a corresponding story that showcases its variants, sizes, and states.
@@ -73,7 +74,7 @@ Each UI component has a corresponding story that showcases its variants, sizes, 
 npm run storybook
 
 # The Storybook will be available at http://localhost:6006
-``` -->
+```
 
 ### Build for Production
 

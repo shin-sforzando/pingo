@@ -17,6 +17,7 @@ pre-commit:
 post-merge:
   commands:
     reveal:
+      interactive: true
       run: git secret reveal -v
     install:
       run: npm install

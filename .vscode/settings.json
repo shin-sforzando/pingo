@@ -13,8 +13,10 @@
     "Firestore",
     "gitsecret",
     "lefthook",
+    "participations",
     "pingo",
     "turbopack",
-    "VIEWPORTS"
+    "VIEWPORTS",
+    "WCAG"
   ]
 }
