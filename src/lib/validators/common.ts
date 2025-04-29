@@ -29,41 +29,16 @@ export const ulidSchema = z
 
 export type ULID = z.infer<typeof ulidSchema>;
 
-/**
- * Represents a timestamp using the standard JavaScript Date object.
- * This is the primary representation used within the application logic.
- * Note: When interacting with Firestore, conversion to/from Firestore Timestamp objects
- * might be necessary. Use `firestoreTimestampSchema` and conversion utilities for that.
- */
 export const timestampSchema = z.date();
 
 export type Timestamp = z.infer<typeof timestampSchema>;
 
-/**
- * Represents a Firestore Timestamp object structure.
- * This is used specifically when interacting directly with Firestore data
- * where Timestamps are represented as objects with seconds and nanoseconds.
- * Necessary for type safety when converting between JS Date and Firestore Timestamp.
- * See: https://firebase.google.com/docs/reference/js/firestore_.timestamp
- */
 export const firestoreTimestampSchema = z.object({
   seconds: z.number().int(),
   nanoseconds: z.number().int().gte(0).lt(1_000_000_000),
 });
 
-export type FirestoreTimestamp = z.infer<typeof firestoreTimestampSchema>;
-
-/**
- * Represents a value that can be either a standard JavaScript Date object
- * or a Firestore Timestamp object.
- * Useful for functions or components that might receive timestamp data
- * in either format before normalization or processing.
- */
 export const dateOrFirestoreTimestampSchema = z.union([
   timestampSchema,
   firestoreTimestampSchema,
 ]);
-
-export type DateOrFirestoreTimestamp = z.infer<
-  typeof dateOrFirestoreTimestampSchema
->;
