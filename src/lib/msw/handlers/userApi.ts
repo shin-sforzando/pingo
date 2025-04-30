@@ -1,9 +1,9 @@
-import { ulidSchema } from "@/lib/validators/common";
+import { ulidSchema, userIdSchema } from "@/lib/validators/common";
 import type { gameSchema as gameSchemaType } from "@/lib/validators/models/game";
 import { submissionSchema } from "@/lib/validators/models/game";
 import { notificationSchema, userSchema } from "@/lib/validators/models/user";
 import { http, HttpResponse } from "msw";
-import { z } from "zod";
+import type { z } from "zod";
 
 // --- Mock Data Store (Simplified for User API) ---
 // This store is local to these handlers. In a real app or more complex mock setup,
@@ -15,10 +15,7 @@ const mockUser1: z.infer<typeof userSchema> = userSchema.parse({
   lastLoginAt: new Date(),
   participatingGames: ["ABCDEF", "GHIJKL"],
   gameHistory: ["UVWXYZ"],
-  profile: {
-    displayName: "Mock User One",
-    avatarUrl: "https://via.placeholder.com/150/0000FF/808080?text=M1",
-  },
+  note: "Active user with good participation history",
   settings: { theme: "light" },
 });
 const mockUser2: z.infer<typeof userSchema> = userSchema.parse({
@@ -28,7 +25,7 @@ const mockUser2: z.infer<typeof userSchema> = userSchema.parse({
   lastLoginAt: new Date(),
   participatingGames: ["GHIJKL"],
   gameHistory: ["MNOPQR", "STUVWX"],
-  profile: { displayName: "Mock User Two" },
+  note: "New user, joined recently",
   settings: {},
 });
 // Exporting mockUsersDb for potential use in other handlers (e.g., enriching participant lists)
@@ -165,7 +162,7 @@ export const userApiHandlers = [
    */
   http.get("/api/users/:userId", ({ params }) => {
     // Validate userId from path parameter
-    const userIdResult = z.string().min(1).safeParse(params.userId);
+    const userIdResult = userIdSchema.safeParse(params.userId);
     if (!userIdResult.success) {
       return HttpResponse.json(
         { message: "Invalid User ID format in URL" },
@@ -185,8 +182,7 @@ export const userApiHandlers = [
       id: user.id,
       handle: user.handle,
       createdAt: user.createdAt, // Might be considered public
-      profile: user.profile,
-      // Omit: lastLoginAt, participatingGames, gameHistory, settings
+      // Omit: lastLoginAt, participatingGames, gameHistory, settings, note (admin only)
     };
     return HttpResponse.json(publicUserData);
   }),
@@ -196,7 +192,7 @@ export const userApiHandlers = [
    * Retrieves a list of games the user has previously participated in.
    */
   http.get("/api/users/:userId/history", ({ params }) => {
-    const userIdResult = z.string().min(1).safeParse(params.userId);
+    const userIdResult = userIdSchema.safeParse(params.userId);
     if (!userIdResult.success) {
       return HttpResponse.json(
         { message: "Invalid User ID format in URL" },
@@ -213,7 +209,7 @@ export const userApiHandlers = [
     // Map game IDs from history to simplified game details from our mock DB.
     const historyDetails = user.gameHistory
       .map((gameId) => getGameDetails(gameId))
-      .filter((game) => game !== undefined) // Filter out potential undefineds
+      .filter((game) => game !== undefined) // Filter out potential undefined
       .map((game) => ({
         // Return only essential details for history view
         id: game?.id,
@@ -235,7 +231,7 @@ export const userApiHandlers = [
    * Retrieves notifications for the specified user.
    */
   http.get("/api/users/:userId/notifications", ({ params }) => {
-    const userIdResult = z.string().min(1).safeParse(params.userId);
+    const userIdResult = userIdSchema.safeParse(params.userId);
     if (!userIdResult.success) {
       return HttpResponse.json(
         { message: "Invalid User ID format in URL" },
@@ -264,8 +260,8 @@ export const userApiHandlers = [
     "/api/users/:userId/notifications/:notificationId/read",
     ({ params }) => {
       // Validate both IDs
-      const userIdResult = z.string().min(1).safeParse(params.userId);
-      const notificationIdResult = ulidSchema.safeParse(params.notificationId); // Use ULID schema
+      const userIdResult = userIdSchema.safeParse(params.userId);
+      const notificationIdResult = ulidSchema.safeParse(params.notificationId);
 
       if (!userIdResult.success || !notificationIdResult.success) {
         return HttpResponse.json(
@@ -304,7 +300,7 @@ export const userApiHandlers = [
    * Retrieves a list of images submitted by the user (excluding inappropriate ones).
    */
   http.get("/api/users/:userId/images", ({ params }) => {
-    const userIdResult = z.string().min(1).safeParse(params.userId);
+    const userIdResult = userIdSchema.safeParse(params.userId);
     if (!userIdResult.success) {
       return HttpResponse.json(
         { message: "Invalid User ID format in URL" },

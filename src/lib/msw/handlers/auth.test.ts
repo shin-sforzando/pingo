@@ -226,11 +226,11 @@ describe("MSW Auth Handlers (/api/auth/*)", () => {
       // Simulate getting some session identifier if needed by the actual API
     });
 
-    it("should update user profile successfully", async () => {
+    it("should update user settings successfully", async () => {
       const updates = {
-        profile: {
-          displayName: "Updated Name",
-          bio: "Updated bio here.",
+        settings: {
+          theme: "dark",
+          notifications: true,
         },
       };
       const response = await fetch(`${testApiBase}/update`, {
@@ -248,9 +248,9 @@ describe("MSW Auth Handlers (/api/auth/*)", () => {
       const parsedData = userApiResponseSchema.safeParse(data);
       expect(parsedData.success).toBe(true);
       if (parsedData.success) {
-        expect(parsedData.data.handle).toBe("UpdateUser"); // Handle shouldn't change
-        expect(parsedData.data.profile?.displayName).toBe("Updated Name");
-        expect(parsedData.data.profile?.bio).toBe("Updated bio here.");
+        expect(parsedData.data.handle).toBe("UpdateUser"); // Handle shouldn't change in this test as we're only updating settings
+        expect(parsedData.data.settings?.theme).toBe("dark");
+        expect(parsedData.data.settings?.notifications).toBe(true);
       }
     });
 
@@ -308,7 +308,7 @@ describe("MSW Auth Handlers (/api/auth/*)", () => {
 
     it("should return 401 if not logged in", async () => {
       await fetch(`${testApiBase}/logout`, { method: "POST" }); // Ensure logged out
-      const updates = { profile: { displayName: "Should Fail" } };
+      const updates = { handle: "ShouldFailWhenLoggedOut" };
       const response = await fetch(`${testApiBase}/update`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },

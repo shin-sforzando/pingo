@@ -42,3 +42,15 @@ export const dateOrFirestoreTimestampSchema = z.union([
   timestampSchema,
   firestoreTimestampSchema,
 ]);
+
+/**
+ * Represents a Firebase Authentication UID.
+ * According to Firebase documentation, UIDs are between 1-128 characters.
+ * https://firebase.google.com/docs/auth/admin/manage-users
+ */
+export const userIdSchema = z
+  .string()
+  .min(1, { message: "User ID cannot be empty." })
+  .max(128, { message: "User ID cannot exceed 128 characters." });
+
+export type UserId = z.infer<typeof userIdSchema>;

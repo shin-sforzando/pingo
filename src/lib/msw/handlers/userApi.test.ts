@@ -27,7 +27,7 @@ describe("MSW User API Handlers (/api/users/*)", () => {
       // or the parts we expect to be public. Here we check known fields.
       expect(data.id).toBe(userId1);
       expect(data.handle).toBe("MockUser1");
-      expect(data.profile?.displayName).toBe("Mock User One");
+      expect(data.note).toBeUndefined(); // Admin only, should not be public
       expect(data.lastLoginAt).toBeUndefined(); // Should not be public
     });
 
@@ -38,13 +38,21 @@ describe("MSW User API Handlers (/api/users/*)", () => {
       expect(data.message).toBe("User not found");
     });
 
-    it("should return 404 for an invalid user ID format (or non-existent)", async () => {
-      // MSW might not validate path params strictly before handler logic.
-      // If the format is invalid such that findUser fails, it results in 404.
+    it("should return 404 for an invalid user ID format", async () => {
+      // Invalid format passes userIdSchema validation (which only checks length)
+      // but fails in findUser, resulting in 404
       const response = await fetch(`${testApiBase}/invalid-id-format!`);
       expect(response.status).toBe(404);
       const data = await response.json();
-      expect(data.message).toBe("User not found"); // Handler returns 404 if findUser fails
+      expect(data.message).toBe("User not found");
+    });
+
+    it("should return 400 for a user ID exceeding 128 characters", async () => {
+      const longId = "a".repeat(129); // 129 characters
+      const response = await fetch(`${testApiBase}/${longId}`);
+      expect(response.status).toBe(400);
+      const data = await response.json();
+      expect(data.message).toBe("Invalid User ID format in URL");
     });
   });
 
@@ -92,6 +100,14 @@ describe("MSW User API Handlers (/api/users/*)", () => {
         `${testApiBase}/${nonExistentUserId}/history`,
       );
       expect(response.status).toBe(404);
+    });
+
+    it("should return 400 for a user ID exceeding 128 characters", async () => {
+      const longId = "a".repeat(129); // 129 characters
+      const response = await fetch(`${testApiBase}/${longId}/history`);
+      expect(response.status).toBe(400);
+      const data = await response.json();
+      expect(data.message).toBe("Invalid User ID format in URL");
     });
   });
 
@@ -147,6 +163,14 @@ describe("MSW User API Handlers (/api/users/*)", () => {
       expect(response.status).toBe(200);
       const data = await response.json();
       expect(data).toEqual([]);
+    });
+
+    it("should return 400 for a user ID exceeding 128 characters", async () => {
+      const longId = "a".repeat(129); // 129 characters
+      const response = await fetch(`${testApiBase}/${longId}/notifications`);
+      expect(response.status).toBe(400);
+      const data = await response.json();
+      expect(data.message).toBe("Invalid User ID format in URL");
     });
   });
 
@@ -210,6 +234,19 @@ describe("MSW User API Handlers (/api/users/*)", () => {
       );
       expect(response.status).toBe(400);
     });
+
+    it("should return 400 for a user ID exceeding 128 characters", async () => {
+      const longId = "a".repeat(129); // 129 characters
+      const response = await fetch(
+        `${testApiBase}/${longId}/notifications/${notificationId1}/read`,
+        { method: "PUT" },
+      );
+      expect(response.status).toBe(400);
+      const data = await response.json();
+      expect(data.message).toBe(
+        "Invalid User or Notification ID format in URL",
+      );
+    });
   });
 
   // --- GET /api/users/:userId/images ---
@@ -258,6 +295,14 @@ describe("MSW User API Handlers (/api/users/*)", () => {
       expect(response.status).toBe(200); // Assuming handler returns empty array, not 404
       const data = await response.json();
       expect(data).toEqual([]);
+    });
+
+    it("should return 400 for a user ID exceeding 128 characters", async () => {
+      const longId = "a".repeat(129); // 129 characters
+      const response = await fetch(`${testApiBase}/${longId}/images`);
+      expect(response.status).toBe(400);
+      const data = await response.json();
+      expect(data.message).toBe("Invalid User ID format in URL");
     });
   });
 });

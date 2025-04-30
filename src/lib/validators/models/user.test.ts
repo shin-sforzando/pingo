@@ -82,11 +82,7 @@ describe("User and Notification Zod Schemas", () => {
       participatingGames: ["ABCDEF", "GHIJKL"], // Max 5 allowed
       gameHistory: ["UVWXYZ"],
       settings: { theme: "dark" },
-      profile: {
-        displayName: "Test User Display",
-        avatarUrl: "https://example.com/avatar.png",
-        bio: "This is a test bio.",
-      },
+      note: "Test user for validation",
     };
 
     it("should validate correct user data", () => {
@@ -97,8 +93,8 @@ describe("User and Notification Zod Schemas", () => {
       ).toBe(true);
     });
 
-    it("should allow missing optional fields (settings, profile)", () => {
-      const { settings, profile, ...dataWithoutOptional } = validUserData;
+    it("should allow missing optional fields (settings, note)", () => {
+      const { settings, note, ...dataWithoutOptional } = validUserData;
       const result = userSchema.safeParse(dataWithoutOptional);
       expect(result.success).toBe(true);
     });
@@ -118,6 +114,18 @@ describe("User and Notification Zod Schemas", () => {
       expect(userSchema.safeParse(invalidData).success).toBe(false);
     });
 
+    it("should invalidate data with id exceeding 128 characters", () => {
+      const longId = "a".repeat(129); // 129 characters
+      const invalidData = { ...validUserData, id: longId };
+      expect(userSchema.safeParse(invalidData).success).toBe(false);
+    });
+
+    it("should validate data with id of maximum length (128 characters)", () => {
+      const maxLengthId = "a".repeat(128); // 128 characters
+      const validData = { ...validUserData, id: maxLengthId };
+      expect(userSchema.safeParse(validData).success).toBe(true);
+    });
+
     it("should invalidate data with invalid handle format", () => {
       expect(
         userSchema.safeParse({ ...validUserData, handle: "Us" }).success,
@@ -134,9 +142,20 @@ describe("User and Notification Zod Schemas", () => {
       expect(
         userSchema.safeParse({
           ...validUserData,
-          handle: "VeryLongHandleThatExceedsTwentyChars",
+          handle: "VeryLongHandleThatExceedsTheLimit123456",
         }).success,
-      ).toBe(false); // Too long
+      ).toBe(false); // Too long (exceeds 24 characters)
+    });
+
+    it("should validate handle with Japanese characters", () => {
+      const validData = { ...validUserData, handle: "日本語ハンドル123" };
+      expect(userSchema.safeParse(validData).success).toBe(true);
+    });
+
+    it("should validate handle with maximum length (24 characters)", () => {
+      const maxLengthHandle = "a".repeat(24); // 24 characters
+      const validData = { ...validUserData, handle: maxLengthHandle };
+      expect(userSchema.safeParse(validData).success).toBe(true);
     });
 
     it("should invalidate data with more than 5 participating games", () => {
@@ -158,12 +177,12 @@ describe("User and Notification Zod Schemas", () => {
       expect(userSchema.safeParse(invalidData).success).toBe(false);
     });
 
-    it("should invalidate data with invalid profile URL", () => {
-      const invalidData = {
+    it("should validate data with note field", () => {
+      const validData = {
         ...validUserData,
-        profile: { ...validUserData.profile, avatarUrl: "not-a-url" },
+        note: "This is an administrative note.",
       };
-      expect(userSchema.safeParse(invalidData).success).toBe(false);
+      expect(userSchema.safeParse(validData).success).toBe(true);
     });
   });
 });

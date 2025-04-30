@@ -32,9 +32,7 @@ const loginSchema = z.object({
 const updateSchema = z
   .object({
     handle: userSchema.shape.handle.optional(),
-    profile: userSchema.shape.profile.optional(),
     settings: userSchema.shape.settings.optional(),
-    // Add other updatable fields here if necessary.
   })
   .partial(); // Use partial to allow updating only some fields.
 
@@ -80,7 +78,7 @@ export const authHandlers = [
         lastLoginAt: new Date(), // Set last login on registration
         participatingGames: [],
         gameHistory: [],
-        profile: {}, // Initialize optional fields
+        note: "New user created via registration",
         settings: {},
       };
 
@@ -240,10 +238,6 @@ export const authHandlers = [
         updatedUser.handle = updates.handle;
       }
 
-      // Merge profile updates.
-      if (updates.profile) {
-        updatedUser.profile = { ...updatedUser.profile, ...updates.profile };
-      }
       // Merge settings updates.
       if (updates.settings) {
         updatedUser.settings = { ...updatedUser.settings, ...updates.settings };
