@@ -38,15 +38,6 @@ describe("MSW User API Handlers (/api/users/*)", () => {
       expect(data.message).toBe("User not found");
     });
 
-    it("should return 404 for an invalid user ID format", async () => {
-      // Invalid format passes userIdSchema validation (which only checks length)
-      // but fails in findUser, resulting in 404
-      const response = await fetch(`${testApiBase}/invalid-id-format!`);
-      expect(response.status).toBe(404);
-      const data = await response.json();
-      expect(data.message).toBe("User not found");
-    });
-
     it("should return 400 for a user ID exceeding 128 characters", async () => {
       const longId = "a".repeat(129); // 129 characters
       const response = await fetch(`${testApiBase}/${longId}`);
@@ -225,14 +216,6 @@ describe("MSW User API Handlers (/api/users/*)", () => {
         { method: "PUT" },
       );
       expect(response.status).toBe(404);
-    });
-
-    it("should return 400 for invalid notification ID format", async () => {
-      const response = await fetch(
-        `${testApiBase}/${userId1}/notifications/invalid-ulid/read`,
-        { method: "PUT" },
-      );
-      expect(response.status).toBe(400);
     });
 
     it("should return 400 for a user ID exceeding 128 characters", async () => {

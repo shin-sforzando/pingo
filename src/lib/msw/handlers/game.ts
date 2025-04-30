@@ -711,14 +711,13 @@ export const gameHandlers = [
     // Get participant summaries from the game's sub-collection mock
     const participantsList = Object.values(mockParticipants[gameId] || {});
 
-    // Optionally enrich with user handle/profile from mockUsersDb if needed by frontend
+    // Optionally enrich with user handle/role from mockUsersDb if needed by frontend
     const enrichedParticipants = participantsList.map((p) => {
       const user = mockUsersDb.find((u) => u.id === p.id);
       const participation = mockGameParticipations[`${p.id}_${gameId}`];
       return {
         ...p,
         handle: user?.handle,
-        profile: user?.profile,
         role: participation?.role, // Add role info
       };
     });

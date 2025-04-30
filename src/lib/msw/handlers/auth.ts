@@ -178,7 +178,7 @@ export const authHandlers = [
 
   /**
    * PUT /api/auth/update
-   * Handles updates to the logged-in user's profile or settings.
+   * Handles updates to the logged-in user's settings.
    */
   http.put("/api/auth/update", async ({ request }) => {
     // Check for active mock session.

@@ -16,7 +16,7 @@ const mockUser1: z.infer<typeof userSchema> = userSchema.parse({
   participatingGames: ["ABCDEF", "GHIJKL"],
   gameHistory: ["UVWXYZ"],
   note: "Active user with good participation history",
-  settings: { theme: "light" },
+  settings: { language: "en" },
 });
 const mockUser2: z.infer<typeof userSchema> = userSchema.parse({
   id: "mockuser2",
@@ -158,7 +158,7 @@ const getGameDetails = (gameId: string) => mockGamesDb[gameId];
 export const userApiHandlers = [
   /**
    * GET /api/users/:userId
-   * Retrieves public profile information for a given user.
+   * Retrieves public information for a given user.
    */
   http.get("/api/users/:userId", ({ params }) => {
     // Validate userId from path parameter

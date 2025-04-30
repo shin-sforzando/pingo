@@ -4,14 +4,14 @@ import { useEffect, useState } from "react";
 import { z } from "zod";
 
 // Define the expected shape of the user data fetched from the API
-type UserProfileData = z.infer<typeof userSchema> | null;
+type UserInfoData = z.infer<typeof userSchema> | null;
 
 /**
- * A simple component that fetches and displays the current user's profile
+ * A simple component that fetches and displays the current user's information.
  * from the /api/auth/session endpoint.
  */
-export const CurrentUserProfile: React.FC = () => {
-  const [user, setUser] = useState<UserProfileData>(null);
+export const CurrentUserInfo: React.FC = () => {
+  const [user, setUser] = useState<UserInfoData>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -71,11 +71,11 @@ export const CurrentUserProfile: React.FC = () => {
   }, []); // Fetch only once on mount
 
   if (loading) {
-    return <div>Loading user profile...</div>;
+    return <div>Loading user info...</div>;
   }
 
   if (error) {
-    return <div style={{ color: "red" }}>Error loading profile: {error}</div>;
+    return <div style={{ color: "red" }}>Error loading info: {error}</div>;
   }
 
   if (!user) {
@@ -86,19 +86,12 @@ export const CurrentUserProfile: React.FC = () => {
     <div
       style={{ border: "1px solid #ccc", padding: "10px", borderRadius: "5px" }}
     >
-      <h2 className="text-2xl">Current User Profile</h2>
+      <h2 className="text-2xl">Current User Info</h2>
       <p>
         <span className="font-semibold">ID:</span> {user.id}
       </p>
       <p>
         <span className="font-semibold">Handle:</span> {user.handle}
-      </p>
-      <p>
-        <span className="font-semibold">Display Name:</span>{" "}
-        {user.profile?.displayName || "N/A"}
-      </p>
-      <p>
-        <span className="font-semibold">Bio:</span> {user.profile?.bio || "N/A"}
       </p>
       <p>
         <span className="font-semibold">Joined:</span>{" "}

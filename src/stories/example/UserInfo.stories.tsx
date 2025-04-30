@@ -2,11 +2,11 @@ import type { userSchema as userSchemaType } from "@/lib/validators/models/user"
 import type { Meta, StoryObj } from "@storybook/react";
 import { http, HttpResponse } from "msw";
 import type { z } from "zod";
-import { CurrentUserProfile } from "./UserProfile";
+import { CurrentUserInfo } from "./UserInfo";
 
-const meta: Meta<typeof CurrentUserProfile> = {
-  title: "Example/UserProfile",
-  component: CurrentUserProfile,
+const meta: Meta<typeof CurrentUserInfo> = {
+  title: "Example/UserInfo",
+  component: CurrentUserInfo,
   tags: ["example"],
   parameters: {
     // layout: 'centered', // Optional: center the component
@@ -14,7 +14,7 @@ const meta: Meta<typeof CurrentUserProfile> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof CurrentUserProfile>;
+type Story = StoryObj<typeof CurrentUserInfo>;
 
 // --- Mock Data ---
 // Define mock user data consistent with userSchema
@@ -25,18 +25,13 @@ const mockLoggedInUser: z.infer<typeof userSchemaType> = {
   lastLoginAt: new Date(), // Use current time for last login
   participatingGames: ["STORYA", "STORYB"], // Use valid Game IDs
   gameHistory: ["OLDONE"], // Use valid Game ID
-  profile: {
-    displayName: "Storybook Tester",
-    bio: "Just testing things out in Storybook.",
-    avatarUrl: "https://via.placeholder.com/150/008000/FFFFFF?text=SB",
-  },
-  settings: { theme: "dark" },
+  settings: {},
 };
 
 // --- Stories ---
 
 /**
- * Default story: Displays the profile when the user is logged in.
+ * Default story: Displays the information when the user is logged in.
  * MSW intercepts the `/api/auth/session` call and returns mockLoggedInUser.
  */
 export const LoggedIn: Story = {

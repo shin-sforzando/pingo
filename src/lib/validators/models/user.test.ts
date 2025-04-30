@@ -81,7 +81,7 @@ describe("User and Notification Zod Schemas", () => {
       lastLoginAt: new Date(),
       participatingGames: ["ABCDEF", "GHIJKL"], // Max 5 allowed
       gameHistory: ["UVWXYZ"],
-      settings: { theme: "dark" },
+      settings: { language: "en" },
       note: "Test user for validation",
     };
 

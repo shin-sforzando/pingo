@@ -76,7 +76,7 @@ export const userSchema = z.object({
   // Could potentially grow large; consider pagination or alternative tracking if needed long-term.
   gameHistory: z.array(gameIdSchema),
   // Optional field for user preferences or settings.
-  // Example: { theme: 'dark', language: 'en' }
+  // Example: { language: 'en' }
   settings: z.record(z.unknown()).optional(),
   // Optional field for administrative notes. Not visible to users, only for system administrators.
   note: z.string().max(500).optional(),

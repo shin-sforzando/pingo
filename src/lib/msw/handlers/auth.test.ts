@@ -229,7 +229,6 @@ describe("MSW Auth Handlers (/api/auth/*)", () => {
     it("should update user settings successfully", async () => {
       const updates = {
         settings: {
-          theme: "dark",
           notifications: true,
         },
       };
@@ -249,7 +248,6 @@ describe("MSW Auth Handlers (/api/auth/*)", () => {
       expect(parsedData.success).toBe(true);
       if (parsedData.success) {
         expect(parsedData.data.handle).toBe("UpdateUser"); // Handle shouldn't change in this test as we're only updating settings
-        expect(parsedData.data.settings?.theme).toBe("dark");
         expect(parsedData.data.settings?.notifications).toBe(true);
       }
     });
