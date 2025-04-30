@@ -11,6 +11,28 @@ let loggedInUserId: string | null = null;
 // Helper to find user by ID in the mock store.
 const findUserById = (id: string) => mockUsers.find((u) => u.id === id);
 
+/**
+ * Check if a handle is unique among all users except the specified user.
+ * This function will be replaced with a Firestore implementation in the future.
+ *
+ * @param handle - The handle to check for uniqueness
+ * @param excludeUserIndex - Optional index of the user to exclude from the check (for updates)
+ * @returns true if the handle is unique, false otherwise
+ */
+const checkHandleUnique = (
+  handle: string,
+  excludeUserIndex?: number,
+): boolean => {
+  if (excludeUserIndex !== undefined) {
+    // For user updates: check if any OTHER user has this handle
+    return !mockUsers.some(
+      (u, index) => index !== excludeUserIndex && u.handle === handle,
+    );
+  }
+  // For new user registration: check if ANY user has this handle
+  return !mockUsers.some((u) => u.handle === handle);
+};
+
 // --- Schemas for Request Bodies (Subset of userSchema) ---
 
 // Schema for registration request body.
@@ -62,7 +84,7 @@ export const authHandlers = [
       const { handle } = parsedBody.data;
 
       // Check if handle already exists in our mock store.
-      if (mockUsers.some((u) => u.handle === handle)) {
+      if (!checkHandleUnique(handle)) {
         return HttpResponse.json(
           { message: "Handle already taken" },
           { status: 409 }, // Conflict
@@ -225,11 +247,7 @@ export const authHandlers = [
 
       // Check handle uniqueness if handle is being updated.
       if (updates.handle && updates.handle !== currentUser.handle) {
-        if (
-          mockUsers.some(
-            (u, index) => index !== userIndex && u.handle === updates.handle,
-          )
-        ) {
+        if (!checkHandleUnique(updates.handle, userIndex)) {
           return HttpResponse.json(
             { message: "Handle already taken by another user" },
             { status: 409 }, // Conflict
@@ -292,13 +310,7 @@ export const authHandlers = [
       );
       return HttpResponse.json(null, { status: 200 }); // Still return null
     }
-    // Convert Date objects to ISO strings before returning JSON,
-    // mimicking standard JSON serialization behavior.
-    const userForJson = {
-      ...user,
-      createdAt: user.createdAt.toISOString(),
-      lastLoginAt: user.lastLoginAt.toISOString(),
-    };
-    return HttpResponse.json(userForJson);
+    // Return the user object directly, letting JSON serialization handle Date objects
+    return HttpResponse.json(user);
   }),
 ];
