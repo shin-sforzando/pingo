@@ -153,31 +153,35 @@ describe("MSW User API Handlers (/api/users/*)", () => {
   // --- PUT /api/users/:userId/notifications/:notificationId/read ---
   describe("PUT /:userId/notifications/:notificationId/read", () => {
     it("should mark a notification as read", async () => {
-      const initialNotifsRes = await fetch(
+      const initialNotificationsRes = await fetch(
         `${testApiBase}/${userId1}/notifications`,
       );
-      const initialNotifs = (await initialNotifsRes.json()) as Notification[];
-      const unreadNotif = initialNotifs.find((n) => !n.read);
-      expect(unreadNotif).toBeDefined();
+      const initialNotifications =
+        (await initialNotificationsRes.json()) as Notification[];
+      const unreadNotification = initialNotifications.find((n) => !n.read);
+      expect(unreadNotification).toBeDefined();
 
-      if (!unreadNotif) return;
+      if (!unreadNotification) return;
 
       const response = await fetch(
-        `${testApiBase}/${userId1}/notifications/${unreadNotif.id}/read`,
+        `${testApiBase}/${userId1}/notifications/${unreadNotification.id}/read`,
         { method: "PUT" },
       );
       expect(response.status).toBe(200);
       const data = await response.json();
-      expect(data.id).toBe(unreadNotif.id);
+      expect(data.id).toBe(unreadNotification.id);
       expect(data.read).toBe(true);
 
       // Verify it's marked as read in subsequent GET request
-      const finalNotifsRes = await fetch(
+      const finalNotificationsRes = await fetch(
         `${testApiBase}/${userId1}/notifications`,
       );
-      const finalNotifs = (await finalNotifsRes.json()) as Notification[];
-      const updatedNotif = finalNotifs.find((n) => n.id === unreadNotif.id);
-      expect(updatedNotif?.read).toBe(true);
+      const finalNotifications =
+        (await finalNotificationsRes.json()) as Notification[];
+      const updatedNotification = finalNotifications.find(
+        (n) => n.id === unreadNotification.id,
+      );
+      expect(updatedNotification?.read).toBe(true);
     });
 
     it("should return 404 if notification does not exist", async () => {
@@ -216,7 +220,7 @@ describe("MSW User API Handlers (/api/users/*)", () => {
       const data = await response.json();
       expect(Array.isArray(data)).toBe(true);
       expect(data.length).toBe(1); // Based on mock data (SUB1 accepted, SUB2 inappropriate)
-      expect(data[0].id).toBe("01J0Z4KAZG6X7X7X7X7X7X7X7A");
+      expect(data[0].id).toBe("01J0Z4AAAA6X7X7X7X7X7X7X7A");
       expect(data[0].acceptanceStatus).toBe("accepted");
       const submissionApiResponseSchema = submissionSchema.extend({
         submittedAt: z.preprocess(
@@ -244,7 +248,7 @@ describe("MSW User API Handlers (/api/users/*)", () => {
       const data = await response.json();
       expect(Array.isArray(data)).toBe(true);
       expect(data.length).toBe(1); // SUB3 should be returned
-      expect(data[0].id).toBe("01J0Z4KCZG6X7X7X7X7X7X7X7C");
+      expect(data[0].id).toBe("01J0Z4CCCC6X7X7X7X7X7X7X7C");
     });
 
     it("should return empty array for non-existent user", async () => {

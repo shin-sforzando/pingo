@@ -1,5 +1,6 @@
 import { gameIdSchema, ulidSchema } from "@/lib/validators/common";
 import { http, HttpResponse } from "msw";
+import { ulid } from "ulid";
 import { z } from "zod";
 // Accessing mock data defined in other handlers is complex and creates coupling.
 // For a robust mock setup, consider a dedicated shared mock data module/store.
@@ -58,11 +59,11 @@ export const imageHandlers = [
 
       // Generate a *fake* signed URL for the mock environment.
       // This URL isn't actually usable for uploading but mimics the structure.
-      const mockUploadUrl = `https://mock-storage.googleapis.com/upload/${gameId}/${ulidSchema.parse(Date.now().toString(36) + Math.random().toString(36).substring(2))}-${filename}?signature=mock_signature&expires=${Date.now() + 300000}`; // Expires in 5 mins
+      const mockUploadUrl = `https://mock-storage.googleapis.com/upload/${gameId}/${ulid()}-${filename}?signature=mock_signature&expires=${Date.now() + 300000}`; // Expires in 5 mins
 
       // Generate the expected final path/URL after a successful "upload".
       // This is what the client might send to the /process endpoint later.
-      const mockFinalImageUrl = `gs://pingo-images/${gameId}/${ulidSchema.parse(Date.now().toString(36) + Math.random().toString(36).substring(2))}-${filename}`; // Example GCS path
+      const mockFinalImageUrl = `gs://pingo-images/${gameId}/${ulid()}-${filename}`; // Example GCS path
 
       console.log(
         `[MSW] Generated mock upload URL for ${filename} (type: ${contentType}) in game ${gameId}`,

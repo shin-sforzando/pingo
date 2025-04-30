@@ -58,7 +58,7 @@ const mockNotificationsDb: Record<
       createdAt: new Date("2024-04-28T11:00:00Z"),
       read: true,
       relatedGameId: "ABCDEF",
-      details: { submissionId: "01J0Z4KAZG6X7X7X7X7X7X7X7A" },
+      details: { submissionId: "01J0Z4AAAA6X7X7X7X7X7X7X7A" },
     }),
     notificationSchema.parse({
       id: "01J0Z4J5ZG6X7X7X7X7X7X7X7Z",
@@ -77,7 +77,7 @@ const mockNotificationsDb: Record<
 // Mock submissions (simplified) - Using parse to ensure schema conformance
 const mockSubmissionsDb: z.infer<typeof submissionSchema>[] = [
   submissionSchema.parse({
-    id: "01J0Z4KAZG6X7X7X7X7X7X7X7A",
+    id: "01J0Z4AAAA6X7X7X7X7X7X7X7A",
     userId: "mockuser1",
     imageUrl: "/mock/image1.jpg",
     submittedAt: new Date("2024-04-28T10:55:00Z"),
@@ -88,7 +88,7 @@ const mockSubmissionsDb: z.infer<typeof submissionSchema>[] = [
     confidence: 0.9,
   }),
   submissionSchema.parse({
-    id: "01J0Z4KBZG6X7X7X7X7X7X7X7B",
+    id: "01J0Z4BBBB6X7X7X7X7X7X7X7B",
     userId: "mockuser1",
     imageUrl: "/mock/image2.jpg",
     submittedAt: new Date("2024-04-28T13:00:00Z"),
@@ -100,7 +100,7 @@ const mockSubmissionsDb: z.infer<typeof submissionSchema>[] = [
     errorMessage: "Image flagged by moderation.",
   }),
   submissionSchema.parse({
-    id: "01J0Z4KCZG6X7X7X7X7X7X7X7C",
+    id: "01J0Z4CCCC6X7X7X7X7X7X7X7C",
     userId: "mockuser2",
     imageUrl: "/mock/image3.jpg",
     submittedAt: new Date("2024-04-28T09:15:00Z"),
