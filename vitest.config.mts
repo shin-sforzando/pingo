@@ -5,8 +5,8 @@ import { coverageConfigDefaults, defineConfig } from "vitest/config";
 export default defineConfig({
   plugins: [tsconfigPaths(), react()],
   test: {
-    globals: true, // Optional: Enables global APIs like describe, it, expect
     environment: "jsdom",
+    pool: "forks",
     setupFiles: ["src/vitest.setup.ts"],
     coverage: {
       enabled: true,
