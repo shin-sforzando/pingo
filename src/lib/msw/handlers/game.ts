@@ -13,19 +13,19 @@ import { mockUsersDb } from "./userApi";
 
 // --- Mock Data Store ---
 // Using Record<GameId, Game> for easier lookup
-const mockGames: Record<string, z.infer<typeof gameSchema>> = {};
+export const mockGames: Record<string, z.infer<typeof gameSchema>> = {};
 // Using Record<GameId, Record<UserId, Participant>>
-const mockParticipants: Record<
+export const mockParticipants: Record<
   string,
   Record<string, z.infer<typeof participantSchema>>
 > = {};
 // Using Record<GameId, Record<UserId, PlayerBoard>>
-const mockPlayerBoards: Record<
+export const mockPlayerBoards: Record<
   string,
   Record<string, z.infer<typeof playerBoardSchema>>
 > = {};
 // Using Record<ParticipationId (e.g., `${userId}_${gameId}`), GameParticipation>
-const mockGameParticipations: Record<
+export const mockGameParticipations: Record<
   string,
   z.infer<typeof gameParticipationSchema>
 > = {};
@@ -33,7 +33,7 @@ const mockGameParticipations: Record<
 // --- Mock Session State (Simplified) ---
 // Ideally, this would be imported or managed centrally with authHandlers state.
 // Hardcoding for now to demonstrate dependent logic.
-const currentMockUserId: string | null = "mockuser1"; // Assume mockuser1 is logged in
+export const currentMockUserId: string | null = "mockuser1"; // Assume mockuser1 is logged in
 
 // --- Helper Functions ---
 
@@ -88,7 +88,7 @@ const generateMockBoard = (): z.infer<typeof boardSchema> => {
 };
 
 /** Generates a unique, valid Game ID */
-const generateNewGameId = (): z.infer<typeof gameIdSchema> => {
+export const generateNewGameId = (): z.infer<typeof gameIdSchema> => {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   let id: string;
   let attempts = 0;
