@@ -8,12 +8,11 @@ export default defineConfig({
     "process.env": JSON.stringify({}),
   },
   test: {
-    // environment: "jsdom",
     browser: {
       enabled: true,
-      // headless: true,
+      headless: false,
       provider: "playwright",
-      instances: [{ browser: "chromium" }],
+      instances: [{ browser: "webkit" }],
     },
     coverage: {
       enabled: true,

@@ -12,7 +12,9 @@
     "docker": "docker build -t pingo . && docker run -p 3000:8080 pingo",
     "start": "next start",
     "check": "biome check --write --verbose",
-    "test": "vitest"
+    "test": "vitest",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "dependencies": {
     "next": "15.3.1",
@@ -21,6 +23,13 @@
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
+    "@storybook/addon-essentials": "^8.6.12",
+    "@storybook/addon-interactions": "^8.6.12",
+    "@storybook/addon-onboarding": "^8.6.12",
+    "@storybook/blocks": "^8.6.12",
+    "@storybook/nextjs": "^8.6.12",
+    "@storybook/react": "^8.6.12",
+    "@storybook/test": "^8.6.12",
     "@tailwindcss/postcss": "^4",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/react": "^16.3.0",
@@ -33,9 +42,11 @@
     "jsdom": "^26.1.0",
     "lefthook": "^1.11.12",
     "playwright": "^1.52.0",
+    "storybook": "^8.6.12",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^3.1.2"
+    "vitest": "^3.1.2",
+    "vitest-browser-react": "^0.1.1"
   }
 }

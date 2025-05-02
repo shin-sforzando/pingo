@@ -12,7 +12,7 @@ pre-commit:
       stage_fixed: true
     test:
       glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx}"
-      run: npm test
+      run: npm test -- run
 
 post-merge:
   commands:

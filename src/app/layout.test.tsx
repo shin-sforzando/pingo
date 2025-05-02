@@ -1,8 +1,9 @@
+import RootLayout from "@/app/layout";
+import Home from "@/app/page";
 import { describe, expect, it } from "vitest";
-import RootLayout from "./layout";
-import Home from "./page";
+import { render } from "vitest-browser-react";
 
-describe("RootLayout component", () => {
+describe("RootLayout", () => {
   it("renders without crashing w/ Home", () => {
     // This is a simple test to check if the component renders without throwing an error
     expect(() => (
@@ -10,5 +11,13 @@ describe("RootLayout component", () => {
         <Home />
       </RootLayout>
     )).not.toThrow();
+  });
+  it("contains the Next.js logo", () => {
+    const { getByAltText } = render(
+      <RootLayout>
+        <Home />
+      </RootLayout>,
+    );
+    expect(getByAltText("Next.js logo")).toBeInTheDocument();
   });
 });
