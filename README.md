@@ -35,8 +35,8 @@ Pingo: Bingo game where AI judges based on photos
 
 ### Tool
 
-- [Biome](https://biomejs.dev) (v1.9.4) - Formatter and Linter
-- [lefthook](https://github.com/evilmartians/lefthook) (v1.11.11) - Git hooks manager
+- [Biome](https://biomejs.dev) - Formatter and Linter
+- [lefthook](https://github.com/evilmartians/lefthook) - Git hooks manager
 - [git-secret](https://sobolevn.me/git-secret/) - A bash-tool to store your private data inside a git repository
 
 ## How to
