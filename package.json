@@ -12,8 +12,7 @@
     "docker": "docker build -t pingo . && docker run -p 3000:8080 pingo",
     "start": "next start",
     "check": "biome check --write --verbose",
-    "test": "vitest run",
-    "test:watch": "vitest"
+    "test": "vitest"
   },
   "dependencies": {
     "next": "15.3.1",
