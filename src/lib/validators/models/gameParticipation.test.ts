@@ -1,6 +1,6 @@
+import { gameIdSchema } from "@/lib/validators/common";
+import { gameParticipationSchema } from "@/lib/validators/models/gameParticipation";
 import { describe, expect, it } from "vitest";
-import { gameIdSchema } from "../common";
-import { gameParticipationSchema } from "./gameParticipation";
 
 describe("GameParticipation Zod Schema", () => {
   const validGameParticipationData = {

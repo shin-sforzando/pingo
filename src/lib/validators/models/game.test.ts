@@ -1,5 +1,4 @@
-import { describe, expect, it } from "vitest";
-import { gameIdSchema, ulidSchema } from "../common"; // For valid IDs
+import { gameIdSchema, ulidSchema } from "@/lib/validators/common";
 import {
   bingoCellSchema,
   boardSchema,
@@ -10,7 +9,8 @@ import {
   playerBoardCellStateSchema,
   playerBoardSchema,
   submissionSchema,
-} from "./game";
+} from "@/lib/validators/models/game";
+import { describe, expect, it } from "vitest";
 
 describe("Game Related Zod Schemas", () => {
   // --- bingoCellSchema Tests ---

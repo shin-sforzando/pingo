@@ -1,9 +1,9 @@
-import { describe, expect, it, vi } from "vitest";
 import {
   isFirestoreTimestamp,
   toDate,
   toFirestoreTimestamp,
-} from "./firestore";
+} from "@/lib/utils/firestore";
+import { describe, expect, it, vi } from "vitest";
 
 // Mock the Firebase Timestamp classes
 vi.mock("firebase-admin/firestore", () => {

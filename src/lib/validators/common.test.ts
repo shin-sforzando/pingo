@@ -1,12 +1,11 @@
-import { describe, expect, it } from "vitest";
-// Removed unused 'z' import
 import {
   dateOrFirestoreTimestampSchema,
   firestoreTimestampSchema,
   gameIdSchema,
   timestampSchema,
   ulidSchema,
-} from "./common";
+} from "@/lib/validators/common";
+import { describe, expect, it } from "vitest";
 
 describe("Common Zod Schemas", () => {
   // --- gameIdSchema Tests ---

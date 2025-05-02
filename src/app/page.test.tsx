@@ -1,5 +1,5 @@
+import Home from "@/app/page";
 import { describe, expect, it } from "vitest";
-import Home from "./page";
 
 describe("Home component", () => {
   it("renders without crashing", () => {

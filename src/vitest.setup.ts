@@ -1,6 +1,5 @@
 import { server } from "@/lib/msw/node"; // Import the MSW node server
 import { afterAll, afterEach, beforeAll } from "vitest";
-import "@testing-library/jest-dom/vitest"; // Import jest-dom for Vitest
 
 // --- MSW Server Lifecycle for general Vitest tests ---
 // Start the server before all tests run in this environment

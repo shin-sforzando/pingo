@@ -1,5 +1,5 @@
+import { notificationSchema, userSchema } from "@/lib/validators/models/user";
 import { describe, expect, it } from "vitest";
-import { notificationSchema, userSchema } from "./user";
 
 describe("User and Notification Zod Schemas", () => {
   // --- notificationSchema Tests ---
