@@ -1,6 +1,6 @@
+import RootLayout from "@/app/layout";
+import Home from "@/app/page";
 import { describe, expect, it } from "vitest";
-import RootLayout from "./layout";
-import Home from "./page";
 
 describe("RootLayout component", () => {
   it("renders without crashing w/ Home", () => {

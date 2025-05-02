@@ -17,8 +17,7 @@ export default defineConfig({
         "next.config.ts", // Exclude Next.js config
         "postcss.config.mjs", // Exclude PostCSS config
         "public/mockServiceWorker.js", // Exclude MSW service worker
-        "src/lib/msw/browser.ts", // Exclude MSW browser setup
-        "src/lib/msw/node.ts", // Exclude MSW node setup
+        "src/lib/msw/**", // Exclude all MSW files
         "**/*.stories.{ts, tsx}", // Exclude Storybook stories
         "**/stories/example/*.tsx", // Exclude example stories
         ...coverageConfigDefaults.exclude,

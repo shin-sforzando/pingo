@@ -14,6 +14,7 @@
     "Firestore",
     "gitsecret",
     "lefthook",
+    "mockuser",
     "participations",
     "pingo",
     "turbopack",
