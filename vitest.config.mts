@@ -4,11 +4,20 @@ import { coverageConfigDefaults, defineConfig } from "vitest/config";
 
 export default defineConfig({
   plugins: [tsconfigPaths(), react()],
+  define: {
+    "process.env": JSON.stringify({}),
+  },
   test: {
-    environment: "jsdom",
+    // environment: "jsdom",
+    browser: {
+      enabled: true,
+      headless: true,
+      provider: "playwright",
+      instances: [{ browser: "chromium" }],
+    },
     coverage: {
       enabled: true,
-      provider: "v8",
+      provider: "istanbul",
       reporter: ["text", "json", "html"],
       reportsDirectory: "./coverage",
       exclude: [

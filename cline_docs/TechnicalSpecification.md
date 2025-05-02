@@ -27,7 +27,6 @@
 - **コード品質**: Biome.js
 - **テスト**: Vitest
 - **UIコンポーネント開発**: Storybook
-- **APIモック**: MSW (Mock Service Worker)
 - **Git フック**: Lefthook
 - **CI/CD**: Google Cloud Build (デプロイ), GitHub Actions (テスト・静的解析)
 - **分析**: Google Analytics 4
@@ -393,7 +392,6 @@ View Transition APIを活用したトランジションを実装する。
 ### 単体テスト
 
 - Vitestを使用したコンポーネントの単体テスト
-- MSWを使用したAPIモック
 - テスト用プレフィックスを使用したテストデータの分離
 - テスト終了時の自動クリーンアップスクリプト
 

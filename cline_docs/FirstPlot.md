@@ -923,7 +923,6 @@ GitHubのIssue Templateは `.github/ISSUE_TEMPLATE/feat.md` `.github/ISSUE_TEMPL
 - [x] CI/CDについて、GitHub mainブランチへのPushをトリガーに動くGoogle Cloud Buildを用意してCloud Runにデプロイ
   - [x] デプロイ以外の自動テストや静的解析にはGitHub Actionsを活用したい → Version 0.8でYAMLファイルを用意し、開発の進行に合わせて拡充
 - [x] テスト時にデータベースやストレージに作成されるテストデータを一括で削除する機能が欲しい → テスト用プレフィックスを使用し、クリーンアップスクリプトを早期に実装
-- [x] APIに関するテストではモックライブラリを導入した方が良いだろうか？ → MSW (Mock Service Worker)を採用し、StorybookやVitestと連携
 - [x] 認証の実装にはNextAuth.jsを利用した方が良いか → 認証の実装にはFirebase Authenticationを利用する
 - [x] データモデルの定義にはZodを利用したほうが良いか → 利点が欠点を上回りそうなので採用決定
 - [x] 状態管理はReact Context APIで良いか → 本システムはそれほど複雑な状態管理が必要にならないと思われるので、React Context APIで決定

@@ -50,7 +50,7 @@ T. B. D.
 
 5. **開発ツール**
    - コード品質: Biome.js
-   - テスト: Vitest + MSW
+   - テスト: Vitest
    - UIコンポーネント開発: Storybook
    - Git フック: Lefthook
 
