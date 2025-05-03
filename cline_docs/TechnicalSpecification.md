@@ -9,7 +9,6 @@
 - **UIライブラリ**: React 19
 - **スタイリング**: Tailwind CSS 4
 - **状態管理**: React Context API
-- **フォーム管理**: React Hook Form + Zod
 - **多言語対応**: next-intl または react-i18next
 - **アニメーション**: View Transition API
 
@@ -72,7 +71,7 @@ flowchart TD
 /users/
   /{userId}/
     - id: string (UUIDv4)
-    - handle: string (ユニークなハンドルネーム)
+    - handle: string (ユニークなハンドルネーム、表示名として)
     - createdAt: timestamp
     - lastLoginAt: timestamp
     - participatingGames: array<string> (参加中のゲームID、最大5つ)

@@ -29,29 +29,35 @@ T. B. D.
 
 ### 決定済み事項
 
-1. **技術スタック**
+1. 技術スタック
    - フロントエンド: Next.js (App Router) + React 19 + TypeScript 5 + Tailwind CSS 4
    - バックエンド: Node.js 22 + Firebase (Authentication, Firestore, Storage)
    - AI/ML: Google Gemini API
    - デプロイ: Docker → Google Cloud Run
 
-2. **データモデル**
+2. データモデル
    - ユーザー、ゲーム、ビンゴボード、提出物などの基本構造を定義
    - Firestoreのコレクション設計を完了
 
-3. **API設計**
+3. API設計
    - RESTful APIエンドポイントの定義
    - 画像処理フローの確立（署名付きURL方式）
 
-4. **UI/UXデザイン**
+4. UI/UXデザイン
    - カラーパレット: #08d9d6, #252a34, #ff2e63, #eaeaea
    - フォント: M PLUS Rounded 1c, M PLUS 1 Code
    - モバイルファーストのレスポンシブデザイン
 
-5. **開発ツール**
+5. 多言語対応
+   - [next-i18next](https://github.com/i18next/next-i18next)
+
+6. テスト
+   - Vitest
+   - Playwright
+   - Storybook Test
+
+7. 開発ツール
    - コード品質: Biome.js
-   - テスト: Vitest
-   - UIコンポーネント開発: Storybook
    - Git フック: Lefthook
 
 ### 検討中の事項
