@@ -5,8 +5,9 @@ const config: StorybookConfig = {
   addons: [
     "@storybook/addon-essentials",
     "@storybook/addon-onboarding",
+    "@storybook/addon-a11y",
     "@storybook/addon-interactions",
-    "storybook-next-intl", // Add the next-intl addon
+    "storybook-next-intl",
   ],
   framework: {
     name: "@storybook/nextjs",

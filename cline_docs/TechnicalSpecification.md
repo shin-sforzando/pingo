@@ -9,7 +9,7 @@
 - **UIライブラリ**: React 19
 - **スタイリング**: Tailwind CSS 4
 - **状態管理**: React Context API
-- **多言語対応**: next-intl または react-i18next
+- **多言語対応**: next-intl
 - **アニメーション**: View Transition API
 
 ### バックエンド
@@ -383,8 +383,12 @@ View Transition APIを活用したトランジションを実装する。
 - 日英の2ヶ国語対応
 - デフォルトロケールは日本語
 - 翻訳リソースはJSON形式で管理し、言語ごとにファイルを分ける
-- 言語切り替えはヘッダーに配置し、選択した言語設定はlocalStorageに保存
+- 言語切り替えはヘッダーに配置し、選択した言語設定はCookieに保存
 - 初回アクセス時はブラウザの言語設定を検出し、対応する言語があればそれを適用
+- next-intlを使用した実装
+  - `messages/ja.json`と`messages/en.json`に翻訳リソースを格納
+  - `useTranslations`フックを使用してコンポーネント内で翻訳を取得
+  - Storybookでも多言語対応が設定済み
 
 ## テスト戦略
 
