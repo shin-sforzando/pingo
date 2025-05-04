@@ -1,0 +1,13 @@
+{
+  "HomePage": {
+    "title": "Pingo",
+    "welcome": "Welcome",
+    "getStarted": "Get started",
+    "editFile": "Get started by editing src/app/page.tsx.",
+    "saveChanges": "Save and see your changes instantly."
+  },
+  "Common": {
+    "appName": "Pingo",
+    "description": "Bingo game where AI judges based on photos"
+  }
+}
