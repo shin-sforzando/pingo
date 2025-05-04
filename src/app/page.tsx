@@ -2,7 +2,7 @@
 
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useTranslation } from "@/i18n/useTranslation";
-import Image from "next/legacy/image";
+import Image from "next/image";
 
 export default function Home() {
   const { t } = useTranslation();
@@ -24,9 +24,7 @@ export default function Home() {
           }}
         />
       </div>
-
       <h1 className="text-2xl font-bold">{t("home.welcome")}</h1>
-
       <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left">
         <li className="mb-2 tracking-[-.01em]">
           {t("home.getStarted")}{" "}
