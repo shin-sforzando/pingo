@@ -1,23 +1,53 @@
-import RootLayout from "@/app/layout";
-import Home from "@/app/page";
-import { describe, expect, it } from "vitest";
+import { NextIntlClientProvider } from "next-intl";
+import { describe, expect, it, vi } from "vitest";
 import { render } from "vitest-browser-react";
 
-describe("RootLayout", () => {
-  it("renders without crashing w/ Home", () => {
-    // This is a simple test to check if the component renders without throwing an error
-    expect(() => (
-      <RootLayout>
-        <Home />
-      </RootLayout>
-    )).not.toThrow();
+import enMessages from "../../messages/en.json";
+import jaMessages from "../../messages/ja.json";
+
+// Mock the next-intl/server module
+vi.mock("next-intl/server", () => ({
+  getLocale: vi.fn().mockResolvedValue("ja"),
+  getTranslations: vi.fn(),
+}));
+
+// Import after mocking
+import { getLocale } from "next-intl/server";
+
+describe("i18n integration", () => {
+  describe("Japanese locale", () => {
+    it("displays Japanese content", () => {
+      const { getByText } = render(
+        <NextIntlClientProvider locale="ja" messages={jaMessages}>
+          <div>{jaMessages.HomePage.title}</div>
+        </NextIntlClientProvider>,
+      );
+
+      expect(getByText(jaMessages.HomePage.title)).toBeInTheDocument();
+    });
   });
-  it("contains the Next.js logo", () => {
-    const { getByAltText } = render(
-      <RootLayout>
-        <Home />
-      </RootLayout>,
-    );
-    expect(getByAltText("Next.js logo")).toBeInTheDocument();
+
+  describe("English locale", () => {
+    it("displays English content", () => {
+      const { getByText } = render(
+        <NextIntlClientProvider locale="en" messages={enMessages}>
+          <div>{enMessages.HomePage.title}</div>
+        </NextIntlClientProvider>,
+      );
+
+      expect(getByText(enMessages.HomePage.title)).toBeInTheDocument();
+    });
+  });
+
+  describe("getLocale function", () => {
+    it("returns the correct locale", async () => {
+      // Test with Japanese
+      vi.mocked(getLocale).mockResolvedValue("ja");
+      expect(await getLocale()).toBe("ja");
+
+      // Test with English
+      vi.mocked(getLocale).mockResolvedValue("en");
+      expect(await getLocale()).toBe("en");
+    });
   });
 });

@@ -1,20 +1,30 @@
 import type { Metadata } from "next";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getTranslations } from "next-intl/server";
 import "./globals.css";
 
-export const metadata: Metadata = {
-  title: "Pingo",
-  description: "Bingo game where AI judges based on photos",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Common");
 
-export default function RootLayout({
+  return {
+    title: t("appName"),
+    description: t("description"),
+  };
+}
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+
   return (
-    <html lang="en">
+    <html lang={locale}>
       <body className={"antialiased"}>
-        <main>{children}</main>
+        <NextIntlClientProvider locale={locale}>
+          <main>{children}</main>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

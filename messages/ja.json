@@ -1,0 +1,13 @@
+{
+  "HomePage": {
+    "title": "Pingo",
+    "welcome": "ようこそ",
+    "getStarted": "編集を始める",
+    "editFile": "src/app/page.tsxを編集して始めましょう。",
+    "saveChanges": "保存して変更をすぐに確認できます。"
+  },
+  "Common": {
+    "appName": "Pingo",
+    "description": "AIが写真に基づいて判定するビンゴゲーム"
+  }
+}
