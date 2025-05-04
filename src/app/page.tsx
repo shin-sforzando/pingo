@@ -2,7 +2,7 @@
 
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useTranslation } from "@/i18n/useTranslation";
-import Image from "next/image";
+import Image from "next/legacy/image";
 
 export default function Home() {
   const { t } = useTranslation();
