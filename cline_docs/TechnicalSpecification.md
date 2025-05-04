@@ -24,7 +24,7 @@
 ### 開発ツール
 
 - **コード品質**: Biome.js
-- **テスト**: Vitest
+- **テスト**: Vitest (Browser Mode)
 - **UIコンポーネント開発**: Storybook
 - **Git フック**: Lefthook
 - **CI/CD**: Google Cloud Build (デプロイ), GitHub Actions (テスト・静的解析)

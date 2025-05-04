@@ -1,6 +1,5 @@
 import { MINIMAL_VIEWPORTS } from "@storybook/addon-viewport";
 import type { Decorator, Preview } from "@storybook/react";
-// biome-ignore lint/correctness/noUnusedImports: React is needed for TSX
 import React from "react";
 import { LocaleProvider } from "../src/i18n/LocaleContext";
 import { LOCALES, LOCALE_NAMES, type LocaleType } from "../src/i18n/config";
@@ -8,14 +7,27 @@ import "../src/app/globals.css";
 
 /**
  * Decorator to wrap all stories with LocaleProvider
- * This ensures that useLocale hook works in all stories
+ * This ensures that useLocale hook works in all stories and responds to toolbar changes
  */
 const withLocaleProvider: Decorator = (Story, context) => {
   // Get locale from toolbar or use default
   const locale = (context.globals.locale as LocaleType) || LOCALES.JA;
 
+  // Use React's useEffect to update locale when Storybook toolbar selection changes
+  React.useEffect(() => {
+    // This will directly update the document cookie and HTML lang attribute
+    document.cookie = `NEXT_LOCALE=${locale};path=/;max-age=31536000`;
+    document.documentElement.lang = locale;
+
+    // Force re-render by dispatching a custom event that components can listen for
+    window.dispatchEvent(
+      new CustomEvent("locale change", { detail: { locale } }),
+    );
+  }, [locale]);
+
   return (
-    <LocaleProvider defaultLocale={locale}>
+    // Use a key to force complete re-render when locale changes
+    <LocaleProvider key={locale} defaultLocale={locale}>
       <div style={{ margin: "1rem" }}>
         <Story />
       </div>

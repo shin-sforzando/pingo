@@ -7,7 +7,7 @@ const meta = {
   parameters: {
     layout: "centered",
   },
-  tags: ["autodocs"],
+  tags: ["autodocs", "example"],
 } satisfies Meta<typeof TranslatedText>;
 
 export default meta;

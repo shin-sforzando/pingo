@@ -52,7 +52,7 @@ T. B. D.
    - [next-i18next](https://github.com/i18next/next-i18next)
 
 6. テスト
-   - Vitest
+   - Vitest (Browser Mode)
    - Playwright
    - Storybook Test
 
