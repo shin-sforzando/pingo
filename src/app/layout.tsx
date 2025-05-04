@@ -1,3 +1,4 @@
+import { LocaleProvider } from "@/i18n/LocaleContext";
 import type { Metadata } from "next";
 import "./globals.css";
 
@@ -12,9 +13,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="ja">
       <body className={"antialiased"}>
-        <main>{children}</main>
+        <LocaleProvider>
+          <main>{children}</main>
+        </LocaleProvider>
       </body>
     </html>
   );

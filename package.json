@@ -13,7 +13,7 @@
     "start": "next start",
     "check": "biome check --write --verbose",
     "test": "vitest",
-    "storybook": "storybook dev -p 6006",
+    "storybook": "storybook dev --port 6006 --debug-webpack",
     "build-storybook": "storybook build"
   },
   "dependencies": {

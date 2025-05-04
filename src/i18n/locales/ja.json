@@ -1,0 +1,34 @@
+{
+  "common": {
+    "title": "Pingo",
+    "description": "AIが写真に基づいて判定するビンゴゲーム",
+    "language": "言語"
+  },
+  "navigation": {
+    "home": "ホーム",
+    "newGame": "新規ゲーム",
+    "joinGame": "ゲームに参加",
+    "myGames": "マイゲーム"
+  },
+  "home": {
+    "welcome": "Pingoへようこそ",
+    "getStarted": "始めましょう",
+    "editFile": "編集するファイル"
+  },
+  "game": {
+    "create": "ゲームを作成",
+    "join": "ゲームに参加",
+    "board": "ビンゴボード",
+    "submit": "写真を提出",
+    "result": "結果"
+  },
+  "actions": {
+    "submit": "送信",
+    "cancel": "キャンセル",
+    "save": "保存",
+    "delete": "削除",
+    "edit": "編集",
+    "back": "戻る",
+    "next": "次へ"
+  }
+}

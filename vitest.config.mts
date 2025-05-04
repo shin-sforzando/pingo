@@ -22,7 +22,7 @@ export default defineConfig({
       exclude: [
         "next.config.ts", // Exclude Next.js config
         "postcss.config.mjs", // Exclude PostCSS config
-        "**/*.stories.{ts, tsx}", // Exclude Storybook stories
+        "**/*.stories.{ts,tsx}", // Exclude Storybook stories
         "**/stories/example/*.tsx", // Exclude example stories
         ...coverageConfigDefaults.exclude,
       ],
