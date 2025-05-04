@@ -1,13 +1,13 @@
 "use client";
 
 import { useTranslation } from "@/i18n/useTranslation";
-import { LanguageSwitcher } from "./LanguageSwitcher";
+import { LanguageSwitcher } from "../../components/LanguageSwitcher";
 
 /**
  * Sample component that demonstrates i18n functionality
  * Shows translated text and includes a language switcher
  */
-export function TranslatedText() {
+export function SampleTranslatedText() {
   const { t } = useTranslation();
 
   return (

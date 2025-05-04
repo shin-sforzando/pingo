@@ -1,14 +1,14 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { TranslatedText } from "./TranslatedText";
+import { SampleTranslatedText } from "./SampleTranslatedText";
 
 const meta = {
-  title: "Components/TranslatedText",
-  component: TranslatedText,
+  title: "Example/SampleTranslatedText",
+  component: SampleTranslatedText,
   parameters: {
     layout: "centered",
   },
   tags: ["autodocs", "example"],
-} satisfies Meta<typeof TranslatedText>;
+} satisfies Meta<typeof SampleTranslatedText>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
