@@ -3,7 +3,6 @@ import { describe, expect, it, vi } from "vitest";
 import { render } from "vitest-browser-react";
 
 import enMessages from "../../messages/en.json";
-// Import messages for testing
 import jaMessages from "../../messages/ja.json";
 
 // Mock the next-intl/server module

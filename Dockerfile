@@ -35,6 +35,7 @@ ENV NODE_ENV=production
 ENV PORT=8080
 
 COPY --from=base /app/next.config.ts ./
+COPY --from=base /app/messages ./messages
 COPY --from=base /app/public ./public
 COPY --from=base /app/.next/standalone ./
 COPY --from=base /app/.next/static ./.next/static

@@ -4,7 +4,6 @@ import { describe, expect, it } from "vitest";
 import { render } from "vitest-browser-react";
 
 import enMessages from "../../messages/en.json";
-// Import messages for testing
 import jaMessages from "../../messages/ja.json";
 
 describe("HomePage", () => {
