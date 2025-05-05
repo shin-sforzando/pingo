@@ -18,5 +18,9 @@
     "notificationsDescription": "Show your latest notifications",
     "profileSettings": "Profile",
     "logout": "Logout"
+  },
+  "Footer": {
+    "copyright": "© {year} Pingo",
+    "termsOfService": "Terms of Service"
   }
 }

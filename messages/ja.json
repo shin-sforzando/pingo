@@ -18,5 +18,9 @@
     "notificationsDescription": "最新の通知を表示します",
     "profileSettings": "プロフィール",
     "logout": "ログアウト"
+  },
+  "Footer": {
+    "copyright": "© {year} Pingo",
+    "termsOfService": "サービス利用規約"
   }
 }

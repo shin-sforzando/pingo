@@ -18,11 +18,13 @@
     "Firestore",
     "gitsecret",
     "lefthook",
+    "magicui",
     "oklch",
     "participations",
     "pingo",
     "shadcn",
     "turbopack",
+    "vaul",
     "VIEWPORTS",
     "WCAG"
   ]

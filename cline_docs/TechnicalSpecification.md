@@ -358,6 +358,28 @@ Google Cloud Storageの階層機能を活用し、ゲームIDごとにフォル�
 - Vitest Browser Modeを使用したテスト
 - Storybookストーリーによる視覚的テスト
 
+##### Footer
+
+画面下部に固定されたフッターコンポーネント。以下の機能を含む：
+
+- サービス利用規約へのリンク（上部に配置）
+- Hacking Papa画像（[はっきんぐパパ](https://hacking-papa.com)へのリンク付き）
+- 2025年固定のコピーライト表記
+
+**実装ファイル**:
+
+- `src/components/layout/Footer.tsx`
+
+**使用コンポーネント**:
+
+- next/image: Image
+- next/link: Link
+
+**テスト**:
+
+- Vitest Browser Modeを使用したテスト
+- Storybookストーリーによる視覚的テスト
+
 ## トランジションとアニメーション
 
 View Transition APIを活用したトランジションを実装する。
