@@ -20,6 +20,9 @@ const preview: Preview = {
       viewports: MINIMAL_VIEWPORTS,
       defaultViewport: "mobile1",
     },
+    nextjs: {
+      appDirectory: true,
+    },
     // Add next-intl configuration
     nextIntl,
   },

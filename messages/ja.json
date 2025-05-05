@@ -8,6 +8,15 @@
   },
   "Common": {
     "appName": "Pingo",
-    "description": "AIが写真に基づいて判定するビンゴゲーム"
+    "description": "AIが写真に基づいて判定するビンゴゲーム",
+    "language": "日本語",
+    "toLanguage": "English",
+    "close": "閉じる"
+  },
+  "Header": {
+    "notifications": "通知",
+    "notificationsDescription": "最新の通知を表示します",
+    "profileSettings": "プロフィール",
+    "logout": "ログアウト"
   }
 }

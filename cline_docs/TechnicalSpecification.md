@@ -25,7 +25,8 @@
 
 - **コード品質**: Biome.js
 - **テスト**: Vitest
-- **UIコンポーネント開発**: Storybook
+- **コンポーネントライブラリ**: shadcn/ui
+- **UI確認**: Storybook
 - **Git フック**: Lefthook
 - **CI/CD**: Google Cloud Build (デプロイ), GitHub Actions (テスト・静的解析)
 - **分析**: Google Analytics 4
@@ -269,10 +270,10 @@ Google Cloud Storageの階層機能を活用し、ゲームIDごとにフォル�
 
 基本構成色として以下の4色を使用する：
 
-- #08d9d6 (プライマリ)
-- #252a34 (フォアグラウンド)
-- #ff2e63 (セカンダリ/アクセント)
-- #eaeaea (バックグラウンド)
+- #08d9d6 = `oklch(0.8 0.1365 192.99)` (プライマリ)
+- #252a34 = `oklch(0.28 0.0198 264.19)` (フォアグラウンド)
+- #ff2e63 = `oklch(0.65 0.2381 13.77)` (セカンダリ/アクセント)
+- #eaeaea = `oklch(0.94 0 0)` (バックグラウンド)
 
 これらの色はglobals.cssでテーマ変数として定義され、各カラーのバリエーション（50-950）も用意する。
 
@@ -315,11 +316,47 @@ Google Cloud Storageの階層機能を活用し、ゲームIDごとにフォル�
 
 ### コンポーネント設計
 
+可能な限り [shadcn/ui](https://ui.shadcn.com)を活用する。
+
 コンポーネントは以下のカテゴリに分類：
 
 1. **基本UI要素**: Button, InputField, Modal, Tooltip, Tabs, Dropdown, Toggle, Slider
 2. **機能コンポーネント**: Countdown Timer, Confirmation Dialog, Loading Indicator, Error Boundary
 3. **複合コンポーネント**: Header, Footer, Notification Toast, Image pop-up, User Register, User Login/Logout, Bingo Cell, Bingo Board, Image Submit, Image Grid, Subject Card, Subjects List, Game ID Input, Game Card, Game List, Game Detail, Players List, QR Code, Speech Bubble
+
+#### 実装済みコンポーネント
+
+##### Header
+
+モバイルファーストで設計されたヘッダーコンポーネント。以下の機能を含む：
+
+- 中央配置されたシステム名「Pingo」（クリックでホームページに遷移）
+- 右上に通知アイコン（Ghostスタイルのボタン + Bellアイコン）
+  - クリックで下部からDrawerを表示
+  - Drawer内のタイトルと説明は多言語対応
+- ユーザーアバター（クリック可能）
+  - クリックでPopoverメニューを表示
+  - メニュー内には以下の項目：
+    - プロフィール設定（Userアイコン付き）
+    - 言語切り替え（Languagesアイコン付き）
+    - ログアウト（LogOutアイコン付き）
+
+**実装ファイル**:
+
+- `src/components/layout/Header.tsx`
+- `src/components/layout/NotificationDrawer.tsx`
+- `src/components/layout/UserMenu.tsx`
+- `src/components/layout/LanguageSwitcher.tsx`
+
+**使用コンポーネント**:
+
+- shadcn/ui: Avatar, Button, Drawer, Popover, Separator
+- lucide-react: Bell, User, Languages, LogOut
+
+**テスト**:
+
+- Vitest Browser Modeを使用したテスト
+- Storybookストーリーによる視覚的テスト
 
 ## トランジションとアニメーション
 
