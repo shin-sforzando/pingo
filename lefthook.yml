@@ -12,7 +12,13 @@ pre-commit:
       stage_fixed: true
     test:
       glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx}"
-      run: npm test -- run
+      run: npm run test:once
+    i18n:
+      glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}"
+      run: npm run check:i18n
+    build:
+      glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx}"
+      run: npm run build
 
 post-merge:
   commands:
