@@ -4,7 +4,7 @@ export default function Home() {
   const t = useTranslations("HomePage");
 
   return (
-    <div>
+    <>
       <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left">
         <li className="mb-2 tracking-[-.01em]">
           {t("getStarted")}{" "}
@@ -15,6 +15,6 @@ export default function Home() {
         </li>
         <li className="tracking-[-.01em]">{t("saveChanges")}</li>
       </ol>
-    </div>
+    </>
   );
 }
