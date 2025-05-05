@@ -35,7 +35,9 @@ export function NotificationDrawer({
           </DrawerHeader>
           <DrawerFooter>
             <DrawerClose asChild>
-              <Button variant="outline">Close</Button>
+              <Button variant="outline">
+                {useTranslations("Common")("close")}
+              </Button>
             </DrawerClose>
           </DrawerFooter>
         </div>

@@ -28,7 +28,7 @@ describe("LanguageSwitcher", () => {
   });
 
   describe("with Japanese locale", () => {
-    it("displays 'English' as the language option", async () => {
+    it(`displays '${jaMessages.Common.toLanguage}' as the language option`, async () => {
       render(
         <NextIntlClientProvider locale="ja" messages={jaMessages}>
           <LanguageSwitcher />
@@ -36,7 +36,9 @@ describe("LanguageSwitcher", () => {
       );
 
       const button = page.getByRole("button");
-      await expect.element(button).toHaveTextContent("English");
+      await expect
+        .element(button)
+        .toHaveTextContent(jaMessages.Common.toLanguage);
     });
 
     it("calls setUserLocale with 'en' when clicked", async () => {
@@ -55,7 +57,7 @@ describe("LanguageSwitcher", () => {
   });
 
   describe("with English locale", () => {
-    it("displays '日本語' as the language option", async () => {
+    it(`displays '${enMessages.Common.toLanguage}' as the language option`, async () => {
       render(
         <NextIntlClientProvider locale="en" messages={enMessages}>
           <LanguageSwitcher />
@@ -63,7 +65,9 @@ describe("LanguageSwitcher", () => {
       );
 
       const button = page.getByRole("button");
-      await expect.element(button).toHaveTextContent("日本語");
+      await expect
+        .element(button)
+        .toHaveTextContent(enMessages.Common.toLanguage);
     });
 
     it("calls setUserLocale with 'ja' when clicked", async () => {

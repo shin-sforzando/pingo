@@ -57,7 +57,7 @@ describe("NotificationDrawer", () => {
         </NextIntlClientProvider>,
       );
 
-      const closeButton = getByText("Close");
+      const closeButton = getByText(jaMessages.Common.close);
       await userEvent.click(closeButton);
 
       expect(mockOnOpenChange).toHaveBeenCalledWith(false);
@@ -82,6 +82,19 @@ describe("NotificationDrawer", () => {
         enMessages.Header.notificationsDescription,
       );
       await expect.element(description).toBeVisible();
+    });
+
+    it("calls onOpenChange when close button is clicked", async () => {
+      const { getByText } = render(
+        <NextIntlClientProvider locale="en" messages={enMessages}>
+          <NotificationDrawer open={true} onOpenChange={mockOnOpenChange} />
+        </NextIntlClientProvider>,
+      );
+
+      const closeButton = getByText(enMessages.Common.close);
+      await userEvent.click(closeButton);
+
+      expect(mockOnOpenChange).toHaveBeenCalledWith(false);
     });
   });
 });

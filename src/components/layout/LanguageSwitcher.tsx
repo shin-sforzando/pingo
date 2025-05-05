@@ -3,22 +3,28 @@
 import { Button } from "@/components/ui/button";
 import { setUserLocale } from "@/services/locale";
 import { Languages } from "lucide-react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 
 export function LanguageSwitcher() {
   const router = useRouter();
   const locale = useLocale();
 
-  // Display the opposite language of the current locale
-  const languageText = locale === "ja" ? "English" : "日本語";
+  const LOCALE_JA = "ja";
+  const LOCALE_EN = "en";
+
+  const t = useTranslations("Common");
 
   const toggleLocale = async () => {
-    const newLocale = locale === "ja" ? "en" : "ja";
-    await setUserLocale(newLocale);
+    try {
+      const newLocale = locale === LOCALE_JA ? LOCALE_EN : LOCALE_JA;
+      await setUserLocale(newLocale);
 
-    // Refresh the page to apply the new locale
-    router.refresh();
+      // Refresh the page to apply the new locale
+      router.refresh();
+    } catch (error) {
+      console.error("Failed to switch language:", error);
+    }
   };
 
   return (
@@ -29,7 +35,7 @@ export function LanguageSwitcher() {
       onClick={toggleLocale}
     >
       <Languages className="mr-2 h-4 w-4" />
-      {languageText}
+      {t("toLanguage")}
     </Button>
   );
 }
