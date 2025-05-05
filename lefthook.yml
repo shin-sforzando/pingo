@@ -18,7 +18,7 @@ pre-commit:
       run: npm run check:i18n
     build:
       glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx}"
-      run: npm run build
+      run: npm run build -- --profile
 
 post-merge:
   commands:

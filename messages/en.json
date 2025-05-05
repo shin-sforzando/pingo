@@ -13,7 +13,7 @@
   "Header": {
     "notifications": "Notifications",
     "notificationsDescription": "Show your latest notifications",
-    "profileSettings": "Profile Settings",
+    "profileSettings": "Profile",
     "logout": "Logout"
   }
 }
