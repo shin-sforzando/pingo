@@ -1,3 +1,4 @@
+import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
@@ -25,7 +26,8 @@ export default async function RootLayout({
       <body className={"antialiased"}>
         <NextIntlClientProvider locale={locale}>
           <Header />
-          <main className="mx-auto max-w-md px-4">{children}</main>
+          <main className="mx-auto max-w-md px-4 pb-24">{children}</main>
+          <Footer />
         </NextIntlClientProvider>
       </body>
     </html>
