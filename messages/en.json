@@ -8,6 +8,15 @@
   },
   "Common": {
     "appName": "Pingo",
-    "description": "Bingo game where AI judges based on photos"
+    "description": "Bingo game where AI judges based on photos",
+    "language": "English",
+    "toLanguage": "日本語",
+    "close": "Close"
+  },
+  "Header": {
+    "notifications": "Notifications",
+    "notificationsDescription": "Show your latest notifications",
+    "profileSettings": "Profile",
+    "logout": "Logout"
   }
 }

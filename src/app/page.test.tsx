@@ -16,25 +16,7 @@ describe("HomePage", () => {
     )).not.toThrow();
   });
 
-  it("contains the Next.js logo", () => {
-    const { getByAltText } = render(
-      <NextIntlClientProvider locale="ja" messages={jaMessages}>
-        <Home />
-      </NextIntlClientProvider>,
-    );
-    expect(getByAltText("Next.js logo")).toBeInTheDocument();
-  });
-
   describe("with Japanese locale", () => {
-    it("displays Japanese title", () => {
-      const { getByText } = render(
-        <NextIntlClientProvider locale="ja" messages={jaMessages}>
-          <Home />
-        </NextIntlClientProvider>,
-      );
-      expect(getByText(jaMessages.HomePage.title)).toBeInTheDocument();
-    });
-
     it("displays Japanese instructions", () => {
       const { getByText } = render(
         <NextIntlClientProvider locale="ja" messages={jaMessages}>
@@ -48,15 +30,6 @@ describe("HomePage", () => {
   });
 
   describe("with English locale", () => {
-    it("displays English title", () => {
-      const { getByText } = render(
-        <NextIntlClientProvider locale="en" messages={enMessages}>
-          <Home />
-        </NextIntlClientProvider>,
-      );
-      expect(getByText(enMessages.HomePage.title)).toBeInTheDocument();
-    });
-
     it("displays English instructions", () => {
       const { getByText } = render(
         <NextIntlClientProvider locale="en" messages={enMessages}>

@@ -324,6 +324,40 @@ Google Cloud Storageの階層機能を活用し、ゲームIDごとにフォル�
 2. **機能コンポーネント**: Countdown Timer, Confirmation Dialog, Loading Indicator, Error Boundary
 3. **複合コンポーネント**: Header, Footer, Notification Toast, Image pop-up, User Register, User Login/Logout, Bingo Cell, Bingo Board, Image Submit, Image Grid, Subject Card, Subjects List, Game ID Input, Game Card, Game List, Game Detail, Players List, QR Code, Speech Bubble
 
+#### 実装済みコンポーネント
+
+##### Header
+
+モバイルファーストで設計されたヘッダーコンポーネント。以下の機能を含む：
+
+- 中央配置されたシステム名「Pingo」（クリックでホームページに遷移）
+- 右上に通知アイコン（Ghostスタイルのボタン + Bellアイコン）
+  - クリックで下部からDrawerを表示
+  - Drawer内のタイトルと説明は多言語対応
+- ユーザーアバター（クリック可能）
+  - クリックでPopoverメニューを表示
+  - メニュー内には以下の項目：
+    - プロフィール設定（Userアイコン付き）
+    - 言語切り替え（Languagesアイコン付き）
+    - ログアウト（LogOutアイコン付き）
+
+**実装ファイル**:
+
+- `src/components/layout/Header.tsx`
+- `src/components/layout/NotificationDrawer.tsx`
+- `src/components/layout/UserMenu.tsx`
+- `src/components/layout/LanguageSwitcher.tsx`
+
+**使用コンポーネント**:
+
+- shadcn/ui: Avatar, Button, Drawer, Popover, Separator
+- lucide-react: Bell, User, Languages, LogOut
+
+**テスト**:
+
+- Vitest Browser Modeを使用したテスト
+- Storybookストーリーによる視覚的テスト
+
 ## トランジションとアニメーション
 
 View Transition APIを活用したトランジションを実装する。

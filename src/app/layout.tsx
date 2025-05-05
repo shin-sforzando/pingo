@@ -1,3 +1,4 @@
+import { Header } from "@/components/layout/Header";
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getTranslations } from "next-intl/server";
@@ -23,7 +24,8 @@ export default async function RootLayout({
     <html lang={locale}>
       <body className={"antialiased"}>
         <NextIntlClientProvider locale={locale}>
-          <main>{children}</main>
+          <Header />
+          <main className="mx-auto max-w-md px-4">{children}</main>
         </NextIntlClientProvider>
       </body>
     </html>

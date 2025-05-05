@@ -10,7 +10,7 @@
 - All comments should only be useful to co-developers and to Cline, which has amnesia after a reset, and should not be self-explanatory from the source code and its change history.
   - In other words, comments that explain **why** are good comments, and comments that explain what, how, or when should not exist.
 - Use standard libraries whenever possible, and reduce the number of external libraries that depend on them.
-- Check the latest documentation with `browser_action`.
+- The world of software development is very fast evolving, so always be suspicious of the possibility that your knowledge is out of date, and read the latest documentation before starting. Use `browser_action` if necessary.
 - Never ignore Linter warnings.
 - Utilize type definitions aggressively and be as rigorous as possible.
 - All source code should be robust with automated tests and all components should be individually viewable in the Storybook.

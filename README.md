@@ -16,9 +16,10 @@ Pingo: Bingo game where AI judges based on photos
 - [How to](#how-to)
   - [Setup](#setup)
   - [Development](#development)
+    - [Lint \& Format](#lint--format)
+    - [i18n](#i18n)
   - [Storybook](#storybook)
   - [Build for Production](#build-for-production)
-  - [Lint \& Format](#lint--format)
   - [Local Docker](#local-docker)
 - [Test](#test)
 - [Deploy](#deploy)
@@ -31,7 +32,9 @@ Pingo: Bingo game where AI judges based on photos
 - TypeScript (v5 or higher)
 - [Next.js](https://nextjs.org) (v15.3.0)
   - [React](https://ja.react.dev) (v19.1.0)
+  - [next-intl](https://next-intl.dev)
 - [Storybook](https://storybook.js.org) (v8.6.12)
+- [shadcn/ui](https://ui.shadcn.com)
 
 ### Tool
 
@@ -64,6 +67,17 @@ npm run dev
 # The application will be available at http://localhost:3000
 ```
 
+#### Lint & Format
+
+```shell
+# Run Biome
+npm run check
+```
+
+#### i18n
+
+(T. B. D.)
+
 ### Storybook
 
 Pingo uses [Storybook](https://storybook.js.org) for UI component development and documentation.
@@ -86,38 +100,22 @@ npm run build
 npm run start
 ```
 
-### Lint & Format
-
-```shell
-# Run Biome
-npm run check
-```
-
 ### Local Docker
 
 ```shell
-# Build the Docker image
-docker build -t pingo .
-
-# Run the Docker container
-# Replace 3000 with your desired host port if needed
-docker run -p 3000:8080 pingo
+# Build image and run container
+npm run docker
+# The container will be exposed at http://localhost:3000
 ```
 
 ## Test
 
 ```shell
-# Run Vitest only once
+# Run Vitest watch mode
 npm test
 
-# Run Vitest watch mode
-npm run test:watch
-
-# Run Vitest with Web UI
-npm run test:ui
-
-# Run Storybook tests
-npm run test:storybook
+# Run Vitest only once
+npm test:once
 ```
 
 ## Deploy
