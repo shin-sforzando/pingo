@@ -27,7 +27,7 @@ Pingoプロジェクトは現在、計画段階にあります。要件定義と
   - Storybookストーリーとテストの作成
 - 画面下部固定のFooterコンポーネント実装
   - サービス利用規約へのリンク
-  - Hacking Papa画像（https://hacking-papa.comへのリンク付き）
+  - Hacking Papa画像（[はっきんぐパパ](https://hacking-papa.com)へのリンク付き）
   - 2025年固定のコピーライト表記
   - Storybookストーリーとテストの作成
 

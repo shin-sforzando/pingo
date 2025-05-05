@@ -6,16 +6,20 @@ export function Footer() {
   const t = useTranslations("Footer");
 
   return (
-    <footer className="fixed bottom-0 w-full bg-background/95 backdrop-blur py-4">
+    <footer className="fixed bottom-0 w-full bg-background/70 backdrop-invert py-4">
       <div className="mx-auto max-w-md px-4 flex flex-col items-center gap-2">
         <Link
           href="/terms"
-          className="text-xs text-muted-foreground hover:text-primary transition-colors"
+          className="text-sm text-foreground hover:text-primary transition-colors"
         >
           {t("termsOfService")}
         </Link>
 
         <div className="flex items-center gap-2">
+          <p className="text-sm text-foreground">
+            {t("copyright", { year: 2025 })}
+          </p>
+          <p className="text-xs">produced by</p>
           <Link
             href="https://hacking-papa.com"
             target="_blank"
@@ -26,12 +30,9 @@ export function Footer() {
               alt="Hacking Papa"
               width={32}
               height={32}
-              className="rounded-full"
+              className="rounded-sm"
             />
           </Link>
-          <p className="text-sm text-muted-foreground">
-            {t("copyright", { year: 2025 })}
-          </p>
         </div>
       </div>
     </footer>

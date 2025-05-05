@@ -13,13 +13,13 @@ export function Header() {
   const t = useTranslations("Common");
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur">
+    <header className="sticky top-0 z-50 w-full bg-background/70 backdrop-invert">
       <div className="mx-auto max-w-md px-4 h-16 flex items-center justify-between">
         <div className="flex-1 hidden" />
 
         {/* System name - centered */}
         <div className="flex-1 flex justify-center">
-          <Link href="/" className="text-xl font-bold">
+          <Link href="/" className="text-3xl font-black">
             {t("appName")}
           </Link>
         </div>
