@@ -9,5 +9,11 @@
   "Common": {
     "appName": "Pingo",
     "description": "Bingo game where AI judges based on photos"
+  },
+  "Header": {
+    "notifications": "Notifications",
+    "notificationsDescription": "Show your latest notifications",
+    "profileSettings": "Profile Settings",
+    "logout": "Logout"
   }
 }
