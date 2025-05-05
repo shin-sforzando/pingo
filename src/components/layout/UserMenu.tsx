@@ -18,7 +18,7 @@ export function UserMenu() {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Avatar className="cursor-pointer">
+        <Avatar className="cursor-pointer" data-testid="my-avatar">
           <AvatarImage src="/avatar-placeholder.png" alt="User" />
           <AvatarFallback>UN</AvatarFallback>
         </Avatar>
