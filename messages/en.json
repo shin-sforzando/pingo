@@ -16,10 +16,37 @@
     "notifications": "Notifications",
     "notificationsDescription": "Show your latest notifications",
     "profileSettings": "Profile",
-    "logout": "Logout"
+    "logout": "Logout",
+    "loggedInAs": "Logged in as:"
   },
   "Footer": {
     "copyright": "© {year} Pingo",
     "termsOfService": "Terms of Service"
+  },
+  "Auth": {
+    "register": "Register",
+    "registering": "Registering...",
+    "login": "Login",
+    "loggingIn": "Logging in...",
+    "logout": "Logout",
+    "handle": "Username",
+    "handlePlaceholder": "Enter your username",
+    "password": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "confirmPassword": "Confirm Password",
+    "confirmPasswordPlaceholder": "Confirm your password",
+    "cancel": "Cancel",
+    "alreadyHaveAccount": "Already have an account?",
+    "dontHaveAccount": "Don't have an account?",
+    "errors": {
+      "handleRequired": "Username is required",
+      "handleTooShort": "Username must be at least 3 characters",
+      "handleTooLong": "Username must be at most 20 characters",
+      "handleInvalid": "Username can only contain letters, numbers, underscores, and hyphens",
+      "passwordRequired": "Password is required",
+      "passwordTooShort": "Password must be at least 8 characters",
+      "passwordMismatch": "Passwords do not match",
+      "invalidCredentials": "Invalid username or password"
+    }
   }
 }
