@@ -8,12 +8,31 @@ export default defineConfig({
     "process.env": JSON.stringify({}),
   },
   test: {
-    browser: {
-      enabled: true,
-      headless: false,
-      provider: "playwright",
-      instances: [{ browser: "webkit" }],
-    },
+    pool: "forks",
+    workspace: [
+      {
+        extends: true,
+        test: {
+          name: "jsdom",
+          environment: "jsdom",
+          include: ["src/**/*.{test,spec}.{js,ts,jsx,tsx}"],
+          exclude: ["src/**/*.browser.{test,spec}.{js,ts,jsx,tsx}"],
+        },
+      },
+      {
+        extends: true,
+        test: {
+          name: "browser",
+          include: ["src/**/*.browser.{test,spec}.{js,ts,jsx,tsx}"],
+          browser: {
+            enabled: true,
+            headless: false,
+            provider: "playwright",
+            instances: [{ browser: "webkit" }],
+          },
+        },
+      },
+    ],
     coverage: {
       enabled: true,
       provider: "istanbul",
