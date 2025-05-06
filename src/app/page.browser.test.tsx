@@ -24,8 +24,8 @@ describe("HomePage", () => {
         </NextIntlClientProvider>,
       );
       // Check for Japanese text
-      expect(getByText(/編集を始める/)).toBeInTheDocument();
-      expect(getByText(/保存して変更をすぐに確認できます/)).toBeInTheDocument();
+      expect(getByText(jaMessages.HomePage.editFile)).toBeInTheDocument();
+      expect(getByText(jaMessages.HomePage.saveChanges)).toBeInTheDocument();
     });
   });
 
@@ -37,10 +37,8 @@ describe("HomePage", () => {
         </NextIntlClientProvider>,
       );
       // Check for English text
-      expect(getByText(/Get started/)).toBeInTheDocument();
-      expect(
-        getByText(/Save and see your changes instantly/),
-      ).toBeInTheDocument();
+      expect(getByText(enMessages.HomePage.editFile)).toBeInTheDocument();
+      expect(getByText(enMessages.HomePage.saveChanges)).toBeInTheDocument();
     });
   });
 });
