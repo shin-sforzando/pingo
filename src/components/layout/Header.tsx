@@ -14,18 +14,18 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full bg-background/70 backdrop-invert">
-      <div className="mx-auto max-w-md px-4 h-16 flex items-center justify-between">
-        <div className="flex-1 hidden" />
+      <div className="mx-auto flex h-16 max-w-md items-center justify-between px-4">
+        <div className="hidden flex-1" />
 
         {/* System name - centered */}
-        <div className="flex-1 flex justify-center">
-          <Link href="/" className="text-3xl font-black">
+        <div className="flex flex-1 justify-center">
+          <Link href="/" className="font-black text-3xl">
             {t("appName")}
           </Link>
         </div>
 
         {/* Right side icons */}
-        <div className="flex-1 flex justify-end items-center gap-2">
+        <div className="flex flex-1 items-center justify-end gap-2">
           {/* Notification button */}
           <Button
             variant="ghost"

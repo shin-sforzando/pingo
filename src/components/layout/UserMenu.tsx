@@ -27,7 +27,7 @@ export function UserMenu() {
         <div className="grid gap-4">
           <div className="space-y-2">
             <h4 className="font-medium leading-none">User Name</h4>
-            <p className="text-sm text-muted-foreground">user@example.com</p>
+            <p className="text-muted-foreground text-sm">user@example.com</p>
           </div>
           <Separator />
           <div className="grid gap-2">
