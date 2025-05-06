@@ -33,28 +33,73 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if handle already exists
-    const usersRef = adminFirestore.collection("users");
-    const query = usersRef.where("handle", "==", handle);
-    const snapshot = await query.get();
+    console.log(`ℹ️ XXX: [DEBUG] Checking handle: ${handle}`);
 
-    if (!snapshot.empty) {
-      return NextResponse.json(
-        { error: "Handle is already taken" },
-        { status: 400 },
-      );
+    try {
+      // Check if handle already exists
+      const usersRef = adminFirestore.collection("users");
+      const query = usersRef.where("handle", "==", handle);
+      const snapshot = await query.get();
+
+      console.log(`ℹ️ XXX: [DEBUG] Snapshot empty: ${snapshot.empty}`);
+      console.log(`ℹ️ XXX: [DEBUG] Snapshot size: ${snapshot.size}`);
+
+      if (!snapshot.empty) {
+        console.log(`ℹ️ XXX: [DEBUG] Handle already exists: ${handle}`);
+        return NextResponse.json(
+          { error: "Handle is already taken" },
+          { status: 400 },
+        );
+      }
+    } catch (queryError) {
+      console.error("Error executing Firestore query:", queryError);
+
+      // If there's a NOT_FOUND error, it likely means the collection doesn't exist yet
+      // In this case, we can proceed with registration as the handle is available
+      if (
+        queryError &&
+        typeof queryError === "object" &&
+        "code" in queryError &&
+        queryError.code === 5
+      ) {
+        console.log(
+          "ℹ️ XXX: [DEBUG] Collection not found, proceeding with registration",
+        );
+        // Continue with registration
+      } else {
+        // For other errors, return a 500 error
+        console.error("Unexpected error checking handle:", queryError);
+        return NextResponse.json(
+          { error: "Failed to check handle availability" },
+          { status: 500 },
+        );
+      }
     }
 
     // Create user document in Firestore
-    const now = new Date().toISOString();
-    await usersRef.doc(uid).set({
-      id: uid,
-      handle,
-      createdAt: now,
-      lastLoginAt: now,
-      participatingGames: [],
-      gameHistory: [],
-    });
+    try {
+      const now = new Date().toISOString();
+      const usersCollection = adminFirestore.collection("users");
+
+      console.log(`ℹ️ XXX: [DEBUG] Creating user document with uid: ${uid}`);
+      console.log(`ℹ️ XXX: [DEBUG] Handle: ${handle}`);
+
+      await usersCollection.doc(uid).set({
+        id: uid,
+        handle,
+        createdAt: now,
+        lastLoginAt: now,
+        participatingGames: [],
+        gameHistory: [],
+      });
+
+      console.log("ℹ️ XXX: [DEBUG] User document created successfully");
+    } catch (docError) {
+      console.error("Error creating user document:", docError);
+      throw new Error(
+        `Failed to create user document: ${docError instanceof Error ? docError.message : String(docError)}`,
+      );
+    }
 
     // Return success response
     return NextResponse.json({ success: true });

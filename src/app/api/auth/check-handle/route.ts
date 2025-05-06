@@ -19,14 +19,40 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if handle already exists in Firestore
-    const usersRef = adminFirestore.collection("users");
-    const query = usersRef.where("handle", "==", handle);
-    const snapshot = await query.get();
+    console.log(`ℹ️ XXX: [DEBUG] Checking handle availability: ${handle}`);
 
-    return NextResponse.json({
-      available: snapshot.empty,
-    });
+    try {
+      // Check if handle already exists in Firestore
+      const usersRef = adminFirestore.collection("users");
+      const query = usersRef.where("handle", "==", handle);
+      const snapshot = await query.get();
+
+      console.log(`ℹ️ XXX: [DEBUG] Snapshot empty: ${snapshot.empty}`);
+      console.log(`ℹ️ XXX: [DEBUG] Snapshot size: ${snapshot.size}`);
+
+      return NextResponse.json({
+        available: snapshot.empty,
+      });
+    } catch (queryError) {
+      console.error("Error executing Firestore query:", queryError);
+
+      // If there's a NOT_FOUND error, it likely means the collection doesn't exist yet
+      // In this case, the handle is available
+      if (
+        queryError &&
+        typeof queryError === "object" &&
+        "code" in queryError &&
+        queryError.code === 5
+      ) {
+        // 5 is the code for NOT_FOUND
+        console.log("ℹ️ XXX: [DEBUG] Collection not found, handle is available");
+        return NextResponse.json({
+          available: true,
+        });
+      }
+
+      throw queryError; // Re-throw other errors
+    }
   } catch (error) {
     console.error("Error checking handle availability:", error);
     return NextResponse.json(

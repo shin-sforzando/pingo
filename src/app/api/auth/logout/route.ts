@@ -3,7 +3,6 @@ import { NextResponse } from "next/server";
 /**
  * Logout a user
  * @route POST /api/auth/logout
- * @param request - The request object
  * @returns NextResponse with success status
  */
 export async function POST() {
