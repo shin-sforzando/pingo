@@ -50,7 +50,7 @@ describe("Header", () => {
         </NextIntlClientProvider>,
       );
 
-      const appName = page.getByText(jaMessages.Common.appName);
+      const appName = page.getByTestId("app-name");
       await expect.element(appName).toBeVisible();
     });
 
@@ -93,7 +93,7 @@ describe("Header", () => {
         </NextIntlClientProvider>,
       );
 
-      const appName = page.getByText(enMessages.Common.appName);
+      const appName = page.getByTestId("app-name");
       await expect.element(appName).toBeVisible();
     });
   });
