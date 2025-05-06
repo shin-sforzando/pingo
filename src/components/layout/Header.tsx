@@ -5,7 +5,6 @@ import { Bell } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useState } from "react";
-import { AuroraText } from "../magicui/aurora-text";
 import { NotificationDrawer } from "./NotificationDrawer";
 import { UserMenu } from "./UserMenu";
 
@@ -20,10 +19,8 @@ export function Header() {
 
         {/* System name - centered */}
         <div className="flex flex-1 justify-center" data-testid="app-name">
-          <Link href="/" className="font-black text-3xl">
-            <AuroraText colors={["#08d9d6", "#252a34", "#ff2e63"]}>
-              {t("appName")}
-            </AuroraText>
+          <Link href="/" className="font-black text-4xl">
+            {t("appName")}
           </Link>
         </div>
 
