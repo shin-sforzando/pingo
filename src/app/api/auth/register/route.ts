@@ -24,23 +24,23 @@ export async function POST(request: NextRequest) {
     const decodedToken = await adminAuth.verifyIdToken(idToken);
     const uid = decodedToken.uid;
 
-    // Get handle and password from request body
-    const { handle, password } = await request.json();
+    // Get username and password from request body
+    const { username, password } = await request.json();
 
-    if (!handle || !password) {
+    if (!username || !password) {
       return NextResponse.json(
-        { error: "Handle and password are required" },
+        { error: "Username and password are required" },
         { status: 400 },
       );
     }
     try {
-      // Check if handle already exists
+      // Check if username already exists
       const usersRef = adminFirestore.collection("users");
-      const query = usersRef.where("handle", "==", handle);
+      const query = usersRef.where("username", "==", username);
       const snapshot = await query.get();
       if (!snapshot.empty) {
         return NextResponse.json(
-          { error: "Handle is already taken" },
+          { error: "Username is already taken" },
           { status: 400 },
         );
       }
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
       console.error("Error executing Firestore query:", queryError);
 
       // If there's a NOT_FOUND error, it likely means the collection doesn't exist yet
-      // In this case, we can proceed with registration as the handle is available
+      // In this case, we can proceed with registration as the username is available
       if (
         queryError &&
         typeof queryError === "object" &&
@@ -58,9 +58,9 @@ export async function POST(request: NextRequest) {
         // Continue with registration
       } else {
         // For other errors, return a 500 error
-        console.error("Unexpected error checking handle:", queryError);
+        console.error("Unexpected error checking username:", queryError);
         return NextResponse.json(
-          { error: "Failed to check handle availability" },
+          { error: "Failed to check username availability" },
           { status: 500 },
         );
       }
@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
 
       await usersCollection.doc(uid).set({
         id: uid,
-        handle,
+        username,
         passwordHash, // Store the hashed password
         createdAt: now,
         lastLoginAt: now,

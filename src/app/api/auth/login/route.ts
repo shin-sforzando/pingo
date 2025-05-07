@@ -11,23 +11,23 @@ import { NextResponse } from "next/server";
  */
 export async function POST(request: NextRequest) {
   try {
-    const { handle, password } = await request.json();
+    const { username, password } = await request.json();
 
-    if (!handle || !password) {
+    if (!username || !password) {
       return NextResponse.json(
-        { error: "Handle and password are required" },
+        { error: "Username and password are required" },
         { status: 400 },
       );
     }
 
-    // Find user by handle
+    // Find user by username
     const usersRef = adminFirestore.collection("users");
-    const query = usersRef.where("handle", "==", handle);
+    const query = usersRef.where("username", "==", username);
     const snapshot = await query.get();
 
     if (snapshot.empty) {
       return NextResponse.json(
-        { error: "Invalid handle or password" },
+        { error: "Invalid username or password" },
         { status: 401 },
       );
     }
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
 
     if (!passwordMatch) {
       return NextResponse.json(
-        { error: "Invalid handle or password" },
+        { error: "Invalid username or password" },
         { status: 401 },
       );
     }

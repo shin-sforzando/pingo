@@ -11,7 +11,7 @@ import jaMessages from "../../../messages/ja.json";
 vi.mock("@/contexts/AuthContext", () => ({
   useAuth: () => ({
     user: { uid: "test-uid" },
-    userProfile: { handle: "John Doe" },
+    userProfile: { username: "John Doe" },
     logout: vi.fn(),
   }),
   AuthContext: {

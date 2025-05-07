@@ -48,7 +48,9 @@ export function UserMenu() {
                 src="https://avatar.iran.liara.run/public"
                 alt="User"
               />
-              <AvatarFallback>{userProfile?.handle?.[0] || "U"}</AvatarFallback>
+              <AvatarFallback>
+                {userProfile?.username?.[0] || "U"}
+              </AvatarFallback>
             </>
           ) : (
             <>
@@ -67,10 +69,10 @@ export function UserMenu() {
           <div className="grid gap-4">
             <div className="space-y-2">
               <h4 className="font-medium leading-none">
-                {userProfile?.handle || "User"}
+                {userProfile?.username || "User"}
               </h4>
               <p className="text-muted-foreground text-sm">
-                {t("loggedInAs")} {userProfile?.handle}
+                {t("loggedInAs")} {userProfile?.username}
               </p>
             </div>
             <Separator />

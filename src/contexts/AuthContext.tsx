@@ -21,7 +21,7 @@ import {
 // Define the shape of the user profile data
 interface UserProfile {
   id: string;
-  handle: string;
+  username: string;
   createdAt: string;
   lastLoginAt: string;
 }
@@ -32,11 +32,11 @@ interface AuthContextType {
   userProfile: UserProfile | null;
   isLoading: boolean;
   error: string | null;
-  register: (handle: string, password: string) => Promise<boolean>;
-  login: (handle: string, password: string) => Promise<boolean>;
+  register: (username: string, password: string) => Promise<boolean>;
+  login: (username: string, password: string) => Promise<boolean>;
   logout: () => Promise<boolean>;
   updateProfile: (
-    handle: string,
+    username: string,
     currentPassword: string,
     newPassword?: string,
   ) => Promise<boolean>;
@@ -85,12 +85,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Register a new user
-  const register = async (handle: string, password: string) => {
+  const register = async (username: string, password: string) => {
     setIsLoading(true);
     clearError();
 
     try {
-      const result = await registerUser(handle, password);
+      const result = await registerUser(username, password);
 
       if (!result.success) {
         setError(result.error || "Registration failed");
@@ -110,12 +110,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   // Login a user
-  const login = async (handle: string, password: string) => {
+  const login = async (username: string, password: string) => {
     setIsLoading(true);
     clearError();
 
     try {
-      const result = await loginUser(handle, password);
+      const result = await loginUser(username, password);
 
       if (!result.success) {
         setError(result.error || "Login failed");
@@ -162,7 +162,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Update user profile
   const updateProfile = async (
-    handle: string,
+    username: string,
     currentPassword: string,
     newPassword?: string,
   ) => {
@@ -171,7 +171,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     try {
       const result = await updateUserProfile(
-        handle,
+        username,
         currentPassword,
         newPassword,
       );

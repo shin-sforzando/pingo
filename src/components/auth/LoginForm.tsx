@@ -34,8 +34,8 @@ export function LoginForm({
 
   // Form validation schema
   const formSchema = z.object({
-    handle: z.string().min(1, {
-      message: t("errors.handleRequired"),
+    username: z.string().min(1, {
+      message: t("errors.usernameRequired"),
     }),
     password: z.string().min(1, {
       message: t("errors.passwordRequired"),
@@ -46,7 +46,7 @@ export function LoginForm({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      handle: "",
+      username: "",
       password: "",
     },
   });
@@ -57,7 +57,7 @@ export function LoginForm({
     setIsSubmitting(true);
 
     try {
-      const success = await login(values.handle, values.password);
+      const success = await login(values.username, values.password);
       if (success && onSuccess) {
         onSuccess();
       }
@@ -78,13 +78,13 @@ export function LoginForm({
         >
           <FormField
             control={form.control}
-            name="handle"
+            name="username"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t("handle")}</FormLabel>
+                <FormLabel>{t("username")}</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder={t("handlePlaceholder")}
+                    placeholder={t("usernamePlaceholder")}
                     autoComplete="username"
                     {...field}
                   />

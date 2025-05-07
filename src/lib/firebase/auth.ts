@@ -8,11 +8,11 @@ import {
 import { auth } from "./client";
 
 /**
- * Register a new user with handle and password
+ * Register a new user with username and password
  * This uses Firebase anonymous auth and then stores user data in Firestore
  */
 export async function registerUser(
-  handle: string,
+  username: string,
   password: string,
 ): Promise<{
   success: boolean;
@@ -20,20 +20,20 @@ export async function registerUser(
   userId?: string;
 }> {
   try {
-    // First check if the handle is available via API
-    const checkResponse = await fetch("/api/auth/check-handle", {
+    // First check if the username is available via API
+    const checkResponse = await fetch("/api/auth/check-username", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ handle }),
+      body: JSON.stringify({ username }),
     });
 
     const checkData = await checkResponse.json();
     if (!checkData.available) {
       return {
         success: false,
-        error: "Handle is already taken",
+        error: "Username is already taken",
       };
     }
 
@@ -41,7 +41,7 @@ export async function registerUser(
     const userCredential = await signInAnonymously(auth);
     const user = userCredential.user;
 
-    // Register user with handle and password via API
+    // Register user with username and password via API
     const response = await fetch("/api/auth/register", {
       method: "POST",
       headers: {
@@ -49,7 +49,7 @@ export async function registerUser(
         Authorization: `Bearer ${await user.getIdToken()}`,
       },
       body: JSON.stringify({
-        handle,
+        username,
         password,
       }),
     });
@@ -79,10 +79,10 @@ export async function registerUser(
 }
 
 /**
- * Login with handle and password
+ * Login with username and password
  */
 export async function loginUser(
-  handle: string,
+  username: string,
   password: string,
 ): Promise<{
   success: boolean;
@@ -97,7 +97,7 @@ export async function loginUser(
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        handle,
+        username,
         password,
       }),
     });
@@ -180,7 +180,7 @@ export function onAuthChange(
  * Update user profile
  */
 export async function updateUserProfile(
-  handle: string,
+  username: string,
   currentPassword: string,
   newPassword?: string,
 ): Promise<{
@@ -205,7 +205,7 @@ export async function updateUserProfile(
         Authorization: `Bearer ${idToken}`,
       },
       body: JSON.stringify({
-        handle,
+        username,
         currentPassword,
         newPassword,
       }),

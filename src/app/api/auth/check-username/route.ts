@@ -3,26 +3,26 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 /**
- * Check if a handle is available
- * @route POST /api/auth/check-handle
+ * Check if a username is available
+ * @route POST /api/auth/check-username
  * @param request - The request object
  * @returns NextResponse with available status
  */
 export async function POST(request: NextRequest) {
   try {
-    const { handle } = await request.json();
+    const { username } = await request.json();
 
-    if (!handle) {
+    if (!username) {
       return NextResponse.json(
-        { error: "Handle is required" },
+        { error: "Username is required" },
         { status: 400 },
       );
     }
 
     try {
-      // Check if handle already exists in Firestore
+      // Check if username already exists in Firestore
       const usersRef = adminFirestore.collection("users");
-      const query = usersRef.where("handle", "==", handle);
+      const query = usersRef.where("username", "==", username);
       const snapshot = await query.get();
 
       return NextResponse.json({
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
       console.error("Error executing Firestore query:", queryError);
 
       // If there's a NOT_FOUND error, it likely means the collection doesn't exist yet
-      // In this case, the handle is available
+      // In this case, the username is available
       if (
         queryError &&
         typeof queryError === "object" &&
@@ -48,9 +48,9 @@ export async function POST(request: NextRequest) {
       throw queryError; // Re-throw other errors
     }
   } catch (error) {
-    console.error("Error checking handle availability:", error);
+    console.error("Error checking username availability:", error);
     return NextResponse.json(
-      { error: "Failed to check handle availability" },
+      { error: "Failed to check username availability" },
       { status: 500 },
     );
   }

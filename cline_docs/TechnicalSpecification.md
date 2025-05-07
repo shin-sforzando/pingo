@@ -72,7 +72,8 @@ flowchart TD
 /users/
   /{userId}/
     - id: string (UUIDv4)
-    - handle: string (ユニークなハンドルネーム、表示名として)
+    - username: string (ユニークなユーザーネーム、表示名として)
+    - passwordHash: string (パスワードハッシュ)
     - createdAt: timestamp
     - lastLoginAt: timestamp
     - participatingGames: array<string> (参加中のゲームID、最大5つ)

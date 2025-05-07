@@ -24,25 +24,25 @@ export async function PUT(request: NextRequest) {
     const uid = decodedToken.uid;
 
     // Get updated user data from request body
-    const { handle } = await request.json();
+    const { username } = await request.json();
 
-    // If handle is provided, check if it's already taken by another user
-    if (handle) {
+    // If username is provided, check if it's already taken by another user
+    if (username) {
       const usersRef = adminFirestore.collection("users");
-      const query = usersRef.where("handle", "==", handle);
+      const query = usersRef.where("username", "==", username);
       const snapshot = await query.get();
 
       // If handle exists and belongs to another user, return error
       if (!snapshot.empty && snapshot.docs[0].id !== uid) {
         return NextResponse.json(
-          { error: "Handle is already taken" },
+          { error: "Username is already taken" },
           { status: 400 },
         );
       }
 
       // Update user document in Firestore
       await usersRef.doc(uid).update({
-        handle,
+        username,
         updatedAt: new Date().toISOString(),
       });
     }

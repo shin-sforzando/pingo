@@ -35,13 +35,13 @@ export function RegisterForm({
   // Form validation schema
   const formSchema = z
     .object({
-      handle: z
+      username: z
         .string()
         .min(3, {
-          message: t("errors.handleTooShort"),
+          message: t("errors.usernameTooShort"),
         })
         .max(20, {
-          message: t("errors.handleTooLong"),
+          message: t("errors.usernameTooLong"),
         }),
       password: z.string().min(8, {
         message: t("errors.passwordTooShort"),
@@ -57,7 +57,7 @@ export function RegisterForm({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      handle: "",
+      username: "",
       password: "",
       confirmPassword: "",
     },
@@ -69,7 +69,7 @@ export function RegisterForm({
     setIsSubmitting(true);
 
     try {
-      const success = await register(values.handle, values.password);
+      const success = await register(values.username, values.password);
       if (success && onSuccess) {
         onSuccess();
       }
@@ -90,13 +90,13 @@ export function RegisterForm({
         >
           <FormField
             control={form.control}
-            name="handle"
+            name="username"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t("handle")}</FormLabel>
+                <FormLabel>{t("username")}</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder={t("handlePlaceholder")}
+                    placeholder={t("usernamePlaceholder")}
                     autoComplete="username"
                     {...field}
                   />
