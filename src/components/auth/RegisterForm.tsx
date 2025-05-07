@@ -42,6 +42,9 @@ export function RegisterForm({
         })
         .max(20, {
           message: t("errors.usernameTooLong"),
+        })
+        .refine((value) => !/[.$/]/.test(value), {
+          message: t("errors.usernameInvalid"),
         }),
       password: z.string().min(8, {
         message: t("errors.passwordTooShort"),

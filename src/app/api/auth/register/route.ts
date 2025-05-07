@@ -33,6 +33,14 @@ export async function POST(request: NextRequest) {
         { status: 400 },
       );
     }
+
+    // Validate username - check for invalid characters
+    if (/[.$/]/.test(username)) {
+      return NextResponse.json(
+        { error: "Username contains invalid characters" },
+        { status: 400 },
+      );
+    }
     try {
       // Check if username already exists
       const usersRef = adminFirestore.collection("users");

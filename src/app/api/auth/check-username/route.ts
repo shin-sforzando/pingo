@@ -19,6 +19,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate username - check for invalid characters
+    if (/[.$/]/.test(username)) {
+      return NextResponse.json(
+        { error: "Username contains invalid characters", available: false },
+        { status: 400 },
+      );
+    }
+
     try {
       // Check if username already exists in Firestore
       const usersRef = adminFirestore.collection("users");

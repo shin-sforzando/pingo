@@ -34,9 +34,14 @@ export function LoginForm({
 
   // Form validation schema
   const formSchema = z.object({
-    username: z.string().min(1, {
-      message: t("errors.usernameRequired"),
-    }),
+    username: z
+      .string()
+      .min(1, {
+        message: t("errors.usernameRequired"),
+      })
+      .refine((value) => !/[.$/]/.test(value), {
+        message: t("errors.usernameInvalid"),
+      }),
     password: z.string().min(1, {
       message: t("errors.passwordRequired"),
     }),

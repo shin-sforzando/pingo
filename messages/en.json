@@ -43,7 +43,7 @@
       "usernameRequired": "Username is required",
       "usernameTooShort": "Username must be at least 3 characters",
       "usernameTooLong": "Username must be at most 20 characters",
-      "usernameInvalid": "Username can only contain letters, numbers, underscores, and hyphens",
+      "usernameInvalid": "Username contains invalid characters",
       "passwordRequired": "Password is required",
       "passwordTooShort": "Password must be at least 8 characters",
       "passwordMismatch": "Passwords do not match",

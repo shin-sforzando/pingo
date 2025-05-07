@@ -20,6 +20,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate username - check for invalid characters
+    if (/[.$/]/.test(username)) {
+      return NextResponse.json(
+        { error: "Username contains invalid characters" },
+        { status: 400 },
+      );
+    }
+
     // Find user by username
     const usersRef = adminFirestore.collection("users");
     const query = usersRef.where("username", "==", username);
