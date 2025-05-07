@@ -28,7 +28,7 @@ export default async function RootLayout({
       <body className={"antialiased"}>
         <NextIntlClientProvider locale={locale}>
           <AuthProvider>
-            <div className="fixed inset-0 -z-10">
+            <div className="-z-10 fixed inset-0">
               <AnimatedGridPattern
                 className="[mask-image:radial-gradient(500px_circle_at_center,transparent,white)]"
                 width={64}
@@ -40,7 +40,7 @@ export default async function RootLayout({
               />
             </div>
             <Header />
-            <main className="mx-auto max-w-md px-4 pb-24 relative">
+            <main className="relative mx-auto max-w-md px-4 pb-24">
               {children}
             </main>
             <Footer />
