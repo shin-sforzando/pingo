@@ -38,6 +38,7 @@
     "cancel": "キャンセル",
     "alreadyHaveAccount": "すでにアカウントをお持ちですか？",
     "dontHaveAccount": "アカウントをお持ちでないですか？",
+    "termsOfServiceNotice": "アカウントの登録に際し、<terms>利用規約</terms>をご一読ください。",
     "errors": {
       "usernameRequired": "ユーザーネームを入力してください",
       "usernameTooShort": "ユーザーネームは3文字以上で入力してください",

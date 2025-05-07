@@ -148,6 +148,21 @@ export function RegisterForm({
             <div className="font-medium text-destructive text-sm">{error}</div>
           )}
 
+          <div className="mb-2 text-center text-muted-foreground text-sm">
+            {t.rich("termsOfServiceNotice", {
+              terms: (chunks) => (
+                <a
+                  href="/terms"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-primary hover:underline"
+                >
+                  {chunks}
+                </a>
+              ),
+            })}
+          </div>
+
           <div className="flex flex-col gap-2">
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? t("registering") : t("register")}

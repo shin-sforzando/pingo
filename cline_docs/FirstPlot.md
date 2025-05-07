@@ -425,7 +425,7 @@ Node.js、Next.js、Reactなど主要ライブラリのバージョン情報とC
 
 ##### Footer
 
-Copyright表記に加えて、 `/privacy` `/terms` `contact` へのリンク。
+Copyright表記に加えて、 `/terms` `contact` へのリンク。
 
 ##### Notification Toast
 

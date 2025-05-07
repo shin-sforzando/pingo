@@ -38,6 +38,7 @@
     "cancel": "Cancel",
     "alreadyHaveAccount": "Already have an account?",
     "dontHaveAccount": "Don't have an account?",
+    "termsOfServiceNotice": "Please read our <terms>Terms of Service</terms> before registering.",
     "errors": {
       "usernameRequired": "Username is required",
       "usernameTooShort": "Username must be at least 3 characters",
