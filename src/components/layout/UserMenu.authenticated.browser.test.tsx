@@ -51,6 +51,10 @@ describe("UserMenu with authenticated user", () => {
       const avatar = page.getByTestId("my-avatar");
       await userEvent.click(avatar);
 
+      // Check if username is displayed
+      const username = page.getByText("John Doe", { exact: false });
+      await expect.element(username).toBeVisible();
+
       // Check if profile settings and logout buttons are displayed using expect.element
       const profileButton = page.getByText(jaMessages.Header.profileSettings);
       await expect.element(profileButton).toBeVisible();
@@ -75,6 +79,10 @@ describe("UserMenu with authenticated user", () => {
       // Find and click the avatar button
       const avatar = page.getByTestId("my-avatar");
       await userEvent.click(avatar);
+
+      // Check if username is displayed
+      const username = page.getByText("John Doe", { exact: false });
+      await expect.element(username).toBeVisible();
 
       // Check if profile settings and logout buttons are displayed in English
       const profileButton = page.getByText(enMessages.Header.profileSettings);
