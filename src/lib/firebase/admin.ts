@@ -4,27 +4,12 @@ import { getFirestore } from "firebase-admin/firestore";
 
 // Initialize Firebase Admin
 const apps = getApps();
-console.log(`ℹ️ XXX: [DEBUG] Firebase Admin apps initialized: ${apps.length}`);
-
 if (!apps.length) {
   // In production (Cloud Run), the Firebase credentials are accessed via Secret Manager
   // The secrets are mounted as environment variables by Cloud Run
   // Secret names in Secret Manager: firebase-project-id, firebase-client-email, firebase-private-key
 
   try {
-    console.log(
-      `ℹ️ XXX: [DEBUG] FIREBASE_PROJECT_ID exists: ${!!process.env.FIREBASE_PROJECT_ID}`,
-    );
-    console.log(
-      `ℹ️ XXX: [DEBUG] FIREBASE_CLIENT_EMAIL exists: ${!!process.env.FIREBASE_CLIENT_EMAIL}`,
-    );
-    console.log(
-      `ℹ️ XXX: [DEBUG] FIREBASE_PRIVATE_KEY exists: ${!!process.env.FIREBASE_PRIVATE_KEY}`,
-    );
-    console.log(
-      `ℹ️ XXX: [DEBUG] GOOGLE_APPLICATION_CREDENTIALS exists: ${!!process.env.GOOGLE_APPLICATION_CREDENTIALS}`,
-    );
-
     // Check if we have the necessary environment variables from Secret Manager
     if (
       process.env.FIREBASE_PROJECT_ID &&
@@ -41,14 +26,15 @@ if (!apps.length) {
           privateKey,
         }),
       });
-
-      console.log("Firebase Admin initialized with Secret Manager credentials");
+      console.log(
+        "ℹ️ XXX: ~ Firebase Admin initialized with Secret Manager credentials",
+      );
     }
     // For local development, use the service account file
     else if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
       initializeApp();
       console.log(
-        "Firebase Admin initialized with GOOGLE_APPLICATION_CREDENTIALS",
+        "ℹ️ XXX: ~ Firebase Admin initialized with GOOGLE_APPLICATION_CREDENTIALS",
       );
     } else {
       throw new Error("Firebase credentials not found");

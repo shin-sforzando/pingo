@@ -1,4 +1,5 @@
 import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
+import bcrypt from "bcrypt";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
@@ -32,20 +33,12 @@ export async function POST(request: NextRequest) {
         { status: 400 },
       );
     }
-
-    console.log(`ℹ️ XXX: [DEBUG] Checking handle: ${handle}`);
-
     try {
       // Check if handle already exists
       const usersRef = adminFirestore.collection("users");
       const query = usersRef.where("handle", "==", handle);
       const snapshot = await query.get();
-
-      console.log(`ℹ️ XXX: [DEBUG] Snapshot empty: ${snapshot.empty}`);
-      console.log(`ℹ️ XXX: [DEBUG] Snapshot size: ${snapshot.size}`);
-
       if (!snapshot.empty) {
-        console.log(`ℹ️ XXX: [DEBUG] Handle already exists: ${handle}`);
         return NextResponse.json(
           { error: "Handle is already taken" },
           { status: 400 },
@@ -62,9 +55,6 @@ export async function POST(request: NextRequest) {
         "code" in queryError &&
         queryError.code === 5
       ) {
-        console.log(
-          "ℹ️ XXX: [DEBUG] Collection not found, proceeding with registration",
-        );
         // Continue with registration
       } else {
         // For other errors, return a 500 error
@@ -80,20 +70,19 @@ export async function POST(request: NextRequest) {
     try {
       const now = new Date().toISOString();
       const usersCollection = adminFirestore.collection("users");
-
-      console.log(`ℹ️ XXX: [DEBUG] Creating user document with uid: ${uid}`);
-      console.log(`ℹ️ XXX: [DEBUG] Handle: ${handle}`);
+      // Hash the password with bcrypt
+      const saltRounds = 10;
+      const passwordHash = await bcrypt.hash(password, saltRounds);
 
       await usersCollection.doc(uid).set({
         id: uid,
         handle,
+        passwordHash, // Store the hashed password
         createdAt: now,
         lastLoginAt: now,
         participatingGames: [],
         gameHistory: [],
       });
-
-      console.log("ℹ️ XXX: [DEBUG] User document created successfully");
     } catch (docError) {
       console.error("Error creating user document:", docError);
       throw new Error(

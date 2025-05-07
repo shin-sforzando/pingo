@@ -19,16 +19,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log(`ℹ️ XXX: [DEBUG] Checking handle availability: ${handle}`);
-
     try {
       // Check if handle already exists in Firestore
       const usersRef = adminFirestore.collection("users");
       const query = usersRef.where("handle", "==", handle);
       const snapshot = await query.get();
-
-      console.log(`ℹ️ XXX: [DEBUG] Snapshot empty: ${snapshot.empty}`);
-      console.log(`ℹ️ XXX: [DEBUG] Snapshot size: ${snapshot.size}`);
 
       return NextResponse.json({
         available: snapshot.empty,
@@ -45,7 +40,6 @@ export async function POST(request: NextRequest) {
         queryError.code === 5
       ) {
         // 5 is the code for NOT_FOUND
-        console.log("ℹ️ XXX: [DEBUG] Collection not found, handle is available");
         return NextResponse.json({
           available: true,
         });

@@ -1,4 +1,5 @@
 import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
+import bcrypt from "bcrypt";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
@@ -34,10 +35,25 @@ export async function POST(request: NextRequest) {
     // Get the user document
     const userDoc = snapshot.docs[0];
     const userId = userDoc.id;
+    const userData = userDoc.data();
 
-    // In a real application, you would verify the password hash here
-    // For simplicity, we're just checking if the handle exists
-    // This is not secure for production!
+    // Verify the password
+    if (!userData.passwordHash) {
+      return NextResponse.json(
+        { error: "Authentication failed: Password hash not found" },
+        { status: 401 },
+      );
+    }
+
+    // Compare the provided password with the stored hash
+    const passwordMatch = await bcrypt.compare(password, userData.passwordHash);
+
+    if (!passwordMatch) {
+      return NextResponse.json(
+        { error: "Invalid handle or password" },
+        { status: 401 },
+      );
+    }
 
     // Update last login time
     await userDoc.ref.update({

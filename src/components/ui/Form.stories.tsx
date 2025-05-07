@@ -99,8 +99,7 @@ function BasicFormDemo() {
   });
 
   function onSubmit(values: z.infer<typeof basicFormSchema>) {
-    // eslint-disable-next-line no-console
-    console.log(values);
+    console.log("ℹ️ XXX: ~ onSubmit ~ values:", values);
     alert(JSON.stringify(values, null, 2));
   }
 
@@ -157,8 +156,7 @@ function ValidationFormDemo() {
   });
 
   function onSubmit(values: z.infer<typeof validationFormSchema>) {
-    // eslint-disable-next-line no-console
-    console.log(values);
+    console.log("ℹ️ XXX: ~ onSubmit ~ values:", values);
     alert(JSON.stringify(values, null, 2));
   }
 
@@ -232,8 +230,7 @@ function ComplexFormDemo() {
   });
 
   function onSubmit(values: z.infer<typeof complexFormSchema>) {
-    // eslint-disable-next-line no-console
-    console.log(values);
+    console.log("ℹ️ XXX: ~ onSubmit ~ values:", values);
     alert(JSON.stringify(values, null, 2));
   }
 
