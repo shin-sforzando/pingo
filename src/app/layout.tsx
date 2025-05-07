@@ -28,17 +28,21 @@ export default async function RootLayout({
       <body className={"antialiased"}>
         <NextIntlClientProvider locale={locale}>
           <AuthProvider>
-            <AnimatedGridPattern
-              className="[mask-image:radial-gradient(500px_circle_at_center,transparent,white)]"
-              width={64}
-              height={64}
-              numSquares={10}
-              maxOpacity={0.2}
-              duration={5}
-              repeatDelay={1}
-            />
+            <div className="fixed inset-0 -z-10">
+              <AnimatedGridPattern
+                className="[mask-image:radial-gradient(500px_circle_at_center,transparent,white)]"
+                width={64}
+                height={64}
+                numSquares={10}
+                maxOpacity={0.2}
+                duration={5}
+                repeatDelay={1}
+              />
+            </div>
             <Header />
-            <main className="mx-auto max-w-md px-4 pb-24">{children}</main>
+            <main className="mx-auto max-w-md px-4 pb-24 relative">
+              {children}
+            </main>
             <Footer />
           </AuthProvider>
         </NextIntlClientProvider>

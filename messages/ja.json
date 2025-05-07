@@ -3,7 +3,11 @@
     "title": "Pingo",
     "welcome": "ようこそ",
     "editFile": "src/app/page.tsxを編集して始めましょう。",
-    "saveChanges": "保存して変更をすぐに確認できます。"
+    "saveChanges": "保存して変更をすぐに確認できます。",
+    "joinGame": "ゲームに参加",
+    "createGame": "ゲームを作成",
+    "howToPlay": "遊び方",
+    "howToPlayDescription": "Pingoは、AIが写真に基づいて判定するビンゴゲームです。"
   },
   "Common": {
     "appName": "Pingo",

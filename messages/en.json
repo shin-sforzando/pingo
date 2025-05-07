@@ -3,7 +3,11 @@
     "title": "Pingo",
     "welcome": "Welcome",
     "editFile": "Get started by editing src/app/page.tsx.",
-    "saveChanges": "Save and see your changes instantly."
+    "saveChanges": "Save and see your changes instantly.",
+    "joinGame": "Join Game",
+    "createGame": "Create Game",
+    "howToPlay": "How to Play",
+    "howToPlayDescription": "Pingo is a bingo game where AI judges based on photos."
   },
   "Common": {
     "appName": "Pingo",
