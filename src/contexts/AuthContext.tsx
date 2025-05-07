@@ -9,6 +9,7 @@ import {
   updateUserProfile,
 } from "@/lib/firebase/auth";
 import type { User } from "firebase/auth";
+import { useTranslations } from "next-intl";
 import {
   type ReactNode,
   createContext,
@@ -61,6 +62,7 @@ export const useAuth = () => useContext(AuthContext);
 
 // Auth provider component
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const t = useTranslations("Auth.errors");
   const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -93,7 +95,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const result = await registerUser(username, password);
 
       if (!result.success) {
-        setError(result.error || "Registration failed");
+        // Map error messages to translation keys
+        let errorKey = "registrationFailed";
+        if (result.error === "Username is already taken") {
+          errorKey = "usernameTaken";
+        }
+        setError(t(errorKey));
         setIsLoading(false);
         return false;
       }
@@ -103,7 +110,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return true;
     } catch (error) {
       console.error("Registration error:", error);
-      setError("An unexpected error occurred");
+      setError(t("unexpectedError"));
       setIsLoading(false);
       return false;
     }
@@ -118,7 +125,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const result = await loginUser(username, password);
 
       if (!result.success) {
-        setError(result.error || "Login failed");
+        // Map error messages to translation keys
+        let errorKey = "loginFailed";
+        if (result.error === "Invalid username or password") {
+          errorKey = "invalidCredentials";
+        }
+        setError(t(errorKey));
         setIsLoading(false);
         return false;
       }
@@ -128,7 +140,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return true;
     } catch (error) {
       console.error("Login error:", error);
-      setError("An unexpected error occurred");
+      setError(t("unexpectedError"));
       setIsLoading(false);
       return false;
     }
@@ -143,7 +155,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const result = await logoutUser();
 
       if (!result.success) {
-        setError(result.error || "Logout failed");
+        setError(t("logoutFailed"));
         setIsLoading(false);
         return false;
       }
@@ -154,7 +166,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return true;
     } catch (error) {
       console.error("Logout error:", error);
-      setError("An unexpected error occurred");
+      setError(t("unexpectedError"));
       setIsLoading(false);
       return false;
     }
@@ -177,7 +189,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       );
 
       if (!result.success) {
-        setError(result.error || "Profile update failed");
+        // Map error messages to translation keys
+        let errorKey = "updateFailed";
+        if (result.error === "Not authenticated") {
+          errorKey = "notAuthenticated";
+        }
+        setError(t(errorKey));
         setIsLoading(false);
         return false;
       }
@@ -191,7 +208,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return true;
     } catch (error) {
       console.error("Profile update error:", error);
-      setError("An unexpected error occurred");
+      setError(t("unexpectedError"));
       setIsLoading(false);
       return false;
     }

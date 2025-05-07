@@ -47,7 +47,18 @@
       "passwordRequired": "パスワードを入力してください",
       "passwordTooShort": "パスワードは8文字以上で入力してください",
       "passwordMismatch": "パスワードが一致しません",
-      "invalidCredentials": "ユーザーネームまたはパスワードが正しくありません"
+      "invalidCredentials": "ユーザーネームまたはパスワードが正しくありません",
+      "usernameTaken": "このユーザーネームは既に使用されています",
+      "registrationFailed": "登録に失敗しました",
+      "loginFailed": "ログインに失敗しました",
+      "logoutFailed": "ログアウトに失敗しました",
+      "updateFailed": "プロフィールの更新に失敗しました",
+      "notAuthenticated": "認証されていません",
+      "unexpectedError": "予期しないエラーが発生しました",
+      "missingToken": "認証トークンがありません",
+      "usernamePasswordRequired": "ユーザーネームとパスワードを入力してください",
+      "failedToCheckUsername": "ユーザーネームの確認に失敗しました",
+      "passwordHashNotFound": "認証に失敗しました：パスワードハッシュが見つかりません"
     }
   }
 }

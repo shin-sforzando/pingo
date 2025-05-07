@@ -47,7 +47,18 @@
       "passwordRequired": "Password is required",
       "passwordTooShort": "Password must be at least 8 characters",
       "passwordMismatch": "Passwords do not match",
-      "invalidCredentials": "Invalid username or password"
+      "invalidCredentials": "Invalid username or password",
+      "usernameTaken": "This username is already taken",
+      "registrationFailed": "Registration failed",
+      "loginFailed": "Login failed",
+      "logoutFailed": "Logout failed",
+      "updateFailed": "Profile update failed",
+      "notAuthenticated": "Not authenticated",
+      "unexpectedError": "An unexpected error occurred",
+      "missingToken": "Missing authentication token",
+      "usernamePasswordRequired": "Username and password are required",
+      "failedToCheckUsername": "Failed to check username availability",
+      "passwordHashNotFound": "Authentication failed: Password hash not found"
     }
   }
 }

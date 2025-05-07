@@ -142,7 +142,10 @@ export function LoginForm({
           <button
             type="button"
             className="text-primary hover:underline"
-            onClick={onRegisterClick}
+            onClick={() => {
+              clearError(); // Clear any error messages before switching to register form
+              onRegisterClick();
+            }}
           >
             {t("register")}
           </button>
