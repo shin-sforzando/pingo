@@ -1,5 +1,6 @@
 import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
 import { timestampHelpers } from "@/models/Timestamp";
+import { userSchema } from "@/models/User";
 import bcrypt from "bcrypt";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
@@ -22,7 +23,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate username - check for invalid characters
-    if (/[.$/]/.test(username)) {
+    const usernameResult = userSchema.shape.username.safeParse(username);
+    if (!usernameResult.success) {
       return NextResponse.json(
         { error: "Username contains invalid characters" },
         { status: 400 },

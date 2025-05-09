@@ -15,6 +15,10 @@ vi.mock("@/lib/firebase/admin", () => ({
   adminFirestore: {
     collection: vi.fn(),
   },
+  adminAuth: {
+    createCustomToken: vi.fn().mockResolvedValue("custom-token"),
+    verifyIdToken: vi.fn().mockResolvedValue({ uid: "test-user-id" }),
+  },
 }));
 
 // Mock bcrypt
