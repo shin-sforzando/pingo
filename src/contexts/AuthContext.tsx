@@ -8,6 +8,7 @@ import {
   registerUser,
   updateUserProfile,
 } from "@/lib/firebase/auth";
+import type { User as UserModel } from "@/models/User";
 import type { User } from "firebase/auth";
 import { useTranslations } from "next-intl";
 import {
@@ -20,12 +21,11 @@ import {
 } from "react";
 
 // Define the shape of the user profile data
-interface UserProfile {
-  id: string;
-  username: string;
+// This is a simplified version of the User model for client-side use
+type UserProfile = Pick<UserModel, "id" | "username"> & {
   createdAt: string;
   lastLoginAt: string;
-}
+};
 
 // Define the shape of the auth context
 interface AuthContextType {

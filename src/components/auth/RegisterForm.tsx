@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
+import { userSchema } from "@/models/User";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
@@ -32,20 +33,10 @@ export function RegisterForm({
   const { register, error, clearError } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Form validation schema
+  // Form validation schema - use username validation from User model
   const formSchema = z
     .object({
-      username: z
-        .string()
-        .min(3, {
-          message: t("errors.usernameTooShort"),
-        })
-        .max(20, {
-          message: t("errors.usernameTooLong"),
-        })
-        .refine((value) => !/[.$/]/.test(value), {
-          message: t("errors.usernameInvalid"),
-        }),
+      username: userSchema.shape.username,
       password: z.string().min(8, {
         message: t("errors.passwordTooShort"),
       }),

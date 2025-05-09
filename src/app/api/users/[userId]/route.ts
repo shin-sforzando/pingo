@@ -1,4 +1,6 @@
 import { adminFirestore } from "@/lib/firebase/admin";
+import { timestampHelpers } from "@/models/Timestamp";
+import { userConverter } from "@/models/User";
 import { type NextRequest, NextResponse } from "next/server";
 
 type Params = Promise<{ userId: string }>;
@@ -19,22 +21,36 @@ export async function GET(
       );
     }
 
-    // Get user profile from Firestore
-    const userDoc = await adminFirestore.collection("users").doc(userId).get();
+    // Get user profile from Firestore using the converter
+    const userRef = adminFirestore
+      .collection("users")
+      .doc(userId)
+      .withConverter(userConverter);
+
+    const userDoc = await userRef.get();
 
     if (!userDoc.exists) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const userData = userDoc.data();
+    const userData = userDoc.data() as ReturnType<
+      typeof userConverter.fromFirestore
+    >;
+
+    // Format timestamps for the response
+    const formattedUser = {
+      id: userData.id,
+      username: userData.username,
+      createdAt: userData.createdAt
+        ? timestampHelpers.format(userData.createdAt)
+        : "",
+      lastLoginAt: userData.lastLoginAt
+        ? timestampHelpers.format(userData.lastLoginAt)
+        : "",
+    };
 
     // Return user profile data
-    return NextResponse.json({
-      id: userId,
-      username: userData?.username || "",
-      createdAt: userData?.createdAt || "",
-      lastLoginAt: userData?.lastLoginAt || "",
-    });
+    return NextResponse.json(formattedUser);
   } catch (error) {
     console.error("Error fetching user profile:", error);
     return NextResponse.json(

@@ -51,7 +51,7 @@ export function UserMenu() {
                 alt="User"
               />
               <AvatarFallback>
-                {userProfile?.username?.[0] || user?.email?.[0] || "U"}
+                {userProfile?.username?.[0] || "Unknown"}
               </AvatarFallback>
             </>
           ) : (

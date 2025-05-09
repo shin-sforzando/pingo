@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
+import { userSchema } from "@/models/User";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
@@ -32,16 +33,11 @@ export function LoginForm({
   const { login, error, clearError } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Form validation schema
+  // Form validation schema - use username validation from User model
   const formSchema = z.object({
-    username: z
-      .string()
-      .min(1, {
-        message: t("errors.usernameRequired"),
-      })
-      .refine((value) => !/[.$/]/.test(value), {
-        message: t("errors.usernameInvalid"),
-      }),
+    username: userSchema.shape.username.optional().refine((value) => !!value, {
+      message: t("errors.usernameRequired"),
+    }),
     password: z.string().min(1, {
       message: t("errors.passwordRequired"),
     }),
@@ -62,6 +58,12 @@ export function LoginForm({
     setIsSubmitting(true);
 
     try {
+      // Username is guaranteed to be defined due to the refine validation
+      // but we'll add a check to satisfy TypeScript
+      if (!values.username) {
+        return; // This should never happen due to form validation
+      }
+
       const success = await login(values.username, values.password);
       if (success && onSuccess) {
         onSuccess();

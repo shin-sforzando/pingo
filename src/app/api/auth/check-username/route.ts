@@ -1,6 +1,8 @@
 import { adminFirestore } from "@/lib/firebase/admin";
+import { userSchema } from "@/models/User";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { z } from "zod";
 
 /**
  * Check if a username is available
@@ -19,12 +21,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate username - check for invalid characters
-    if (/[.$/]/.test(username)) {
-      return NextResponse.json(
-        { error: "Username contains invalid characters", available: false },
-        { status: 400 },
-      );
+    // Validate username using the User schema
+    try {
+      // Extract just the username validation from the User schema
+      const usernameSchema = userSchema.shape.username;
+      usernameSchema.parse(username);
+    } catch (validationError) {
+      if (validationError instanceof z.ZodError) {
+        return NextResponse.json(
+          {
+            error: validationError.errors[0].message,
+            available: false,
+          },
+          { status: 400 },
+        );
+      }
     }
 
     try {

@@ -1,6 +1,9 @@
 import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
+import { timestampHelpers } from "@/models/Timestamp";
+import { userSchema } from "@/models/User";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { z } from "zod";
 
 /**
  * Update user information
@@ -26,13 +29,27 @@ export async function PUT(request: NextRequest) {
     // Get updated user data from request body
     const { username } = await request.json();
 
-    // If username is provided, check if it's already taken by another user
+    // If username is provided, validate and check if it's already taken
     if (username) {
+      // Validate username using the User schema
+      try {
+        // Extract just the username validation from the User schema
+        const usernameSchema = userSchema.shape.username;
+        usernameSchema.parse(username);
+      } catch (validationError) {
+        if (validationError instanceof z.ZodError) {
+          return NextResponse.json(
+            { error: validationError.errors[0].message },
+            { status: 400 },
+          );
+        }
+      }
+
       const usersRef = adminFirestore.collection("users");
       const query = usersRef.where("username", "==", username);
       const snapshot = await query.get();
 
-      // If handle exists and belongs to another user, return error
+      // If username exists and belongs to another user, return error
       if (!snapshot.empty && snapshot.docs[0].id !== uid) {
         return NextResponse.json(
           { error: "Username is already taken" },
@@ -40,10 +57,10 @@ export async function PUT(request: NextRequest) {
         );
       }
 
-      // Update user document in Firestore
+      // Update user document in Firestore with timestamp
       await usersRef.doc(uid).update({
         username,
-        updatedAt: new Date().toISOString(),
+        updatedAt: timestampHelpers.now(),
       });
     }
 
