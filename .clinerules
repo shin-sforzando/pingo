@@ -17,6 +17,7 @@
   - noUnusedImports: Disallow unused imports.
   - noUnusedVariables: Disallow unused variables.
   - useImportType: Promotes the use of import type for types.
+  - useTemplate: Prefer template literals over string concatenation.
 - Utilize type definitions aggressively and be as rigorous as possible.
 - All source code should be robust with automated tests.
   - Use `npm run test:once` instead of `npm test` in Watch mode to run tests.
