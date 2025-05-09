@@ -3,7 +3,11 @@
     "title": "Pingo",
     "welcome": "ようこそ",
     "editFile": "src/app/page.tsxを編集して始めましょう。",
-    "saveChanges": "保存して変更をすぐに確認できます。"
+    "saveChanges": "保存して変更をすぐに確認できます。",
+    "joinGame": "ゲームに参加",
+    "createGame": "ゲームを作成",
+    "howToPlay": "遊び方",
+    "howToPlayDescription": "Pingoは、AIが写真に基づいて判定するビンゴゲームです。"
   },
   "Common": {
     "appName": "Pingo",
@@ -16,10 +20,49 @@
     "notifications": "通知",
     "notificationsDescription": "最新の通知を表示します",
     "profileSettings": "プロフィール",
-    "logout": "ログアウト"
+    "logout": "ログアウト",
+    "loggedInAs": "ログイン中："
   },
   "Footer": {
     "copyright": "© {year} Pingo",
     "termsOfService": "サービス利用規約"
+  },
+  "Auth": {
+    "register": "新規登録",
+    "registering": "登録中...",
+    "login": "ログイン",
+    "loggingIn": "ログイン中...",
+    "logout": "ログアウト",
+    "username": "ユーザーネーム",
+    "usernamePlaceholder": "ユーザーネームを入力",
+    "password": "パスワード",
+    "passwordPlaceholder": "パスワードを入力",
+    "confirmPassword": "パスワード（確認）",
+    "confirmPasswordPlaceholder": "パスワードを再入力",
+    "cancel": "キャンセル",
+    "alreadyHaveAccount": "すでにアカウントをお持ちですか？",
+    "dontHaveAccount": "アカウントをお持ちでないですか？",
+    "termsOfServiceNotice": "アカウントの登録に際し、<terms>利用規約</terms>をご一読ください。",
+    "errors": {
+      "usernameRequired": "ユーザーネームを入力してください",
+      "usernameTooShort": "ユーザーネームは3文字以上で入力してください",
+      "usernameTooLong": "ユーザーネームは20文字以下で入力してください",
+      "usernameInvalid": "ユーザーネームに使用できない文字が含まれています",
+      "passwordRequired": "パスワードを入力してください",
+      "passwordTooShort": "パスワードは8文字以上で入力してください",
+      "passwordMismatch": "パスワードが一致しません",
+      "invalidCredentials": "ユーザーネームまたはパスワードが正しくありません",
+      "usernameTaken": "このユーザーネームは既に使用されています",
+      "registrationFailed": "登録に失敗しました",
+      "loginFailed": "ログインに失敗しました",
+      "logoutFailed": "ログアウトに失敗しました",
+      "updateFailed": "プロフィールの更新に失敗しました",
+      "notAuthenticated": "認証されていません",
+      "unexpectedError": "予期しないエラーが発生しました",
+      "missingToken": "認証トークンがありません",
+      "usernamePasswordRequired": "ユーザーネームとパスワードを入力してください",
+      "failedToCheckUsername": "ユーザーネームの確認に失敗しました",
+      "passwordHashNotFound": "認証に失敗しました：パスワードハッシュが見つかりません"
+    }
   }
 }

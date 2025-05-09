@@ -10,11 +10,13 @@
     "messages",
     "src/i18n"
   ],
+  "i18n-ally.displayLanguage": "ja",
   "i18n-ally.keystyle": "nested",
   "cSpell.words": [
     "autodocs",
     "biomejs",
     "clinerules",
+    "dont",
     "Firestore",
     "gitsecret",
     "lefthook",
@@ -22,6 +24,7 @@
     "oklch",
     "participations",
     "pingo",
+    "secretmanager",
     "shadcn",
     "turbopack",
     "vaul",
