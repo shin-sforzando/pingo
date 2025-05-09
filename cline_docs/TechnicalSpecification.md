@@ -78,6 +78,8 @@ flowchart TD
     - lastLoginAt: timestamp
     - participatingGames: array<string> (参加中のゲームID、最大5つ)
     - gameHistory: array<string> (過去に参加したゲームID)
+    - memo: string (備考、管理用なのでユーザには表示されない)
+    - isTestUser: boolean
     
     /notifications/
       /{notificationId}/
