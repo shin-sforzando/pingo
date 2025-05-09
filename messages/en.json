@@ -3,7 +3,11 @@
     "title": "Pingo",
     "welcome": "Welcome",
     "editFile": "Get started by editing src/app/page.tsx.",
-    "saveChanges": "Save and see your changes instantly."
+    "saveChanges": "Save and see your changes instantly.",
+    "joinGame": "Join Game",
+    "createGame": "Create Game",
+    "howToPlay": "How to Play",
+    "howToPlayDescription": "Pingo is a bingo game where AI judges based on photos."
   },
   "Common": {
     "appName": "Pingo",
@@ -16,10 +20,49 @@
     "notifications": "Notifications",
     "notificationsDescription": "Show your latest notifications",
     "profileSettings": "Profile",
-    "logout": "Logout"
+    "logout": "Logout",
+    "loggedInAs": "Logged in as:"
   },
   "Footer": {
     "copyright": "© {year} Pingo",
     "termsOfService": "Terms of Service"
+  },
+  "Auth": {
+    "register": "Register",
+    "registering": "Registering...",
+    "login": "Login",
+    "loggingIn": "Logging in...",
+    "logout": "Logout",
+    "username": "Username",
+    "usernamePlaceholder": "Enter your username",
+    "password": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "confirmPassword": "Confirm Password",
+    "confirmPasswordPlaceholder": "Confirm your password",
+    "cancel": "Cancel",
+    "alreadyHaveAccount": "Already have an account?",
+    "dontHaveAccount": "Don't have an account?",
+    "termsOfServiceNotice": "Please read our <terms>Terms of Service</terms> before registering.",
+    "errors": {
+      "usernameRequired": "Username is required",
+      "usernameTooShort": "Username must be at least 3 characters",
+      "usernameTooLong": "Username must be at most 20 characters",
+      "usernameInvalid": "Username contains invalid characters",
+      "passwordRequired": "Password is required",
+      "passwordTooShort": "Password must be at least 8 characters",
+      "passwordMismatch": "Passwords do not match",
+      "invalidCredentials": "Invalid username or password",
+      "usernameTaken": "This username is already taken",
+      "registrationFailed": "Registration failed",
+      "loginFailed": "Login failed",
+      "logoutFailed": "Logout failed",
+      "updateFailed": "Profile update failed",
+      "notAuthenticated": "Not authenticated",
+      "unexpectedError": "An unexpected error occurred",
+      "missingToken": "Missing authentication token",
+      "usernamePasswordRequired": "Username and password are required",
+      "failedToCheckUsername": "Failed to check username availability",
+      "passwordHashNotFound": "Authentication failed: Password hash not found"
+    }
   }
 }

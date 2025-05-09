@@ -1,0 +1,151 @@
+# Query: handle
+# Flags: RegExp
+
+114 results - 19 files
+
+cline_docs\FirstPlot.md:
+  692:     - handle: string (ユニークなハンドルネーム)
+
+cline_docs\Progress.md:
+   42:    - UserMenuにhandleを表示
+  113: 2. **ユーザー表示の不備**: UserMenuにhandleが表示されていません。
+
+cline_docs\TechnicalSpecification.md:
+  75:     - handle: string (ユニークなハンドルネーム、表示名として)
+
+messages\en.json:
+  32:     "handle": "Username",
+  33:     "handlePlaceholder": "Enter your username",
+  42:       "handleRequired": "Username is required",
+  43:       "handleTooShort": "Username must be at least 3 characters",
+  44:       "handleTooLong": "Username must be at most 20 characters",
+  45:       "handleInvalid": "Username can only contain letters, numbers, underscores, and hyphens",
+
+messages\ja.json:
+  32:     "handle": "ユーザーネーム",
+  33:     "handlePlaceholder": "ユーザーネームを入力",
+  42:       "handleRequired": "ユーザーネームを入力してください",
+  43:       "handleTooShort": "ユーザーネームは3文字以上で入力してください",
+  44:       "handleTooLong": "ユーザーネームは20文字以下で入力してください",
+  45:       "handleInvalid": "ユーザーネームに使用できない文字が含まれています",
+
+src\app\api\auth\check-handle\route.ts:
+   6:  * Check if a handle is available
+   7:  * @route POST /api/auth/check-handle
+  13:     const { handle } = await request.json();
+  15:     if (!handle) {
+  17:         { error: "Handle is required" },
+  23:       // Check if handle already exists in Firestore
+  25:       const query = usersRef.where("handle", "==", handle);
+  35:       // In this case, the handle is available
+  51:     console.error("Error checking handle availability:", error);
+  53:       { error: "Failed to check handle availability" },
+
+src\app\api\auth\login\route.ts:
+  14:     const { handle, password } = await request.json();
+  16:     if (!handle || !password) {
+  18:         { error: "Handle and password are required" },
+  23:     // Find user by handle
+  25:     const query = usersRef.where("handle", "==", handle);
+  30:         { error: "Invalid handle or password" },
+  53:         { error: "Invalid handle or password" },
+
+src\app\api\auth\logout\route.ts:
+  10:     // Firebase Auth handles the actual logout on the client side
+
+src\app\api\auth\register\route.ts:
+  27:     // Get handle and password from request body
+  28:     const { handle, password } = await request.json();
+  30:     if (!handle || !password) {
+  32:         { error: "Handle and password are required" },
+  37:       // Check if handle already exists
+  39:       const query = usersRef.where("handle", "==", handle);
+  43:           { error: "Handle is already taken" },
+  51:       // In this case, we can proceed with registration as the handle is available
+  61:         console.error("Unexpected error checking handle:", queryError);
+  63:           { error: "Failed to check handle availability" },
+  79:         handle,
+
+src\app\api\auth\update\route.ts:
+  27:     const { handle } = await request.json();
+  29:     // If handle is provided, check if it's already taken by another user
+  30:     if (handle) {
+  32:       const query = usersRef.where("handle", "==", handle);
+  35:       // If handle exists and belongs to another user, return error
+  38:           { error: "Handle is already taken" },
+  45:         handle,
+
+src\components\auth\LoginForm.tsx:
+  37:     handle: z.string().min(1, {
+  38:       message: t("errors.handleRequired"),
+  49:       handle: "",
+  54:   // Form submission handler
+  60:       const success = await login(values.handle, values.password);
+  75:           onSubmit={form.handleSubmit(onSubmit)}
+  81:             name="handle"
+  84:                 <FormLabel>{t("handle")}</FormLabel>
+  87:                     placeholder={t("handlePlaceholder")}
+
+src\components\auth\RegisterForm.tsx:
+  38:       handle: z
+  41:           message: t("errors.handleTooShort"),
+  44:           message: t("errors.handleTooLong"),
+  60:       handle: "",
+  66:   // Form submission handler
+  72:       const success = await register(values.handle, values.password);
+  87:           onSubmit={form.handleSubmit(onSubmit)}
+  93:             name="handle"
+  96:                 <FormLabel>{t("handle")}</FormLabel>
+  99:                     placeholder={t("handlePlaceholder")}
+
+src\components\layout\UserMenu.authenticated.browser.test.tsx:
+  14:     userProfile: { handle: "John Doe" },
+
+src\components\layout\UserMenu.tsx:
+   25:   // Handle logout
+   26:   const handleLogout = async () => {
+   37:   const handleAuthSuccess = () => {
+   51:               <AvatarFallback>{userProfile?.handle?.[0] || "U"}</AvatarFallback>
+   70:                 {userProfile?.handle || "User"}
+   73:                 {t("loggedInAs")} {userProfile?.handle}
+   88:                 onClick={handleLogout}
+  100:                 onSuccess={handleAuthSuccess}
+  105:                 onSuccess={handleAuthSuccess}
+
+src\components\ui\Form.stories.tsx:
+  110:         onSubmit={form.handleSubmit(onSubmit)}
+  168:         onSubmit={form.handleSubmit(onSubmit)}
+  243:         onSubmit={form.handleSubmit(onSubmit)}
+
+src\contexts\AuthContext.tsx:
+   24:   handle: string;
+   35:   register: (handle: string, password: string) => Promise<boolean>;
+   36:   login: (handle: string, password: string) => Promise<boolean>;
+   39:     handle: string,
+   88:   const register = async (handle: string, password: string) => {
+   93:       const result = await registerUser(handle, password);
+  113:   const login = async (handle: string, password: string) => {
+  118:       const result = await loginUser(handle, password);
+  165:     handle: string,
+  174:         handle,
+
+src\lib\firebase\admin.ts:
+  43:     // In production, we might want to handle this more gracefully
+
+src\lib\firebase\auth.ts:
+   11:  * Register a new user with handle and password
+   15:   handle: string,
+   23:     // First check if the handle is available via API
+   24:     const checkResponse = await fetch("/api/auth/check-handle", {
+   29:       body: JSON.stringify({ handle }),
+   36:         error: "Handle is already taken",
+   44:     // Register user with handle and password via API
+   52:         handle,
+   82:  * Login with handle and password
+   85:   handle: string,
+  100:         handle,
+  183:   handle: string,
+  208:         handle,
+
+src\stories\example\Button.tsx:
+  12:   /** Optional click handler */
