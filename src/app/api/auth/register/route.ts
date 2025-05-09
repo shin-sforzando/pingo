@@ -37,7 +37,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate username - check for invalid characters
-    if (/[.$/]/.test(username)) {
+    const usernameResult = userSchema.shape.username.safeParse(username);
+    if (!usernameResult.success) {
       return NextResponse.json(
         { error: "Username contains invalid characters" },
         { status: 400 },

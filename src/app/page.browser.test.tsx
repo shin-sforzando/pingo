@@ -1,3 +1,4 @@
+import { useAuth } from "@/contexts/AuthContext";
 import { page, userEvent } from "@vitest/browser/context";
 import { NextIntlClientProvider } from "next-intl";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -49,9 +50,6 @@ vi.mock("@/contexts/AuthContext", () => ({
     Provider: ({ children }: { children: React.ReactNode }) => children,
   },
 }));
-
-// Import the mocked useAuth after mocking
-const { useAuth } = await import("@/contexts/AuthContext");
 
 describe("Home Page", () => {
   describe("Unauthenticated state", () => {

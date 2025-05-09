@@ -117,7 +117,12 @@ export async function loginUser(
     // Sign in with the custom token
     await signInWithCustomToken(auth, customToken);
 
-    const currentUser = auth.currentUser;
+    const currentUser = await new Promise<User | null>((resolve) => {
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
+        unsubscribe();
+        resolve(user);
+      });
+    });
 
     return {
       success: true,
