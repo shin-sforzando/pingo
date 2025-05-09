@@ -66,7 +66,113 @@ flowchart TD
 
 ## データモデル
 
+### モデル共通ユーティリティ
+
+#### Timestamp ユーティリティ
+
+Firebase の Timestamp 型を扱うための共通ユーティリティを実装しています。
+
+```typescript
+// src/models/Timestamp.ts
+import { z } from "zod";
+import { Timestamp } from "firebase/firestore";
+
+// Zod schema for Firebase Timestamp
+export const timestampSchema = z
+  .instanceof(Timestamp)
+  .or(z.date())
+  .or(z.string())
+  .refine((value): value is Timestamp => {
+    if (value instanceof Timestamp) return true;
+    return false;
+  }, "Expected a Firebase Timestamp");
+
+// Helper functions for working with timestamps
+export const timestampHelpers = {
+  // Convert various types to Timestamp
+  fromValue: (value: Date | string | Timestamp): Timestamp => {
+    if (value instanceof Timestamp) return value;
+    if (value instanceof Date) return Timestamp.fromDate(value);
+    return Timestamp.fromDate(new Date(value));
+  },
+
+  // Get current timestamp
+  now: (): Timestamp => {
+    return Timestamp.now();
+  },
+
+  // Format timestamp to string
+  format: (timestamp: Timestamp): string => {
+    return timestamp.toDate().toISOString();
+  },
+};
+```
+
 ### ユーザー(users)
+
+ユーザーモデルは Zod スキーマを使用して型安全に定義されています。
+
+```typescript
+// src/models/User.ts
+import { z } from "zod";
+import { Timestamp } from "firebase/firestore";
+import { timestampSchema } from "./Timestamp";
+
+// Zod schema for User
+export const userSchema = z.object({
+  id: z.string(),
+  username: z
+    .string()
+    .min(3, { message: "Username must be at least 3 characters" })
+    .max(20, { message: "Username must be at most 20 characters" })
+    .refine((value) => !/[.$/]/.test(value), {
+      message: "Username contains invalid characters",
+    }),
+  passwordHash: z.string(),
+  createdAt: timestampSchema,
+  lastLoginAt: timestampSchema,
+  participatingGames: z.array(z.string()),
+  gameHistory: z.array(z.string()),
+  memo: z.string(),
+  isTestUser: z.boolean().default(false),
+});
+
+// Type for User based on the schema
+export type User = z.infer<typeof userSchema>;
+
+// Firestore converter for User
+export const userConverter = {
+  toFirestore: (user: User) => {
+    return {
+      id: user.id,
+      username: user.username,
+      passwordHash: user.passwordHash,
+      createdAt: user.createdAt,
+      lastLoginAt: user.lastLoginAt,
+      participatingGames: user.participatingGames,
+      gameHistory: user.gameHistory,
+      memo: user.memo,
+      isTestUser: user.isTestUser,
+    };
+  },
+  fromFirestore: (snapshot, options) => {
+    const data = snapshot.data(options);
+    return {
+      id: data.id,
+      username: data.username,
+      passwordHash: data.passwordHash,
+      createdAt: data.createdAt,
+      lastLoginAt: data.lastLoginAt,
+      participatingGames: data.participatingGames || [],
+      gameHistory: data.gameHistory || [],
+      memo: data.memo || "",
+      isTestUser: data.isTestUser || false,
+    } as User;
+  },
+};
+```
+
+Firestoreのドキュメント構造：
 
 ```yaml
 /users/

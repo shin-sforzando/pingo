@@ -59,6 +59,16 @@ Pingoプロジェクトは現在、計画段階にあります。要件定義と
   - テストとStorybookの作成
     - 認証状態と未認証状態の両方をテストするブラウザテスト
     - 両方の状態を確認できるStorybookストーリー
+- UserモデルとTimestampユーティリティの実装
+  - Zodスキーマを使用した型安全なユーザーモデルの定義
+  - Firebase Timestamp型を扱うための共通ユーティリティの実装
+  - Firestore ドキュメント ⇔ アプリケーションモデル間の変換（コンバーターパターン）
+  - 既存の API エンドポイントを更新してUserモデルを使用
+    - `/api/auth/register`
+    - `/api/auth/check-username`
+    - `/api/auth/update`
+    - `/api/users/[userId]`
+  - 認証フォームコンポーネントを更新してUserモデルのバリデーションスキーマを使用
 
 ## 次のステップ
 
