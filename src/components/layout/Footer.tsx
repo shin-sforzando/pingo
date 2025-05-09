@@ -6,17 +6,17 @@ export function Footer() {
   const t = useTranslations("Footer");
 
   return (
-    <footer className="fixed bottom-0 w-full bg-background/70 backdrop-invert py-4">
-      <div className="mx-auto max-w-md px-4 flex flex-col items-center gap-2">
+    <footer className="fixed bottom-0 w-full bg-background/70 py-4 backdrop-invert">
+      <div className="mx-auto flex max-w-md flex-col items-center gap-2 px-4">
         <Link
           href="/terms"
-          className="text-sm text-foreground hover:text-primary transition-colors"
+          className="text-foreground text-sm transition-colors hover:text-primary"
         >
           {t("termsOfService")}
         </Link>
 
         <div className="flex items-center gap-2">
-          <p className="text-sm text-foreground">
+          <p className="text-foreground text-sm">
             {t("copyright", { year: 2025 })}
           </p>
           <p className="text-xs">produced by</p>

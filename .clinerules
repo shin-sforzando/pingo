@@ -11,9 +11,16 @@
   - In other words, comments that explain **why** are good comments, and comments that explain what, how, or when should not exist.
 - Use standard libraries whenever possible, and reduce the number of external libraries that depend on them.
 - The world of software development is very fast evolving, so always be suspicious of the possibility that your knowledge is out of date, and read the latest documentation before starting. Use `browser_action` if necessary.
-- Never ignore Linter warnings.
+- Never ignore Linter warnings, pay particular attention to the following rules.
+  - noExplicitAny
+  - noUnusedImports
+  - noUnusedVariables
+  - useImportType
 - Utilize type definitions aggressively and be as rigorous as possible.
-- All source code should be robust with automated tests and all components should be individually viewable in the Storybook.
+- All source code should be robust with automated tests.
+  - Use `npm run test:once` instead of `npm test` in Watch mode to run tests.
+  - Do not start the next task until the test passes.
+- All components should be individually viewable in the Storybook.
 - To avoid rework, implementations should be tested and verified frequently and persistently.
   - Wait for user confirmation of completion before updating memory banks or starting the next task.
 - If a similar problem cannot be corrected after three attempts, consider the possibility that the approach itself is incorrect.

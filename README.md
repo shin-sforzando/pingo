@@ -58,6 +58,10 @@ git secret reveal
 npm install
 ```
 
+> [!NOTE]
+> If git-secret is not available, decrypt secrets one by one using GPG as in
+> `gpg --output something --decrypt something.secret`
+
 ### Development
 
 ```shell
