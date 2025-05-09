@@ -32,10 +32,22 @@ if (!apps.length) {
     }
     // For local development, use the service account file
     else if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-      initializeApp();
-      console.log(
-        "ℹ️ XXX: ~ Firebase Admin initialized with GOOGLE_APPLICATION_CREDENTIALS",
-      );
+      try {
+        console.log(
+          "ℹ️ XXX: ~ Attempting to initialize Firebase Admin with GOOGLE_APPLICATION_CREDENTIALS",
+          process.env.GOOGLE_APPLICATION_CREDENTIALS,
+        );
+        initializeApp();
+        console.log(
+          "ℹ️ XXX: ~ Firebase Admin initialized with GOOGLE_APPLICATION_CREDENTIALS",
+        );
+      } catch (initError) {
+        console.error(
+          "Firebase Admin initialization error with GOOGLE_APPLICATION_CREDENTIALS:",
+          initError,
+        );
+        throw initError;
+      }
     } else {
       throw new Error("Firebase credentials not found");
     }
