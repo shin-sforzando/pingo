@@ -1,4 +1,5 @@
 import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
+import { timestampHelpers } from "@/models/Timestamp";
 import bcrypt from "bcrypt";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
@@ -65,7 +66,7 @@ export async function POST(request: NextRequest) {
 
     // Update last login time
     await userDoc.ref.update({
-      lastLoginAt: new Date().toISOString(),
+      lastLoginAt: timestampHelpers.now(),
     });
 
     // Create a custom token for the user

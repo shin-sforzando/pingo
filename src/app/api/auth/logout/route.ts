@@ -1,11 +1,12 @@
-import { NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 /**
  * Logout a user
  * @route POST /api/auth/logout
  * @returns NextResponse with success status
  */
-export async function POST() {
+export async function POST(request: NextRequest) {
+  console.log("ℹ️ XXX: ~ route.ts ~ POST ~ request:", request);
   try {
     // Firebase Auth handles the actual logout on the client side
     // This endpoint is mainly for any server-side cleanup that might be needed

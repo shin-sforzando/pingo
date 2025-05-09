@@ -5,6 +5,7 @@ import { RegisterForm } from "@/components/auth/RegisterForm";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { useState } from "react";
 
 export default function Home() {
@@ -28,12 +29,16 @@ export default function Home() {
         // Display game options for authenticated users
         <div className="space-y-4 text-center">
           <div className="flex justify-center gap-4">
-            <Button size="lg" className="min-w-[150px]">
-              {t("joinGame")}
-            </Button>
-            <Button size="lg" className="min-w-[150px]">
-              {t("createGame")}
-            </Button>
+            <Link href="/join-game">
+              <Button size="lg" className="min-w-[150px]">
+                {t("joinGame")}
+              </Button>
+            </Link>
+            <Link href="/create-game">
+              <Button size="lg" className="min-w-[150px]">
+                {t("createGame")}
+              </Button>
+            </Link>
           </div>
         </div>
       )}
