@@ -71,7 +71,7 @@ flowchart TD
 /users/
   /{userId}/
     - id: string (UUIDv4)
-    - username: string (ユニークなユーザーネーム、表示名として)
+    - username: string (ユニークなユーザーネーム、表示名として使用、日本語も可)
     - passwordHash: string (パスワードハッシュ)
     - createdAt: timestamp
     - lastLoginAt: timestamp
@@ -82,7 +82,7 @@ flowchart TD
     
     /notifications/
       /{notificationId}/
-        - id: string
+        - id: string (UUIDv7)
         - type: string (通知タイプ)
         - displayType: string ("toast" または "popup")
         - message: string (表示メッセージ)
@@ -111,7 +111,7 @@ flowchart TD
 ```yaml
 /games/
   /{gameId}/
-    - id: string (6文字のアルファベット大文字)
+    - id: string (6文字のアルファベット大文字+数字、ただし本番環境では数字は含まない)
     - title: string (タイトル)
     - theme: string (場所やテーマ)
     - creatorId: string (作成者のユーザーID)
@@ -122,7 +122,7 @@ flowchart TD
     - requiredBingoLines: number (何列揃えたらゴールとするか、1-5)
     - confidenceThreshold: number (AIの判定確信度の閾値、デフォルト0.5)
     - notes: string (備考)
-    - status: string ("active", "ended")
+    - status: string ("active", "ended", "archived")
     
     /board/
       - cells: array<{
@@ -156,7 +156,7 @@ flowchart TD
     
     /submissions/
       /{submissionId}/
-        - id: string
+        - id: string (UUIDv7)
         - userId: string (提出したユーザーID)
         - imageUrl: string (Cloud Storageへのパス)
         - submittedAt: timestamp (アップロード完了時刻)
@@ -170,7 +170,7 @@ flowchart TD
     
     /events/
       /{eventId}/
-        - id: string
+        - id: string (UUIDv7)
         - type: string (例: "join", "submit", "complete_line", "complete_game")
         - userId: string (イベント発生ユーザー)
         - timestamp: timestamp
