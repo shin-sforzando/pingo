@@ -33,7 +33,7 @@ export const userSchema = baseSchema.extend({
   participatingGames: z.array(z.string()).max(5),
   gameHistory: z.array(z.string()),
   memo: z.string().optional(),
-  isTestUser: z.boolean().default(false),
+  isTestUser: z.boolean(),
 });
 
 /**
@@ -52,7 +52,7 @@ export const userCreationSchema = z.object({
     .regex(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]+$/, {
       message: "Auth.errors.passwordInvalid",
     }),
-  isTestUser: z.boolean().default(false),
+  isTestUser: z.boolean(),
 });
 
 /**
