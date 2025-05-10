@@ -12,7 +12,17 @@ import { z } from "zod";
  */
 export async function POST(request: NextRequest) {
   try {
-    const { username } = await request.json();
+    let username: string | undefined;
+    try {
+      const body = (await request.json()) as { username?: string };
+      username = body.username;
+    } catch (parseError) {
+      console.error("Error parsing request body:", parseError);
+      return NextResponse.json(
+        { error: "Invalid request body" },
+        { status: 400 },
+      );
+    }
 
     if (!username) {
       return NextResponse.json(

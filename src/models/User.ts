@@ -1,6 +1,11 @@
 import { z } from "zod";
 import { timestampSchema } from "./Timestamp";
 
+import enMessages from "../../messages/en.json";
+
+// Extract auth-related error messages from translation files
+const enAuth = enMessages.Auth.errors;
+
 /**
  * User schema definition using Zod
  */
@@ -8,10 +13,12 @@ export const userSchema = z.object({
   id: z.string(),
   username: z
     .string()
-    .min(3)
-    .max(20)
+    .min(3, {
+      message: `${enAuth.usernameTooShort}`,
+    })
+    .max(20, { message: `${enAuth.usernameTooLong}` })
     .refine((val) => !/[.$/]/.test(val), {
-      message: "Username contains invalid characters",
+      message: `${enAuth.usernameInvalid}`,
     }),
   passwordHash: z.string(),
   createdAt: timestampSchema,

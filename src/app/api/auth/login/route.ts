@@ -13,7 +13,22 @@ import { NextResponse } from "next/server";
  */
 export async function POST(request: NextRequest) {
   try {
-    const { username, password } = await request.json();
+    let username: string | undefined;
+    let password: string | undefined;
+    try {
+      const body = (await request.json()) as {
+        username?: string;
+        password?: string;
+      };
+      username = body.username;
+      password = body.password;
+    } catch (parseError) {
+      console.error("Error parsing request body:", parseError);
+      return NextResponse.json(
+        { error: "Invalid request body" },
+        { status: 400 },
+      );
+    }
 
     if (!username || !password) {
       return NextResponse.json(

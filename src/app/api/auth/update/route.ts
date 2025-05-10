@@ -27,7 +27,17 @@ export async function PUT(request: NextRequest) {
     const uid = decodedToken.uid;
 
     // Get updated user data from request body
-    const { username } = await request.json();
+    let username: string | undefined;
+    try {
+      const body = (await request.json()) as { username?: string };
+      username = body.username;
+    } catch (parseError) {
+      console.error("Error parsing request body:", parseError);
+      return NextResponse.json(
+        { error: "Invalid request body" },
+        { status: 400 },
+      );
+    }
 
     // If username is provided, validate and check if it's already taken
     if (username) {
