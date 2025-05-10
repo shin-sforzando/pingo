@@ -35,8 +35,10 @@
     "logout": "Logout",
     "username": "Username",
     "usernamePlaceholder": "Enter your username",
+    "usernameDescription": "Must be 3-20 characters",
     "password": "Password",
     "passwordPlaceholder": "Enter your password",
+    "passwordDescription": "Must be at least 8 characters with letters and numbers",
     "confirmPassword": "Confirm Password",
     "confirmPasswordPlaceholder": "Confirm your password",
     "cancel": "Cancel",
@@ -50,6 +52,7 @@
       "usernameInvalid": "Username contains invalid characters",
       "passwordRequired": "Password is required",
       "passwordTooShort": "Password must be at least 8 characters",
+      "passwordInvalid": "Password must contain letters and numbers",
       "passwordMismatch": "Passwords do not match",
       "invalidCredentials": "Invalid username or password",
       "usernameTaken": "This username is already taken",
@@ -62,7 +65,15 @@
       "missingToken": "Missing authentication token",
       "usernamePasswordRequired": "Username and password are required",
       "failedToCheckUsername": "Failed to check username availability",
-      "passwordHashNotFound": "Authentication failed: Password hash not found"
+      "passwordHashNotFound": "Authentication failed: Password hash not found",
+      "invalidInput": "Invalid input data",
+      "serverError": "Server error occurred",
+      "usernameExists": "This username already exists",
+      "userIdRequired": "User ID is required",
+      "userNotFound": "User not found",
+      "currentPasswordInvalid": "Current password is invalid",
+      "currentPasswordRequired": "Current password is required",
+      "unauthorized": "Unauthorized access"
     }
   }
 }
