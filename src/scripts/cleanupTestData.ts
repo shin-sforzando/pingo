@@ -10,6 +10,16 @@ const prefix = args.includes("--prefix")
 
 // Initialize Firebase Admin (if not already initialized)
 if (getApps().length === 0) {
+  if (!process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+    console.error("GOOGLE_APPLICATION_CREDENTIALS environment variable is not set");
+    process.exit(1);
+  }
+
+  if (!process.env.GOOGLE_CLOUD_PROJECT_ID) {
+    console.error("GOOGLE_CLOUD_PROJECT_ID environment variable is not set");
+    process.exit(1);
+  }
+
   initializeApp({
     credential: cert(process.env.GOOGLE_APPLICATION_CREDENTIALS as string),
     projectId: process.env.GOOGLE_CLOUD_PROJECT_ID,
