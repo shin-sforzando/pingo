@@ -65,6 +65,37 @@ flowchart TD
 
 ## データモデル
 
+### データモデルの実装
+
+データモデルは以下のアプローチで実装されています：
+
+1. **型定義とバリデーション**
+   - Zodスキーマを使用した型定義とバリデーション
+   - React Hook Formとの連携を考慮した設計
+   - 多言語対応のエラーメッセージキー
+
+2. **Firestoreとの連携**
+   - Firestoreドキュメントインターフェースの定義
+   - クライアント/サーバー間のタイムスタンプ変換
+   - 型安全な変換関数の実装
+
+3. **タイムスタンプの扱い**
+   - `firebase/firestore`と`firebase-admin/firestore`の両方に対応
+   - 共通インターフェース`TimestampInterface`の定義
+   - 型ガード関数による安全な型変換
+
+4. **ディレクトリ構造**
+
+```plain
+src/types/
+├── common.ts       # 共通の型定義（列挙型など）
+├── firestore.ts    # Firestore関連の型定義とユーティリティ
+├── game.ts         # ゲーム関連の型定義と変換関数
+├── index.ts        # 型定義のエクスポート
+├── schema.ts       # Zodスキーマと派生型
+└── user.ts         # ユーザー関連の型定義と変換関数
+```
+
 ### ユーザー(users)
 
 ```yaml
