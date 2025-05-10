@@ -1,7 +1,7 @@
-import type { Timestamp as AdminTimestamp } from "firebase-admin/firestore";
 /**
  * Common type definitions for Firestore
  */
+import { Timestamp as AdminTimestamp } from "firebase-admin/firestore";
 import { Timestamp as ClientTimestamp } from "firebase/firestore";
 
 /**
@@ -70,6 +70,32 @@ export function dateToClientTimestamp(
   date: Date | null | undefined,
 ): ClientTimestamp | null {
   return date ? ClientTimestamp.fromDate(date) : null;
+}
+
+/**
+ * Convert a Date to an admin Timestamp
+ * Note: This should only be used in server-side code
+ */
+export function dateToAdminTimestamp(
+  date: Date | null | undefined,
+): AdminTimestamp | null {
+  return date ? AdminTimestamp.fromDate(date) : null;
+}
+
+/**
+ * Convert a Date to a Timestamp based on the environment
+ * This function should be used in code that can run in both client and server environments
+ */
+export function dateToTimestamp(
+  date: Date | null | undefined,
+): TimestampInterface | null {
+  // Check if we're in a server environment
+  if (typeof window === "undefined") {
+    // Server-side: use Admin SDK
+    return dateToAdminTimestamp(date);
+  }
+  // Client-side: use Client SDK
+  return dateToClientTimestamp(date);
 }
 
 /**

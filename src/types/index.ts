@@ -17,8 +17,8 @@ export {
   Role,
 } from "./common";
 
-// Common types - interfaces (need to use 'export type' with isolatedModules)
-export type { ApiResponse, CellPosition } from "./common";
+// Common interfaces
+export type { ApiResponse, CellPosition, CompletedLine } from "./common";
 
 // Schema definitions - Zod schemas and inferred types
 export * from "./schema";

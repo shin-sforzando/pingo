@@ -17,6 +17,7 @@ export enum Role {
 export enum GameStatus {
   ACTIVE = "active",
   ENDED = "ended",
+  ARCHIVED = "archived",
 }
 
 /**

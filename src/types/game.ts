@@ -1,7 +1,6 @@
 /**
  * Game related type definitions and conversion functions
  */
-import { Timestamp } from "firebase/firestore";
 import type {
   AcceptanceStatus,
   GameStatus,
@@ -10,7 +9,7 @@ import type {
   Role,
 } from "./common";
 import type { TimestampInterface } from "./firestore";
-import { timestampToDate } from "./firestore";
+import { dateToTimestamp, timestampToDate } from "./firestore";
 import type {
   Cell,
   CellState,
@@ -166,9 +165,11 @@ export function gameToFirestore(game: Game): GameDocument {
     title: game.title,
     theme: game.theme,
     creatorId: game.creatorId,
-    createdAt: Timestamp.fromDate(game.createdAt),
-    updatedAt: game.updatedAt ? Timestamp.fromDate(game.updatedAt) : null,
-    expiresAt: Timestamp.fromDate(game.expiresAt),
+    createdAt: dateToTimestamp(game.createdAt) as TimestampInterface,
+    updatedAt: game.updatedAt
+      ? (dateToTimestamp(game.updatedAt) as TimestampInterface)
+      : null,
+    expiresAt: dateToTimestamp(game.expiresAt) as TimestampInterface,
     isPublic: game.isPublic,
     isPhotoSharingEnabled: game.isPhotoSharingEnabled,
     requiredBingoLines: game.requiredBingoLines,
@@ -277,7 +278,9 @@ export function cellStateFromFirestore(doc: CellStateDocument): CellState {
 export function cellStateToFirestore(state: CellState): CellStateDocument {
   return {
     isOpen: state.isOpen,
-    openedAt: state.openedAt ? Timestamp.fromDate(state.openedAt) : null,
+    openedAt: state.openedAt
+      ? (dateToTimestamp(state.openedAt) as TimestampInterface)
+      : null,
     openedBySubmissionId: state.openedBySubmissionId,
   };
 }
@@ -304,7 +307,7 @@ export function completedLineToFirestore(
   return {
     type: line.type,
     index: line.index,
-    completedAt: Timestamp.fromDate(line.completedAt),
+    completedAt: dateToTimestamp(line.completedAt) as TimestampInterface,
   };
 }
 
@@ -337,14 +340,14 @@ export function gameParticipationToFirestore(
     userId: participation.userId,
     gameId: participation.gameId,
     role: participation.role,
-    joinedAt: Timestamp.fromDate(participation.joinedAt),
-    createdAt: Timestamp.fromDate(participation.createdAt),
+    joinedAt: dateToTimestamp(participation.joinedAt) as TimestampInterface,
+    createdAt: dateToTimestamp(participation.createdAt) as TimestampInterface,
     updatedAt: participation.updatedAt
-      ? Timestamp.fromDate(participation.updatedAt)
+      ? (dateToTimestamp(participation.updatedAt) as TimestampInterface)
       : null,
     completedLines: participation.completedLines,
     lastCompletedAt: participation.lastCompletedAt
-      ? Timestamp.fromDate(participation.lastCompletedAt)
+      ? (dateToTimestamp(participation.lastCompletedAt) as TimestampInterface)
       : null,
     submissionCount: participation.submissionCount,
   };
@@ -381,9 +384,9 @@ export function submissionToFirestore(
     id: submission.id,
     userId: submission.userId,
     imageUrl: submission.imageUrl,
-    submittedAt: Timestamp.fromDate(submission.submittedAt),
+    submittedAt: dateToTimestamp(submission.submittedAt) as TimestampInterface,
     analyzedAt: submission.analyzedAt
-      ? Timestamp.fromDate(submission.analyzedAt)
+      ? (dateToTimestamp(submission.analyzedAt) as TimestampInterface)
       : null,
     aiResponse: submission.aiResponse,
     matchedCellId: submission.matchedCellId,
@@ -391,9 +394,9 @@ export function submissionToFirestore(
     processingStatus: submission.processingStatus,
     acceptanceStatus: submission.acceptanceStatus,
     errorMessage: submission.errorMessage,
-    createdAt: Timestamp.fromDate(submission.createdAt),
+    createdAt: dateToTimestamp(submission.createdAt) as TimestampInterface,
     updatedAt: submission.updatedAt
-      ? Timestamp.fromDate(submission.updatedAt)
+      ? (dateToTimestamp(submission.updatedAt) as TimestampInterface)
       : null,
   };
 }
@@ -421,9 +424,11 @@ export function eventToFirestore(event: Event): EventDocument {
     id: event.id,
     type: event.type,
     userId: event.userId,
-    timestamp: Timestamp.fromDate(event.timestamp),
+    timestamp: dateToTimestamp(event.timestamp) as TimestampInterface,
     details: event.details,
-    createdAt: Timestamp.fromDate(event.createdAt),
-    updatedAt: event.updatedAt ? Timestamp.fromDate(event.updatedAt) : null,
+    createdAt: dateToTimestamp(event.createdAt) as TimestampInterface,
+    updatedAt: event.updatedAt
+      ? (dateToTimestamp(event.updatedAt) as TimestampInterface)
+      : null,
   };
 }

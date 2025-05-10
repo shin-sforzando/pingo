@@ -49,7 +49,7 @@ export const userCreationSchema = z.object({
     .string()
     .min(1, { message: "Auth.errors.passwordRequired" })
     .min(8, { message: "Auth.errors.passwordTooShort" })
-    .regex(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]/, {
+    .regex(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]+$/, {
       message: "Auth.errors.passwordInvalid",
     }),
   isTestUser: z.boolean().default(false),

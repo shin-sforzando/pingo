@@ -1,10 +1,9 @@
 /**
  * User related type definitions and conversion functions
  */
-import { Timestamp } from "firebase/firestore";
 import type { NotificationDisplayType, NotificationType } from "./common";
 import type { TimestampInterface } from "./firestore";
-import { timestampToDate } from "./firestore";
+import { dateToTimestamp, timestampToDate } from "./firestore";
 import type { Notification, User } from "./schema";
 
 /**
@@ -28,8 +27,8 @@ export interface UserDocument {
  */
 export interface NotificationDocument {
   id: string; // UUIDv7
-  type: string;
-  displayType: string;
+  type: NotificationType;
+  displayType: NotificationDisplayType;
   message: string;
   createdAt: TimestampInterface;
   updatedAt?: TimestampInterface | null;
@@ -63,9 +62,13 @@ export function userToFirestore(user: User, passwordHash = ""): UserDocument {
     id: user.id,
     username: user.username,
     passwordHash: passwordHash, // Only used when creating a new user
-    createdAt: Timestamp.fromDate(user.createdAt),
-    updatedAt: user.updatedAt ? Timestamp.fromDate(user.updatedAt) : null,
-    lastLoginAt: user.lastLoginAt ? Timestamp.fromDate(user.lastLoginAt) : null,
+    createdAt: dateToTimestamp(user.createdAt) as TimestampInterface,
+    updatedAt: user.updatedAt
+      ? (dateToTimestamp(user.updatedAt) as TimestampInterface)
+      : null,
+    lastLoginAt: user.lastLoginAt
+      ? (dateToTimestamp(user.lastLoginAt) as TimestampInterface)
+      : null,
     participatingGames: user.participatingGames,
     gameHistory: user.gameHistory,
     memo: user.memo,
@@ -104,9 +107,9 @@ export function notificationToFirestore(
     type: notification.type,
     displayType: notification.displayType,
     message: notification.message,
-    createdAt: Timestamp.fromDate(notification.createdAt),
+    createdAt: dateToTimestamp(notification.createdAt) as TimestampInterface,
     updatedAt: notification.updatedAt
-      ? Timestamp.fromDate(notification.updatedAt)
+      ? (dateToTimestamp(notification.updatedAt) as TimestampInterface)
       : null,
     read: notification.read,
   };
