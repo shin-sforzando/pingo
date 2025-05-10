@@ -142,7 +142,7 @@ src/types/
 ```yaml
 /games/
   /{gameId}/
-    - id: string (6文字のアルファベット大文字+数字、ただし本番環境では数字は含まない)
+    - id: string (6文字のアルファベット大文字、またはアルファベット大文字+数字。ただし本番環境では数字を含まない形式が使用される。例: "ABCDEF")
     - title: string (タイトル)
     - theme: string (場所やテーマ)
     - creatorId: string (作成者のユーザーID)
