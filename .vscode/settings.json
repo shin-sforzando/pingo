@@ -19,6 +19,7 @@
     "dont",
     "Firestore",
     "gitsecret",
+    "jsdom",
     "lefthook",
     "magicui",
     "oklch",
@@ -26,7 +27,9 @@
     "pingo",
     "secretmanager",
     "shadcn",
+    "subcollections",
     "turbopack",
+    "uuidv",
     "vaul",
     "VIEWPORTS",
     "WCAG"

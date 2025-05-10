@@ -9,6 +9,7 @@
     "humao.rest-client",
     "jsayol.firebase-explorer",
     "lokalise.i18n-ally",
+    "ms-playwright.playwright",
     "shd101wyy.markdown-preview-enhanced",
     "streetsidesoftware.code-spell-checker",
     "vitest.explorer",

@@ -62,117 +62,10 @@ flowchart TD
 - **データベース**: ユーザー情報、ゲーム情報、ビンゴボード状態の保存
 - **ストレージ**: 画像ファイルの保存
 - **AI**: 画像判定、被写体候補生成、公序良俗チェック
-- **認証**: ユーザー認証と権限管理
 
 ## データモデル
 
-### モデル共通ユーティリティ
-
-#### Timestamp ユーティリティ
-
-Firebase の Timestamp 型を扱うための共通ユーティリティを実装しています。
-
-```typescript
-// src/models/Timestamp.ts
-import { z } from "zod";
-import { Timestamp } from "firebase/firestore";
-
-// Zod schema for Firebase Timestamp
-export const timestampSchema = z
-  .instanceof(Timestamp)
-  .or(z.date())
-  .or(z.string())
-  .refine((value): value is Timestamp => {
-    if (value instanceof Timestamp) return true;
-    return false;
-  }, "Expected a Firebase Timestamp");
-
-// Helper functions for working with timestamps
-export const timestampHelpers = {
-  // Convert various types to Timestamp
-  fromValue: (value: Date | string | Timestamp): Timestamp => {
-    if (value instanceof Timestamp) return value;
-    if (value instanceof Date) return Timestamp.fromDate(value);
-    return Timestamp.fromDate(new Date(value));
-  },
-
-  // Get current timestamp
-  now: (): Timestamp => {
-    return Timestamp.now();
-  },
-
-  // Format timestamp to string
-  format: (timestamp: Timestamp): string => {
-    return timestamp.toDate().toISOString();
-  },
-};
-```
-
 ### ユーザー(users)
-
-ユーザーモデルは Zod スキーマを使用して型安全に定義されています。
-
-```typescript
-// src/models/User.ts
-import { z } from "zod";
-import { Timestamp } from "firebase/firestore";
-import { timestampSchema } from "./Timestamp";
-
-// Zod schema for User
-export const userSchema = z.object({
-  id: z.string(),
-  username: z
-    .string()
-    .min(3, { message: "Username must be at least 3 characters" })
-    .max(20, { message: "Username must be at most 20 characters" })
-    .refine((value) => !/[.$/]/.test(value), {
-      message: "Username contains invalid characters",
-    }),
-  passwordHash: z.string(),
-  createdAt: timestampSchema,
-  lastLoginAt: timestampSchema,
-  participatingGames: z.array(z.string()),
-  gameHistory: z.array(z.string()),
-  memo: z.string(),
-  isTestUser: z.boolean().default(false),
-});
-
-// Type for User based on the schema
-export type User = z.infer<typeof userSchema>;
-
-// Firestore converter for User
-export const userConverter = {
-  toFirestore: (user: User) => {
-    return {
-      id: user.id,
-      username: user.username,
-      passwordHash: user.passwordHash,
-      createdAt: user.createdAt,
-      lastLoginAt: user.lastLoginAt,
-      participatingGames: user.participatingGames,
-      gameHistory: user.gameHistory,
-      memo: user.memo,
-      isTestUser: user.isTestUser,
-    };
-  },
-  fromFirestore: (snapshot, options) => {
-    const data = snapshot.data(options);
-    return {
-      id: data.id,
-      username: data.username,
-      passwordHash: data.passwordHash,
-      createdAt: data.createdAt,
-      lastLoginAt: data.lastLoginAt,
-      participatingGames: data.participatingGames || [],
-      gameHistory: data.gameHistory || [],
-      memo: data.memo || "",
-      isTestUser: data.isTestUser || false,
-    } as User;
-  },
-};
-```
-
-Firestoreのドキュメント構造：
 
 ```yaml
 /users/
@@ -407,21 +300,20 @@ Google Cloud Storageの階層機能を活用し、ゲームIDごとにフォル�
 主要な画面は以下の通り：
 
 1. トップページ (`/`)
-2. ユーザー登録画面 (`/register`)
-3. ユーザー情報画面 (`/[userId]`)
-4. ユーザー編集画面 (`/[userId]/edit`)
-5. ゲーム作成画面 (`/new`)
-6. ゲーム参加画面 (`/join`)
-7. ゲーム画面 (`/game/[gameId]`)
-8. ゲーム共有画面 (`/game/[gameId]/share`)
-9. ゲーム結果画面 (`/game/[gameId]/result`)
-10. ゲーム管理画面 (`/game/[gameId]/admin`)
-11. プライバシーポリシー (`/privacy`)
-12. 利用規約 (`/terms`)
-13. お問い合わせ (`/contact`)
-14. エラー画面 (`/error`)
-15. システム管理画面 (`/config`)
-16. ヘルスチェック画面 (`/health`)
+2. ユーザー情報画面 (`/[userId]`)
+3. ユーザー編集画面 (`/[userId]/edit`)
+4. ゲーム作成画面 (`/new`)
+5. ゲーム参加画面 (`/join`)
+6. ゲーム画面 (`/game/[gameId]`)
+7. ゲーム共有画面 (`/game/[gameId]/share`)
+8. ゲーム結果画面 (`/game/[gameId]/result`)
+9. ゲーム管理画面 (`/game/[gameId]/admin`)
+10. プライバシーポリシー (`/privacy`)
+11. 利用規約 (`/terms`)
+12. お問い合わせ (`/contact`)
+13. エラー画面 (`/error`)
+14. システム管理画面 (`/config`)
+15. ヘルスチェック画面 (`/health`)
 
 ### コンポーネント設計
 

@@ -12,10 +12,12 @@
 - Use standard libraries whenever possible, and reduce the number of external libraries that depend on them.
 - The world of software development is very fast evolving, so always be suspicious of the possibility that your knowledge is out of date, and read the latest documentation before starting. Use `browser_action` if necessary.
 - Never ignore Linter warnings, pay particular attention to the following rules.
-  - noExplicitAny
-  - noUnusedImports
-  - noUnusedVariables
-  - useImportType
+  - noExplicitAny: Disallow the any type usage.
+  - noForEach: Prefer for...of statement instead of Array.forEach.
+  - noUnusedImports: Disallow unused imports.
+  - noUnusedVariables: Disallow unused variables.
+  - useImportType: Promotes the use of import type for types.
+  - useTemplate: Prefer template literals over string concatenation.
 - Utilize type definitions aggressively and be as rigorous as possible.
 - All source code should be robust with automated tests.
   - Use `npm run test:once` instead of `npm test` in Watch mode to run tests.
