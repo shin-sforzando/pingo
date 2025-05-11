@@ -5,32 +5,26 @@ steps:
     args:
       - '-c'
       - |
-        # Create a temporary file with the secrets
-        echo "FIREBASE_PROJECT_ID=$$FIREBASE_PROJECT_ID" > /tmp/secrets
-        echo "FIREBASE_CLIENT_EMAIL=$$FIREBASE_CLIENT_EMAIL" >> /tmp/secrets
-        echo "FIREBASE_PRIVATE_KEY='$$FIREBASE_PRIVATE_KEY'" >> /tmp/secrets
-        # Print first few characters of the private key for debugging (without revealing the whole key)
-        echo "Private key starts with: $(echo $$FIREBASE_PRIVATE_KEY | cut -c 1-20)..."
+        echo "FIREBASE_PROJECT_ID=$$FIREBASE_PROJECT_ID"
+        echo "FIREBASE_CLIENT_EMAIL=$$FIREBASE_CLIENT_EMAIL"
+        echo "FIREBASE_PRIVATE_KEY='$$FIREBASE_PRIVATE_KEY'"
     secretEnv: ['FIREBASE_PROJECT_ID', 'FIREBASE_CLIENT_EMAIL', 'FIREBASE_PRIVATE_KEY']
     id: PrepareSecrets
 
   # Build the Docker image using the secrets file
   - name: gcr.io/cloud-builders/docker
+    entrypoint: 'bash'
     args:
-      - build
-      - '--no-cache'
-      - '-t'
-      - >-
-        $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
-      - .
-      - '-f'
-      - Dockerfile
-      - '--build-arg'
-      - 'FIREBASE_PROJECT_ID=$$FIREBASE_PROJECT_ID'
-      - '--build-arg'
-      - 'FIREBASE_CLIENT_EMAIL=$$FIREBASE_CLIENT_EMAIL'
-      - '--build-arg'
-      - 'FIREBASE_PRIVATE_KEY="$$FIREBASE_PRIVATE_KEY"'
+      - '-c'
+      - |
+        docker build \
+          --no-cache \
+          -t $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA \
+          . \
+          -f Dockerfile \
+          --build-arg FIREBASE_PROJECT_ID="$$FIREBASE_PROJECT_ID" \
+          --build-arg FIREBASE_CLIENT_EMAIL="$$FIREBASE_CLIENT_EMAIL" \
+          --build-arg FIREBASE_PRIVATE_KEY="$$FIREBASE_PRIVATE_KEY"
     secretEnv: ['FIREBASE_PROJECT_ID', 'FIREBASE_CLIENT_EMAIL', 'FIREBASE_PRIVATE_KEY']
     id: Build
   - name: gcr.io/cloud-builders/docker
