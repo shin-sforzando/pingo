@@ -58,7 +58,8 @@ export function userFromFirestore(doc: UserDocument): User {
  * Convert a user model to a Firestore document
  */
 export function userToFirestore(user: User, passwordHash = ""): UserDocument {
-  return {
+  // Create base document without optional fields
+  const doc: Omit<UserDocument, "memo"> = {
     id: user.id,
     username: user.username,
     passwordHash: passwordHash, // Only used when creating a new user
@@ -71,9 +72,14 @@ export function userToFirestore(user: User, passwordHash = ""): UserDocument {
       : null,
     participatingGames: user.participatingGames,
     gameHistory: user.gameHistory,
-    memo: user.memo,
     isTestUser: user.isTestUser,
   };
+
+  // Add optional memo field if it exists (not undefined)
+  return {
+    ...doc,
+    ...(user.memo !== undefined && { memo: user.memo }),
+  } as UserDocument;
 }
 
 /**

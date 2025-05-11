@@ -46,7 +46,7 @@ interface RegisterFormProps {
 
 export function RegisterForm({ onSuccess, onError }: RegisterFormProps) {
   const t = useTranslations();
-  const { register, loading } = useAuth();
+  const { register: registerUser, loading } = useAuth();
   const [error, setError] = useState<string | null>(null);
 
   // Initialize form with schema validation
@@ -62,22 +62,22 @@ export function RegisterForm({ onSuccess, onError }: RegisterFormProps) {
   });
 
   // Handle form submission
-  function onSubmit(values: ExtendedUserCreationData) {
+  async function onSubmit(values: ExtendedUserCreationData) {
     // Extract only the fields needed for registration
     const { username, password, isTestUser } = values;
     setError(null);
-    register(username, password, isTestUser)
-      .then(() => {
-        onSuccess?.();
-      })
-      .catch((err) => {
-        const errorMessage =
-          err instanceof Error
-            ? err.message
-            : String(err) || t("Auth.errors.registrationFailed");
-        setError(errorMessage);
-        onError?.(err instanceof Error ? err : new Error(errorMessage));
-      });
+
+    try {
+      await registerUser(username, password, isTestUser);
+      onSuccess?.();
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : String(err) || t("Auth.errors.registrationFailed");
+      setError(errorMessage);
+      onError?.(err instanceof Error ? err : new Error(errorMessage));
+    }
   }
 
   return (

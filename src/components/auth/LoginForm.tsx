@@ -40,20 +40,20 @@ export function LoginForm({ onSuccess, onError }: LoginFormProps) {
   });
 
   // Handle form submission
-  function onSubmit(values: UserLoginData) {
+  async function onSubmit(values: UserLoginData) {
     setError(null);
-    login(values.username, values.password)
-      .then(() => {
-        onSuccess?.();
-      })
-      .catch((err) => {
-        const errorMessage =
-          err instanceof Error
-            ? err.message
-            : String(err) || t("Auth.errors.loginFailed");
-        setError(errorMessage);
-        onError?.(err instanceof Error ? err : new Error(errorMessage));
-      });
+
+    try {
+      await login(values.username, values.password);
+      onSuccess?.();
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : String(err) || t("Auth.errors.loginFailed");
+      setError(errorMessage);
+      onError?.(err instanceof Error ? err : new Error(errorMessage));
+    }
   }
 
   return (

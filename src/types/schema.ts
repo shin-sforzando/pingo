@@ -33,7 +33,7 @@ export const userSchema = baseSchema.extend({
   participatingGames: z.array(z.string()).max(5),
   gameHistory: z.array(z.string()),
   memo: z.string().optional(),
-  isTestUser: z.boolean(),
+  isTestUser: z.boolean().default(false),
 });
 
 /**

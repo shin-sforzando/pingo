@@ -1,3 +1,5 @@
+"use client";
+
 import { signInWithCustomToken } from "firebase/auth";
 import {
   createContext,
