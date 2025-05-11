@@ -16,8 +16,35 @@ if (!apps.length) {
       process.env.FIREBASE_CLIENT_EMAIL &&
       process.env.FIREBASE_PRIVATE_KEY
     ) {
-      // Private key comes as a string with escaped newlines
-      const privateKey = process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n");
+      // Private key handling - try different formats
+      let privateKey = process.env.FIREBASE_PRIVATE_KEY;
+
+      // Log the first few characters of the private key for debugging
+      console.log(
+        `Private key starts with: ${privateKey?.substring(0, 20)}...`,
+      );
+
+      // Try to handle different possible formats of the private key
+      if (privateKey) {
+        // 1. If it contains literal \n strings, replace them with actual newlines
+        if (privateKey.includes("\\n")) {
+          privateKey = privateKey.replace(/\\n/g, "\n");
+          console.log("Replaced escaped newlines in private key");
+        }
+
+        // 2. If it's wrapped in quotes (from Secret Manager or Docker ENV), remove them
+        if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
+          privateKey = privateKey.slice(1, -1);
+          console.log("Removed surrounding quotes from private key");
+        }
+
+        // 3. Check if it has the expected PEM format
+        if (!privateKey.includes("-----BEGIN PRIVATE KEY-----")) {
+          console.error(
+            "Private key does not have the expected PEM format beginning",
+          );
+        }
+      }
 
       initializeApp({
         credential: cert({

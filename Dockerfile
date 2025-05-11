@@ -9,9 +9,9 @@ ARG FIREBASE_PRIVATE_KEY
 # Set environment variables for Firebase credentials
 ENV FIREBASE_PROJECT_ID=$FIREBASE_PROJECT_ID
 ENV FIREBASE_CLIENT_EMAIL=$FIREBASE_CLIENT_EMAIL
-# Ensure private key is properly formatted with literal \n characters
-# This is needed because the key in Secret Manager has escaped newlines (\n)
-ENV FIREBASE_PRIVATE_KEY="$FIREBASE_PRIVATE_KEY"
+# Pass the private key as-is, without adding quotes
+# The admin.ts file will handle different formats
+ENV FIREBASE_PRIVATE_KEY=$FIREBASE_PRIVATE_KEY
 
 # Set the working directory in the container
 WORKDIR /app
@@ -53,9 +53,9 @@ ENV PORT=8080
 # Set Firebase credentials for production stage
 ENV FIREBASE_PROJECT_ID=$FIREBASE_PROJECT_ID
 ENV FIREBASE_CLIENT_EMAIL=$FIREBASE_CLIENT_EMAIL
-# Ensure private key is properly formatted with literal \n characters
-# This is needed because the key in Secret Manager has escaped newlines (\n)
-ENV FIREBASE_PRIVATE_KEY="$FIREBASE_PRIVATE_KEY"
+# Pass the private key as-is, without adding quotes
+# The admin.ts file will handle different formats
+ENV FIREBASE_PRIVATE_KEY=$FIREBASE_PRIVATE_KEY
 
 COPY --from=base /app/next.config.ts ./
 COPY --from=base /app/messages ./messages
