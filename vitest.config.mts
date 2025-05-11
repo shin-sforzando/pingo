@@ -4,9 +4,9 @@ import { coverageConfigDefaults, defineConfig } from "vitest/config";
 
 export default defineConfig({
   plugins: [tsconfigPaths(), react()],
-  define: {
-    "process.env": JSON.stringify({}),
-  },
+  // define: {
+  //   "process.env": process.env,
+  // },
   test: {
     pool: "forks",
     workspace: [
@@ -17,6 +17,8 @@ export default defineConfig({
           environment: "jsdom",
           include: ["src/**/*.{test,spec}.{js,ts,jsx,tsx}"],
           exclude: ["src/**/*.browser.{test,spec}.{js,ts,jsx,tsx}"],
+          setupFiles: ["./vitest.setup.ts"], // Add setup file
+          testTimeout: 10000, // Increase timeout for Firebase operations
         },
       },
       {
