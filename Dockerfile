@@ -1,5 +1,5 @@
 # Use an official Node.js runtime as a parent image (Node LTS recommended)
-FROM node:22-slim AS base
+FROM node:24-slim AS base
 
 # Define build arguments for Firebase credentials
 ARG FIREBASE_PROJECT_ID
@@ -9,7 +9,9 @@ ARG FIREBASE_PRIVATE_KEY
 # Set environment variables for Firebase credentials
 ENV FIREBASE_PROJECT_ID=$FIREBASE_PROJECT_ID
 ENV FIREBASE_CLIENT_EMAIL=$FIREBASE_CLIENT_EMAIL
-ENV FIREBASE_PRIVATE_KEY=$FIREBASE_PRIVATE_KEY
+# Ensure private key is properly formatted with literal \n characters
+# This is needed because the key in Secret Manager has escaped newlines (\n)
+ENV FIREBASE_PRIVATE_KEY="$FIREBASE_PRIVATE_KEY"
 
 # Set the working directory in the container
 WORKDIR /app
@@ -35,7 +37,7 @@ RUN npm run build
 
 
 # --- Production Stage ---
-FROM node:22-slim AS production
+FROM node:24-slim AS production
 
 # Define build arguments for Firebase credentials in production stage
 ARG FIREBASE_PROJECT_ID
@@ -51,7 +53,9 @@ ENV PORT=8080
 # Set Firebase credentials for production stage
 ENV FIREBASE_PROJECT_ID=$FIREBASE_PROJECT_ID
 ENV FIREBASE_CLIENT_EMAIL=$FIREBASE_CLIENT_EMAIL
-ENV FIREBASE_PRIVATE_KEY=$FIREBASE_PRIVATE_KEY
+# Ensure private key is properly formatted with literal \n characters
+# This is needed because the key in Secret Manager has escaped newlines (\n)
+ENV FIREBASE_PRIVATE_KEY="$FIREBASE_PRIVATE_KEY"
 
 COPY --from=base /app/next.config.ts ./
 COPY --from=base /app/messages ./messages
