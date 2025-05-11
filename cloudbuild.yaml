@@ -30,7 +30,7 @@ steps:
       - '--build-arg'
       - 'FIREBASE_CLIENT_EMAIL=$$FIREBASE_CLIENT_EMAIL'
       - '--build-arg'
-      - 'FIREBASE_PRIVATE_KEY=$$FIREBASE_PRIVATE_KEY'
+      - 'FIREBASE_PRIVATE_KEY="$$FIREBASE_PRIVATE_KEY"'
     secretEnv: ['FIREBASE_PROJECT_ID', 'FIREBASE_CLIENT_EMAIL', 'FIREBASE_PRIVATE_KEY']
     id: Build
   - name: gcr.io/cloud-builders/docker

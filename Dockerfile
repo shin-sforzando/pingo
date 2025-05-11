@@ -11,9 +11,10 @@ ENV FIREBASE_PROJECT_ID=$FIREBASE_PROJECT_ID
 ENV FIREBASE_CLIENT_EMAIL=$FIREBASE_CLIENT_EMAIL
 # Set the private key with proper escaping
 # The value comes from Secret Manager via Cloud Build
-ENV FIREBASE_PRIVATE_KEY=$FIREBASE_PRIVATE_KEY
-# Print the first few characters of the private key for debugging
-RUN echo "Docker build - Private key starts with: ${FIREBASE_PRIVATE_KEY:0:20}..."
+# Use double quotes to preserve the format
+ENV FIREBASE_PRIVATE_KEY="$FIREBASE_PRIVATE_KEY"
+# Print debug info using a more compatible syntax
+RUN echo "Docker build - FIREBASE_PRIVATE_KEY is set"
 
 # Set the working directory in the container
 WORKDIR /app
@@ -57,7 +58,8 @@ ENV FIREBASE_PROJECT_ID=$FIREBASE_PROJECT_ID
 ENV FIREBASE_CLIENT_EMAIL=$FIREBASE_CLIENT_EMAIL
 # Set the private key with proper escaping
 # The value comes from Secret Manager via Cloud Build
-ENV FIREBASE_PRIVATE_KEY=$FIREBASE_PRIVATE_KEY
+# Use double quotes to preserve the format
+ENV FIREBASE_PRIVATE_KEY="$FIREBASE_PRIVATE_KEY"
 
 COPY --from=base /app/next.config.ts ./
 COPY --from=base /app/messages ./messages
