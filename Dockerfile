@@ -9,9 +9,11 @@ ARG FIREBASE_PRIVATE_KEY
 # Set environment variables for Firebase credentials
 ENV FIREBASE_PROJECT_ID=$FIREBASE_PROJECT_ID
 ENV FIREBASE_CLIENT_EMAIL=$FIREBASE_CLIENT_EMAIL
-# Pass the private key as-is, without adding quotes
-# The admin.ts file will handle different formats
+# Set the private key with proper escaping
+# The value comes from Secret Manager via Cloud Build
 ENV FIREBASE_PRIVATE_KEY=$FIREBASE_PRIVATE_KEY
+# Print the first few characters of the private key for debugging
+RUN echo "Docker build - Private key starts with: ${FIREBASE_PRIVATE_KEY:0:20}..."
 
 # Set the working directory in the container
 WORKDIR /app
@@ -53,8 +55,8 @@ ENV PORT=8080
 # Set Firebase credentials for production stage
 ENV FIREBASE_PROJECT_ID=$FIREBASE_PROJECT_ID
 ENV FIREBASE_CLIENT_EMAIL=$FIREBASE_CLIENT_EMAIL
-# Pass the private key as-is, without adding quotes
-# The admin.ts file will handle different formats
+# Set the private key with proper escaping
+# The value comes from Secret Manager via Cloud Build
 ENV FIREBASE_PRIVATE_KEY=$FIREBASE_PRIVATE_KEY
 
 COPY --from=base /app/next.config.ts ./

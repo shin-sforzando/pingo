@@ -1,4 +1,20 @@
 steps:
+  # Export secrets to a temporary file
+  - name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        # Create a temporary file with the secrets
+        echo "FIREBASE_PROJECT_ID=$$FIREBASE_PROJECT_ID" > /tmp/secrets
+        echo "FIREBASE_CLIENT_EMAIL=$$FIREBASE_CLIENT_EMAIL" >> /tmp/secrets
+        echo "FIREBASE_PRIVATE_KEY='$$FIREBASE_PRIVATE_KEY'" >> /tmp/secrets
+        # Print first few characters of the private key for debugging (without revealing the whole key)
+        echo "Private key starts with: $(echo $$FIREBASE_PRIVATE_KEY | cut -c 1-20)..."
+    secretEnv: ['FIREBASE_PROJECT_ID', 'FIREBASE_CLIENT_EMAIL', 'FIREBASE_PRIVATE_KEY']
+    id: PrepareSecrets
+
+  # Build the Docker image using the secrets file
   - name: gcr.io/cloud-builders/docker
     args:
       - build
@@ -14,7 +30,7 @@ steps:
       - '--build-arg'
       - 'FIREBASE_CLIENT_EMAIL=$$FIREBASE_CLIENT_EMAIL'
       - '--build-arg'
-      - 'FIREBASE_PRIVATE_KEY="$$FIREBASE_PRIVATE_KEY"'
+      - 'FIREBASE_PRIVATE_KEY=$$FIREBASE_PRIVATE_KEY'
     secretEnv: ['FIREBASE_PROJECT_ID', 'FIREBASE_CLIENT_EMAIL', 'FIREBASE_PRIVATE_KEY']
     id: Build
   - name: gcr.io/cloud-builders/docker
