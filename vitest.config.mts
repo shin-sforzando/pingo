@@ -4,9 +4,6 @@ import { coverageConfigDefaults, defineConfig } from "vitest/config";
 
 export default defineConfig({
   plugins: [tsconfigPaths(), react()],
-  // define: {
-  //   "process.env": process.env,
-  // },
   test: {
     pool: "forks",
     workspace: [

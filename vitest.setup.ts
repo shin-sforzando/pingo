@@ -2,7 +2,14 @@ import { resolve } from "node:path";
 import { config } from "dotenv";
 
 // Load environment variables from .env.local
-config({ path: resolve(process.cwd(), ".env.local") });
+const envPath = resolve(process.cwd(), ".env.local");
+const result = config({ path: envPath });
+if (result.error) {
+  console.error(
+    `Failed to load environment variables from ${envPath}:`,
+    result.error,
+  );
+}
 
 // Log key environment variables to verify they are loaded
 // (without revealing sensitive values)

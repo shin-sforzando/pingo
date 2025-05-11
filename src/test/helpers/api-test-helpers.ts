@@ -3,7 +3,8 @@ import { NextRequest } from "next/server";
 
 // Constants
 export const TEST_PREFIX = "vitest_";
-export const API_BASE_URL = "http://localhost:3000";
+export const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000";
 
 /**
  * Generate a unique test username
@@ -33,7 +34,10 @@ export const createApiRequest = (
   return new NextRequest(`${API_BASE_URL}${path}`, {
     method,
     body: body ? JSON.stringify(body) : undefined,
-    headers,
+    headers: {
+      "Content-Type": "application/json",
+      ...headers,
+    },
   });
 };
 
