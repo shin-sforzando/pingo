@@ -78,6 +78,8 @@ flowchart TD
    - Firestoreドキュメントインターフェースの定義
    - クライアント/サーバー間のタイムスタンプ変換
    - 型安全な変換関数の実装
+   - `withConverter`を使用した型変換の自動化
+   - コレクション参照関数による型安全なアクセス
 
 3. **タイムスタンプの扱い**
    - `firebase/firestore`と`firebase-admin/firestore`の両方に対応
