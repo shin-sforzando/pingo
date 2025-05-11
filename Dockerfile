@@ -1,5 +1,5 @@
 # Use an official Node.js runtime as a parent image (Node LTS recommended)
-FROM node:24-slim AS base
+FROM node:22-slim AS base
 
 # Define build arguments for Firebase credentials
 ARG FIREBASE_PROJECT_ID
@@ -37,7 +37,7 @@ RUN npm run build
 
 
 # --- Production Stage ---
-FROM node:24-slim AS production
+FROM node:22-slim AS production
 
 # Define build arguments for Firebase credentials in production stage
 ARG FIREBASE_PROJECT_ID
