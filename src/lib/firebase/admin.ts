@@ -35,7 +35,6 @@ if (!apps.length) {
       try {
         console.log(
           "ℹ️ XXX: ~ Attempting to initialize Firebase Admin with GOOGLE_APPLICATION_CREDENTIALS",
-          process.env.GOOGLE_APPLICATION_CREDENTIALS,
         );
         initializeApp();
         console.log(
