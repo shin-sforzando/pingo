@@ -35,8 +35,10 @@
     "logout": "ログアウト",
     "username": "ユーザーネーム",
     "usernamePlaceholder": "ユーザーネームを入力",
+    "usernameDescription": "3〜20文字で入力してください",
     "password": "パスワード",
     "passwordPlaceholder": "パスワードを入力",
+    "passwordDescription": "8文字以上で、英字と数字を含めてください",
     "confirmPassword": "パスワード（確認）",
     "confirmPasswordPlaceholder": "パスワードを再入力",
     "cancel": "キャンセル",
@@ -50,6 +52,7 @@
       "usernameInvalid": "ユーザーネームに使用できない文字が含まれています",
       "passwordRequired": "パスワードを入力してください",
       "passwordTooShort": "パスワードは8文字以上で入力してください",
+      "passwordInvalid": "パスワードは英字と数字を含める必要があります",
       "passwordMismatch": "パスワードが一致しません",
       "invalidCredentials": "ユーザーネームまたはパスワードが正しくありません",
       "usernameTaken": "このユーザーネームは既に使用されています",
@@ -62,7 +65,15 @@
       "missingToken": "認証トークンがありません",
       "usernamePasswordRequired": "ユーザーネームとパスワードを入力してください",
       "failedToCheckUsername": "ユーザーネームの確認に失敗しました",
-      "passwordHashNotFound": "認証に失敗しました：パスワードハッシュが見つかりません"
+      "passwordHashNotFound": "認証に失敗しました：パスワードハッシュが見つかりません",
+      "invalidInput": "入力内容が無効です",
+      "serverError": "サーバーエラーが発生しました",
+      "usernameExists": "このユーザーネームは既に使用されています",
+      "userIdRequired": "ユーザーIDが必要です",
+      "userNotFound": "ユーザーが見つかりません",
+      "currentPasswordInvalid": "現在のパスワードが正しくありません",
+      "currentPasswordRequired": "現在のパスワードを入力してください",
+      "unauthorized": "認証されていません"
     }
   }
 }

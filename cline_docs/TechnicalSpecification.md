@@ -101,7 +101,7 @@ src/types/
 ```yaml
 /users/
   /{userId}/
-    - id: string (UUIDv4)
+    - id: string (ULID)
     - username: string (ユニークなユーザーネーム、表示名として使用、日本語も可)
     - passwordHash: string (パスワードハッシュ)
     - createdAt: timestamp
@@ -113,7 +113,7 @@ src/types/
     
     /notifications/
       /{notificationId}/
-        - id: string (UUIDv7)
+        - id: string (ULID)
         - type: string (通知タイプ)
         - displayType: string ("toast" または "popup")
         - message: string (表示メッセージ)
@@ -128,7 +128,7 @@ src/types/
 ```yaml
 /game_participations/
   /{participationId}/
-    - userId: string (ユーザーID)
+    - userId: string (ULID)
     - gameId: string (ゲームID)
     - role: string ("creator", "admin", "participant")
     - joinedAt: timestamp
@@ -142,10 +142,10 @@ src/types/
 ```yaml
 /games/
   /{gameId}/
-    - id: string (6文字のアルファベット大文字、またはアルファベット大文字+数字。ただし本番環境では数字を含まない形式が使用される。例: "ABCDEF")
+    - id: string (6文字のアルファベット大文字、またはアルファベット大文字+数字 (ex: "TEST01")。ただし本番環境では数字を含まない形式が使用される。(ex: "ABCDEF"))
     - title: string (タイトル)
     - theme: string (場所やテーマ)
-    - creatorId: string (作成者のユーザーID)
+    - creatorId: string (ULID)
     - createdAt: timestamp
     - expiresAt: timestamp
     - isPublic: boolean
@@ -165,7 +165,7 @@ src/types/
     
     /playerBoards/
       /{userId}/
-        - userId: string (プレイヤーID)
+        - userId: string (ULID)
         - cellStates: map<string, {
           isOpen: boolean (セルがOPENされているかどうか),
           openedAt: timestamp (OPENされた時刻、未OPENの場合はnull),
@@ -187,8 +187,8 @@ src/types/
     
     /submissions/
       /{submissionId}/
-        - id: string (UUIDv7)
-        - userId: string (提出したユーザーID)
+        - id: string (ULID)
+        - userId: string (ULID)
         - imageUrl: string (Cloud Storageへのパス)
         - submittedAt: timestamp (アップロード完了時刻)
         - analyzedAt: timestamp (AI解析完了時刻)
@@ -201,9 +201,9 @@ src/types/
     
     /events/
       /{eventId}/
-        - id: string (UUIDv7)
+        - id: string (ULID)
         - type: string (例: "join", "submit", "complete_line", "complete_game")
-        - userId: string (イベント発生ユーザー)
+        - userId: string (ULID)
         - timestamp: timestamp
         - details: map (イベント固有の詳細情報)
 ```
@@ -481,6 +481,28 @@ View Transition APIを活用したトランジションを実装する。
   - `useTranslations`フックを使用してコンポーネント内で翻訳を取得
   - Storybookでも多言語対応が設定済み
 
+## ID形式の統一（ULIDへの移行）
+
+### ULIDの採用理由
+
+ゲームID以外のすべてのIDをULIDに統一しました。ULIDを採用した理由は以下の通りです：
+
+1. **時間的にソート可能**: ULIDは時間的に単調増加するため、データベースのインデックス効率が向上し、時系列での取得が容易になります
+2. **人間にとって読みやすい**: UUIDに比べて読みやすい形式です（大文字と数字のみを使用）
+3. **URL安全**: Base32エンコーディングを使用しているため、URLなどでも安全に使用できます
+4. **タイムスタンプ内蔵**: 最初の10文字にミリ秒精度のタイムスタンプが埋め込まれており、作成時刻の概算が可能です
+5. **コリジョン確率が低い**: UUIDと同様に実用上は衝突の心配がほぼありません
+
+### 実装アプローチ
+
+1. **スキーマ定義**: Zodスキーマで`z.string().ulid()`を使用してバリデーション
+2. **ID生成**: `ulid()`関数を使用してIDを生成
+3. **スキーマの再利用**: `userSchema.shape.id`などを使用して、一貫性のあるバリデーションを実現
+
+### ゲームIDの例外
+
+ゲームIDは、ユーザーが直接入力する可能性があるため、6文字のアルファベット大文字形式を維持しています。これにより、ユーザビリティを損なうことなく、システム内部で生成・管理するIDの一貫性と効率性を向上させています。
+
 ## テスト戦略
 
 ### 単体テスト
@@ -488,6 +510,13 @@ View Transition APIを活用したトランジションを実装する。
 - Vitestを使用したコンポーネントの単体テスト
 - テスト用プレフィックスを使用したテストデータの分離
 - テスト終了時の自動クリーンアップスクリプト
+
+### APIテスト
+
+- Vitestを使用した実際のFirestoreとFirebase Authenticationとの連携テスト
+- テスト用のユーザーデータとゲームデータを作成し、APIエンドポイントをテスト
+- テスト後のデータクリーンアップを自動化
+- テスト用のヘルパー関数を作成し、テストコードの重複を削減
 
 ### 統合テスト
 

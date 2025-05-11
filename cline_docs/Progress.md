@@ -41,6 +41,12 @@ Pingoプロジェクトは現在、基礎構築段階にあります。要件定
   - ユーザー関連のFirestoreドキュメントインターフェースと変換関数
   - ゲーム関連のFirestoreドキュメントインターフェースと変換関数
   - 型定義のエクスポート
+- ID形式の統一（ULIDへの移行）
+  - ゲームID以外のすべてのIDをULIDに統一
+  - schema.tsのバリデーションルールを更新
+  - 関連するコメントの更新
+  - ID生成ロジックの更新
+  - userSchema.shape.idを使用した一貫性のあるバリデーション実装
 
 ## 次のステップ
 
@@ -51,6 +57,10 @@ Pingoプロジェクトは現在、基礎構築段階にあります。要件定
   - ログイン/ログアウト機能
   - 認証状態の管理
   - 認証済みユーザーのみがアクセスできるページの保護
+- APIテストの実装
+  - Vitestを使用した実際のFirestoreとFirebase Authenticationとの連携テスト
+  - テストデータの分離とクリーンアップ機能の実装
+  - CI/CDパイプラインへの統合
 - 基本コンポーネントの実装と拡充
   - ビンゴボードコンポーネント
   - 画像アップロードコンポーネント
@@ -66,6 +76,7 @@ Pingoプロジェクトは現在、基礎構築段階にあります。要件定
    - バックエンド: Node.js 22 + Firebase (Authentication, Firestore, Storage)
    - AI/ML: Google Gemini API
    - デプロイ: Docker → Google Cloud Run
+   - テスト: Vitest, Playwright, Firebase Emulator
 
 2. データモデル
    - ユーザー、ゲーム、ビンゴボード、提出物などの基本構造を定義
@@ -88,9 +99,10 @@ Pingoプロジェクトは現在、基礎構築段階にあります。要件定
    - Storybookでの多言語対応テスト環境も整備済み
 
 6. テスト
-   - Vitest
-   - Playwright
-   - Storybook Test
+   - Vitest（単体テスト、APIテスト）
+   - Playwright（E2Eテスト）
+   - Storybook Test（コンポーネントテスト）
+   - Firebase Emulator（Firestore、Authentication）
 
 7. 開発ツール
    - コード品質: Biome.js

@@ -24,7 +24,7 @@ export const baseSchema = z.object({
  * User schema
  */
 export const userSchema = baseSchema.extend({
-  id: z.string().uuid(), // UUIDv4
+  id: z.string().ulid(), // ULID
   username: z
     .string()
     .min(3, { message: "Auth.errors.usernameTooShort" })
@@ -52,7 +52,7 @@ export const userCreationSchema = z.object({
     .regex(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]+$/, {
       message: "Auth.errors.passwordInvalid",
     }),
-  isTestUser: z.boolean().default(false),
+  isTestUser: z.boolean(),
 });
 
 /**
@@ -67,7 +67,7 @@ export const userLoginSchema = z.object({
  * Notification schema
  */
 export const notificationSchema = baseSchema.extend({
-  id: z.string().uuid(), // UUIDv7
+  id: z.string().ulid(), // ULID
   type: z.nativeEnum(NotificationType),
   displayType: z.nativeEnum(NotificationDisplayType),
   message: z.string(),
@@ -80,7 +80,7 @@ export const notificationSchema = baseSchema.extend({
  * Game participation schema
  */
 export const gameParticipationSchema = baseSchema.extend({
-  userId: z.string().uuid(),
+  userId: z.string().ulid(),
   gameId: z.string(),
   role: z.nativeEnum(Role),
   joinedAt: z.date(),
@@ -124,7 +124,7 @@ export const completedLineSchema = z.object({
  * Player board schema
  */
 export const playerBoardSchema = z.object({
-  userId: z.string().uuid(),
+  userId: z.string().ulid(),
   cellStates: z.record(cellStateSchema),
   completedLines: z.array(completedLineSchema),
 });
@@ -143,7 +143,7 @@ export const gameSchema = baseSchema.extend({
   id: z.string().regex(/^[A-Z0-9]{6}$/),
   title: z.string().min(1).max(50),
   theme: z.string().min(1).max(50),
-  creatorId: z.string().uuid(),
+  creatorId: z.string().ulid(),
   expiresAt: z.date(),
   isPublic: z.boolean().default(false),
   isPhotoSharingEnabled: z.boolean().default(true),
@@ -171,8 +171,8 @@ export const gameCreationSchema = z.object({
  * Submission schema
  */
 export const submissionSchema = baseSchema.extend({
-  id: z.string().uuid(), // UUIDv7
-  userId: z.string().uuid(),
+  id: z.string().ulid(), // ULID
+  userId: z.string().ulid(),
   imageUrl: z.string().url(),
   submittedAt: z.date(),
   analyzedAt: z.date().nullable(),
@@ -188,9 +188,9 @@ export const submissionSchema = baseSchema.extend({
  * Event schema
  */
 export const eventSchema = baseSchema.extend({
-  id: z.string().uuid(), // UUIDv7
+  id: z.string().ulid(), // ULID
   type: z.string(),
-  userId: z.string().uuid(),
+  userId: z.string().ulid(),
   timestamp: z.date(),
   details: z.record(z.unknown()).optional(),
 });

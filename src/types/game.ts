@@ -107,7 +107,7 @@ export interface GameParticipationDocument {
  * Submission document as stored in Firestore
  */
 export interface SubmissionDocument {
-  id: string; // UUIDv7
+  id: string; // ULID
   userId: string;
   imageUrl: string;
   submittedAt: TimestampInterface;
@@ -126,7 +126,7 @@ export interface SubmissionDocument {
  * Event document as stored in Firestore
  */
 export interface EventDocument {
-  id: string; // UUIDv7
+  id: string; // ULID
   type: string;
   userId: string;
   timestamp: TimestampInterface;

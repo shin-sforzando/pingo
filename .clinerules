@@ -13,7 +13,7 @@
 - The world of software development is very fast evolving, so always be suspicious of the possibility that your knowledge is out of date, and read the latest documentation before starting. Use `browser_action` if necessary.
 - Never ignore Linter warnings, pay particular attention to the following rules.
   - noExplicitAny: Disallow the any type usage.
-  - noForEach: Prefer for...of statement instead of Array.forEach.
+  - noForEach: Prefer `for...of` statement instead of `Array.forEach`.
   - noUnusedImports: Disallow unused imports.
   - noUnusedVariables: Disallow unused variables.
   - useImportType: Promotes the use of import type for types.

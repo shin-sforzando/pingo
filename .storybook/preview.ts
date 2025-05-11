@@ -2,10 +2,15 @@ import { MINIMAL_VIEWPORTS } from "@storybook/addon-viewport";
 import type { Preview } from "@storybook/react";
 import "@/app/globals.css";
 
+import { withMockAuthContext } from "./decorators";
 // Import next-intl configuration
 import nextIntl from "./next-intl";
 
 const preview: Preview = {
+  decorators: [
+    // Add global decorators here
+    withMockAuthContext,
+  ],
   parameters: {
     a11y: {
       test: "error",
