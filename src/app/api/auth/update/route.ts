@@ -5,27 +5,26 @@ import { z } from "zod";
 import { adminFirestore } from "@/lib/firebase/admin";
 import type { ApiResponse } from "@/types/common";
 import { dateToTimestamp } from "@/types/firestore";
-import type { User } from "@/types/schema";
+import { type User, userCreationSchema, userSchema } from "@/types/schema";
 import type { UserDocument } from "@/types/user";
 import { userFromFirestore } from "@/types/user";
 
-// User update schema
-const userUpdateSchema = z.object({
-  userId: z.string().uuid(),
-  username: z
-    .string()
-    .min(3, { message: "Auth.errors.usernameTooShort" })
-    .max(20, { message: "Auth.errors.usernameTooLong" })
-    .optional(),
+// Define password update fields
+const passwordUpdateFields = z.object({
   currentPassword: z.string().optional(),
-  newPassword: z
-    .string()
-    .min(8, { message: "Auth.errors.passwordTooShort" })
-    .regex(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]+$/, {
-      message: "Auth.errors.passwordInvalid",
-    })
-    .optional(),
+  newPassword: userCreationSchema.shape.password.optional(),
 });
+
+// User update schema - using userSchema.shape.id for userId validation
+const userUpdateSchema = z
+  .object({
+    // Use userSchema.shape.id for consistent ID validation
+    userId: userSchema.shape.id,
+
+    // Optional username with validation from userSchema
+    username: userSchema.shape.username.optional(),
+  })
+  .merge(passwordUpdateFields);
 
 /**
  * User update API

@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
 import { type NextRequest, NextResponse } from "next/server";
-import { v4 as uuidv4 } from "uuid";
+import { ulid } from "ulid";
 
 import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
 import type { ApiResponse } from "@/types/common";
@@ -61,7 +61,7 @@ export async function POST(
     const passwordHash = await bcrypt.hash(password, saltRounds);
 
     // Create user data
-    const userId = uuidv4();
+    const userId = ulid();
     const now = new Date();
     const user: User = {
       id: userId,

@@ -10,7 +10,7 @@ import type { Notification, User } from "./schema";
  * User document as stored in Firestore
  */
 export interface UserDocument {
-  id: string; // UUIDv4
+  id: string; // ULID
   username: string;
   passwordHash: string;
   createdAt: TimestampInterface;
@@ -26,7 +26,7 @@ export interface UserDocument {
  * Notification document as stored in Firestore
  */
 export interface NotificationDocument {
-  id: string; // UUIDv7
+  id: string; // ULID
   type: NotificationType;
   displayType: NotificationDisplayType;
   message: string;
