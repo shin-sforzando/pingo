@@ -545,7 +545,33 @@ View Transition APIを活用したトランジションを実装する。
 
 - GitHub Actionsを使用した自動テストと静的解析
 - Google Cloud Buildを使用したデプロイ
+  - Secret Managerを使用した機密情報の管理
+  - cloudbuild.yamlでのbashスクリプトを使用した環境変数の適切な処理
+  - Firebase認証情報（特に秘密鍵）の安全な受け渡し
 - mainブランチへのマージをトリガーとした自動デプロイ
+
+### Google Cloud Buildでの環境変数と秘密情報の扱い
+
+Google Cloud Buildでは、Secret Managerと連携して機密情報を安全に扱います。特にFirebase Admin SDKの初期化に必要な認証情報（秘密鍵など）は、以下の方法で管理しています：
+
+1. **Secret Managerでの保存**
+   - `FIREBASE_PROJECT_ID`、`FIREBASE_CLIENT_EMAIL`、`FIREBASE_PRIVATE_KEY`をSecret Managerに保存
+   - 各シークレットは最新バージョン（`versions/latest`）を参照
+
+2. **cloudbuild.yamlでの参照**
+   - `secretEnv`フィールドで使用するシークレットを指定
+   - `availableSecrets`セクションでSecret Managerからシークレットを取得する設定
+   - bashスクリプトを使用して環境変数を適切に処理（特に改行や特殊文字を含む秘密鍵）
+
+3. **Dockerfileでの設定**
+   - ビルド引数（ARG）として認証情報を受け取る
+   - 環境変数（ENV）として設定し、引用符で囲んでフォーマットを保持
+
+4. **Firebase Admin SDKの初期化**
+   - 環境変数から認証情報を取得
+   - 秘密鍵の形式に応じた適切な処理（エスケープされた改行文字の置換など）
+
+この方法により、ビルド時とランタイム時の両方で、Firebase Admin SDKが正常に初期化されるようになっています。
 
 ## 分析と監視
 

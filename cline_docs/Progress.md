@@ -17,6 +17,11 @@ Pingoプロジェクトは現在、基礎構築段階にあります。要件定
 - UI/UXデザインの基本方針決定
 - メモリーバンクの作成
 - next-intlを用いた多言語対応（日英）の基盤構築
+- Google Cloud BuildでのFirebase認証問題の解決
+  - Secret Managerから取得した秘密鍵をDockerビルドに正しく渡すための設定
+  - cloudbuild.yamlでのbashスクリプトを使用した環境変数の適切な処理
+  - Dockerfileでの環境変数設定の最適化
+  - Firebase Admin SDKの初期化処理の改善
 - モバイルファーストのHeaderコンポーネント実装
   - 中央配置されたシステム名「Pingo」
   - 通知ドロワー機能（Drawerコンポーネント）
