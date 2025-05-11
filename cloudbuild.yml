@@ -1,0 +1,67 @@
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - '--no-cache'
+      - '-t'
+      - >-
+        $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
+      - .
+      - '-f'
+      - Dockerfile
+      - '--build-arg'
+      - 'FIREBASE_PROJECT_ID=$$FIREBASE_PROJECT_ID'
+      - '--build-arg'
+      - 'FIREBASE_CLIENT_EMAIL=$$FIREBASE_CLIENT_EMAIL'
+      - '--build-arg'
+      - 'FIREBASE_PRIVATE_KEY=$$FIREBASE_PRIVATE_KEY'
+    secretEnv: ['FIREBASE_PROJECT_ID', 'FIREBASE_CLIENT_EMAIL', 'FIREBASE_PRIVATE_KEY']
+    id: Build
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - >-
+        $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
+    id: Push
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+    args:
+      - run
+      - services
+      - update
+      - $_SERVICE_NAME
+      - '--platform=managed'
+      - >-
+        --image=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
+      - >-
+        --labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID,gcb-trigger-id=$_TRIGGER_ID
+      - '--region=$_DEPLOY_REGION'
+      - '--quiet'
+    id: Deploy
+    entrypoint: gcloud
+images:
+  - >-
+    $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
+options:
+  substitutionOption: ALLOW_LOOSE
+  logging: CLOUD_LOGGING_ONLY
+substitutions:
+  _AR_PROJECT_ID: pingo-456817
+  _PLATFORM: managed
+  _SERVICE_NAME: pingo
+  _TRIGGER_ID: ffafef4b-1470-4a85-9178-2f0b0adea3eb
+  _DEPLOY_REGION: asia-northeast1
+  _AR_HOSTNAME: asia-northeast1-docker.pkg.dev
+  _AR_REPOSITORY: cloud-run-source-deploy
+tags:
+  - gcp-cloud-build-deploy-cloud-run
+  - gcp-cloud-build-deploy-cloud-run-managed
+  - pingo
+
+availableSecrets:
+  secretManager:
+    - versionName: projects/pingo-456817/secrets/FIREBASE_PROJECT_ID/versions/latest
+      env: 'FIREBASE_PROJECT_ID'
+    - versionName: projects/pingo-456817/secrets/FIREBASE_CLIENT_EMAIL/versions/latest
+      env: 'FIREBASE_CLIENT_EMAIL'
+    - versionName: projects/pingo-456817/secrets/FIREBASE_PRIVATE_KEY/versions/latest
+      env: 'FIREBASE_PRIVATE_KEY'
