@@ -9,12 +9,7 @@ ARG FIREBASE_PRIVATE_KEY
 # Set environment variables for Firebase credentials
 ENV FIREBASE_PROJECT_ID=$FIREBASE_PROJECT_ID
 ENV FIREBASE_CLIENT_EMAIL=$FIREBASE_CLIENT_EMAIL
-# Set the private key with proper escaping
-# The value comes from Secret Manager via Cloud Build
-# Use double quotes to preserve the format
 ENV FIREBASE_PRIVATE_KEY="$FIREBASE_PRIVATE_KEY"
-# Print debug info using a more compatible syntax
-RUN echo "Docker build - FIREBASE_PRIVATE_KEY is set"
 
 # Set the working directory in the container
 WORKDIR /app

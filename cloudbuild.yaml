@@ -1,16 +1,4 @@
 steps:
-  # Export secrets to a temporary file
-  - name: 'gcr.io/cloud-builders/docker'
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        echo "FIREBASE_PROJECT_ID=$$FIREBASE_PROJECT_ID"
-        echo "FIREBASE_CLIENT_EMAIL=$$FIREBASE_CLIENT_EMAIL"
-        echo "FIREBASE_PRIVATE_KEY='$$FIREBASE_PRIVATE_KEY'"
-    secretEnv: ['FIREBASE_PROJECT_ID', 'FIREBASE_CLIENT_EMAIL', 'FIREBASE_PRIVATE_KEY']
-    id: PrepareSecrets
-
   # Build the Docker image using the secrets file
   - name: gcr.io/cloud-builders/docker
     entrypoint: 'bash'
@@ -27,12 +15,14 @@ steps:
           --build-arg FIREBASE_PRIVATE_KEY="$$FIREBASE_PRIVATE_KEY"
     secretEnv: ['FIREBASE_PROJECT_ID', 'FIREBASE_CLIENT_EMAIL', 'FIREBASE_PRIVATE_KEY']
     id: Build
+
   - name: gcr.io/cloud-builders/docker
     args:
       - push
       - >-
         $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
     id: Push
+
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     args:
       - run
@@ -48,12 +38,15 @@ steps:
       - '--quiet'
     id: Deploy
     entrypoint: gcloud
+
 images:
   - >-
     $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
+
 options:
   substitutionOption: ALLOW_LOOSE
   logging: CLOUD_LOGGING_ONLY
+
 substitutions:
   _AR_PROJECT_ID: pingo-456817
   _PLATFORM: managed
@@ -62,6 +55,7 @@ substitutions:
   _DEPLOY_REGION: asia-northeast1
   _AR_HOSTNAME: asia-northeast1-docker.pkg.dev
   _AR_REPOSITORY: cloud-run-source-deploy
+
 tags:
   - gcp-cloud-build-deploy-cloud-run
   - gcp-cloud-build-deploy-cloud-run-managed

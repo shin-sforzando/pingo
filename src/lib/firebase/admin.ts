@@ -19,11 +19,6 @@ if (!apps.length) {
       // Private key handling - try different formats
       let privateKey = process.env.FIREBASE_PRIVATE_KEY;
 
-      // Log the first few characters of the private key for debugging
-      console.log(
-        `Private key starts with: ${privateKey?.substring(0, 20)}...`,
-      );
-
       // Try to handle different possible formats of the private key
       if (privateKey) {
         // 1. If it contains literal \n strings, replace them with actual newlines
