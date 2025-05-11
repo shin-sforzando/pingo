@@ -141,7 +141,7 @@ export async function PUT(
       updateData.passwordHash = passwordHash;
     }
 
-    // If there are no updates, return success with current user data
+    // If there are no updates other than the updatedAt timestamp, return success with current user data
     if (Object.keys(updateData).length === 1 && updateData.updatedAt) {
       const user = userFromFirestore(userDoc);
       return NextResponse.json(

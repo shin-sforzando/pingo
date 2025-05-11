@@ -8,7 +8,19 @@ import { AuthContext } from "../src/contexts/AuthContext";
  */
 export const withMockAuthContext = (Story: React.ComponentType) => {
   // Mock auth functions
-  const mockAuthValue = {
+  const mockAuthValue: {
+    user: null;
+    loading: boolean;
+    error: null;
+    login: (username: string, password: string) => Promise<void>;
+    register: (
+      username: string,
+      password: string,
+      isTestUser?: boolean,
+    ) => Promise<void>;
+    logout: () => Promise<void>;
+    updateUser: () => Promise<void>;
+  } = {
     user: null,
     loading: false,
     error: null,
