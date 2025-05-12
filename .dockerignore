@@ -39,5 +39,4 @@ yarn-error.log*
 
 # Environment files
 .env*.local
-.env
 *.secret
