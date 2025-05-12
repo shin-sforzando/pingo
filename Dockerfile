@@ -1,11 +1,10 @@
+# ---------------- Build Stage ----------------
+FROM node:lts-slim AS base
+
 # Define build arguments for Firebase credentials
 ARG FIREBASE_PROJECT_ID
 ARG FIREBASE_CLIENT_EMAIL
 ARG FIREBASE_PRIVATE_KEY
-
-
-# ---------------- Build Stage ----------------
-FROM node:lts-slim AS base
 
 # Set environment variables for Firebase credentials
 ENV FIREBASE_PROJECT_ID=$FIREBASE_PROJECT_ID
