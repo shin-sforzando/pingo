@@ -1,10 +1,11 @@
-# ---------------- Build Stage ----------------
-FROM node:lts-slim AS base
-
 # Define build arguments for Firebase credentials
 ARG FIREBASE_PROJECT_ID
 ARG FIREBASE_CLIENT_EMAIL
 ARG FIREBASE_PRIVATE_KEY
+
+
+# ---------------- Build Stage ----------------
+FROM node:lts-slim AS base
 
 # Set environment variables for Firebase credentials
 ENV FIREBASE_PROJECT_ID=$FIREBASE_PROJECT_ID
@@ -51,9 +52,9 @@ ENV NODE_ENV=production
 ENV PORT=8080
 
 # # Set Firebase credentials for production stage
-# ENV FIREBASE_PROJECT_ID=$FIREBASE_PROJECT_ID
-# ENV FIREBASE_CLIENT_EMAIL=$FIREBASE_CLIENT_EMAIL
-# ENV FIREBASE_PRIVATE_KEY="$FIREBASE_PRIVATE_KEY"
+ENV FIREBASE_PROJECT_ID=$FIREBASE_PROJECT_ID
+ENV FIREBASE_CLIENT_EMAIL=$FIREBASE_CLIENT_EMAIL
+ENV FIREBASE_PRIVATE_KEY="$FIREBASE_PRIVATE_KEY"
 
 COPY --from=base /app/next.config.ts ./
 COPY --from=base /app/messages ./messages

@@ -30,10 +30,10 @@ describe("/api/health endpoint", () => {
 
   // Setup spies and mocks
   beforeEach(() => {
-    vi.spyOn(process, "resourceUsage").mockReturnValue(mockResourceUsage);
-    vi.spyOn(process, "uptime").mockReturnValue(mockUptime);
     vi.spyOn(process, "version", "get").mockReturnValue(mockNodeVersion);
     vi.stubEnv("NODE_ENV", mockEnv);
+    vi.spyOn(process, "resourceUsage").mockReturnValue(mockResourceUsage);
+    vi.spyOn(process, "uptime").mockReturnValue(mockUptime);
     vi.spyOn(global, "Date").mockImplementation(() => mockDate as Date);
     vi.spyOn(console, "error").mockImplementation(() => {});
   });
@@ -54,10 +54,10 @@ describe("/api/health endpoint", () => {
     const responseData = await response.json();
     expect(responseData).toEqual({
       status: "ok",
-      resourceUsage: mockResourceUsage,
-      uptime: mockUptime,
       nodeVersion: mockNodeVersion,
       environment: mockEnv,
+      resourceUsage: mockResourceUsage,
+      uptime: mockUptime,
       timestamp: mockDate.toISOString(),
     });
 
