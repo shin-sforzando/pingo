@@ -19,7 +19,10 @@ if (!apps.length) {
       // Private key handling - try different formats
       const privateKey = process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n");
 
-      if (!privateKey.includes("-----BEGIN PRIVATE KEY-----")) {
+      if (
+        !privateKey.includes("-----BEGIN PRIVATE KEY-----") ||
+        !privateKey.includes("-----END PRIVATE KEY-----")
+      ) {
         console.error(
           "Private key does not have the expected PEM format beginning",
         );

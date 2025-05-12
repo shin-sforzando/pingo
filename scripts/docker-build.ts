@@ -82,11 +82,9 @@ async function main(): Promise<void> {
   const credentials = await extractFirebaseCredentials(FIREBASE_ADMIN_SDK_FILE);
 
   // Build Docker command with template literals
-  const escapedPrivateKey = credentials.privateKey.replace(/\n/g, "");
+  const escapedPrivateKey = credentials.privateKey.replace(/\n/g, "\\n");
 
-  // const buildCmd = `docker build --no-cache --tag pingo:latest . --file Dockerfile --build-arg FIREBASE_PROJECT_ID="${credentials.projectId}" --build-arg FIREBASE_CLIENT_EMAIL="${credentials.clientEmail}" --build-arg FIREBASE_PRIVATE_KEY="${escapedPrivateKey}"`;
-  const buildCmd = `docker build --tag pingo:latest . --file Dockerfile --build-arg FIREBASE_PROJECT_ID="${credentials.projectId}" --build-arg FIREBASE_CLIENT_EMAIL="${credentials.clientEmail}" --build-arg FIREBASE_PRIVATE_KEY="${escapedPrivateKey}"`;
-  console.log("ℹ️ XXX: ~ docker-build.ts ~ main ~ buildCmd:", buildCmd);
+  const buildCmd = `docker build --no-cache --progress=plain --tag pingo:latest . --file Dockerfile --build-arg FIREBASE_PROJECT_ID="${credentials.projectId}" --build-arg FIREBASE_CLIENT_EMAIL="${credentials.clientEmail}" --build-arg FIREBASE_PRIVATE_KEY="${escapedPrivateKey}"`;
 
   // Execute build
   console.log("Building Docker image...");
