@@ -59,6 +59,7 @@ describe("/api/health endpoint", () => {
       resourceUsage: mockResourceUsage,
       uptime: mockUptime,
       timestamp: mockDate.toISOString(),
+      firebaseApiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
     });
 
     // Verify process.resourceUsage was called

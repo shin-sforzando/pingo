@@ -8,6 +8,9 @@ export async function GET() {
     const uptime = process.uptime();
     const timestamp = new Date().toISOString();
 
+    const NEXT_PUBLIC_FIREBASE_API_KEY =
+      process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
+
     const healthStatus = {
       status: "ok",
       nodeVersion,
@@ -15,6 +18,7 @@ export async function GET() {
       resourceUsage,
       uptime,
       timestamp,
+      firebaseApiKey: NEXT_PUBLIC_FIREBASE_API_KEY,
     };
     return NextResponse.json(healthStatus);
   } catch (error) {
