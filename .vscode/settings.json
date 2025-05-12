@@ -19,6 +19,8 @@
     "cloudbuild",
     "cloudsdktool",
     "dont",
+    "firebaseapp",
+    "firebasestorage",
     "Firestore",
     "gitsecret",
     "jsdom",
