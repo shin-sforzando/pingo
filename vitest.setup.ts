@@ -1,13 +1,23 @@
 import { resolve } from "node:path";
 import { config } from "dotenv";
 
-// Load environment variables from .env.local
-const envPath = resolve(process.cwd(), ".env.local");
-const result = config({ path: envPath });
-if (result.error) {
+// Load environment variables from .env (public variables)
+const publicEnvPath = resolve(process.cwd(), ".env");
+const publicResult = config({ path: publicEnvPath });
+if (publicResult.error) {
   console.error(
-    `Failed to load environment variables from ${envPath}:`,
-    result.error,
+    `Failed to load public environment variables from ${publicEnvPath}:`,
+    publicResult.error,
+  );
+}
+
+// Load environment variables from .env.local (private variables, will override .env)
+const privateEnvPath = resolve(process.cwd(), ".env.local");
+const privateResult = config({ path: privateEnvPath });
+if (privateResult.error) {
+  console.error(
+    `Failed to load private environment variables from ${privateEnvPath}:`,
+    privateResult.error,
   );
 }
 
