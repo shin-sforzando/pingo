@@ -24,6 +24,7 @@ describe("/api/health endpoint", () => {
   };
 
   const mockUptime = 3600; // 1 hour
+  const mockNodeVersion = "v22.15.0";
   const mockEnv = "test";
   const mockDate = new Date("2025-05-06T12:00:00Z");
 
@@ -31,6 +32,7 @@ describe("/api/health endpoint", () => {
   beforeEach(() => {
     vi.spyOn(process, "resourceUsage").mockReturnValue(mockResourceUsage);
     vi.spyOn(process, "uptime").mockReturnValue(mockUptime);
+    vi.spyOn(process, "version", "get").mockReturnValue(mockNodeVersion);
     vi.stubEnv("NODE_ENV", mockEnv);
     vi.spyOn(global, "Date").mockImplementation(() => mockDate as Date);
     vi.spyOn(console, "error").mockImplementation(() => {});
@@ -54,6 +56,7 @@ describe("/api/health endpoint", () => {
       status: "ok",
       resourceUsage: mockResourceUsage,
       uptime: mockUptime,
+      nodeVersion: mockNodeVersion,
       environment: mockEnv,
       timestamp: mockDate.toISOString(),
     });
