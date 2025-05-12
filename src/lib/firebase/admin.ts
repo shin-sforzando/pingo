@@ -18,7 +18,6 @@ if (!apps.length) {
     ) {
       // Private key handling - try different formats
       const privateKey = process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n");
-      console.log("ℹ️ XXX: ~ admin.ts ~ privateKey:", privateKey);
 
       if (!privateKey.includes("-----BEGIN PRIVATE KEY-----")) {
         console.error(
