@@ -1,5 +1,3 @@
-# ---------------- Build Stage ----------------
-# FROM node:lts-slim AS base
 FROM node:lts-slim
 
 # Define build arguments for Firebase credentials
@@ -34,34 +32,11 @@ COPY . .
 # This will generate the .next directory with the production build
 RUN npm run build
 
-
-# # ---------------- Production Stage ----------------
-# FROM node:lts-slim AS production
-
-# # Define build arguments for Firebase credentials in production stage
-# ARG FIREBASE_PROJECT_ID
-# ARG FIREBASE_CLIENT_EMAIL
-# ARG FIREBASE_PRIVATE_KEY
-
 # Set environment variables
 ENV NODE_ENV=production
 
 # Next.js server runs on port 3000 by default, Cloud Run expects PORT env var
 ENV PORT=8080
-
-# # # Set Firebase credentials for production stage
-# ENV FIREBASE_PROJECT_ID=$FIREBASE_PROJECT_ID
-# ENV FIREBASE_CLIENT_EMAIL=$FIREBASE_CLIENT_EMAIL
-# ENV FIREBASE_PRIVATE_KEY="$FIREBASE_PRIVATE_KEY"
-
-# # Set the working directory in the container
-# WORKDIR /app
-
-# COPY --from=base /app/next.config.ts ./
-# COPY --from=base /app/messages ./messages
-# COPY --from=base /app/public ./public
-# COPY --from=base /app/.next/standalone ./
-# COPY --from=base /app/.next/static ./.next/static
 
 # Expose the port the app runs on (defined by PORT env var)
 EXPOSE 8080
