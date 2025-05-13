@@ -48,6 +48,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
+  // Debug output for auth state
+  useEffect(() => {
+    console.log("Auth state:", { isLoggedIn: !!user, loading });
+    if (user) {
+      console.log("User info:", { id: user.id, username: user.username });
+    }
+  }, [user, loading]);
+
   // Initialize auth state
   useEffect(() => {
     // Listen for auth state changes

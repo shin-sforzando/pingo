@@ -9,12 +9,42 @@
     "howToPlay": "How to Play",
     "howToPlayDescription": "Pingo is a bingo game where AI judges based on photos."
   },
+  "Game": {
+    "createNew": "Create New Game",
+    "details": "Game Details",
+    "createDescription": "Enter a title for your bingo game and add subjects for the bingo cells.",
+    "title": "Game Title",
+    "titlePlaceholder": "Enter game title...",
+    "titleDescription": "Enter a title for your game (up to 50 characters)",
+    "theme": "Theme",
+    "themePlaceholder": "Enter game theme...",
+    "themeDescription": "Enter a theme for your game (up to 50 characters)",
+    "subjects": "Subjects",
+    "creating": "Creating...",
+    "create": "Create Game",
+    "editBingoCells": "Edit Bingo Cells ({0} / {1})",
+    "addNewSubject": "Add New Subject",
+    "subjectPlaceholder": "Enter subject...",
+    "subjectsUsageDescription": "The first {0} subjects will be used in the bingo board. Drag and drop to reorder.",
+    "boardPreview": "Board Preview (5x5)",
+    "boardDescription": "Only the first {0} subjects will be used in the bingo board. The center cell is always FREE.",
+    "errors": {
+      "titleRequired": "Title is required",
+      "titleTooLong": "Title must be at most 50 characters",
+      "themeRequired": "Theme is required",
+      "themeTooLong": "Theme must be at most 50 characters",
+      "subjectsRequired": "At least one subject is required",
+      "creationFailed": "Failed to create game",
+      "expiresAtInvalid": "Expiration date must be in the future"
+    }
+  },
   "Common": {
     "appName": "Pingo",
     "description": "Bingo game where AI judges based on photos",
     "language": "English",
     "toLanguage": "日本語",
-    "close": "Close"
+    "close": "Close",
+    "cancel": "Cancel"
   },
   "Header": {
     "notifications": "Notifications",

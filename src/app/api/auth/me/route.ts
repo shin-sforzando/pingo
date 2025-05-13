@@ -69,6 +69,11 @@ export async function GET(
     const userDoc = userSnapshot.data() as UserDocument;
     const user = userFromFirestore(userDoc);
 
+    // Debug output
+    console.log(
+      `ℹ️ XXX: Auth /me API - User authenticated: ${user.username} (ID: ${user.id})`,
+    );
+
     return NextResponse.json(
       {
         success: true,

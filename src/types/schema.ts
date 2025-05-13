@@ -157,9 +157,17 @@ export const gameSchema = baseSchema.extend({
  * Game creation schema
  */
 export const gameCreationSchema = z.object({
-  title: z.string().min(1, { message: "Game.errors.titleRequired" }).max(50),
-  theme: z.string().min(1, { message: "Game.errors.themeRequired" }).max(50),
-  expiresAt: z.date(),
+  title: z
+    .string()
+    .min(1, { message: "Game.errors.titleRequired" })
+    .max(50, { message: "Game.errors.titleTooLong" }),
+  theme: z
+    .string()
+    .min(1, { message: "Game.errors.themeRequired" })
+    .max(50, { message: "Game.errors.themeTooLong" }),
+  expiresAt: z
+    .date()
+    .min(new Date(), { message: "Game.errors.expiresAtInvalid" }),
   isPublic: z.boolean().default(false),
   isPhotoSharingEnabled: z.boolean().default(true),
   requiredBingoLines: z.number().int().min(1).max(5).default(1),

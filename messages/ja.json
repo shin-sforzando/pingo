@@ -9,12 +9,42 @@
     "howToPlay": "遊び方",
     "howToPlayDescription": "Pingoは、AIが写真に基づいて判定するビンゴゲームです。"
   },
+  "Game": {
+    "createNew": "新規ゲーム作成",
+    "details": "ゲーム詳細",
+    "createDescription": "ビンゴゲームのタイトルを設定し、被写体候補を追加してください。",
+    "title": "ゲームタイトル",
+    "titlePlaceholder": "タイトルを入力...",
+    "titleDescription": "ゲームのタイトルを50文字以内で入力してください",
+    "theme": "テーマ",
+    "themePlaceholder": "テーマを入力...",
+    "themeDescription": "ゲームのテーマを50文字以内で入力してください",
+    "subjects": "被写体候補",
+    "creating": "作成中...",
+    "create": "ゲームを作成",
+    "editBingoCells": "ビンゴセルを編集 ({0} / {1})",
+    "addNewSubject": "新しい被写体を追加",
+    "subjectPlaceholder": "被写体を入力...",
+    "subjectsUsageDescription": "最初の{0}個の被写体がビンゴボードに使用されます。ドラッグ＆ドロップで並べ替えができます。",
+    "boardPreview": "ボードプレビュー (5x5)",
+    "boardDescription": "最初の{0}個の被写体のみがビンゴボードに使用されます。中央のセルは常に「FREE」です。",
+    "errors": {
+      "titleRequired": "タイトルを入力してください",
+      "titleTooLong": "タイトルは50文字以内で入力してください",
+      "themeRequired": "テーマを入力してください",
+      "themeTooLong": "テーマは50文字以内で入力してください",
+      "subjectsRequired": "被写体候補を1つ以上追加してください",
+      "creationFailed": "ゲームの作成に失敗しました",
+      "expiresAtInvalid": "有効期限は現在より後の日時を指定してください"
+    }
+  },
   "Common": {
     "appName": "Pingo",
     "description": "AIが写真に基づいて判定するビンゴゲーム",
     "language": "日本語",
     "toLanguage": "English",
-    "close": "閉じる"
+    "close": "閉じる",
+    "cancel": "キャンセル"
   },
   "Header": {
     "notifications": "通知",
