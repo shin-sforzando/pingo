@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import type { Cell } from "@/types/schema";
-import { useState } from "react";
+import { useTranslations } from "next-intl";
+import { useId, useState } from "react";
 import { BingoBoard } from "./BingoBoard";
 import type { Subject } from "./SubjectList";
 import { SubjectList } from "./SubjectList";
@@ -36,8 +37,31 @@ export function GameCreationPreview({
   className,
   onSubjectsChange,
 }: GameCreationPreviewProps) {
+  // Generate stable IDs for subjects
+  const idPrefix = useId();
+
+  // Initialize with empty subjects to fill up to maxAdopted
+  const generateInitialSubjects = () => {
+    // Use provided initialSubjects
+    const subjects = [...initialSubjects];
+
+    // Fill remaining slots with empty subjects
+    const remainingCount = maxAdopted - subjects.length;
+    if (0 < remainingCount) {
+      const emptySubjects = Array.from({ length: remainingCount }, (_, i) => ({
+        id: `${idPrefix}-empty-subject-${i}`,
+        text: "",
+      }));
+      subjects.push(...emptySubjects);
+    }
+
+    return subjects;
+  };
+
   // State for subjects
-  const [subjects, setSubjects] = useState<Subject[]>(initialSubjects);
+  const [subjects, setSubjects] = useState<Subject[]>(
+    generateInitialSubjects(),
+  );
 
   // Convert subjects to cells for the bingo board
   const subjectsToCells = (subjects: Subject[]): Cell[] => {
@@ -105,6 +129,9 @@ export function GameCreationPreview({
     onSubjectsChange?.(newSubjects);
   };
 
+  // Get translations
+  const t = useTranslations();
+
   // Convert subjects to cells
   const cells = subjectsToCells(subjects);
 
@@ -113,7 +140,7 @@ export function GameCreationPreview({
       {/* Subject list */}
       <div className="space-y-4">
         <h3 className="font-semibold text-lg">
-          Edit Bingo Cells ({subjects.length} / {maxAdopted})
+          {t("Game.editBingoCells", { 0: subjects.length, 1: maxAdopted })}
         </h3>
         <SubjectList
           subjects={subjects}
@@ -124,13 +151,12 @@ export function GameCreationPreview({
 
       {/* Board preview */}
       <div className="space-y-4">
-        <h3 className="font-semibold text-lg">Board Preview (5x5)</h3>
+        <h3 className="font-semibold text-lg">{t("Game.boardPreview")}</h3>
         <div className="mx-auto max-w-md">
           <BingoBoard cells={cells} />
         </div>
         <p className="text-center text-muted-foreground text-xs">
-          Only the first {maxAdopted} subjects will be used in the bingo board.
-          The center cell is always FREE.
+          {t("Game.boardDescription", { 0: maxAdopted })}
         </p>
       </div>
     </div>

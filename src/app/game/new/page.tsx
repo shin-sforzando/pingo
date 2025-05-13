@@ -5,7 +5,6 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 
 import { GameCreationPreview } from "@/components/game/GameCreationPreview";
 import type { Subject } from "@/components/game/SubjectList";
@@ -28,17 +27,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { TranslatedFormMessage } from "@/components/ui/translated-form-message";
-
-// Define a simplified schema for game creation
-const gameCreationSchema = z.object({
-  title: z
-    .string()
-    .min(1, { message: "Game.errors.titleRequired" })
-    .max(50, { message: "Game.errors.titleTooLong" }),
-});
-
-// Type for the form data
-type GameCreationFormData = z.infer<typeof gameCreationSchema>;
+import type { GameCreationData } from "@/types/schema";
+import { gameCreationSchema } from "@/types/schema";
 
 /**
  * New Game Creation Page
@@ -61,17 +51,27 @@ export default function NewGamePage() {
   // State for error
   const [error, setError] = useState<string | null>(null);
 
+  // Default values for the form
+  const defaultValues = {
+    title: "",
+    theme: "",
+    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 1 week from now
+    isPublic: false,
+    isPhotoSharingEnabled: true,
+    requiredBingoLines: 1,
+    confidenceThreshold: 0.5,
+    notes: "",
+  } as const;
+
   // Initialize form with schema validation
-  const form = useForm<GameCreationFormData>({
+  const form = useForm({
     resolver: zodResolver(gameCreationSchema),
-    defaultValues: {
-      title: "",
-    },
+    defaultValues,
     mode: "onBlur",
   });
 
   // Handle form submission
-  async function onSubmit(values: GameCreationFormData) {
+  async function onSubmit(values: GameCreationData) {
     if (subjects.length < 1) {
       setError("Game.errors.subjectsRequired");
       return;
@@ -91,8 +91,8 @@ export default function NewGamePage() {
         subjects: subjects.map((s) => s.text),
       });
 
-      // Navigate to the games list page after creation
-      router.push("/game");
+      // Navigate to the home page after creation
+      router.push("/");
     } catch (err) {
       const errorMessage =
         err instanceof Error
@@ -134,6 +134,29 @@ export default function NewGamePage() {
                     </FormControl>
                     <FormDescription>
                       {t("Game.titleDescription")}
+                    </FormDescription>
+                    <TranslatedFormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Game theme input */}
+              <FormField
+                control={form.control}
+                name="theme"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("Game.theme")}</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder={t("Game.themePlaceholder")}
+                        data-testid="theme-input"
+                        maxLength={50}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      {t("Game.themeDescription")}
                     </FormDescription>
                     <TranslatedFormMessage />
                   </FormItem>

@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { GripVertical, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export interface SubjectItemProps {
   /**
@@ -54,6 +55,8 @@ export function SubjectItem({
   isDragging = false,
   dragHandleProps,
 }: SubjectItemProps) {
+  // Get translations
+  const t = useTranslations();
   return (
     <div
       className={cn(
@@ -87,7 +90,7 @@ export function SubjectItem({
             "focus-visible:ring-1 focus-visible:ring-primary",
           )}
           maxLength={30}
-          placeholder="Enter subject..."
+          placeholder={t("Game.subjectPlaceholder")}
         />
       </div>
 

@@ -18,6 +18,8 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Plus } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useId } from "react";
 import { SubjectItem } from "./SubjectItem";
 
 export interface Subject {
@@ -103,6 +105,9 @@ export function SubjectList({
   className,
   onSubjectsChange,
 }: SubjectListProps) {
+  // Generate stable IDs for subjects
+  const idPrefix = useId();
+
   // Set up sensors for drag and drop
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -129,11 +134,14 @@ export function SubjectList({
   const handleAddSubject = () => {
     const newSubjects = [...subjects];
     newSubjects.push({
-      id: `subject-${Date.now()}`,
+      id: `${idPrefix}-subject-${subjects.length}`,
       text: "",
     });
     onSubjectsChange(newSubjects);
   };
+
+  // Get translations
+  const t = useTranslations();
 
   // Handle drag end event
   const handleDragEnd = (event: DragEndEvent) => {
@@ -142,6 +150,13 @@ export function SubjectList({
     if (over && active.id !== over.id) {
       const oldIndex = subjects.findIndex((s) => s.id === active.id);
       const newIndex = subjects.findIndex((s) => s.id === over.id);
+
+      if (oldIndex === -1 || newIndex === -1) {
+        console.error(
+          `Invalid drag and drop operation: oldIndex=${oldIndex}, newIndex=${newIndex}`,
+        );
+        return;
+      }
 
       const newSubjects = arrayMove(subjects, oldIndex, newIndex);
       onSubjectsChange(newSubjects);
@@ -175,20 +190,18 @@ export function SubjectList({
       </div>
 
       <Button
+        type="button"
         variant="outline"
         size="sm"
         onClick={handleAddSubject}
         className="w-full"
       >
         <Plus className="mr-2 h-4 w-4" />
-        Add New Subject
+        {t("Game.addNewSubject")}
       </Button>
 
       <div className="text-muted-foreground text-xs">
-        <p>
-          The first {maxAdopted} subjects will be used in the bingo board. Drag
-          and drop to reorder.
-        </p>
+        <p>{t("Game.subjectsUsageDescription", { 0: maxAdopted })}</p>
       </div>
     </div>
   );
