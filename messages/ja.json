@@ -9,12 +9,30 @@
     "howToPlay": "遊び方",
     "howToPlayDescription": "Pingoは、AIが写真に基づいて判定するビンゴゲームです。"
   },
+  "Game": {
+    "createNew": "新規ゲーム作成",
+    "details": "ゲーム詳細",
+    "createDescription": "ビンゴゲームのタイトルを設定し、被写体候補を追加してください。",
+    "title": "ゲームタイトル",
+    "titlePlaceholder": "タイトルを入力...",
+    "titleDescription": "ゲームのタイトルを50文字以内で入力してください",
+    "subjects": "被写体候補",
+    "creating": "作成中...",
+    "create": "ゲームを作成",
+    "errors": {
+      "titleRequired": "タイトルを入力してください",
+      "titleTooLong": "タイトルは50文字以内で入力してください",
+      "subjectsRequired": "被写体候補を1つ以上追加してください",
+      "creationFailed": "ゲームの作成に失敗しました"
+    }
+  },
   "Common": {
     "appName": "Pingo",
     "description": "AIが写真に基づいて判定するビンゴゲーム",
     "language": "日本語",
     "toLanguage": "English",
-    "close": "閉じる"
+    "close": "閉じる",
+    "cancel": "キャンセル"
   },
   "Header": {
     "notifications": "通知",
