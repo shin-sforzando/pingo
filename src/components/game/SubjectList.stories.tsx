@@ -68,74 +68,25 @@ const generateSampleSubjects = (count: number): Subject[] => {
   return subjects;
 };
 
+const renderWithState = (args: React.ComponentProps<typeof SubjectList>) => {
+  const [subjects, setSubjects] = useState<Subject[]>(
+    args.subjects || generateSampleSubjects(10),
+  );
+  return (
+    <SubjectList
+      {...args}
+      subjects={subjects}
+      onSubjectsChange={(newSubjects) => {
+        console.log("Subjects changed:", newSubjects);
+        setSubjects(newSubjects);
+      }}
+    />
+  );
+};
+
 // All stories with interactive state
 export const Default: Story = {
-  render: function Render(args) {
-    const [subjects, setSubjects] = useState(
-      args.subjects || generateSampleSubjects(10),
-    );
-
-    return (
-      <SubjectList
-        {...args}
-        subjects={subjects}
-        onSubjectsChange={(newSubjects) => {
-          console.log("Subjects changed:", newSubjects);
-          setSubjects(newSubjects);
-        }}
-      />
-    );
-  },
-  args: {
-    maxAdopted: 24,
-    subjects: generateSampleSubjects(10),
-    onSubjectsChange: (_newSubjects) => {},
-  },
-};
-
-// With exactly 24 subjects (all adopted)
-export const ExactlyMaxAdopted: Story = {
-  render: function Render(args) {
-    const [subjects, setSubjects] = useState(
-      args.subjects || generateSampleSubjects(24),
-    );
-
-    return (
-      <SubjectList
-        {...args}
-        subjects={subjects}
-        onSubjectsChange={(newSubjects) => {
-          console.log("Subjects changed:", newSubjects);
-          setSubjects(newSubjects);
-        }}
-      />
-    );
-  },
-  args: {
-    maxAdopted: 24,
-    subjects: generateSampleSubjects(24),
-    onSubjectsChange: (_newSubjects) => {},
-  },
-};
-
-// With more than max subjects (some not adopted)
-export const MoreThanMaxAdopted: Story = {
-  render: function Render(args) {
-    const [subjects, setSubjects] = useState(
-      args.subjects || generateSampleSubjects(30),
-    );
-
-    return (
-      <SubjectList
-        {...args}
-        subjects={subjects}
-        onSubjectsChange={(newSubjects) => {
-          console.log("Subjects changed:", newSubjects);
-          setSubjects(newSubjects);
-        }}
-      />
-    );
-  },
+  render: renderWithState,
   args: {
     maxAdopted: 24,
     subjects: generateSampleSubjects(30),
@@ -143,22 +94,19 @@ export const MoreThanMaxAdopted: Story = {
   },
 };
 
+// With exactly 24 subjects (all adopted)
+export const ExactlyMaxAdopted: Story = {
+  render: renderWithState,
+  args: {
+    maxAdopted: 24,
+    subjects: generateSampleSubjects(24),
+    onSubjectsChange: (_newSubjects) => {},
+  },
+};
+
 // With empty subjects
 export const EmptyList: Story = {
-  render: function Render(args) {
-    const [subjects, setSubjects] = useState(args.subjects || []);
-
-    return (
-      <SubjectList
-        {...args}
-        subjects={subjects}
-        onSubjectsChange={(newSubjects) => {
-          console.log("Subjects changed:", newSubjects);
-          setSubjects(newSubjects);
-        }}
-      />
-    );
-  },
+  render: renderWithState,
   args: {
     maxAdopted: 24,
     subjects: [],
@@ -168,22 +116,7 @@ export const EmptyList: Story = {
 
 // With custom styling
 export const WithCustomStyling: Story = {
-  render: function Render(args) {
-    const [subjects, setSubjects] = useState(
-      args.subjects || generateSampleSubjects(10),
-    );
-
-    return (
-      <SubjectList
-        {...args}
-        subjects={subjects}
-        onSubjectsChange={(newSubjects) => {
-          console.log("Subjects changed:", newSubjects);
-          setSubjects(newSubjects);
-        }}
-      />
-    );
-  },
+  render: renderWithState,
   args: {
     maxAdopted: 24,
     subjects: generateSampleSubjects(10),

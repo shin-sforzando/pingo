@@ -1,4 +1,5 @@
 import type { Cell } from "@/types/schema";
+import { fakerJA as faker } from "@faker-js/faker";
 import type { Meta, StoryObj } from "@storybook/react";
 import { BingoBoard } from "./BingoBoard";
 import type { BingoCellState } from "./BingoCell";
@@ -21,32 +22,9 @@ type Story = StoryObj<typeof meta>;
 // Generate sample cells for a 5x5 board
 const generateSampleCells = (): Cell[] => {
   const cells: Cell[] = [];
-  const subjects = [
-    "Red car",
-    "Blue sky",
-    "Green tree",
-    "Yellow flower",
-    "White cloud",
-    "Black cat",
-    "Brown dog",
-    "Orange fruit",
-    "Purple grape",
-    "Pink flamingo",
-    "Gray elephant",
-    "Silver spoon",
-    "Golden ring",
-    "Bronze medal",
-    "Copper penny",
-    "Teal ocean",
-    "Magenta sunset",
-    "Cyan river",
-    "Lime leaf",
-    "Indigo night",
-    "Violet flower",
-    "Crimson rose",
-    "Amber light",
-    "Turquoise gem",
-  ];
+  const subjects = faker.helpers.multiple(() => faker.lorem.word(), {
+    count: 24,
+  });
 
   for (let y = 0; y < 5; y++) {
     for (let x = 0; x < 5; x++) {

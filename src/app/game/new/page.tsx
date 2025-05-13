@@ -105,8 +105,8 @@ export default function NewGamePage() {
   }
 
   return (
-    <div className="container py-8 space-y-8">
-      <h1 className="text-3xl font-bold">{t("Game.createNew")}</h1>
+    <div className="container space-y-8 py-8">
+      <h1 className="font-bold text-3xl">{t("Game.createNew")}</h1>
 
       <Card>
         <CardHeader>
@@ -142,14 +142,14 @@ export default function NewGamePage() {
 
               {/* Game creation preview */}
               <div className="space-y-2">
-                <h3 className="text-sm font-medium">{t("Game.subjects")}</h3>
+                <h3 className="font-medium text-sm">{t("Game.subjects")}</h3>
                 <GameCreationPreview
                   initialSubjects={subjects}
                   onSubjectsChange={setSubjects}
                 />
                 {subjects.length < 1 &&
                   error === "Game.errors.subjectsRequired" && (
-                    <div className="text-sm font-medium text-destructive">
+                    <div className="font-medium text-destructive text-sm">
                       {t("Game.errors.subjectsRequired")}
                     </div>
                   )}

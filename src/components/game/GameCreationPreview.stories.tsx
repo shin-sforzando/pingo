@@ -1,3 +1,4 @@
+import { fakerJA as faker } from "@faker-js/faker";
 import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
 import { GameCreationPreview } from "./GameCreationPreview";
@@ -26,32 +27,9 @@ type Story = StoryObj<typeof meta>;
 // Generate sample subjects
 const generateSampleSubjects = (count: number): Subject[] => {
   const subjects: Subject[] = [];
-  const sampleTexts = [
-    "Red car",
-    "Blue sky",
-    "Green tree",
-    "Yellow flower",
-    "White cloud",
-    "Black cat",
-    "Brown dog",
-    "Orange fruit",
-    "Purple grape",
-    "Pink flamingo",
-    "Gray elephant",
-    "Silver spoon",
-    "Golden ring",
-    "Bronze medal",
-    "Copper penny",
-    "Teal ocean",
-    "Magenta sunset",
-    "Cyan river",
-    "Lime leaf",
-    "Indigo night",
-    "Violet flower",
-    "Crimson rose",
-    "Amber light",
-    "Turquoise gem",
-  ];
+  const sampleTexts = faker.helpers.multiple(() => faker.lorem.word(), {
+    count: 24,
+  });
 
   for (let i = 0; i < count; i++) {
     subjects.push({
@@ -63,72 +41,37 @@ const generateSampleSubjects = (count: number): Subject[] => {
   return subjects;
 };
 
-// Interactive story with state
-export const Default: Story = {
-  render: function Render(args) {
-    const [subjects, setSubjects] = useState<Subject[]>(
-      args.initialSubjects || generateSampleSubjects(10),
-    );
+const renderWithState = (
+  args: React.ComponentProps<typeof GameCreationPreview>,
+) => {
+  const [subjects, setSubjects] = useState<Subject[]>(
+    args.initialSubjects || [],
+  );
 
-    return (
-      <GameCreationPreview
-        {...args}
-        initialSubjects={subjects}
-        onSubjectsChange={(newSubjects) => {
-          console.log("Subjects changed:", newSubjects);
-          setSubjects(newSubjects);
-        }}
-      />
-    );
-  },
-  args: {
-    maxAdopted: 24,
-    initialSubjects: generateSampleSubjects(10),
-  },
+  return (
+    <GameCreationPreview
+      {...args}
+      initialSubjects={subjects}
+      onSubjectsChange={(newSubjects) => {
+        console.log("Subjects changed:", newSubjects);
+        setSubjects(newSubjects);
+      }}
+    />
+  );
 };
 
-// With exactly 24 subjects (all adopted)
-export const FullBoard: Story = {
-  render: function Render(args) {
-    const [subjects, setSubjects] = useState<Subject[]>(
-      args.initialSubjects || generateSampleSubjects(24),
-    );
-
-    return (
-      <GameCreationPreview
-        {...args}
-        initialSubjects={subjects}
-        onSubjectsChange={(newSubjects) => {
-          console.log("Subjects changed:", newSubjects);
-          setSubjects(newSubjects);
-        }}
-      />
-    );
-  },
+// Interactive story with state
+export const Default: Story = {
+  render: renderWithState,
   args: {
     maxAdopted: 24,
-    initialSubjects: generateSampleSubjects(24),
+    initialSubjects: generateSampleSubjects(30),
   },
 };
 
 // With empty subjects
 export const EmptyBoard: Story = {
-  render: function Render(args) {
-    const [subjects, setSubjects] = useState<Subject[]>(
-      args.initialSubjects || [],
-    );
-
-    return (
-      <GameCreationPreview
-        {...args}
-        initialSubjects={subjects}
-        onSubjectsChange={(newSubjects) => {
-          console.log("Subjects changed:", newSubjects);
-          setSubjects(newSubjects);
-        }}
-      />
-    );
-  },
+  render: renderWithState,
   args: {
     maxAdopted: 24,
     initialSubjects: [],
@@ -137,54 +80,10 @@ export const EmptyBoard: Story = {
 
 // With custom styling
 export const WithCustomStyling: Story = {
-  render: function Render(args) {
-    const [subjects, setSubjects] = useState<Subject[]>(
-      args.initialSubjects || generateSampleSubjects(10),
-    );
-
-    return (
-      <GameCreationPreview
-        {...args}
-        initialSubjects={subjects}
-        onSubjectsChange={(newSubjects) => {
-          console.log("Subjects changed:", newSubjects);
-          setSubjects(newSubjects);
-        }}
-      />
-    );
-  },
+  render: renderWithState,
   args: {
     maxAdopted: 24,
     initialSubjects: generateSampleSubjects(10),
     className: "bg-muted p-4 rounded-xl",
-  },
-};
-
-// Responsive display
-export const Responsive: Story = {
-  render: function Render(args) {
-    const [subjects, setSubjects] = useState<Subject[]>(
-      args.initialSubjects || generateSampleSubjects(10),
-    );
-
-    return (
-      <GameCreationPreview
-        {...args}
-        initialSubjects={subjects}
-        onSubjectsChange={(newSubjects) => {
-          console.log("Subjects changed:", newSubjects);
-          setSubjects(newSubjects);
-        }}
-      />
-    );
-  },
-  args: {
-    maxAdopted: 24,
-    initialSubjects: generateSampleSubjects(10),
-  },
-  parameters: {
-    viewport: {
-      defaultViewport: "mobile1",
-    },
   },
 };

@@ -97,19 +97,6 @@ export const CompletedLine: Story = {
   },
 };
 
-// Responsive display
-export const Responsive: Story = {
-  args: {
-    cell: sampleCell,
-    state: "CLOSE",
-  },
-  parameters: {
-    viewport: {
-      defaultViewport: "mobile1",
-    },
-  },
-};
-
 // Different sizes
 export const Small: Story = {
   args: {

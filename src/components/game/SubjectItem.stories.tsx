@@ -1,3 +1,4 @@
+import { fakerJA as faker } from "@faker-js/faker";
 import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
 import { SubjectItem } from "./SubjectItem";
@@ -27,25 +28,27 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+const renderWithState = (args: React.ComponentProps<typeof SubjectItem>) => {
+  const [subject, setSubject] = useState(args.subject);
+
+  return (
+    <SubjectItem
+      {...args}
+      subject={subject}
+      onSubjectChange={(value, index) => {
+        console.log(`Subject changed to: ${value} at index: ${index}`);
+        setSubject(value);
+      }}
+      onDelete={(index) => console.log(`Delete subject at index: ${index}`)}
+    />
+  );
+};
+
 // Basic states with interactive editing
 export const Default: Story = {
-  render: function Render(args) {
-    const [subject, setSubject] = useState(args.subject || "Red car");
-
-    return (
-      <SubjectItem
-        {...args}
-        subject={subject}
-        onSubjectChange={(value, index) => {
-          console.log(`Subject changed to: ${value} at index: ${index}`);
-          setSubject(value);
-        }}
-        onDelete={(index) => console.log(`Delete subject at index: ${index}`)}
-      />
-    );
-  },
+  render: renderWithState,
   args: {
-    subject: "Red car",
+    subject: faker.lorem.word({ length: { min: 5, max: 20 } }),
     isAdopted: false,
     index: 0,
     onSubjectChange: () => {},
@@ -54,23 +57,9 @@ export const Default: Story = {
 };
 
 export const Adopted: Story = {
-  render: function Render(args) {
-    const [subject, setSubject] = useState(args.subject || "Red car");
-
-    return (
-      <SubjectItem
-        {...args}
-        subject={subject}
-        onSubjectChange={(value, index) => {
-          console.log(`Subject changed to: ${value} at index: ${index}`);
-          setSubject(value);
-        }}
-        onDelete={(index) => console.log(`Delete subject at index: ${index}`)}
-      />
-    );
-  },
+  render: renderWithState,
   args: {
-    subject: "Red car",
+    subject: faker.lorem.word({ length: { min: 5, max: 20 } }),
     isAdopted: true,
     index: 0,
     onSubjectChange: () => {},
@@ -79,24 +68,7 @@ export const Adopted: Story = {
 };
 
 export const WithLongText: Story = {
-  render: function Render(args) {
-    const [subject, setSubject] = useState(
-      args.subject ||
-        "A very long subject that might need to be truncated or wrapped in some way",
-    );
-
-    return (
-      <SubjectItem
-        {...args}
-        subject={subject}
-        onSubjectChange={(value, index) => {
-          console.log(`Subject changed to: ${value} at index: ${index}`);
-          setSubject(value);
-        }}
-        onDelete={(index) => console.log(`Delete subject at index: ${index}`)}
-      />
-    );
-  },
+  render: renderWithState,
   args: {
     subject:
       "A very long subject that might need to be truncated or wrapped in some way",
@@ -108,21 +80,7 @@ export const WithLongText: Story = {
 };
 
 export const Empty: Story = {
-  render: function Render(args) {
-    const [subject, setSubject] = useState(args.subject || "");
-
-    return (
-      <SubjectItem
-        {...args}
-        subject={subject}
-        onSubjectChange={(value, index) => {
-          console.log(`Subject changed to: ${value} at index: ${index}`);
-          setSubject(value);
-        }}
-        onDelete={(index) => console.log(`Delete subject at index: ${index}`)}
-      />
-    );
-  },
+  render: renderWithState,
   args: {
     subject: "",
     isAdopted: false,
@@ -133,23 +91,9 @@ export const Empty: Story = {
 };
 
 export const Dragging: Story = {
-  render: function Render(args) {
-    const [subject, setSubject] = useState(args.subject || "Red car");
-
-    return (
-      <SubjectItem
-        {...args}
-        subject={subject}
-        onSubjectChange={(value, index) => {
-          console.log(`Subject changed to: ${value} at index: ${index}`);
-          setSubject(value);
-        }}
-        onDelete={(index) => console.log(`Delete subject at index: ${index}`)}
-      />
-    );
-  },
+  render: renderWithState,
   args: {
-    subject: "Red car",
+    subject: faker.lorem.word({ length: { min: 5, max: 20 } }),
     isAdopted: true,
     index: 0,
     isDragging: true,
@@ -160,23 +104,9 @@ export const Dragging: Story = {
 
 // Different indices
 export const WithHighIndex: Story = {
-  render: function Render(args) {
-    const [subject, setSubject] = useState(args.subject || "Red car");
-
-    return (
-      <SubjectItem
-        {...args}
-        subject={subject}
-        onSubjectChange={(value, index) => {
-          console.log(`Subject changed to: ${value} at index: ${index}`);
-          setSubject(value);
-        }}
-        onDelete={(index) => console.log(`Delete subject at index: ${index}`)}
-      />
-    );
-  },
+  render: renderWithState,
   args: {
-    subject: "Red car",
+    subject: faker.lorem.word({ length: { min: 5, max: 20 } }),
     isAdopted: true,
     index: 23, // Last index in a 5x5 bingo board (excluding center)
     onSubjectChange: () => {},
@@ -186,23 +116,9 @@ export const WithHighIndex: Story = {
 
 // With custom styling
 export const WithCustomStyling: Story = {
-  render: function Render(args) {
-    const [subject, setSubject] = useState(args.subject || "Red car");
-
-    return (
-      <SubjectItem
-        {...args}
-        subject={subject}
-        onSubjectChange={(value, index) => {
-          console.log(`Subject changed to: ${value} at index: ${index}`);
-          setSubject(value);
-        }}
-        onDelete={(index) => console.log(`Delete subject at index: ${index}`)}
-      />
-    );
-  },
+  render: renderWithState,
   args: {
-    subject: "Red car",
+    subject: faker.lorem.word({ length: { min: 5, max: 20 } }),
     isAdopted: true,
     index: 0,
     className: "bg-accent text-accent-foreground",
