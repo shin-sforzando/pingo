@@ -97,7 +97,7 @@ export default function NewGamePage() {
       const errorMessage =
         err instanceof Error
           ? err.message
-          : String(err) || "Game.errors.creationFailed";
+          : String(err) || t("Game.errors.creationFailed");
       setError(errorMessage);
     } finally {
       setIsCreating(false);
@@ -172,7 +172,11 @@ export default function NewGamePage() {
                 />
                 {subjects.length < 1 &&
                   error === "Game.errors.subjectsRequired" && (
-                    <div className="font-medium text-destructive text-sm">
+                    <div
+                      className="font-medium text-destructive text-sm"
+                      role="alert"
+                      aria-live="polite"
+                    >
                       {t("Game.errors.subjectsRequired")}
                     </div>
                   )}
