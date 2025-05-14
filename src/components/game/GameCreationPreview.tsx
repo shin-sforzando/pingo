@@ -1,3 +1,5 @@
+"use client";
+
 import { cn } from "@/lib/utils";
 import type { Cell } from "@/types/schema";
 import { useTranslations } from "next-intl";
