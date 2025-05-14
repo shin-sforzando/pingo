@@ -50,12 +50,31 @@
     "notifications": "Notifications",
     "notificationsDescription": "Show your latest notifications",
     "profileSettings": "Profile",
+    "profile": "Profile",
+    "recentGames": "Recent Games",
+    "noNotifications": "No notifications",
     "logout": "Logout",
     "loggedInAs": "Logged in as:"
   },
   "Footer": {
     "copyright": "© {year} Pingo",
     "termsOfService": "Terms of Service"
+  },
+  "Notification": {
+    "system_notification": "System notification",
+    "account_registered": "Account registered",
+    "login": "Logged in",
+    "logout": "Logged out",
+    "game_invitation": "You have been invited to a game",
+    "game_started": "Game has started",
+    "game_ended": "Game has ended",
+    "player_achieved_bingo": "You achieved bingo",
+    "player_completed_game": "You completed the game",
+    "someone_achieved_bingo": "Another player achieved bingo",
+    "someone_completed_game": "Another player completed the game",
+    "new_submission": "New photo submitted",
+    "submission_accepted": "Photo accepted",
+    "submission_rejected": "Photo rejected"
   },
   "Auth": {
     "register": "Register",

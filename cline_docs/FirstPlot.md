@@ -622,24 +622,24 @@ LLMからの応答はMarkdownである可能性が高いので、Markdownをそ�
 
 ### ゲーム管理API
 
-- ゲーム作成: `/api/games/create`
-- ゲーム情報取得: `/api/games/[gameId]`
-- ゲーム参加: `/api/games/[gameId]/join`
-- ゲーム設定更新: `/api/games/[gameId]/update`
-- ゲーム終了: `/api/games/[gameId]/end`
-- 公開ゲーム一覧取得: `/api/games/public`
-- 参加中ゲーム一覧取得: `/api/games/participating`
-- 管理者追加: `/api/games/[gameId]/admins/add`
-- 参加者一覧取得: `/api/games/[gameId]/participants`
+- ゲーム作成: `/api/game/create`
+- ゲーム情報取得: `/api/game/[gameId]`
+- ゲーム参加: `/api/game/[gameId]/join`
+- ゲーム設定更新: `/api/game/[gameId]/update`
+- ゲーム終了: `/api/game/[gameId]/end`
+- 公開ゲーム一覧取得: `/api/game/public`
+- 参加中ゲーム一覧取得: `/api/game/participating`
+- 管理者追加: `/api/game/[gameId]/admins/add`
+- 参加者一覧取得: `/api/game/[gameId]/participants`
 
 ### 画像処理API
 
-- 署名付きURL取得: `/api/images/getUploadUrl` (GCSへの直接アップロード用)
-- 画像処理: `/api/images/process` (アップロード完了通知と画像判定)
-- ゲーム画像一覧取得: `/api/games/[gameId]/images` (写真共有設定に応じて全参加者または自分の画像のみ)
+- 署名付きURL取得: `/api/image/getUploadUrl` (GCSへの直接アップロード用)
+- 画像処理: `/api/image/process` (アップロード完了通知と画像判定)
+- ゲーム画像一覧取得: `/api/game/[gameId]/images` (写真共有設定に応じて全参加者または自分の画像のみ)
   - 自分の画像一覧: `acceptanceStatus != null && acceptanceStatus != "inappropriate_content"`
   - 他のプレイヤーの画像: `acceptanceStatus == "accepted"`
-- セル画像一覧取得: `/api/games/[gameId]/cells/[cellId]/images` (特定のセルに対する画像)
+- セル画像一覧取得: `/api/game/[gameId]/cells/[cellId]/images` (特定のセルに対する画像)
 
 #### 画像処理フロー
 

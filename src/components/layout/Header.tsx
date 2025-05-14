@@ -1,9 +1,16 @@
+"use client";
+
+import { useAuth } from "@/contexts/AuthContext";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
+import type { ReactElement } from "react";
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import { NotificationIcon } from "./NotificationIcon";
+import { UserMenu } from "./UserMenu";
 
-export function Header() {
+export function Header(): ReactElement {
   const t = useTranslations("Common");
+  const { user } = useAuth();
 
   return (
     <header className="sticky top-0 z-50 w-full bg-background/70 backdrop-invert">
@@ -17,7 +24,14 @@ export function Header() {
           </Link>
         </div>
         <div className="flex flex-1 items-center justify-end gap-2">
-          <LanguageSwitcher />
+          {user ? (
+            <>
+              <NotificationIcon hasUnreadNotifications={true} />
+              <UserMenu />
+            </>
+          ) : (
+            <LanguageSwitcher />
+          )}
         </div>
       </div>
     </header>

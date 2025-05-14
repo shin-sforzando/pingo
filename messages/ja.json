@@ -50,12 +50,31 @@
     "notifications": "通知",
     "notificationsDescription": "最新の通知を表示します",
     "profileSettings": "プロフィール",
+    "profile": "プロフィール",
+    "recentGames": "最近のゲーム",
+    "noNotifications": "通知はありません",
     "logout": "ログアウト",
     "loggedInAs": "ログイン中："
   },
   "Footer": {
     "copyright": "© {year} Pingo",
     "termsOfService": "サービス利用規約"
+  },
+  "Notification": {
+    "system_notification": "システム通知",
+    "account_registered": "アカウントが登録されました",
+    "login": "ログインしました",
+    "logout": "ログアウトしました",
+    "game_invitation": "ゲームに招待されました",
+    "game_started": "ゲームが開始されました",
+    "game_ended": "ゲームが終了しました",
+    "player_achieved_bingo": "ビンゴを達成しました",
+    "player_completed_game": "ゲームを完了しました",
+    "someone_achieved_bingo": "他のプレイヤーがビンゴを達成しました",
+    "someone_completed_game": "他のプレイヤーがゲームを完了しました",
+    "new_submission": "新しい写真が提出されました",
+    "submission_accepted": "写真が承認されました",
+    "submission_rejected": "写真が拒否されました"
   },
   "Auth": {
     "register": "新規登録",
