@@ -39,7 +39,11 @@ export default defineConfig({
       reportsDirectory: "./coverage",
       exclude: [
         "next.config.ts", // Exclude Next.js config
+        "playwright.config.ts", // Exclude Playwright config
         "postcss.config.mjs", // Exclude PostCSS config
+        "scripts/**/*.ts", // Exclude scripts
+        "src/components/ui/*.tsx", // Exclude shadcn/ui components
+        "src/components/magicui/*.tsx", // Exclude Magic UI components
         "src/i18n/*.ts", // Exclude i18n config
         "**/*.stories.{ts,tsx}", // Exclude Storybook stories
         "**/stories/example/*.tsx", // Exclude example stories
