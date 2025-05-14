@@ -229,21 +229,24 @@ src/types/
 
 ### ゲーム管理API
 
-- ゲーム作成: `/api/games/create`
-- ゲーム情報取得: `/api/games/[gameId]`
-- ゲーム参加: `/api/games/[gameId]/join`
-- ゲーム設定更新: `/api/games/[gameId]/update`
-- ゲーム終了: `/api/games/[gameId]/end`
-- 公開ゲーム一覧取得: `/api/games/public`
-- 参加中ゲーム一覧取得: `/api/games/participating`
-- 管理者追加: `/api/games/[gameId]/admins/add`
-- 参加者一覧取得: `/api/games/[gameId]/participants`
+- ゲーム作成: `/api/game/create`
+- ゲーム情報取得: `/api/game/[gameId]`
+- ゲーム参加: `/api/game/[gameId]/join`
+- ゲーム設定更新: `/api/game/[gameId]/update`
+- ゲーム終了: `/api/game/[gameId]/end`
+- 公開ゲーム一覧取得: `/api/game/public`
+- 参加中ゲーム一覧取得: `/api/game/participating`
+- 管理者追加: `/api/game/[gameId]/admins/add`
+- 参加者一覧取得: `/api/game/[gameId]/participants`
+- 被写体候補の列挙: `/api/game/generate-subjects`
+- 被写体候補文字列の公序良俗チェック: `/api/game/check-moral`
 
 ### 画像処理API
 
-- 署名付きURL取得: `/api/images/getUploadUrl` (GCSへの直接アップロード用)
-- 画像処理: `/api/images/process` (アップロード完了通知と画像判定)
-- ゲーム画像一覧取得: `/api/games/[gameId]/images` (写真共有設定に応じて全参加者または自分の画像のみ)
+- 署名付きURL取得: `/api/image/getUploadUrl` (GCSへの直接アップロード用)
+- 画像の公序良俗チェック: `/api/image/check-moral`
+- 画像判定処理: `/api/image/process` (画像内被写体の識別)
+- ゲーム画像一覧取得: `/api/game/[gameId]/images` (写真共有設定に応じて全参加者または自分の画像のみ)
   - 自分の画像一覧: `acceptanceStatus != null && acceptanceStatus != "inappropriate_content"`
   - 他のプレイヤーの画像: `acceptanceStatus == "accepted"`
 - セル画像一覧取得: `/api/games/[gameId]/cells/[cellId]/images` (特定のセルに対する画像)
@@ -257,16 +260,18 @@ sequenceDiagram
     participant GCS as Google Cloud Storage
     participant Gemini as Google Gemini API
 
+    Client->>Client: 画像の変換とリサイズ
     Client->>Server: 署名付きURL要求
     Server->>Client: 署名付きURL応答
-    
-    Client->>GCS: 画像アップロード (リサイズ・変換済み)
+    Client->>GCS: 変換済みの画像をアップロード
     GCS->>Client: アップロード完了
-    
     Client->>Server: アップロード完了通知
-    Server->>Gemini: 画像解析要求 (GCS URL)
-    Gemini->>Server: 解析結果応答
-    Server->>Client: 解析結果応答
+    Server->>Gemini: 画像の公序良俗チェック (GCS URL)
+    Gemini->>Server: 結果応答
+    Server->>Client: （公序良俗に反していれば）結果応答
+    Server->>Gemini: 画像判定要求 (GCS URL)
+    Gemini->>Server: 結果応答
+    Server->>Client: 結果応答
 ```
 
 ## リアルタイム機能
@@ -296,9 +301,6 @@ Google Cloud Storageの階層機能を活用し、ゲームIDごとにフォル�
 
 ## UI/UXデザイン
 
-> [!NOTE]
-> UI/UXの詳細な実装上の懸念点や各コンポーネントの詳細説明については、`./cline_docs/FirstPlot.md`を参照してください。
-
 ### デザインシステム
 
 #### カラーパレット
@@ -310,7 +312,7 @@ Google Cloud Storageの階層機能を活用し、ゲームIDごとにフォル�
 - #ff2e63 = `oklch(0.65 0.2381 13.77)` (セカンダリ/アクセント)
 - #eaeaea = `oklch(0.94 0 0)` (バックグラウンド)
 
-これらの色はglobals.cssでテーマ変数として定義され、各カラーのバリエーション（50-950）も用意する。
+これらの色は `/src/app/globals.css` でテーマ変数として定義され、各カラーのバリエーション（50-950）も用意する。
 
 #### タイポグラフィ
 
@@ -324,9 +326,9 @@ Google Cloud Storageの階層機能を活用し、ゲームIDごとにフォル�
 
 #### アクセシビリティ
 
-- 色覚異常者への配慮：選定した4色のコントラスト比を確認し、WCAG AAレベルを満たす
 - スクリーンリーダー対応：適切なaria属性を使用
 - タッチターゲットは最低44x44pxを確保し、操作性を向上
+- 色覚異常者への配慮：選定した4色のコントラスト比を確認し、WCAG AAレベルを満たす
 
 ### 画面設計
 
@@ -346,17 +348,10 @@ Google Cloud Storageの階層機能を活用し、ゲームIDごとにフォル�
 12. お問い合わせ (`/contact`)
 13. エラー画面 (`/error`)
 14. システム管理画面 (`/config`)
-15. ヘルスチェック画面 (`/health`)
 
 ### コンポーネント設計
 
 可能な限り [shadcn/ui](https://ui.shadcn.com)を活用する。
-
-コンポーネントは以下のカテゴリに分類：
-
-1. **基本UI要素**: Button, InputField, Modal, Tooltip, Tabs, Dropdown, Toggle, Slider
-2. **機能コンポーネント**: Countdown Timer, Confirmation Dialog, Loading Indicator, Error Boundary
-3. **複合コンポーネント**: Header, Footer, Notification Toast, Image pop-up, User Register, User Login/Logout, Bingo Cell, Bingo Board, Image Submit, Image Grid, Subject Card, Subjects List, Game ID Input, Game Card, Game List, Game Detail, Players List, QR Code, Speech Bubble
 
 #### 実装済みコンポーネント
 
@@ -365,32 +360,41 @@ Google Cloud Storageの階層機能を活用し、ゲームIDごとにフォル�
 モバイルファーストで設計されたヘッダーコンポーネント。以下の機能を含む：
 
 - 中央配置されたシステム名「Pingo」（クリックでホームページに遷移）
-- 右上に通知アイコン（Ghostスタイルのボタン + Bellアイコン）
-  - クリックで下部からDrawerを表示
-  - Drawer内のタイトルと説明は多言語対応
-- ユーザーアバター（クリック可能）
-  - クリックでPopoverメニューを表示
-  - メニュー内には以下の項目：
-    - プロフィール設定（Userアイコン付き）
-    - 言語切り替え（Languagesアイコン付き）
-    - ログアウト（LogOutアイコン付き）
+- 認証状態に応じた表示切り替え
+  - 非ログイン時: 右上に言語切り替えボタン
+  - ログイン時: 右上に通知アイコンとユーザーメニュー
 
-**実装ファイル**:
+##### UserMenu
 
-- `src/components/layout/Header.tsx`
-- `src/components/layout/NotificationDrawer.tsx`
-- `src/components/layout/UserMenu.tsx`
-- `src/components/layout/LanguageSwitcher.tsx`
+ユーザーメニューコンポーネント。以下の機能を含む：
 
-**使用コンポーネント**:
+- ユーザー名の1文字目を丸く囲ったAvatarを表示
+- クリックするとドロップダウンメニューを表示
+  - ユーザー名
+  - プロフィールリンク（Userアイコン付き）
+  - 言語切り替え（Languagesアイコン付き）
+  - 参加中のゲーム最新5件（存在する場合）
+  - ログアウト（LogOutアイコン付き）
 
-- shadcn/ui: Avatar, Button, Drawer, Popover, Separator
-- lucide-react: Bell, User, Languages, LogOut
+##### NotificationIcon
 
-**テスト**:
+通知アイコンコンポーネント。以下の機能を含む：
 
-- Vitest Browser Modeを使用したテスト
-- Storybookストーリーによる視覚的テスト
+- 鐘アイコンを表示
+- 未読通知がある場合は右上に赤いドットでハイライト
+- クリックすると画面下部からNotificationDrawerを表示
+
+##### NotificationDrawer
+
+通知ドロワーコンポーネント。以下の機能を含む：
+
+- 画面下部から表示されるドロワー
+- 通知一覧の表示
+  - 未読通知は背景色で強調表示
+  - 通知メッセージは多言語対応（ゲーム名 + 翻訳されたメッセージ）
+  - 通知の日時は日付と時間の両方を表示
+- 通知がない場合は「通知はありません」と表示
+- 閉じるボタン
 
 ##### Footer
 
@@ -403,16 +407,6 @@ Google Cloud Storageの階層機能を活用し、ゲームIDごとにフォル�
 **実装ファイル**:
 
 - `src/components/layout/Footer.tsx`
-
-**使用コンポーネント**:
-
-- next/image: Image
-- next/link: Link
-
-**テスト**:
-
-- Vitest Browser Modeを使用したテスト
-- Storybookストーリーによる視覚的テスト
 
 ## トランジションとアニメーション
 
@@ -438,31 +432,24 @@ View Transition APIを活用したトランジションを実装する。
 
 ## セキュリティ設計
 
-### 認証セキュリティ
-
-- Firebase Authenticationを使用した安全な認証
-- パスワードの強度要件を設定（最低8文字、英数字混在など）
-- ログイン試行回数の制限を実装
-
-### データアクセス制御
-
-- Firestoreセキュリティルールによる厳格なアクセス制御
-  - ゲーム参加者は自分のプレイヤーボードのみ更新可能
-  - ゲーム管理者のみがゲーム設定を更新可能
-  - 写真共有設定がオフの場合、他のプレイヤーの画像は閲覧不可
-
-### API保護
-
-- CSRFトークンを使用してクロスサイトリクエストフォージェリを防止
-- レート制限を実装し、APIの過剰な使用を防止（特に画像判定API）
-- APIキーはサーバーサイドでのみ使用し、クライアントには公開しない
-
-### 画像アップロードセキュリティ
-
-- アップロード前にクライアント側でファイルサイズと形式を検証
-- サーバー側でも再検証を行い、不正なファイルをブロック
-- 署名付きURLには短い有効期限を設定（5分程度）
-- アップロード可能なファイル形式を厳格に制限（JPG、PNG、HEICのみ）
+- 認証セキュリティ
+  - Firebase Authenticationを使用した安全な認証
+  - パスワードの強度要件を設定（最低8文字、英数字混在など）
+  - ログイン試行回数の制限を実装
+- データアクセス制御
+  - Firestoreセキュリティルールによる厳格なアクセス制御
+    - ゲーム参加者は自分のプレイヤーボードのみ更新可能
+    - ゲーム管理者のみがゲーム設定を更新可能
+    - 写真共有設定がオフの場合、他のプレイヤーの画像は閲覧不可
+  - API保護
+    - CSRFトークンを使用してクロスサイトリクエストフォージェリを防止
+    - レート制限を実装し、APIの過剰な使用を防止（特に画像判定API）
+    - APIキーはサーバーサイドでのみ使用し、クライアントには公開しない
+    - 画像アップロードセキュリティ
+      - アップロード前にクライアント側でファイルサイズと形式を検証
+      - サーバー側でも再検証を行い、不正なファイルをブロック
+      - 署名付きURLには短い有効期限を設定（5分程度）
+      - アップロード可能なファイル形式を厳格に制限（JPG、PNG、HEICのみ）
 
 ## パフォーマンス要件
 
@@ -543,12 +530,11 @@ View Transition APIを活用したトランジションを実装する。
 
 ## CI/CD
 
-- GitHub Actionsを使用した自動テストと静的解析
 - Google Cloud Buildを使用したデプロイ
+  - mainブランチへのマージをトリガーとした自動デプロイ
   - Secret Managerを使用した機密情報の管理
   - cloudbuild.yamlでのbashスクリプトを使用した環境変数の適切な処理
   - Firebase認証情報（特に秘密鍵）の安全な受け渡し
-- mainブランチへのマージをトリガーとした自動デプロイ
 
 ### Google Cloud Buildでの環境変数と秘密情報の扱い
 
