@@ -26,7 +26,8 @@
 - All components should be individually viewable in the Storybook.
 - To avoid rework, implementations should be tested and verified frequently and persistently.
   - Wait for user confirmation of completion before updating memory banks or starting the next task.
-- If a similar problem cannot be corrected after three attempts, consider the possibility that the approach itself is incorrect.
+- A task is never "Task Completed" until the user has confirmed that it is working.
+  - If a similar problem cannot be corrected after three attempts, consider the possibility that the approach itself is incorrect.
 
 ## Memory Bank
 

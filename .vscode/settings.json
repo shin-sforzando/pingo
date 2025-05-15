@@ -23,6 +23,7 @@
     "firebaseapp",
     "firebasestorage",
     "Firestore",
+    "genai",
     "gitsecret",
     "jsdom",
     "lefthook",

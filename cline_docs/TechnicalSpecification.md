@@ -10,6 +10,7 @@
 - **スタイリング**: Tailwind CSS 4
 - **状態管理**: React Context API
 - **多言語対応**: next-intl
+- **Gemini API**: @google/genai
 - **アニメーション**: View Transition API
 
 ### バックエンド
@@ -276,7 +277,6 @@ Error response example for immoral title/theme:
 {
   "error": "The given theme contains racist expressions."
 }
-
 ```
 
 #### 候補文字列のチェックプロンプト
@@ -297,6 +297,7 @@ T. B. D.
 
 ```plain
 Please check if the given image is safe to show to the general public and return an error with the reason if there is a problem.
+Output only the pure JSON object. Do not include any other explanations, introductions, or markdown like \`\`\`json ... \`\`\`.
 
 Error response example for sexual image:
 
