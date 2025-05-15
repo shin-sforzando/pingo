@@ -45,7 +45,7 @@ describe("subjects/generate API", () => {
       title: "Summer Camp",
       theme: "Campsite by the beach",
       language: "en",
-      numberOfCandidates: 5,
+      numberOfCandidates: 20,
     });
 
     const response = await POST(req);
@@ -54,7 +54,7 @@ describe("subjects/generate API", () => {
     expect(response.status).toBe(200);
     expect(data.candidates).toBeDefined();
     expect(Array.isArray(data.candidates)).toBe(true);
-    expect(data.candidates.length).toBe(5);
+    expect(data.candidates.length).toBe(20);
 
     // Each candidate should be a non-empty string
     for (const candidate of data.candidates) {
@@ -73,7 +73,7 @@ describe("subjects/generate API", () => {
       title: "夏祭り",
       theme: "日本の伝統的な夏祭り",
       language: "ja",
-      numberOfCandidates: 5,
+      numberOfCandidates: 20,
     });
 
     const response = await POST(req);
@@ -102,7 +102,7 @@ describe("subjects/generate API", () => {
     const req = createApiRequest("/api/subjects/generate", "POST", {
       title: "Travel",
       theme: "City exploration",
-      numberOfCandidates: 5,
+      numberOfCandidates: 20,
     });
 
     const response = await POST(req);
@@ -111,7 +111,7 @@ describe("subjects/generate API", () => {
     expect(response.status).toBe(200);
     expect(data.candidates).toBeDefined();
     expect(Array.isArray(data.candidates)).toBe(true);
-    expect(data.candidates.length).toBe(5);
+    expect(data.candidates.length).toBe(20);
   });
 
   it("should handle inappropriate content", async () => {
@@ -124,7 +124,7 @@ describe("subjects/generate API", () => {
       title: "Weapons",
       theme: "Dangerous items",
       language: "en",
-      numberOfCandidates: 5,
+      numberOfCandidates: 20,
     });
 
     const response = await POST(req);
@@ -144,7 +144,7 @@ describe("subjects/generate API", () => {
       title: "Illegal substances",
       theme: "Drug paraphernalia",
       language: "en",
-      numberOfCandidates: 5,
+      numberOfCandidates: 20,
     });
 
     const response = await POST(req);
@@ -177,7 +177,7 @@ describe("subjects/generate API", () => {
       title: "うんこ",
       theme: "ちんこ",
       language: "ja",
-      numberOfCandidates: 5,
+      numberOfCandidates: 20,
     });
 
     const response = await POST(req);

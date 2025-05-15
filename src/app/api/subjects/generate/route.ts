@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
     });
 
     const text = result.text;
-    console.log("ℹ️ XXX: ~ route.ts ~ POST ~ text:", text);
+    console.log("ℹ️ XXX: ~ route.ts ~ POST ~ AI Response:", text);
 
     try {
       if (!text) {

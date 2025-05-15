@@ -261,10 +261,12 @@ Candidates must respond in ${language}.
 
 # Output Format
 
+- IMPORTANT: Your response MUST be a raw JSON object WITHOUT any markdown formatting.
+- DO NOT use \`\`\`json or \`\`\` markers around your response.
 - Strictly output a JSON object with a single key "candidates".
 - The value of "candidates" must be a JSON array of strings.
 - Each string in the array should be **only the name of the object or subject** (e.g., "White seashells", "wooden bench", "fisherman"), not a full sentence instruction.
-- Do not include any other explanations, introductions, or markdown like \`\`\`json ... \`\`\`. Output only the pure JSON object.
+- Do not include any other explanations, introductions, or markdown. Output only the pure JSON object.
 
 English response example for Title: Summer Camp, Theme: Campsite by the beach:
 
