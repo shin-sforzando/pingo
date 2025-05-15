@@ -238,18 +238,82 @@ src/types/
 - 参加中ゲーム一覧取得: `/api/game/participating`
 - 管理者追加: `/api/game/[gameId]/admins/add`
 - 参加者一覧取得: `/api/game/[gameId]/participants`
-- 被写体候補の列挙: `/api/game/generate-subjects`
-- 被写体候補文字列の公序良俗チェック: `/api/game/check-moral`
+- 被写体候補の生成: `/api/subjects/generate`
+- 被写体候補文字列の公序良俗チェック: `/api/subjects/check`
+
+#### 候補生成プロンプト
+
+```plain
+You are the expert in suggesting specific objects or subjects suitable for a photo bingo game based on the given criteria.
+Suggest **${numberOfCandidates}** distinct objects or subjects that can be photographed at the specified title and theme, matching the following conditions.
+Focus on concrete nouns or short descriptive phrases that clearly identify the target for a photo.
+Google Cloud Vision AI will be used to determine if a photo matches the suggested object/subject, so ensure the suggestions are visually identifiable and relatively unambiguous.
+Candidates should be subjects that are not offensive to public order and morals and that are safe for children to see or approach.
+If the given title or theme is offensive to public order and morals, return an error with the reason.
+
+Candidates must respond in ${language}.
+
+# Conditions
+
+- Title: ${title}
+- Theme: ${theme}
+
+# Output Format
+
+- Strictly output a JSON object with a single key "candidates".
+- The value of "candidates" must be a JSON array of strings.
+- Each string in the array should be **only the name of the object or subject** (e.g., "White seashells", "wooden bench", "fisherman"), not a full sentence instruction.
+- Do not include any other explanations, introductions, or markdown like \`\`\`json ... \`\`\`. Output only the pure JSON object.
+
+English response example for Title: Summer Camp, Theme: Campsite by the beach:
+
+{
+  "candidates": ["White seashells", "wooden bench", "fisherman", "hibiscus", "turtle", "driftwood", "barbecue grill", "propped up surfboard"]
+}
+
+Error response example for immoral title/theme:
+
+{
+  "error": "The given theme contains racist expressions."
+}
+
+```
+
+#### 候補文字列のチェックプロンプト
+
+T. B. D.
 
 ### 画像処理API
 
 - 署名付きURL取得: `/api/image/getUploadUrl` (GCSへの直接アップロード用)
-- 画像の公序良俗チェック: `/api/image/check-moral`
+- 画像の公序良俗チェック: `/api/image/check`
 - 画像判定処理: `/api/image/process` (画像内被写体の識別)
 - ゲーム画像一覧取得: `/api/game/[gameId]/images` (写真共有設定に応じて全参加者または自分の画像のみ)
   - 自分の画像一覧: `acceptanceStatus != null && acceptanceStatus != "inappropriate_content"`
   - 他のプレイヤーの画像: `acceptanceStatus == "accepted"`
-- セル画像一覧取得: `/api/games/[gameId]/cells/[cellId]/images` (特定のセルに対する画像)
+- セル画像一覧取得: `/api/game/[gameId]/cells/[cellId]/images` (特定のセルに対する画像)
+
+#### 画像のチェックプロンプト
+
+```plain
+Please check if the given image is safe to show to the general public and return an error with the reason if there is a problem.
+
+Error response example for sexual image:
+
+{
+  "error": "This image contains sexual expressions."
+}
+
+OK response example:
+
+{
+  "ok": "This image shows a white coffee cup on a wooden desk. Steam is coming out of the coffee, indicating that the coffee is hot."
+}
+```
+
+#### 画像判定プロンプト
+
+T. B. D.
 
 ### 画像処理フロー
 
