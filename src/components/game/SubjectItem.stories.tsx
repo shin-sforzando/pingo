@@ -20,6 +20,10 @@ const meta = {
       control: "boolean",
       description: "Whether the item is being dragged",
     },
+    error: {
+      control: "text",
+      description: "Error message to display",
+    },
     onSubjectChange: { action: "subject changed" },
     onDelete: { action: "deleted" },
   },
@@ -122,6 +126,32 @@ export const WithCustomStyling: Story = {
     isAdopted: true,
     index: 0,
     className: "bg-accent text-accent-foreground",
+    onSubjectChange: () => {},
+    onDelete: () => {},
+  },
+};
+
+// With error
+export const WithError: Story = {
+  render: renderWithState,
+  args: {
+    subject: "Abstract concept",
+    isAdopted: true,
+    index: 0,
+    error: "This subject is too abstract to photograph",
+    onSubjectChange: () => {},
+    onDelete: () => {},
+  },
+};
+
+// With error and not adopted
+export const WithErrorNotAdopted: Story = {
+  render: renderWithState,
+  args: {
+    subject: "Inappropriate content",
+    isAdopted: false,
+    index: 25,
+    error: "This subject contains inappropriate content",
     onSubjectChange: () => {},
     onDelete: () => {},
   },

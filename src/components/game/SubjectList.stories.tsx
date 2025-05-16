@@ -1,3 +1,4 @@
+import { faker } from "@faker-js/faker";
 import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
 import { type Subject, SubjectList } from "./SubjectList";
@@ -23,46 +24,36 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 // Generate sample subjects
-const generateSampleSubjects = (count: number): Subject[] => {
+const generateSampleSubjects = (
+  count: number,
+  withErrors = false,
+): Subject[] => {
   const subjects: Subject[] = [];
-  const sampleTexts = [
-    "Red car",
-    "Blue sky",
-    "Green tree",
-    "Yellow flower",
-    "White cloud",
-    "Black cat",
-    "Brown dog",
-    "Orange fruit",
-    "Purple grape",
-    "Pink flamingo",
-    "Gray elephant",
-    "Silver spoon",
-    "Golden ring",
-    "Bronze medal",
-    "Copper penny",
-    "Teal ocean",
-    "Magenta sunset",
-    "Cyan river",
-    "Lime leaf",
-    "Indigo night",
-    "Violet flower",
-    "Crimson rose",
-    "Amber light",
-    "Turquoise gem",
-    "Olive branch",
-    "Maroon coat",
-    "Navy blue shirt",
-    "Coral reef",
-    "Emerald stone",
-    "Ruby necklace",
+  const sampleTexts = faker.helpers.multiple(() => faker.lorem.word(), {
+    count: count,
+  });
+
+  // Sample error messages
+  const sampleErrors = [
+    "This subject is too abstract to photograph",
+    "This subject is too vague",
+    "This subject is similar to another one",
+    "This subject may not be appropriate for all ages",
+    "This subject is too common",
   ];
 
   for (let i = 0; i < count; i++) {
-    subjects.push({
+    const subject: Subject = {
       id: `subject-${i}`,
       text: sampleTexts[i % sampleTexts.length],
-    });
+    };
+
+    // Add errors to some subjects if requested
+    if (withErrors && i % 3 === 0) {
+      subject.error = sampleErrors[i % sampleErrors.length];
+    }
+
+    subjects.push(subject);
   }
 
   return subjects;
@@ -121,6 +112,16 @@ export const WithCustomStyling: Story = {
     maxAdopted: 24,
     subjects: generateSampleSubjects(10),
     className: "bg-muted p-4 rounded-xl",
+    onSubjectsChange: (_newSubjects) => {},
+  },
+};
+
+// With validation errors
+export const WithValidationErrors: Story = {
+  render: renderWithState,
+  args: {
+    maxAdopted: 24,
+    subjects: generateSampleSubjects(15, true),
     onSubjectsChange: (_newSubjects) => {},
   },
 };

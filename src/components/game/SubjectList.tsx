@@ -27,6 +27,7 @@ import { SubjectItem } from "./SubjectItem";
 export interface Subject {
   id: string;
   text: string;
+  error?: string;
 }
 
 export interface SubjectListProps {
@@ -90,6 +91,7 @@ function SortableSubjectItem({
         onDelete={onDelete}
         isDragging={isDragging}
         dragHandleProps={{ ...attributes, ...listeners }}
+        error={subject.error}
       />
     </div>
   );
