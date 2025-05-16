@@ -25,6 +25,7 @@
     "Firestore",
     "genai",
     "gitsecret",
+    "gsutil",
     "jsdom",
     "lefthook",
     "magicui",

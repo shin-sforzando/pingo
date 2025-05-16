@@ -22,6 +22,8 @@
     "subjects": "被写体候補",
     "creating": "作成中...",
     "create": "ゲームを作成",
+    "generateSubjects": "被写体候補を生成",
+    "generating": "生成中...",
     "editBingoCells": "ビンゴセルを編集 ({0} / {1})",
     "addNewSubject": "新しい被写体を追加",
     "subjectPlaceholder": "被写体を入力...",
@@ -35,7 +37,9 @@
       "themeTooLong": "テーマは50文字以内で入力してください",
       "subjectsRequired": "被写体候補を1つ以上追加してください",
       "creationFailed": "ゲームの作成に失敗しました",
-      "expiresAtInvalid": "有効期限は現在より後の日時を指定してください"
+      "expiresAtInvalid": "有効期限は現在より後の日時を指定してください",
+      "generationFailed": "被写体候補の生成に失敗しました",
+      "titleOrThemeRequired": "タイトルまたはテーマを入力してください"
     }
   },
   "Common": {

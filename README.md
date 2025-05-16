@@ -15,6 +15,13 @@ Pingo: Bingo game where AI judges based on photos
   - [Tool](#tool)
 - [How to](#how-to)
   - [Setup](#setup)
+    - [Environment Variables](#environment-variables)
+      - [.env](#env)
+      - [.env.local](#envlocal)
+    - [Google Cloud](#google-cloud)
+      - [Application Default Credentials (ADC)](#application-default-credentials-adc)
+      - [Google Cloud Storage (GCS) CORS Configuration](#google-cloud-storage-gcs-cors-configuration)
+    - [Firebase](#firebase)
   - [Development](#development)
     - [Lint \& Format](#lint--format)
     - [i18n](#i18n)
@@ -61,6 +68,59 @@ npm install
 > [!NOTE]
 > If git-secret is not available, decrypt secrets one by one using GPG as in
 > `gpg --output something --decrypt something.secret`
+
+#### Environment Variables
+
+##### .env
+
+`.env` contains common environment variables that are safe to disclose.
+
+```.env
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=pingo-456817
+NEXT_PUBLIC_FIREBASE_API_KEY=AIzaSyCYXPVHEMWgIXpDc2j-qFuvzD79eI24dws
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=pingo-456817.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=pingo-456817.firebasestorage.app
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=617969816285
+NEXT_PUBLIC_FIREBASE_APP_ID=1:617969816285:web:09a7ffe5ea531b45648134
+```
+
+##### .env.local
+
+`.env.local` contains environment variables for the local development environment that cannot be disclosed.
+
+```.env.local
+GOOGLE_CLOUD_PROJECT_ID=XXXXXXXXXXXXXXXX
+# Gemini API Key for local development
+GEMINI_API_KEY=YYYYYYYYYYYYYYYY
+# ADC Service account key for Google Cloud
+GOOGLE_APPLICATION_CREDENTIALS=./ZZZZZZZZZZZZZZZZ.json
+```
+
+#### Google Cloud
+
+##### Application Default Credentials (ADC)
+
+For most server-side operations interacting with Google Cloud (like Firestore access from API routes, or operations on Cloud Run), ADC is used. Set it up for local development:
+
+```shell
+gcloud auth application-default login
+```
+
+> [!IMPORTANT]
+> For generating **v4 Signed URLs** locally (used for direct GCS uploads), ADC with user credentials is **not sufficient**.
+> You need to use a **Service Account Key**.
+
+##### Google Cloud Storage (GCS) CORS Configuration
+
+To allow the browser (running on `localhost:3000` or the deployed app URL) to directly upload files to the GCS bucket (`gcs-pingo`), you need to configure CORS (Cross-Origin Resource Sharing) on the bucket.
+
+```shell
+gsutil cors set gcs-pingo-cors-config.json gs://gcs-pingo
+```
+
+#### Firebase
+
+T. B. D.
 
 ### Development
 
