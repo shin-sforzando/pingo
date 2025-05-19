@@ -112,7 +112,7 @@ export interface SubmissionDocument {
   imageUrl: string;
   submittedAt: TimestampInterface;
   analyzedAt: TimestampInterface | null;
-  aiResponse: string | null;
+  critique: string | null;
   matchedCellId: string | null;
   confidence: number | null;
   processingStatus: ProcessingStatus;
@@ -120,6 +120,7 @@ export interface SubmissionDocument {
   errorMessage: string | null;
   createdAt: TimestampInterface;
   updatedAt?: TimestampInterface | null;
+  memo?: string; // Admin notes, not visible to users
 }
 
 /**
@@ -363,7 +364,7 @@ export function submissionFromFirestore(doc: SubmissionDocument): Submission {
     imageUrl: doc.imageUrl,
     submittedAt: timestampToDate(doc.submittedAt) as Date,
     analyzedAt: timestampToDate(doc.analyzedAt),
-    aiResponse: doc.aiResponse,
+    critique: doc.critique,
     matchedCellId: doc.matchedCellId,
     confidence: doc.confidence,
     processingStatus: doc.processingStatus,
@@ -371,6 +372,7 @@ export function submissionFromFirestore(doc: SubmissionDocument): Submission {
     errorMessage: doc.errorMessage,
     createdAt: timestampToDate(doc.createdAt) as Date,
     updatedAt: timestampToDate(doc.updatedAt),
+    memo: doc.memo,
   };
 }
 
@@ -388,7 +390,7 @@ export function submissionToFirestore(
     analyzedAt: submission.analyzedAt
       ? (dateToTimestamp(submission.analyzedAt) as TimestampInterface)
       : null,
-    aiResponse: submission.aiResponse,
+    critique: submission.critique,
     matchedCellId: submission.matchedCellId,
     confidence: submission.confidence,
     processingStatus: submission.processingStatus,
@@ -398,6 +400,7 @@ export function submissionToFirestore(
     updatedAt: submission.updatedAt
       ? (dateToTimestamp(submission.updatedAt) as TimestampInterface)
       : null,
+    memo: submission.memo,
   };
 }
 

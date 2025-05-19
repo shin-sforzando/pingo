@@ -773,7 +773,7 @@ Firestoreのセキュリティルールを適切に設定し、認証済みユ�
         - imageUrl: string (Cloud Storageへのパス)
         - submittedAt: timestamp (アップロード完了時刻)
         - analyzedAt: timestamp (AI解析完了時刻)
-        - aiResponse: string (AIの判定結果)
+        - critique: string (AIの判定結果)
         - matchedCellId: string (AIが判定した合致するセルID、合致しない場合はnull)
         - confidence: number (AIの確信度)
         - processingStatus: string ("uploaded", "content_checking", "analyzing", "analyzed", "error")
