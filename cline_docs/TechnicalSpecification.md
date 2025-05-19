@@ -404,7 +404,7 @@ Google Cloud Storageの階層機能を活用し、ゲームIDごとにフォル�
 1. トップページ (`/`)
 2. ユーザー情報画面 (`/[userId]`)
 3. ユーザー編集画面 (`/[userId]/edit`)
-4. ゲーム作成画面 (`/new`)
+4. ゲーム作成画面 (`/create`)
 5. ゲーム参加画面 (`/join`)
 6. ゲーム画面 (`/game/[gameId]`)
 7. ゲーム共有画面 (`/game/[gameId]/share`)

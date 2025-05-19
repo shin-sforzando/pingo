@@ -99,6 +99,27 @@ export function dateToTimestamp(
 }
 
 /**
+ * Convert a Date to a non-null Timestamp based on the environment
+ * This function should be used when a non-null Timestamp is required
+ * @throws Error if date is null or undefined
+ */
+export function nonNullDateToTimestamp(date: Date): TimestampInterface {
+  if (!date) {
+    throw new Error("Date cannot be null or undefined");
+  }
+
+  // Check if we're in a server environment
+  if (typeof window === "undefined") {
+    // Server-side: use Admin SDK
+    const timestamp = AdminTimestamp.fromDate(date);
+    return timestamp as TimestampInterface;
+  }
+  // Client-side: use Client SDK
+  const timestamp = ClientTimestamp.fromDate(date);
+  return timestamp as TimestampInterface;
+}
+
+/**
  * Convert a Timestamp to an ISO string
  */
 export function timestampToISOString(
