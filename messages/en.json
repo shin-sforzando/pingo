@@ -22,6 +22,9 @@
     "subjects": "Subjects",
     "creating": "Creating...",
     "create": "Create Game",
+    "generateSubjectsWithAI": "Generate Subjects with AI",
+    "generatingSubjects": "Generating...",
+    "validating": "Validating...",
     "editBingoCells": "Edit Bingo Cells ({0} / {1})",
     "addNewSubject": "Add New Subject",
     "subjectPlaceholder": "Enter subject...",
@@ -35,7 +38,11 @@
       "themeTooLong": "Theme must be at most 50 characters",
       "subjectsRequired": "At least one subject is required",
       "creationFailed": "Failed to create game",
-      "expiresAtInvalid": "Expiration date must be in the future"
+      "expiresAtInvalid": "Expiration date must be in the future",
+      "generationFailed": "Failed to generate subjects",
+      "titleAndThemeRequired": "Title and theme are required",
+      "validationFailed": "Failed to validate subjects",
+      "titleOrThemeRequired": "Title or theme is required"
     }
   },
   "Common": {

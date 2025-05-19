@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
-  DndContext,
   type DragEndEvent,
   KeyboardSensor,
   PointerSensor,
@@ -21,12 +20,14 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
+import dynamic from "next/dynamic";
 import { useId } from "react";
 import { SubjectItem } from "./SubjectItem";
 
 export interface Subject {
   id: string;
   text: string;
+  error?: string;
 }
 
 export interface SubjectListProps {
@@ -90,6 +91,7 @@ function SortableSubjectItem({
         onDelete={onDelete}
         isDragging={isDragging}
         dragHandleProps={{ ...attributes, ...listeners }}
+        error={subject.error}
       />
     </div>
   );
@@ -165,10 +167,15 @@ export function SubjectList({
     }
   };
 
+  // Dynamic import DndContextWrapper with SSR disabled
+  const DndContextWrapper = dynamic(() => import("./DndContextWrapper"), {
+    ssr: false,
+  });
+
   return (
     <div className={cn("space-y-4", className)}>
       <div className="space-y-2">
-        <DndContext
+        <DndContextWrapper
           sensors={sensors}
           collisionDetection={closestCenter}
           onDragEnd={handleDragEnd}
@@ -188,7 +195,7 @@ export function SubjectList({
               />
             ))}
           </SortableContext>
-        </DndContext>
+        </DndContextWrapper>
       </div>
 
       <Button
