@@ -1,5 +1,9 @@
 /**
  * API endpoint for creating a new game
+ * POST /api/game/create
+ *
+ * This endpoint allows authenticated users to create a new game with a unique ID.
+ * It creates all necessary documents in Firestore using a transaction to ensure data consistency.
  */
 import { FieldValue } from "firebase-admin/firestore";
 import { customAlphabet } from "nanoid";
@@ -7,7 +11,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { ulid } from "ulid";
 import { z } from "zod";
 import { adminAuth, adminFirestore } from "../../../../lib/firebase/admin";
-import { GameStatus, Role } from "../../../../types/common";
+import { type ApiResponse, GameStatus, Role } from "../../../../types/common";
 import {
   cellToFirestore,
   eventToFirestore,
@@ -121,8 +125,13 @@ async function generateUniqueGameId(isTest = false): Promise<string> {
 
 /**
  * Create a new game
+ *
+ * @param request The Next.js request object
+ * @returns A response with the created game ID or an error
  */
-export async function POST(request: NextRequest) {
+export async function POST(
+  request: NextRequest,
+): Promise<NextResponse<ApiResponse<{ gameId: string }>>> {
   try {
     // Verify authentication
     const authHeader = request.headers.get("Authorization");
@@ -328,17 +337,48 @@ export async function POST(request: NextRequest) {
     });
 
     // Return success response with the game ID
-    return NextResponse.json({
-      success: true,
-      data: {
-        gameId: gameId,
+    return NextResponse.json(
+      {
+        success: true,
+        data: {
+          gameId: gameId,
+        },
       },
-    });
+      { status: 200 },
+    );
   } catch (error) {
     console.error("Error creating game:", error);
 
-    // Handle specific errors
+    // Handle specific error types
     if (error instanceof Error) {
+      // Check for specific error types
+      if (error.message.includes("Firebase Auth")) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              code: "auth/operation-failed",
+              message: error.message,
+            },
+          },
+          { status: 500 },
+        );
+      }
+
+      if (error.message.includes("Firestore")) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              code: "database/operation-failed",
+              message: error.message,
+            },
+          },
+          { status: 500 },
+        );
+      }
+
+      // Generic error with specific message
       return NextResponse.json(
         {
           success: false,
@@ -351,7 +391,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generic error
+    // Fallback for unknown error types
     return NextResponse.json(
       {
         success: false,
