@@ -40,13 +40,14 @@ Pingo: Bingo game where AI judges based on photos
 - [Next.js](https://nextjs.org) (v15.3.0)
   - [React](https://ja.react.dev) (v19.1.0)
   - [next-intl](https://next-intl.dev)
-- [Storybook](https://storybook.js.org) (v8.6.12)
+  - [@google/genai](https://googleapis.github.io/js-genai/release_docs/index.html) (v0.15.0)
+- [Storybook](https://storybook.js.org) (v8.6.14)
 - [shadcn/ui](https://ui.shadcn.com)
 
 ### Tool
 
 - [Biome](https://biomejs.dev) (v1.9.4) - Formatter and Linter
-- [lefthook](https://github.com/evilmartians/lefthook) (v1.11.11) - Git hooks manager
+- [lefthook](https://github.com/evilmartians/lefthook) (v1.11.13) - Git hooks manager
 - [git-secret](https://sobolevn.me/git-secret/) - A bash-tool to store your private data inside a git repository
 
 ## How to
