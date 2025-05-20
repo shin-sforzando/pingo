@@ -12,7 +12,7 @@ pre-commit:
       stage_fixed: true
     test:
       glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx}"
-      run: npm run test:once
+      run: npm run test:once -- --no-coverage
     i18n:
       glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}"
       run: npm run check:i18n

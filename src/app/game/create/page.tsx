@@ -1,0 +1,704 @@
+"use client";
+
+import { BingoBoard } from "@/components/game/BingoBoard";
+import { type Subject, SubjectList } from "@/components/game/SubjectList";
+import { ShineBorder } from "@/components/magicui/shine-border";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
+import { TranslatedFormMessage } from "@/components/ui/translated-form-message";
+import { auth } from "@/lib/firebase/client";
+import { cn } from "@/lib/utils";
+import type { Cell, GameCreationData } from "@/types/schema";
+import { gameCreationSchema } from "@/types/schema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useId, useState } from "react";
+import { type Resolver, type SubmitHandler, useForm } from "react-hook-form";
+
+// Use the existing gameCreationSchema
+type GameCreateFormValues = GameCreationData;
+
+/**
+ * Game creation page component
+ */
+export default function CreateGamePage() {
+  const t = useTranslations();
+  const idPrefix = useId();
+
+  // State for subjects
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [isGeneratingSubjects, setIsGeneratingSubjects] = useState(false);
+  const [generationError, setGenerationError] = useState<string | null>(null);
+
+  // State for cells (bingo board)
+  const [cells, setCells] = useState<Cell[]>([]);
+
+  // Calculate default expiration date (1 day from now)
+  const defaultExpiresAt = new Date();
+  defaultExpiresAt.setDate(defaultExpiresAt.getDate() + 1);
+
+  // Form setup with type assertion to resolve compatibility issues
+  const form = useForm<GameCreateFormValues>({
+    resolver: zodResolver(gameCreationSchema) as Resolver<GameCreateFormValues>,
+    mode: "onBlur", // Validate on blur
+    defaultValues: {
+      title: "",
+      theme: "",
+      expiresAt: defaultExpiresAt,
+      isPublic: false,
+      isPhotoSharingEnabled: true,
+      requiredBingoLines: 1,
+      confidenceThreshold: 0.5,
+      notes: "",
+    },
+  });
+
+  // Watch title and theme values for button enabling/disabling
+  const title = form.watch("title");
+  const theme = form.watch("theme");
+
+  /**
+   * Generate subjects using AI based on title and theme
+   */
+  const generateSubjects = async () => {
+    console.log("generateSubjects called");
+    const { title, theme } = form.getValues();
+
+    // Validate title and theme
+    if (!title || !theme) {
+      setGenerationError(t("Game.errors.titleAndThemeRequired"));
+      return;
+    }
+
+    setIsGeneratingSubjects(true);
+    setGenerationError(null);
+
+    try {
+      console.log("Calling /api/subjects/generate");
+      const response = await fetch("/api/subjects/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title,
+          theme,
+          numberOfCandidates: 30, // Request more than needed to have extras
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || t("Game.errors.generationFailed"));
+      }
+
+      const data = await response.json();
+      console.log("Generate API response:", data);
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      if (!data.candidates || !Array.isArray(data.candidates)) {
+        throw new Error(t("Game.errors.generationFailed"));
+      }
+
+      // Filter out duplicates
+      const existingTexts = subjects.map((subject) => subject.text);
+      const uniqueNewCandidates = data.candidates.filter(
+        (text: string) => !existingTexts.includes(text),
+      );
+
+      console.log(
+        `Filtered ${data.candidates.length - uniqueNewCandidates.length} duplicates`,
+      );
+
+      // Create subject objects for the new unique candidates
+      const newSubjectObjects: Subject[] = uniqueNewCandidates.map(
+        (text: string, index: number) => ({
+          id: `${idPrefix}-subject-${Date.now()}-${index}`,
+          text,
+        }),
+      );
+
+      // Append new subjects to existing ones
+      const updatedSubjects = [...subjects, ...newSubjectObjects];
+      setSubjects(updatedSubjects);
+
+      // Update cells for the bingo board
+      updateCells(updatedSubjects);
+    } catch (error) {
+      console.error("Error generating subjects:", error);
+      setGenerationError(
+        error instanceof Error
+          ? error.message
+          : t("Game.errors.generationFailed"),
+      );
+    } finally {
+      setIsGeneratingSubjects(false);
+    }
+  };
+
+  /**
+   * Update cells for the bingo board based on subjects
+   */
+  const updateCells = (subjectList: Subject[]) => {
+    // Take the first 24 subjects (or fewer if not enough)
+    const boardSubjects = subjectList.slice(0, 24);
+
+    // Create cells array
+    const newCells: Cell[] = [];
+
+    // Add cells in row-major order
+    for (let y = 0; y < 5; y++) {
+      for (let x = 0; x < 5; x++) {
+        const index = y * 5 + x;
+        const isCenterCell = x === 2 && y === 2;
+
+        // Center cell is always FREE
+        if (isCenterCell) {
+          newCells.push({
+            id: `cell_${index}`,
+            position: { x, y },
+            subject: "FREE",
+            isFree: true,
+          });
+          continue;
+        }
+
+        // Calculate the subject index (accounting for the FREE cell)
+        const subjectIndex = index < 12 ? index : index - 1;
+
+        // Add the cell with the subject (if available)
+        if (subjectIndex < boardSubjects.length) {
+          newCells.push({
+            id: `cell_${index}`,
+            position: { x, y },
+            subject: boardSubjects[subjectIndex].text,
+            isFree: false,
+          });
+        } else {
+          // Empty cell if not enough subjects
+          newCells.push({
+            id: `cell_${index}`,
+            position: { x, y },
+            subject: "",
+            isFree: false,
+          });
+        }
+      }
+    }
+
+    setCells(newCells);
+  };
+
+  /**
+   * Handle subjects change from SubjectList component
+   */
+  const handleSubjectsChange = (newSubjects: Subject[]) => {
+    setSubjects(newSubjects);
+    updateCells(newSubjects);
+  };
+
+  // State for form submission
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submissionError, setSubmissionError] = useState<string | null>(null);
+
+  /**
+   * Handle form submission
+   */
+  const onSubmit: SubmitHandler<GameCreateFormValues> = async (data) => {
+    console.log("onSubmit called");
+    // Validate that we have enough subjects
+    if (subjects.length < 24) {
+      setSubmissionError(t("Game.errors.notEnoughValidSubjects"));
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmissionError(null);
+
+    try {
+      // Extract subject texts from the first 24 subjects (those used in the bingo board)
+      const boardSubjects = subjects.slice(0, 24);
+      const boardSubjectTexts = boardSubjects.map((subject) => subject.text);
+
+      // Validate only the subjects that will be used in the bingo board
+      console.log("Calling /api/subjects/check for the first 24 subjects");
+      const checkResponse = await fetch("/api/subjects/check", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          subjects: boardSubjectTexts,
+        }),
+      });
+
+      const checkData = await checkResponse.json();
+      console.log("Check API response:", checkData);
+
+      if (!checkResponse.ok) {
+        throw new Error(checkData.error || t("Game.errors.validationFailed"));
+      }
+
+      if (checkData.ok === false && checkData.issues) {
+        // Mark subjects with issues (only for the first 24 subjects)
+        const updatedSubjects = subjects.map((subject, index) => {
+          // Only check the first 24 subjects
+          if (index < 24) {
+            const issue = checkData.issues.find(
+              (issue: { subject: string; reason: string }) =>
+                issue.subject === subject.text,
+            );
+
+            if (issue) {
+              return { ...subject, error: issue.reason };
+            }
+
+            // Clear any previous errors for valid subjects
+            return { ...subject, error: undefined };
+          }
+
+          // Keep subjects beyond the first 24 unchanged
+          return subject;
+        });
+
+        // Count valid subjects (without errors)
+        const validSubjectsCount = updatedSubjects.filter(
+          (subject) => !subject.error,
+        ).length;
+
+        if (validSubjectsCount < 24) {
+          setSubmissionError(t("Game.errors.notEnoughValidSubjects"));
+
+          // Update subjects with error messages
+          setSubjects(updatedSubjects);
+          return;
+        }
+
+        // Show warning about subjects with issues
+        setSubmissionError(t("Game.someSubjectsFiltered"));
+
+        // Update subjects with error messages
+        setSubjects(updatedSubjects);
+        return;
+      }
+
+      // Prepare cells data from subjects
+      const cellsData = cells.map((cell) => ({
+        position: cell.position,
+        subject: cell.subject,
+        isFree: cell.isFree,
+      }));
+
+      // Prepare request data
+      const requestData = {
+        ...data,
+        cells: cellsData,
+      };
+
+      // Send request to API
+      console.log("Calling /api/game/create");
+
+      // Get the ID token from Firebase Authentication
+      const idToken = await auth.currentUser?.getIdToken();
+      if (!idToken) {
+        throw new Error("Not authenticated");
+      }
+
+      const response = await fetch("/api/game/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${idToken}`,
+        },
+        body: JSON.stringify(requestData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.error?.message || t("Game.errors.creationFailed"),
+        );
+      }
+
+      const responseData = await response.json();
+
+      if (!responseData.success) {
+        throw new Error(
+          responseData.error?.message || t("Game.errors.creationFailed"),
+        );
+      }
+
+      // Redirect to game share page
+      window.location.href = `/game/${responseData.data.gameId}/share`;
+    } catch (error) {
+      console.error("Error creating game:", error);
+      setSubmissionError(
+        error instanceof Error
+          ? error.message
+          : t("Game.errors.creationFailed"),
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="container mx-auto space-y-8 py-6">
+      <h1 className="font-bold text-3xl">{t("Game.createNew")}</h1>
+      <p className="text-muted-foreground">{t("Game.createDescription")}</p>
+
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          {/* Basic Information */}
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("Game.details")}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <FormField
+                control={form.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("Game.title")}</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder={t("Game.titlePlaceholder")}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      {t("Game.titleDescription")}
+                    </FormDescription>
+                    <TranslatedFormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="theme"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("Game.theme")}</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder={t("Game.themePlaceholder")}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      {t("Game.themeDescription")}
+                    </FormDescription>
+                    <TranslatedFormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="space-y-2">
+                <div className="relative">
+                  <Button
+                    type="button"
+                    onClick={generateSubjects}
+                    disabled={isGeneratingSubjects || !title || !theme}
+                    className="w-full"
+                  >
+                    {isGeneratingSubjects
+                      ? t("Game.generatingSubjects")
+                      : t("Game.generateSubjectsWithAI")}
+                  </Button>
+                  {isGeneratingSubjects && (
+                    <ShineBorder
+                      borderWidth={2}
+                      duration={3}
+                      shineColor={["#3b82f6", "#10b981", "#6366f1"]}
+                    />
+                  )}
+                </div>
+
+                {isGeneratingSubjects && (
+                  <div className="animate-pulse text-center text-muted-foreground text-sm">
+                    {t("Game.generatingSubjectsDescription")}
+                  </div>
+                )}
+
+                {generationError && (
+                  <p className="text-destructive text-sm">{generationError}</p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Subjects List */}
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("Game.subjects")}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="text-muted-foreground text-sm">
+                    {subjects.length > 0
+                      ? t("Game.subjectsCount", { count: subjects.length })
+                      : t("Game.noSubjects")}
+                  </div>
+                  {subjects.length > 0 && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setSubjects([]);
+                        setCells([]);
+                      }}
+                    >
+                      {t("Game.resetSubjects")}
+                    </Button>
+                  )}
+                </div>
+                <SubjectList
+                  subjects={subjects}
+                  onSubjectsChange={handleSubjectsChange}
+                  maxAdopted={24}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Board Preview */}
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("Game.boardPreview")}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="mx-auto max-w-md">
+                <BingoBoard cells={cells} />
+              </div>
+              <p className="mt-4 text-muted-foreground text-xs">
+                {t("Game.boardDescription", { 0: 24 })}
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Game Settings */}
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("Game.settings")}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Expiration Date Setting */}
+              <FormField
+                control={form.control}
+                name="expiresAt"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>{t("Game.expiresAt")}</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              "w-full pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground",
+                            )}
+                          >
+                            {field.value ? (
+                              format(field.value, "PPP")
+                            ) : (
+                              <span>{t("Game.selectDate")}</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          disabled={(date) => date < new Date()}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormDescription>
+                      {t("Game.expiresAtDescription")}
+                    </FormDescription>
+                    <TranslatedFormMessage />
+                  </FormItem>
+                )}
+              />
+              {/* Public/Private Setting */}
+              <FormField
+                control={form.control}
+                name="isPublic"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                    <div className="space-y-0.5">
+                      <FormLabel>{t("Game.isPublic")}</FormLabel>
+                      <FormDescription>
+                        {t("Game.isPublicDescription")}
+                      </FormDescription>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              {/* Photo Sharing Setting */}
+              <FormField
+                control={form.control}
+                name="isPhotoSharingEnabled"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                    <div className="space-y-0.5">
+                      <FormLabel>{t("Game.isPhotoSharingEnabled")}</FormLabel>
+                      <FormDescription>
+                        {t("Game.isPhotoSharingEnabledDescription")}
+                      </FormDescription>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              {/* Required Bingo Lines Setting */}
+              <FormField
+                control={form.control}
+                name="requiredBingoLines"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("Game.requiredBingoLines")}</FormLabel>
+                    <FormControl>
+                      <div className="flex items-center space-x-2">
+                        <Input
+                          type="number"
+                          min={1}
+                          max={5}
+                          {...field}
+                          onChange={(e) => {
+                            const value = Number.parseInt(e.target.value, 10);
+                            if (value >= 1 && value <= 5) {
+                              field.onChange(value);
+                            }
+                          }}
+                          className="w-20"
+                        />
+                        <span className="text-muted-foreground">(1-5)</span>
+                      </div>
+                    </FormControl>
+                    <FormDescription>
+                      {t("Game.requiredBingoLinesDescription")}
+                    </FormDescription>
+                    <TranslatedFormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Confidence Threshold Setting */}
+              <FormField
+                control={form.control}
+                name="confidenceThreshold"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("Game.confidenceThreshold")}</FormLabel>
+                    <FormControl>
+                      <div className="flex items-center space-x-2">
+                        <Input
+                          type="number"
+                          min={0}
+                          max={1}
+                          step={0.1}
+                          {...field}
+                          onChange={(e) => {
+                            const value = Number.parseFloat(e.target.value);
+                            if (value >= 0 && value <= 1) {
+                              field.onChange(value);
+                            }
+                          }}
+                          className="w-20"
+                        />
+                        <span className="text-muted-foreground">(0.0-1.0)</span>
+                      </div>
+                    </FormControl>
+                    <FormDescription>
+                      {t("Game.confidenceThresholdDescription")}
+                    </FormDescription>
+                    <TranslatedFormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Notes */}
+              <FormField
+                control={form.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("Game.notes")}</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder={t("Game.notesPlaceholder")}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      {t("Game.notesDescription")}
+                    </FormDescription>
+                    <TranslatedFormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Submit Button */}
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={isSubmitting || !title || !theme || subjects.length < 24}
+          >
+            {isSubmitting ? t("Game.creating") : t("Game.create")}
+          </Button>
+
+          {submissionError && (
+            <p className="mt-2 text-destructive text-sm">{submissionError}</p>
+          )}
+        </form>
+      </Form>
+    </div>
+  );
+}

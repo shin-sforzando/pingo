@@ -126,20 +126,24 @@ export function SubjectItem({
           />
         </div>
 
-        {/* Error message */}
-        {error && <div className="px-2 text-destructive text-xs">{error}</div>}
+        {/* Delete button */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => onDelete(index)}
+          aria-label="Delete subject"
+          className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive"
+        >
+          <X className="h-4 w-4" />
+        </Button>
       </div>
 
-      {/* Delete button */}
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => onDelete(index)}
-        aria-label="Delete subject"
-        className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive"
-      >
-        <X className="h-4 w-4" />
-      </Button>
+      {/* Error message */}
+      {error && (
+        <div className="rounded-md border border-destructive/10 bg-destructive/5 px-2 py-1 text-destructive text-xs">
+          {error}
+        </div>
+      )}
     </div>
   );
 }

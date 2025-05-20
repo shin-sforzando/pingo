@@ -31,20 +31,12 @@ const getPromptTemplate = (params: CheckSubjectsRequest) => {
 Please check if the following subjects are appropriate for the game.
 
 Each subject must meet ALL of the following criteria:
-1. Be a concrete noun or short descriptive phrase that clearly identifies a photo target
-2. Be visually identifiable in a photograph
-3. Be suitable for recognition by Google Cloud Vision AI
-4. Be unambiguous and specific enough for players to understand what to photograph
-5. Be appropriate for all ages (no offensive content, harmful elements, adult themes, violence, or illegal activities)
-6. Be unique within the list (not duplicated or too similar to other subjects)
-
-Subjects that do NOT meet these criteria might include:
-- Abstract concepts that cannot be clearly photographed (e.g., "happiness", "tension")
-- Vague descriptions that are too subjective (e.g., "something nice", "beautiful thing")
-- Items that are too common or generic (e.g., "person", "building")
-- Items that are too specific or rare to reasonably find (e.g., "1965 Ford Mustang GT with red interior")
-- Duplicated or extremely similar items (e.g., "cat" and "kitten")
-- Inappropriate content for a family game
+- Be a concrete noun or short descriptive phrase that clearly identifies a photo target
+- Be visually identifiable in a photograph
+- Be suitable for recognition by Google Cloud Vision AI
+- Be unambiguous and specific enough for players to understand what to photograph
+- Be appropriate for all ages (no offensive content, harmful elements, adult themes, violence, or illegal activities)
+- Be unique within the list (not duplicated or too similar to other subjects)
 
 Subjects to check:
 ${subjects.map((subject) => `- "${subject}"`).join("\n")}
