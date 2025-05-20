@@ -5,8 +5,6 @@ import { render } from "vitest-browser-react";
 import enMessages from "../../../../messages/en.json";
 import jaMessages from "../../../../messages/ja.json";
 
-import "../../globals.css";
-
 import CreateGamePage from "./page";
 
 // Mock the fetch API
