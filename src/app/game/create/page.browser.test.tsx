@@ -1,6 +1,6 @@
 import { page, userEvent } from "@vitest/browser/context";
 import { NextIntlClientProvider } from "next-intl";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { render } from "vitest-browser-react";
 import enMessages from "../../../../messages/en.json";
 import jaMessages from "../../../../messages/ja.json";
@@ -10,6 +10,7 @@ import "../../globals.css";
 import CreateGamePage from "./page";
 
 // Mock the fetch API
+const originalFetch = globalThis.fetch;
 const mockFetch = vi.fn();
 window.fetch = mockFetch;
 
@@ -21,6 +22,11 @@ vi.mock("@/lib/firebase/client", () => ({
     },
   },
 }));
+
+afterAll(() => {
+  // Restore the original fetch implementation
+  globalThis.fetch = originalFetch;
+});
 
 describe("CreateGamePage", () => {
   beforeEach(() => {

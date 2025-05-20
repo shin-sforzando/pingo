@@ -2,7 +2,7 @@ import { faker } from "@faker-js/faker";
 import type { Meta, StoryObj } from "@storybook/react";
 import CreateGamePage from "./page";
 
-// Mock the fetch API for Storybook
+// Mock the fetch API and Firebase Authentication for Storybook
 if (typeof window !== "undefined") {
   const originalFetch = window.fetch;
   window.fetch = async (input, init) => {
@@ -33,10 +33,7 @@ if (typeof window !== "undefined") {
     // Default to original fetch for other requests
     return originalFetch(input, init);
   };
-}
 
-// Mock Firebase auth for Storybook
-if (typeof window !== "undefined") {
   // @ts-ignore - Mock auth object for Storybook
   window.mockFirebaseAuth = {
     currentUser: {

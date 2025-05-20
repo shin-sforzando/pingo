@@ -122,10 +122,13 @@ export default function CreateGamePage() {
         throw new Error(t("Game.errors.generationFailed"));
       }
 
-      // Filter out duplicates
+      // First, remove duplicates within the candidates array using Set
+      const uniqueCandidates = [...new Set(data.candidates as string[])];
+
+      // Then filter out candidates that already exist in subjects
       const existingTexts = subjects.map((subject) => subject.text);
-      const uniqueNewCandidates = data.candidates.filter(
-        (text: string) => !existingTexts.includes(text),
+      const uniqueNewCandidates = uniqueCandidates.filter(
+        (text) => !existingTexts.includes(text),
       );
 
       console.log(
@@ -293,6 +296,8 @@ export default function CreateGamePage() {
 
           // Update subjects with error messages
           setSubjects(updatedSubjects);
+          updateCells(updatedSubjects);
+
           return;
         }
 
