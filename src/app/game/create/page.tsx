@@ -388,15 +388,15 @@ export default function CreateGamePage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>{t("Game.title")}</FormLabel>
+                    <FormDescription>
+                      {t("Game.titleDescription")}
+                    </FormDescription>
                     <FormControl>
                       <Input
                         placeholder={t("Game.titlePlaceholder")}
                         {...field}
                       />
                     </FormControl>
-                    <FormDescription>
-                      {t("Game.titleDescription")}
-                    </FormDescription>
                     <TranslatedFormMessage />
                   </FormItem>
                 )}
@@ -408,15 +408,15 @@ export default function CreateGamePage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>{t("Game.theme")}</FormLabel>
+                    <FormDescription>
+                      {t("Game.themeDescription")}
+                    </FormDescription>
                     <FormControl>
                       <Input
                         placeholder={t("Game.themePlaceholder")}
                         {...field}
                       />
                     </FormControl>
-                    <FormDescription>
-                      {t("Game.themeDescription")}
-                    </FormDescription>
                     <TranslatedFormMessage />
                   </FormItem>
                 )}
@@ -442,13 +442,11 @@ export default function CreateGamePage() {
                     />
                   )}
                 </div>
-
                 {isGeneratingSubjects && (
                   <div className="animate-pulse text-center text-muted-foreground text-sm">
                     {t("Game.generatingSubjectsDescription")}
                   </div>
                 )}
-
                 {generationError && (
                   <p className="text-destructive text-sm">{generationError}</p>
                 )}
@@ -496,14 +494,14 @@ export default function CreateGamePage() {
           <Card>
             <CardHeader>
               <CardTitle>{t("Game.boardPreview")}</CardTitle>
+              <p className="mt-4 text-muted-foreground text-xs">
+                {t("Game.boardDescription", { 0: 24 })}
+              </p>
             </CardHeader>
             <CardContent>
               <div className="mx-auto max-w-md">
                 <BingoBoard cells={cells} />
               </div>
-              <p className="mt-4 text-muted-foreground text-xs">
-                {t("Game.boardDescription", { 0: 24 })}
-              </p>
             </CardContent>
           </Card>
 
@@ -520,6 +518,9 @@ export default function CreateGamePage() {
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel>{t("Game.expiresAt")}</FormLabel>
+                    <FormDescription>
+                      {t("Game.expiresAtDescription")}
+                    </FormDescription>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -549,9 +550,6 @@ export default function CreateGamePage() {
                         />
                       </PopoverContent>
                     </Popover>
-                    <FormDescription>
-                      {t("Game.expiresAtDescription")}
-                    </FormDescription>
                     <TranslatedFormMessage />
                   </FormItem>
                 )}
@@ -607,6 +605,9 @@ export default function CreateGamePage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>{t("Game.requiredBingoLines")}</FormLabel>
+                    <FormDescription>
+                      {t("Game.requiredBingoLinesDescription")}
+                    </FormDescription>
                     <FormControl>
                       <div className="flex items-center space-x-2">
                         <Input
@@ -625,9 +626,6 @@ export default function CreateGamePage() {
                         <span className="text-muted-foreground">(1-5)</span>
                       </div>
                     </FormControl>
-                    <FormDescription>
-                      {t("Game.requiredBingoLinesDescription")}
-                    </FormDescription>
                     <TranslatedFormMessage />
                   </FormItem>
                 )}
@@ -640,6 +638,9 @@ export default function CreateGamePage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>{t("Game.confidenceThreshold")}</FormLabel>
+                    <FormDescription>
+                      {t("Game.confidenceThresholdDescription")}
+                    </FormDescription>
                     <FormControl>
                       <div className="flex items-center space-x-2">
                         <Input
@@ -659,9 +660,6 @@ export default function CreateGamePage() {
                         <span className="text-muted-foreground">(0.0-1.0)</span>
                       </div>
                     </FormControl>
-                    <FormDescription>
-                      {t("Game.confidenceThresholdDescription")}
-                    </FormDescription>
                     <TranslatedFormMessage />
                   </FormItem>
                 )}
@@ -674,15 +672,15 @@ export default function CreateGamePage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>{t("Game.notes")}</FormLabel>
+                    <FormDescription>
+                      {t("Game.notesDescription")}
+                    </FormDescription>
                     <FormControl>
                       <Textarea
                         placeholder={t("Game.notesPlaceholder")}
                         {...field}
                       />
                     </FormControl>
-                    <FormDescription>
-                      {t("Game.notesDescription")}
-                    </FormDescription>
                     <TranslatedFormMessage />
                   </FormItem>
                 )}

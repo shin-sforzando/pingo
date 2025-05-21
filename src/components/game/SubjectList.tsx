@@ -180,6 +180,9 @@ export function SubjectList({
           collisionDetection={closestCenter}
           onDragEnd={handleDragEnd}
         >
+          <div className="text-muted-foreground text-xs">
+            <p>{t("Game.subjectsUsageDescription", { 0: maxAdopted })}</p>
+          </div>
           <SortableContext
             items={subjects.map((s) => s.id)}
             strategy={verticalListSortingStrategy}
@@ -197,7 +200,6 @@ export function SubjectList({
           </SortableContext>
         </DndContextWrapper>
       </div>
-
       <Button
         type="button"
         variant="outline"
@@ -208,10 +210,6 @@ export function SubjectList({
         <Plus className="mr-2 h-4 w-4" />
         {t("Game.addNewSubject")}
       </Button>
-
-      <div className="text-muted-foreground text-xs">
-        <p>{t("Game.subjectsUsageDescription", { 0: maxAdopted })}</p>
-      </div>
     </div>
   );
 }
