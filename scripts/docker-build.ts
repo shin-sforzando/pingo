@@ -97,7 +97,7 @@ async function main(): Promise<void> {
     if (runContainer) {
       console.log("Running container...");
       execSync(
-        "docker run --publish 8080:8080 --env-file .env --env-file .env.local pingo:latest",
+        "docker run --rm --publish 8080:8080 --env-file .env --env-file .env.local pingo:latest",
         execOptions,
       );
     }

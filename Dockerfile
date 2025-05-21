@@ -6,10 +6,12 @@ ARG FIREBASE_PROJECT_ID
 ARG FIREBASE_CLIENT_EMAIL
 ARG FIREBASE_PRIVATE_KEY
 
-# Set environment variables for Firebase credentials
+# Set non-public environment variables
 ENV FIREBASE_PROJECT_ID=$FIREBASE_PROJECT_ID
 ENV FIREBASE_CLIENT_EMAIL=$FIREBASE_CLIENT_EMAIL
 ENV FIREBASE_PRIVATE_KEY=$FIREBASE_PRIVATE_KEY
+
+# Set publishable environment variables
 ENV NEXT_PUBLIC_FIREBASE_PROJECT_ID="pingo-456817"
 ENV NEXT_PUBLIC_FIREBASE_API_KEY="AIzaSyCYXPVHEMWgIXpDc2j-qFuvzD79eI24dws"
 ENV NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN="pingo-456817.firebaseapp.com"
@@ -30,6 +32,7 @@ COPY package*.json ./
 
 # Install dependencies
 # Use --frozen-lockfile to ensure reproducibility
+# Use --legacy-peer-deps to avoid peer dependency issues with shadcn/ui
 RUN npm ci --legacy-peer-deps
 
 # Copy the rest of the application code
@@ -49,16 +52,17 @@ ARG FIREBASE_PROJECT_ID
 ARG FIREBASE_CLIENT_EMAIL
 ARG FIREBASE_PRIVATE_KEY
 
-# Set environment variables
 ENV NODE_ENV=production
 
 # Next.js server runs on port 3000 by default, Cloud Run expects PORT env var
 ENV PORT=8080
 
-# # Set Firebase credentials for production stage
+# Set non-public credentials for production stage
 ENV FIREBASE_PROJECT_ID=$FIREBASE_PROJECT_ID
 ENV FIREBASE_CLIENT_EMAIL=$FIREBASE_CLIENT_EMAIL
 ENV FIREBASE_PRIVATE_KEY=$FIREBASE_PRIVATE_KEY
+
+# Set publishable environment variables for production stage
 ENV NEXT_PUBLIC_FIREBASE_PROJECT_ID="pingo-456817"
 ENV NEXT_PUBLIC_FIREBASE_API_KEY="AIzaSyCYXPVHEMWgIXpDc2j-qFuvzD79eI24dws"
 ENV NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN="pingo-456817.firebaseapp.com"
