@@ -26,4 +26,4 @@ post-merge:
       interactive: true
       run: git secret reveal -v
     install:
-      run: npm install
+      run: npm install --legacy-peer-deps
