@@ -122,6 +122,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (data.success) {
+        // Store token in localStorage
+        localStorage.setItem("authToken", data.data.token);
+
         // Sign in with custom token
         await signInWithCustomToken(auth, data.data.token);
         setUser(data.data.user);
@@ -157,6 +160,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         if (data.success) {
+          // Store token in localStorage
+          localStorage.setItem("authToken", data.data.token);
+
           // Sign in with custom token
           await signInWithCustomToken(auth, data.data.token);
           setUser(data.data.user);
@@ -189,6 +195,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           body: JSON.stringify({ userId: user.id }),
         });
       }
+
+      // Remove token from localStorage
+      localStorage.removeItem("authToken");
 
       // Sign out from Firebase
       await auth.signOut();

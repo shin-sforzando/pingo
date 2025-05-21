@@ -24,6 +24,14 @@ Google Cloud Vision AI will be used to determine if a photo matches the suggeste
 Candidates should be subjects that are not offensive to public order and morals and that are safe for children to see or approach.
 If the given title or theme is offensive to public order and morals, return an error with the reason.
 
+Each subject must meet ALL of the following criteria:
+- Be a concrete noun or short descriptive phrase that clearly identifies a photo target
+- Be visually identifiable in a photograph
+- Be suitable for recognition by Google Cloud Vision AI
+- Be unambiguous and specific enough for players to understand what to photograph
+- Be appropriate for all ages (no offensive content, harmful elements, adult themes, violence, or illegal activities)
+- Be unique within the list (not duplicated or too similar to other subjects)
+
 Candidates must respond in ${language}.
 
 # Conditions

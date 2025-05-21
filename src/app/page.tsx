@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { useState } from "react";
 
 import { LoginForm } from "@/components/auth/LoginForm";
@@ -12,7 +13,7 @@ import { useAuth } from "@/contexts/AuthContext";
 
 export default function Home() {
   const t = useTranslations();
-  const { user, logout, loading } = useAuth();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<string>("login");
 
   // Handle successful login/registration
@@ -30,23 +31,20 @@ export default function Home() {
       {/* Authentication section */}
       <section className="mx-auto mt-8 max-w-md">
         {user ? (
-          // User is logged in - show profile info and logout button
-          <Card className="p-6">
-            <div className="flex flex-col items-center space-y-4">
-              <h2 className="font-bold text-xl">{t("HomePage.welcome")}</h2>
-              <p className="text-center">
-                {t("Header.loggedInAs")} <strong>{user.username}</strong>
-              </p>
-              <Button
-                onClick={() => logout()}
-                disabled={loading}
-                variant="outline"
-                className="w-full"
-              >
-                {t("Auth.logout")}
-              </Button>
-            </div>
-          </Card>
+          // User is logged in - show game action buttons
+          <div className="grid grid-cols-2 gap-6">
+            <Button asChild size="lg" className="h-16 text-lg">
+              <Link href="/game/create">{t("HomePage.createGame")}</Link>
+            </Button>
+            <Button
+              asChild
+              size="lg"
+              variant="outline"
+              className="h-16 text-lg"
+            >
+              <Link href="/game/join">{t("HomePage.joinGame")}</Link>
+            </Button>
+          </div>
         ) : (
           // User is not logged in - show login/register forms
           <Card className="p-6">

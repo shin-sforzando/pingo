@@ -29,6 +29,7 @@ export default defineConfig({
             provider: "playwright",
             instances: [{ browser: "webkit" }],
           },
+          setupFiles: ["./vitest.browser.setup.ts"], // Add browser setup file
         },
       },
     ],

@@ -184,12 +184,13 @@ export const submissionSchema = baseSchema.extend({
   imageUrl: z.string().url(),
   submittedAt: z.date(),
   analyzedAt: z.date().nullable(),
-  aiResponse: z.string().nullable(),
+  critique: z.string().nullable(),
   matchedCellId: z.string().nullable(),
   confidence: z.number().min(0).max(1).nullable(),
   processingStatus: z.nativeEnum(ProcessingStatus),
   acceptanceStatus: z.nativeEnum(AcceptanceStatus).nullable(),
   errorMessage: z.string().nullable(),
+  memo: z.string().optional(),
 });
 
 /**
