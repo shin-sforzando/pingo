@@ -30,7 +30,7 @@ COPY package*.json ./
 
 # Install dependencies
 # Use --frozen-lockfile to ensure reproducibility
-RUN npm ci
+RUN npm ci --legacy-peer-deps
 
 # Copy the rest of the application code
 # Use .dockerignore to exclude unnecessary files
