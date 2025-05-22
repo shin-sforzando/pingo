@@ -18,16 +18,13 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
-interface SharePageProps {
-  params: Promise<{
-    gameId: string;
-  }>;
-}
+export default function SharePage() {
+  const params = useParams();
+  const gameId = params.gameId as string;
 
-export default function SharePage({ params }: SharePageProps) {
-  const { gameId } = React.use(params);
   const t = useTranslations("Game.Share");
 
   const [game, setGame] = useState<Game | null>(null);
