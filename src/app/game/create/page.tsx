@@ -438,7 +438,7 @@ export default function CreateGamePage() {
                     <ShineBorder
                       borderWidth={2}
                       duration={3}
-                      shineColor={["#3b82f6", "#10b981", "#6366f1"]}
+                      // shineColor={["#08d9d6", "#252a34", "#ff2e63"]}
                     />
                   )}
                 </div>

@@ -3,6 +3,7 @@
 import { BingoBoard } from "@/components/game/BingoBoard";
 import { InfoCard } from "@/components/game/InfoCard";
 import { QRCodeCard } from "@/components/game/QRCodeCard";
+import { HyperText } from "@/components/magicui/hyper-text";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { BASE_URL } from "@/lib/constants";
@@ -75,8 +76,13 @@ export default function SharePage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto py-8 text-center">
-        <p>Loading...</p>
+      <div className="container mx-auto flex min-h-[50vh] items-center justify-center py-8">
+        <HyperText
+          className="text-center font-bold text-4xl md:text-6xl"
+          duration={1200}
+        >
+          Loading...
+        </HyperText>
       </div>
     );
   }
