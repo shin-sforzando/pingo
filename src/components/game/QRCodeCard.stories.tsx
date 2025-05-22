@@ -21,6 +21,7 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   args: {
     gameId: "ABCDEF",
+    url: "https://example.com/game/ABCDEF",
     size: 200,
   },
 };
@@ -36,6 +37,7 @@ export const WithCustomURL: Story = {
 export const LargeSize: Story = {
   args: {
     gameId: "PINGO1",
+    url: "https://example.com/game/PINGO1",
     size: 300,
   },
 };
@@ -43,6 +45,7 @@ export const LargeSize: Story = {
 export const SmallSize: Story = {
   args: {
     gameId: "PINGO2",
+    url: "https://example.com/game/PINGO2",
     size: 150,
   },
 };
