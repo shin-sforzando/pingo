@@ -1,18 +1,24 @@
+"use client";
+
 import { BingoBoard } from "@/components/game/BingoBoard";
 import { InfoCard } from "@/components/game/InfoCard";
 import { QRCodeCard } from "@/components/game/QRCodeCard";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { BASE_URL } from "@/lib/constants";
 import { formatDate } from "@/lib/utils";
-import { getGameBoard, getGameData, getParticipants } from "@/services/game";
 import { GameStatus } from "@/types/common";
+import type { Game, GameBoard } from "@/types/schema";
 import {
   ActivityIcon,
   CalendarIcon,
   PercentIcon,
+  PlayIcon,
   TableIcon,
 } from "lucide-react";
-import { headers } from "next/headers";
+import { useTranslations } from "next-intl";
+import Link from "next/link";
+import React, { useEffect, useState } from "react";
 
 interface SharePageProps {
   params: Promise<{
@@ -20,35 +26,86 @@ interface SharePageProps {
   }>;
 }
 
-export default async function SharePage({ params }: SharePageProps) {
-  const { gameId } = await params;
-  const game = await getGameData(gameId);
+export default function SharePage({ params }: SharePageProps) {
+  const { gameId } = React.use(params);
+  const t = useTranslations("Game.Share");
 
-  if (!game) {
+  const [game, setGame] = useState<Game | null>(null);
+  const [board, setBoard] = useState<GameBoard | null>(null);
+  const [participants, setParticipants] = useState<
+    Array<{ id: string; username: string }>
+  >([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        // Fetch game data
+        const gameResponse = await fetch(`/api/game/${gameId}`);
+        if (!gameResponse.ok) {
+          setError(true);
+          return;
+        }
+        const gameData = await gameResponse.json();
+        setGame(gameData);
+
+        // Fetch board data
+        const boardResponse = await fetch(`/api/game/${gameId}/board`);
+        if (boardResponse.ok) {
+          const boardData = await boardResponse.json();
+          setBoard(boardData);
+        }
+
+        // Fetch participants
+        const participantsResponse = await fetch(
+          `/api/game/${gameId}/participants`,
+        );
+        if (participantsResponse.ok) {
+          const participantsData = await participantsResponse.json();
+          setParticipants(participantsData);
+        }
+      } catch (err) {
+        console.error("Error fetching game data:", err);
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchData();
+  }, [gameId]);
+
+  if (loading) {
+    return (
+      <div className="container mx-auto py-8 text-center">
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
+  if (error || !game) {
     return (
       <div className="container mx-auto py-8">
-        <h1 className="text-center font-bold text-2xl">Game not found</h1>
+        <h1 className="text-center font-bold text-2xl">{t("gameNotFound")}</h1>
         <p className="text-center text-muted-foreground">
-          The game you are looking for does not exist or has been deleted.
+          {t("gameNotFoundDesc")}
         </p>
       </div>
     );
   }
 
-  const board = await getGameBoard(gameId);
-  const participants = await getParticipants(gameId);
-
   // Get the current URL for QR code
-  const headersList = await headers();
-  const protocol = headersList.get("x-forwarded-proto") || "http";
-  const host = headersList.get("host") || new URL(BASE_URL).host;
-  const gameUrl = `${protocol}://${host}/game/${gameId}`;
+  const gameUrl =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/game/${gameId}`
+      : `${BASE_URL}/game/${gameId}`;
 
   // Format game status for display
   const gameStatusMap: Record<GameStatus, string> = {
-    [GameStatus.ACTIVE]: "Active",
-    [GameStatus.ENDED]: "Ended",
-    [GameStatus.ARCHIVED]: "Archived",
+    [GameStatus.ACTIVE]: t("active"),
+    [GameStatus.ENDED]: t("ended"),
+    [GameStatus.ARCHIVED]: t("archived"),
   };
 
   return (
@@ -59,14 +116,25 @@ export default async function SharePage({ params }: SharePageProps) {
         <p className="text-center text-muted-foreground">{game.theme}</p>
         <div className="mt-4 flex justify-center gap-4">
           <Badge variant={game.isPublic ? "default" : "destructive"}>
-            {game.isPublic ? "Public" : "Private"}
+            {game.isPublic ? t("public") : t("private")}
           </Badge>
           <Badge
             variant={game.isPhotoSharingEnabled ? "default" : "destructive"}
           >
-            Photo Sharing: {game.isPhotoSharingEnabled ? "ON" : "OFF"}
+            {t("photoSharing")}:{" "}
+            {game.isPhotoSharingEnabled ? t("on") : t("off")}
           </Badge>
         </div>
+      </div>
+
+      {/* Join game button */}
+      <div className="mb-6 flex justify-center">
+        <Button variant="default" size="lg" className="gap-2" asChild>
+          <Link href={`/game/${gameId}`}>
+            <PlayIcon className="h-5 w-5" />
+            {t("joinGame")}
+          </Link>
+        </Button>
       </div>
 
       {/* QR code (public games only) */}
@@ -80,7 +148,7 @@ export default async function SharePage({ params }: SharePageProps) {
       {board && (
         <div className="mb-8">
           <h2 className="mb-4 text-center font-semibold text-xl">
-            Bingo Board
+            {t("bingoBoard")}
           </h2>
           <BingoBoard cells={board.cells} />
         </div>
@@ -89,22 +157,22 @@ export default async function SharePage({ params }: SharePageProps) {
       {/* Game settings information */}
       <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
         <InfoCard
-          title="Expiration Date"
+          title={t("expirationDate")}
           value={formatDate(game.expiresAt)}
           icon={<CalendarIcon className="h-4 w-4" />}
         />
         <InfoCard
-          title="Required Bingo Lines"
-          value={`${game.requiredBingoLines} lines`}
+          title={t("requiredBingoLines")}
+          value={`${game.requiredBingoLines} ${t("lines")}`}
           icon={<TableIcon className="h-4 w-4" />}
         />
         <InfoCard
-          title="Confidence Threshold"
+          title={t("confidenceThreshold")}
           value={`${Math.round(game.confidenceThreshold * 100)}%`}
           icon={<PercentIcon className="h-4 w-4" />}
         />
         <InfoCard
-          title="Status"
+          title={t("status")}
           value={gameStatusMap[game.status]}
           icon={<ActivityIcon className="h-4 w-4" />}
         />
@@ -113,27 +181,37 @@ export default async function SharePage({ params }: SharePageProps) {
       {/* Game notes (if any) */}
       {game.notes && (
         <div className="mb-6 rounded-lg bg-muted p-4">
-          <h2 className="mb-2 font-semibold">Notes</h2>
+          <h2 className="mb-2 font-semibold">{t("notes")}</h2>
           <p>{game.notes}</p>
         </div>
       )}
 
       {/* Participants list */}
-      {participants.length > 0 && (
+      {0 < participants.length && (
         <div className="mt-8">
-          <h2 className="mb-4 font-semibold text-xl">Participants</h2>
-          <div className="grid grid-cols-2 gap-2">
+          <h2 className="mb-4 font-semibold text-xl">{t("participants")}</h2>
+          <ul className="list-inside list-disc space-y-2 pl-5">
             {participants.map((participant) => (
-              <div
+              <li
                 key={participant.id}
                 className="truncate rounded-lg border p-2"
               >
                 {participant.username}
-              </div>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
       )}
+
+      {/* Join game button */}
+      <div className="mb-6 flex justify-center">
+        <Button variant="default" size="lg" className="gap-2" asChild>
+          <Link href={`/game/${gameId}`}>
+            <PlayIcon className="h-5 w-5" />
+            {t("joinGame")}
+          </Link>
+        </Button>
+      </div>
     </div>
   );
 }
