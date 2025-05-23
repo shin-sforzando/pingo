@@ -15,6 +15,7 @@
 - Never ignore Linter warnings, pay particular attention to the following rules.
   - noExplicitAny: Disallow the any type usage.
   - noForEach: Prefer `for...of` statement instead of `Array.forEach`.
+  - noNonNullAssertion: Disallow non-null assertions using the ! postfix operator.
   - noUnusedImports: Disallow unused imports.
   - noUnusedVariables: Disallow unused variables.
   - useImportType: Promotes the use of import type for types.
