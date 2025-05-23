@@ -1,5 +1,18 @@
 import { adminFirestore } from "@/lib/firebase/admin";
-import type { Game, GameBoard, User } from "@/types/schema";
+import {
+  type GameBoardDocument,
+  type GameDocument,
+  gameBoardFromFirestore,
+  gameFromFirestore,
+} from "@/types/game";
+import {
+  type Game,
+  type GameBoard,
+  gameBoardSchema,
+  gameSchema,
+  userSchema,
+} from "@/types/schema";
+import { type UserDocument, userFromFirestore } from "@/types/user";
 
 /**
  * Fetch game data by ID
@@ -14,12 +27,26 @@ export async function getGameData(gameId: string): Promise<Game | null> {
       return null;
     }
 
-    return {
-      ...gameDoc.data(),
+    const gameData = gameDoc.data();
+    if (!gameData) {
+      return null;
+    }
+
+    // Step 1: Convert Firestore data to application model using the converter function
+    const convertedGame = gameFromFirestore({
+      ...gameData,
       id: gameDoc.id,
-      createdAt: gameDoc.data()?.createdAt?.toDate() || new Date(),
-      expiresAt: gameDoc.data()?.expiresAt?.toDate() || new Date(),
-    } as Game;
+    } as GameDocument);
+
+    // Step 2: Validate the converted data using Zod schema
+    // This ensures the data meets all constraints defined in the schema
+    try {
+      return gameSchema.parse(convertedGame);
+    } catch (error) {
+      console.error("Game data validation error:", error);
+      // Return the converted data anyway, but log the validation error
+      return convertedGame;
+    }
   } catch (error) {
     console.error("Error fetching game data:", error);
     return null;
@@ -42,7 +69,24 @@ export async function getGameBoard(gameId: string): Promise<GameBoard | null> {
       return null;
     }
 
-    return boardDoc.data() as GameBoard;
+    const boardData = boardDoc.data();
+    if (!boardData) {
+      return null;
+    }
+
+    // Step 1: Convert Firestore data to application model
+    const convertedBoard = gameBoardFromFirestore(
+      boardData as GameBoardDocument,
+    );
+
+    // Step 2: Validate the converted data
+    try {
+      return gameBoardSchema.parse(convertedBoard);
+    } catch (error) {
+      console.error("Game board validation error:", error);
+      // Return the converted data anyway, but log the validation error
+      return convertedBoard;
+    }
   } catch (error) {
     console.error("Error fetching game board:", error);
     return null;
@@ -90,12 +134,35 @@ export async function getParticipants(gameId: string): Promise<Participant[]> {
           };
         }
 
-        const userData = userDoc.data() as User;
+        const userData = userDoc.data();
+        if (!userData) {
+          return {
+            id: userId,
+            username: "Unknown User",
+          };
+        }
 
-        return {
+        // Step 1: Convert Firestore data to application model
+        const convertedUser = userFromFirestore({
+          ...userData,
           id: userId,
-          username: userData.username,
-        };
+        } as UserDocument);
+
+        // Step 2: Validate the converted data
+        try {
+          const validatedUser = userSchema.parse(convertedUser);
+          return {
+            id: userId,
+            username: validatedUser.username,
+          };
+        } catch (error) {
+          console.error("User data validation error:", error);
+          // Return the converted data anyway, but log the validation error
+          return {
+            id: userId,
+            username: convertedUser.username || "Unknown User",
+          };
+        }
       }),
     );
 

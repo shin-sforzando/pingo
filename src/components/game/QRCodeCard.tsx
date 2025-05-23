@@ -14,7 +14,7 @@ export function QRCodeCard({ gameId, url, size = 200 }: QRCodeCardProps) {
     <Card className="mx-auto w-full max-w-md">
       <CardHeader>
         <CardTitle className="text-center font-mono text-3xl">
-          {gameId}
+          Game ID: {gameId}
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col items-center">

@@ -1,4 +1,6 @@
+import { validateGameId } from "@/lib/api-utils";
 import { adminFirestore } from "@/lib/firebase/admin";
+import { type GameDocument, gameFromFirestore } from "@/types/game";
 import { NextResponse } from "next/server";
 
 /**
@@ -12,12 +14,8 @@ export async function GET(
   try {
     const { gameId } = await params;
 
-    if (!gameId) {
-      return NextResponse.json(
-        { error: "Game ID is required" },
-        { status: 400 },
-      );
-    }
+    const validationError = validateGameId(gameId);
+    if (validationError) return validationError;
 
     const gameDoc = await adminFirestore.collection("games").doc(gameId).get();
 
@@ -25,13 +23,22 @@ export async function GET(
       return NextResponse.json({ error: "Game not found" }, { status: 404 });
     }
 
-    // Return game data with proper date conversion
-    return NextResponse.json({
-      ...gameDoc.data(),
+    const gameData = gameDoc.data();
+    if (!gameData) {
+      return NextResponse.json(
+        { error: "Game data is empty" },
+        { status: 404 },
+      );
+    }
+
+    // Convert Firestore data to application model using the converter function
+    const convertedGame = gameFromFirestore({
+      ...gameData,
       id: gameDoc.id,
-      createdAt: gameDoc.data()?.createdAt?.toDate() || new Date(),
-      expiresAt: gameDoc.data()?.expiresAt?.toDate() || new Date(),
-    });
+    } as GameDocument);
+
+    // Return the converted game data
+    return NextResponse.json(convertedGame);
   } catch (error) {
     console.error("Error fetching game data:", error);
     return NextResponse.json(

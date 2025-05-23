@@ -1,4 +1,6 @@
+import { validateGameId } from "@/lib/api-utils";
 import { adminFirestore } from "@/lib/firebase/admin";
+import { type UserDocument, userFromFirestore } from "@/types/user";
 import { NextResponse } from "next/server";
 
 /**
@@ -12,12 +14,8 @@ export async function GET(
   try {
     const { gameId } = await params;
 
-    if (!gameId) {
-      return NextResponse.json(
-        { error: "Game ID is required" },
-        { status: 400 },
-      );
-    }
+    const validationError = validateGameId(gameId);
+    if (validationError) return validationError;
 
     const participantsSnapshot = await adminFirestore
       .collection(`games/${gameId}/participants`)
@@ -46,10 +44,23 @@ export async function GET(
         }
 
         const userData = userDoc.data();
+        if (!userData) {
+          return {
+            id: userId,
+            username: "Unknown User",
+          };
+        }
 
+        // Convert Firestore data to application model
+        const user = userFromFirestore({
+          ...userData,
+          id: userId,
+        } as UserDocument);
+
+        // Return only the necessary fields
         return {
           id: userId,
-          username: userData?.username || "Unknown User",
+          username: user.username,
         };
       }),
     );

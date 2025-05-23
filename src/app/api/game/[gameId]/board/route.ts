@@ -1,4 +1,6 @@
+import { validateGameId } from "@/lib/api-utils";
 import { adminFirestore } from "@/lib/firebase/admin";
+import { type GameBoardDocument, gameBoardFromFirestore } from "@/types/game";
 import { NextResponse } from "next/server";
 
 /**
@@ -12,12 +14,8 @@ export async function GET(
   try {
     const { gameId } = await params;
 
-    if (!gameId) {
-      return NextResponse.json(
-        { error: "Game ID is required" },
-        { status: 400 },
-      );
-    }
+    const validationError = validateGameId(gameId);
+    if (validationError) return validationError;
 
     const boardDoc = await adminFirestore
       .collection(`games/${gameId}/board`)
@@ -28,8 +26,22 @@ export async function GET(
       return NextResponse.json({ error: "Board not found" }, { status: 404 });
     }
 
-    // Return board data
-    return NextResponse.json(boardDoc.data());
+    const boardData = boardDoc.data();
+    if (!boardData) {
+      return NextResponse.json(
+        { error: "Board data is empty" },
+        { status: 404 },
+      );
+    }
+
+    // Convert Firestore data to application model
+    // Type cast to GameBoardDocument to satisfy TypeScript
+    const convertedBoard = gameBoardFromFirestore(
+      boardData as GameBoardDocument,
+    );
+
+    // Return the converted board data
+    return NextResponse.json(convertedBoard);
   } catch (error) {
     console.error("Error fetching game board:", error);
     return NextResponse.json(

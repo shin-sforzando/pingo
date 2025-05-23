@@ -113,7 +113,51 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
+export const PublicGame: Story = {};
+
+export const PrivateGame: Story = {
+  decorators: [
+    (Story) => {
+      // Mock fetch to return a private game
+      if (typeof window !== "undefined") {
+        const originalFetch = window.fetch;
+        // Override fetch for this story
+        window.fetch = async (input, init) => {
+          const url = input.toString();
+          console.log(`Mocked fetch: ${url}`);
+
+          // Always return success for any game ID to avoid "game not found" error
+          if (url.includes("/api/game/")) {
+            if (url.endsWith("/board")) {
+              return {
+                ok: true,
+                json: async () => mockBoard,
+              } as Response;
+            }
+            if (url.endsWith("/participants")) {
+              return {
+                ok: true,
+                json: async () => mockParticipants,
+              } as Response;
+            }
+            // Return a private game
+            return {
+              ok: true,
+              json: async () => ({
+                ...mockGame,
+                isPublic: false,
+              }),
+            } as Response;
+          }
+
+          // Default to original fetch for other requests
+          return originalFetch(input, init);
+        };
+      }
+      return <Story />;
+    },
+  ],
+};
 
 export const Loading: Story = {
   decorators: [

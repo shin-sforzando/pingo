@@ -140,12 +140,18 @@ export default function SharePage() {
         </Button>
       </div>
 
-      {/* QR code (public games only) */}
-      {game.isPublic && (
-        <div className="mb-8">
+      {/* QR code (public games only) or Game ID (private games) */}
+      <div className="mb-8">
+        {game.isPublic ? (
           <QRCodeCard gameId={gameId} url={gameUrl} />
-        </div>
-      )}
+        ) : (
+          <div className="mx-auto w-full max-w-md rounded-lg border p-6 text-center">
+            <p className="font-mono font-semibold text-3xl">
+              Game ID: {gameId}
+            </p>
+          </div>
+        )}
+      </div>
 
       {/* Bingo board preview */}
       {board && (

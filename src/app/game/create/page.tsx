@@ -435,11 +435,7 @@ export default function CreateGamePage() {
                       : t("Game.generateSubjectsWithAI")}
                   </Button>
                   {isGeneratingSubjects && (
-                    <ShineBorder
-                      borderWidth={2}
-                      duration={3}
-                      // shineColor={["#08d9d6", "#252a34", "#ff2e63"]}
-                    />
+                    <ShineBorder borderWidth={2} duration={3} />
                   )}
                 </div>
                 {isGeneratingSubjects && (
