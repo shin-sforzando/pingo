@@ -10,6 +10,25 @@ Pingoプロジェクトは現在、機能実装段階に入っています。基
 
 ## 最近の変更
 
+- データ変換とバリデーションの改善（2025年5月23日）
+  - APIエンドポイントの修正
+    - `src/app/api/game/[gameId]/board/route.ts`、`src/app/api/game/[gameId]/route.ts`、`src/app/api/game/[gameId]/participants/route.ts`の修正
+    - `gameFromFirestore`、`gameBoardFromFirestore`、`userFromFirestore`関数を使用したFirestoreデータの適切な変換
+    - Timestamp型のフィールドをDateオブジェクトに正しく変換
+  - サービス層の改善
+    - `src/services/game.ts`にConverterとZodバリデーションを組み合わせた堅牢なアプローチを実装
+    - 2段階のデータ処理：Converterによる変換とZodスキーマによるバリデーション
+    - バリデーションエラーが発生した場合でも、変換されたデータを返しつつエラーをログに記録
+    - 型安全性と値の制約の両方を確保
+  - SharePageの機能強化
+    - 公開ゲームの場合はQRコードを表示
+    - 非公開ゲームの場合は「Game ID: {gameId}」を表示
+    - Storybookに`PublicGame`と`PrivateGame`の2つのストーリーを追加
+  - ローディングUIの改善
+    - `src/app/loading.tsx`の実装
+    - `HyperText`コンポーネントを使用したアニメーションテキスト
+    - SharePageのローディング表示も同様のスタイルに統一
+
 - ヘッダーコンポーネントの拡張
   - UserMenuコンポーネントの実装
     - ユーザー名の1文字目を丸く囲ったAvatarの表示
