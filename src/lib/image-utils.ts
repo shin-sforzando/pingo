@@ -1,7 +1,11 @@
 /**
  * Image processing utilities for client-side image manipulation
  * Handles JPEG conversion, resizing, and optimization
+ * Supports HEIC/HEIF to JPEG conversion using heic2any
  */
+
+// Dynamic import for heic2any to avoid SSR issues
+let heic2any: typeof import("heic2any").default | null = null;
 
 export interface ImageProcessingOptions {
   /**
@@ -76,6 +80,70 @@ export const SUPPORTED_IMAGE_TYPES = [
  * Maximum file size in bytes (10MB)
  */
 export const MAX_FILE_SIZE = 10 * 1024 * 1024;
+
+/**
+ * HEIC/HEIF file types that require conversion
+ */
+const HEIC_TYPES = ["image/heic", "image/heif"] as const;
+
+/**
+ * Dynamically imports heic2any to avoid SSR issues
+ */
+async function getHeic2any() {
+  if (!heic2any && typeof window !== "undefined") {
+    const module = await import("heic2any");
+    heic2any = module.default;
+  }
+  return heic2any;
+}
+
+/**
+ * Checks if the file is a HEIC/HEIF format
+ */
+function isHeicFile(file: File): boolean {
+  return HEIC_TYPES.includes(file.type as (typeof HEIC_TYPES)[number]);
+}
+
+/**
+ * Converts HEIC/HEIF file to JPEG using heic2any
+ * Returns the converted file or the original file if conversion is not needed
+ */
+async function convertHeicToJpeg(file: File): Promise<File> {
+  if (!isHeicFile(file)) {
+    return file;
+  }
+
+  try {
+    const heic2anyLib = await getHeic2any();
+    if (!heic2anyLib) {
+      throw new Error("heic2any library not available");
+    }
+
+    const convertedBlob = await heic2anyLib({
+      blob: file,
+      toType: "image/jpeg",
+      quality: 0.9, // High quality for initial conversion, will be optimized later
+    });
+
+    // heic2any can return Blob or Blob[], handle both cases
+    const blob = Array.isArray(convertedBlob)
+      ? convertedBlob[0]
+      : convertedBlob;
+
+    // Create new File object with JPEG type
+    const convertedFile = new File(
+      [blob],
+      file.name.replace(/\.(heic|heif)$/i, ".jpg"),
+      { type: "image/jpeg" },
+    );
+
+    return convertedFile;
+  } catch (error) {
+    throw new Error(
+      `Failed to convert HEIC file: ${error instanceof Error ? error.message : "Unknown error"}`,
+    );
+  }
+}
 
 /**
  * Validates if the file is a supported image type
@@ -156,8 +224,11 @@ export async function processImage(
     );
   }
 
+  // Convert HEIC/HEIF to JPEG if needed
+  const processedFile = await convertHeicToJpeg(file);
+
   // Load image
-  const img = await createImageFromFile(file);
+  const img = await createImageFromFile(processedFile);
   const originalDimensions = { width: img.width, height: img.height };
 
   // Calculate new dimensions

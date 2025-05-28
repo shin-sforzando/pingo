@@ -39,6 +39,9 @@ const meta = {
     },
   },
   args: {
+    gameId: "TEST01",
+    isUploading: false,
+    disabled: false,
     onImageProcessed: fn(),
     onUploadStart: fn(),
     onUploadComplete: fn(),
@@ -90,25 +93,6 @@ export const WithCustomStyling: Story = {
     className: "max-w-md border-2 border-blue-200 rounded-xl p-4",
     isUploading: false,
     disabled: false,
-  },
-};
-
-/**
- * Interactive example showing all callback functions.
- * This story demonstrates the component's behavior with all event handlers.
- */
-export const Interactive: Story = {
-  args: {
-    isUploading: false,
-    disabled: false,
-  },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          "Try uploading an image to see the processing and upload flow. The callbacks are handled by Storybook's action logger.",
-      },
-    },
   },
 };
 

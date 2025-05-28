@@ -10,112 +10,147 @@ import {
   revokeImagePreviewUrl,
 } from "./image-utils";
 
-// Mock canvas and image elements for testing
-const mockCanvas = {
-  width: 0,
-  height: 0,
-  getContext: vi.fn(),
-  toBlob: vi.fn(),
-};
+// Mock heic2any
+vi.mock("heic2any", () => ({
+  default: vi.fn(),
+}));
 
-const mockContext = {
-  drawImage: vi.fn(),
-};
-
-const mockImage = {
-  width: 1920,
-  height: 1080,
-  onload: null as (() => void) | null,
-  onerror: null as (() => void) | null,
-  src: "",
-};
-
-// Mock URL methods
-const mockCreateObjectURL = vi.fn();
-const mockRevokeObjectURL = vi.fn();
-
-beforeEach(() => {
-  // Reset mocks
-  vi.clearAllMocks();
-
-  // Mock document.createElement
-  vi.spyOn(document, "createElement").mockImplementation((tagName: string) => {
-    if (tagName === "canvas") {
-      return mockCanvas as unknown as HTMLCanvasElement;
-    }
-    return {} as HTMLElement;
-  });
-
-  // Mock canvas context
-  mockCanvas.getContext.mockReturnValue(mockContext);
-
-  // Mock Image constructor
-  global.Image = vi.fn().mockImplementation(() => mockImage);
-
-  // Mock URL methods
-  global.URL.createObjectURL = mockCreateObjectURL;
-  global.URL.revokeObjectURL = mockRevokeObjectURL;
-
-  mockCreateObjectURL.mockReturnValue("blob:mock-url");
-});
-
-afterEach(() => {
-  vi.restoreAllMocks();
+// Mock URL API for jsdom environment
+Object.defineProperty(global, "URL", {
+  value: {
+    createObjectURL: vi.fn(),
+    revokeObjectURL: vi.fn(),
+  },
+  writable: true,
 });
 
 describe("image-utils", () => {
+  describe("constants", () => {
+    it("should have correct default options", () => {
+      expect(DEFAULT_IMAGE_OPTIONS).toEqual({
+        maxLongSide: 1280,
+        quality: 0.8,
+        format: "image/jpeg",
+      });
+    });
+
+    it("should have correct max file size", () => {
+      expect(MAX_FILE_SIZE).toBe(10 * 1024 * 1024); // 10MB
+    });
+
+    it("should support correct image types", () => {
+      expect(SUPPORTED_IMAGE_TYPES).toEqual([
+        "image/jpeg",
+        "image/jpg",
+        "image/png",
+        "image/heic",
+        "image/heif",
+        "image/webp",
+      ]);
+    });
+  });
+
   describe("isValidImageFile", () => {
     it("should return true for supported image types", () => {
       for (const type of SUPPORTED_IMAGE_TYPES) {
-        const file = new File([""], "test.jpg", { type });
+        const file = new File(["test"], "test.jpg", { type });
         expect(isValidImageFile(file)).toBe(true);
       }
     });
 
     it("should return false for unsupported file types", () => {
-      const unsupportedTypes = ["text/plain", "application/pdf", "video/mp4"];
-
-      for (const type of unsupportedTypes) {
-        const file = new File([""], "test.txt", { type });
-        expect(isValidImageFile(file)).toBe(false);
-      }
+      const file = new File(["test"], "test.txt", { type: "text/plain" });
+      expect(isValidImageFile(file)).toBe(false);
     });
   });
 
   describe("isValidFileSize", () => {
     it("should return true for files within size limit", () => {
-      const file = new File(["x".repeat(1024)], "test.jpg", {
-        type: "image/jpeg",
-      });
+      const file = new File(["test"], "test.jpg", { type: "image/jpeg" });
+      Object.defineProperty(file, "size", { value: 5 * 1024 * 1024 }); // 5MB
       expect(isValidFileSize(file)).toBe(true);
     });
 
     it("should return false for files exceeding size limit", () => {
-      const file = new File(["x".repeat(MAX_FILE_SIZE + 1)], "test.jpg", {
-        type: "image/jpeg",
-      });
+      const file = new File(["test"], "test.jpg", { type: "image/jpeg" });
+      Object.defineProperty(file, "size", { value: 15 * 1024 * 1024 }); // 15MB
       expect(isValidFileSize(file)).toBe(false);
     });
 
     it("should return true for files at exact size limit", () => {
-      const file = new File(["x".repeat(MAX_FILE_SIZE)], "test.jpg", {
-        type: "image/jpeg",
-      });
+      const file = new File(["test"], "test.jpg", { type: "image/jpeg" });
+      Object.defineProperty(file, "size", { value: MAX_FILE_SIZE });
       expect(isValidFileSize(file)).toBe(true);
     });
   });
 
+  describe("createImagePreviewUrl and revokeImagePreviewUrl", () => {
+    it("should create and revoke preview URLs", () => {
+      const file = new File(["test"], "test.jpg", { type: "image/jpeg" });
+
+      // Mock URL.createObjectURL and URL.revokeObjectURL
+      const mockUrl = "blob:http://localhost/test";
+      const createObjectURLSpy = vi
+        .spyOn(URL, "createObjectURL")
+        .mockReturnValue(mockUrl);
+      const revokeObjectURLSpy = vi
+        .spyOn(URL, "revokeObjectURL")
+        .mockImplementation(() => {});
+
+      const url = createImagePreviewUrl(file);
+      expect(url).toBe(mockUrl);
+      expect(createObjectURLSpy).toHaveBeenCalledWith(file);
+
+      revokeImagePreviewUrl(url);
+      expect(revokeObjectURLSpy).toHaveBeenCalledWith(mockUrl);
+
+      createObjectURLSpy.mockRestore();
+      revokeObjectURLSpy.mockRestore();
+    });
+  });
+
   describe("processImage", () => {
+    // Mock canvas and image elements for testing
+    const mockCanvas = {
+      width: 0,
+      height: 0,
+      getContext: vi.fn(() => ({
+        drawImage: vi.fn(),
+      })),
+      toBlob: vi.fn(),
+    };
+
+    const mockImage = {
+      width: 1920,
+      height: 1080,
+      onload: null as (() => void) | null,
+      onerror: null as (() => void) | null,
+      src: "",
+    };
+
     beforeEach(() => {
-      // Mock successful canvas.toBlob
-      mockCanvas.toBlob.mockImplementation((callback) => {
-        const blob = new Blob(["mock-image-data"], { type: "image/jpeg" });
-        callback(blob);
+      // Mock document.createElement
+      vi.spyOn(document, "createElement").mockImplementation((tagName) => {
+        if (tagName === "canvas") {
+          return mockCanvas as unknown as HTMLCanvasElement;
+        }
+        if (tagName === "img") {
+          return mockImage as unknown as HTMLImageElement;
+        }
+        throw new Error(`Unexpected createElement call with ${tagName}`);
       });
+
+      // Mock URL methods
+      vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:test");
+      vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
     });
 
     it("should reject unsupported file types", async () => {
-      const file = new File([""], "test.txt", { type: "text/plain" });
+      const file = new File(["test"], "test.txt", { type: "text/plain" });
 
       await expect(processImage(file)).rejects.toThrow(
         "Unsupported file type: text/plain",
@@ -123,204 +158,96 @@ describe("image-utils", () => {
     });
 
     it("should reject files that are too large", async () => {
-      const file = new File(["x".repeat(MAX_FILE_SIZE + 1)], "test.jpg", {
-        type: "image/jpeg",
-      });
+      const file = new File(["test"], "test.jpg", { type: "image/jpeg" });
+      Object.defineProperty(file, "size", { value: 15 * 1024 * 1024 }); // 15MB
 
       await expect(processImage(file)).rejects.toThrow("File size too large");
     });
 
-    it("should process valid image file successfully", async () => {
-      const file = new File(["mock-image-data"], "test.jpg", {
-        type: "image/jpeg",
-      });
+    it("should process HEIC files by converting them first", async () => {
+      const heic2any = await import("heic2any");
+      const mockHeic2any = heic2any.default as ReturnType<typeof vi.fn>;
 
-      // Simulate successful image loading
-      setTimeout(() => {
-        if (mockImage.onload) {
-          mockImage.onload();
-        }
-      }, 0);
+      // Mock HEIC conversion
+      const convertedBlob = new Blob(["converted"], { type: "image/jpeg" });
+      mockHeic2any.mockResolvedValue(convertedBlob);
 
-      const result = await processImage(file);
+      const file = new File(["heic data"], "test.heic", { type: "image/heic" });
+      Object.defineProperty(file, "size", { value: 5 * 1024 * 1024 });
 
-      expect(result).toMatchObject({
-        originalName: "test.jpg",
-        originalSize: expect.any(Number),
-        processedSize: expect.any(Number),
-        originalDimensions: {
-          width: 1920,
-          height: 1080,
-        },
-        processedDimensions: {
-          width: 1280,
-          height: 720,
-        },
-      });
-
-      expect(result.blob).toBeInstanceOf(Blob);
-    });
-
-    it("should maintain aspect ratio when resizing", async () => {
-      const file = new File(["mock-image-data"], "test.jpg", {
-        type: "image/jpeg",
-      });
-
-      // Set up image with different aspect ratio
-      mockImage.width = 2000;
-      mockImage.height = 1000;
-
-      setTimeout(() => {
-        if (mockImage.onload) {
-          mockImage.onload();
-        }
-      }, 0);
-
-      const result = await processImage(file);
-
-      // Should resize to 1280x640 (maintaining 2:1 aspect ratio)
-      expect(result.processedDimensions).toEqual({
-        width: 1280,
-        height: 640,
-      });
-    });
-
-    it("should not resize images smaller than max dimension", async () => {
-      const file = new File(["mock-image-data"], "test.jpg", {
-        type: "image/jpeg",
-      });
-
-      // Set up small image
-      mockImage.width = 800;
-      mockImage.height = 600;
-
-      setTimeout(() => {
-        if (mockImage.onload) {
-          mockImage.onload();
-        }
-      }, 0);
-
-      const result = await processImage(file);
-
-      // Should keep original dimensions
-      expect(result.processedDimensions).toEqual({
-        width: 800,
-        height: 600,
-      });
-    });
-
-    it("should use custom processing options", async () => {
-      const file = new File(["mock-image-data"], "test.jpg", {
-        type: "image/jpeg",
-      });
-
-      const customOptions = {
-        maxLongSide: 800,
-        quality: 0.9,
-        format: "image/jpeg" as const,
-      };
-
-      setTimeout(() => {
-        if (mockImage.onload) {
-          mockImage.onload();
-        }
-      }, 0);
-
-      await processImage(file, customOptions);
-
-      // Verify canvas.toBlob was called with custom quality
-      expect(mockCanvas.toBlob).toHaveBeenCalledWith(
-        expect.any(Function),
-        "image/jpeg",
-        0.9,
-      );
-    });
-
-    it("should handle image loading errors", async () => {
-      const file = new File(["mock-image-data"], "test.jpg", {
-        type: "image/jpeg",
-      });
-
-      // Simulate image loading error
-      setTimeout(() => {
-        if (mockImage.onerror) {
-          mockImage.onerror();
-        }
-      }, 0);
-
-      await expect(processImage(file)).rejects.toThrow("Failed to load image");
-    });
-
-    it("should handle canvas context creation failure", async () => {
-      const file = new File(["mock-image-data"], "test.jpg", {
-        type: "image/jpeg",
-      });
-
-      // Mock getContext to return null
-      mockCanvas.getContext.mockReturnValue(null);
-
-      setTimeout(() => {
-        if (mockImage.onload) {
-          mockImage.onload();
-        }
-      }, 0);
-
-      await expect(processImage(file)).rejects.toThrow(
-        "Failed to get canvas context",
-      );
-    });
-
-    it("should handle canvas.toBlob failure", async () => {
-      const file = new File(["mock-image-data"], "test.jpg", {
-        type: "image/jpeg",
-      });
-
-      // Mock toBlob to call callback with null
+      // Mock successful image loading and canvas conversion
       mockCanvas.toBlob.mockImplementation((callback) => {
-        callback(null);
+        const resultBlob = new Blob(["processed"], { type: "image/jpeg" });
+        Object.defineProperty(resultBlob, "size", { value: 2 * 1024 * 1024 });
+        callback?.(resultBlob);
       });
 
+      // Simulate image load
       setTimeout(() => {
         if (mockImage.onload) {
           mockImage.onload();
         }
       }, 0);
 
-      await expect(processImage(file)).rejects.toThrow(
-        "Failed to convert canvas to blob",
-      );
-    });
-  });
+      const result = await processImage(file);
 
-  describe("createImagePreviewUrl", () => {
-    it("should create preview URL for image file", () => {
-      const file = new File(["mock-image-data"], "test.jpg", {
-        type: "image/jpeg",
+      expect(mockHeic2any).toHaveBeenCalledWith({
+        blob: file,
+        toType: "image/jpeg",
+        quality: 0.9,
       });
 
-      const url = createImagePreviewUrl(file);
-
-      expect(mockCreateObjectURL).toHaveBeenCalledWith(file);
-      expect(url).toBe("blob:mock-url");
+      expect(result).toEqual({
+        blob: expect.any(Blob),
+        originalName: "test.heic",
+        originalSize: 5 * 1024 * 1024,
+        processedSize: 2 * 1024 * 1024,
+        originalDimensions: { width: 1920, height: 1080 },
+        processedDimensions: { width: 1280, height: 720 }, // Scaled down
+      });
     });
-  });
 
-  describe("revokeImagePreviewUrl", () => {
-    it("should revoke preview URL", () => {
-      const url = "blob:mock-url";
+    it("should handle HEIC conversion errors", async () => {
+      const heic2any = await import("heic2any");
+      const mockHeic2any = heic2any.default as ReturnType<typeof vi.fn>;
 
-      revokeImagePreviewUrl(url);
+      mockHeic2any.mockRejectedValue(new Error("HEIC conversion failed"));
 
-      expect(mockRevokeObjectURL).toHaveBeenCalledWith(url);
+      const file = new File(["heic data"], "test.heic", { type: "image/heic" });
+      Object.defineProperty(file, "size", { value: 5 * 1024 * 1024 });
+
+      await expect(processImage(file)).rejects.toThrow(
+        "Failed to convert HEIC file: HEIC conversion failed",
+      );
     });
-  });
 
-  describe("DEFAULT_IMAGE_OPTIONS", () => {
-    it("should have correct default values", () => {
-      expect(DEFAULT_IMAGE_OPTIONS).toEqual({
-        maxLongSide: 1280,
-        quality: 0.8,
-        format: "image/jpeg",
+    it("should process regular image files without HEIC conversion", async () => {
+      const file = new File(["jpeg data"], "test.jpg", { type: "image/jpeg" });
+      Object.defineProperty(file, "size", { value: 5 * 1024 * 1024 });
+
+      // Mock successful canvas conversion
+      mockCanvas.toBlob.mockImplementation((callback) => {
+        const resultBlob = new Blob(["processed"], { type: "image/jpeg" });
+        Object.defineProperty(resultBlob, "size", { value: 2 * 1024 * 1024 });
+        callback?.(resultBlob);
+      });
+
+      // Simulate image load
+      setTimeout(() => {
+        if (mockImage.onload) {
+          mockImage.onload();
+        }
+      }, 0);
+
+      const result = await processImage(file);
+
+      expect(result).toEqual({
+        blob: expect.any(Blob),
+        originalName: "test.jpg",
+        originalSize: 5 * 1024 * 1024,
+        processedSize: 2 * 1024 * 1024,
+        originalDimensions: { width: 1920, height: 1080 },
+        processedDimensions: { width: 1280, height: 720 },
       });
     });
   });

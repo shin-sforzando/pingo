@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   type ProcessedImage,
   createImagePreviewUrl,
@@ -11,36 +12,11 @@ import {
   revokeImagePreviewUrl,
 } from "@/lib/image-utils";
 import { cn } from "@/lib/utils";
+import { submitImage } from "@/services/image-upload";
+import type { ImageSubmissionResult, ImageUploadProps } from "@/types/schema";
 import { Image as ImageIcon, Loader2, Upload, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useRef, useState } from "react";
-
-export interface ImageUploadProps {
-  /**
-   * Callback when image is successfully processed
-   */
-  onImageProcessed?: (processedImage: ProcessedImage) => void;
-  /**
-   * Callback when upload process starts
-   */
-  onUploadStart?: () => void;
-  /**
-   * Callback when upload process completes (success or error)
-   */
-  onUploadComplete?: (success: boolean, error?: string) => void;
-  /**
-   * Whether the upload is currently in progress
-   */
-  isUploading?: boolean;
-  /**
-   * Optional CSS class name
-   */
-  className?: string;
-  /**
-   * Whether the component is disabled
-   */
-  disabled?: boolean;
-}
 
 interface ImagePreview {
   file: File;
@@ -54,6 +30,7 @@ interface ImagePreview {
  * Supports drag & drop, file validation, and client-side image processing
  */
 export function ImageUpload({
+  gameId,
   onImageProcessed,
   onUploadStart,
   onUploadComplete,
@@ -62,6 +39,7 @@ export function ImageUpload({
   disabled = false,
 }: ImageUploadProps) {
   const t = useTranslations("imageUpload");
+  const { user } = useAuth();
   const [preview, setPreview] = useState<ImagePreview | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -198,16 +176,55 @@ export function ImageUpload({
   }, [cleanupPreview]);
 
   // Handle upload
-  const handleUpload = useCallback(() => {
-    if (preview?.processedImage && !isUploading) {
-      onUploadStart?.();
-      // Note: Actual upload logic will be implemented when we create the upload API
-      // For now, we just call the completion callback
-      setTimeout(() => {
-        onUploadComplete?.(true);
-      }, 1000);
+  const handleUpload = useCallback(async () => {
+    if (!preview?.processedImage || isUploading) return;
+
+    if (!user) {
+      onUploadComplete?.(false, undefined, "Authentication required");
+      return;
     }
-  }, [preview?.processedImage, isUploading, onUploadStart, onUploadComplete]);
+
+    onUploadStart?.();
+
+    try {
+      // Get authentication token from Firebase Auth
+      const { auth } = await import("@/lib/firebase/client");
+      const authToken = await auth.currentUser?.getIdToken();
+      if (!authToken) {
+        throw new Error("Failed to get authentication token");
+      }
+
+      // Prepare submission data
+      const submissionData = {
+        gameId,
+        fileName: preview.processedImage.originalName,
+        contentType: "image/jpeg", // Always JPEG after processing
+        processedSize: preview.processedImage.processedSize,
+        originalDimensions: preview.processedImage.originalDimensions,
+        processedDimensions: preview.processedImage.processedDimensions,
+      };
+
+      // Submit image
+      const result: ImageSubmissionResult = await submitImage(
+        preview.processedImage,
+        submissionData,
+        authToken,
+      );
+
+      onUploadComplete?.(true, result);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Upload failed";
+      onUploadComplete?.(false, undefined, errorMessage);
+    }
+  }, [
+    preview?.processedImage,
+    isUploading,
+    user,
+    gameId,
+    onUploadStart,
+    onUploadComplete,
+  ]);
 
   const isInteractive = !disabled && !isUploading;
 
