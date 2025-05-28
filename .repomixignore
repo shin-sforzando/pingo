@@ -1,0 +1,18 @@
+# Add patterns to ignore here, one per line
+# Example:
+# *.log
+# tmp/
+
+.dockerignore
+.github/
+.gitignore
+.repomixignore
+.gitsecret/
+.next/
+.vscode/
+cline_docs/
+coverage/
+node_modules/
+src/stories/example/
+*.secret
+package-lock.json
