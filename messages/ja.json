@@ -178,14 +178,14 @@
   "imageUpload": {
     "dropZone": {
       "title": "画像をここにドロップするか、クリックして選択",
-      "description": "JPEG、PNG、HEIC、WebPファイル（最大10MB）をサポート"
+      "description": "JPEG、PNG、HEIC、WebPファイル（最大20MB）をサポート"
     },
     "processing": "画像を処理中...",
     "uploading": "アップロード中...",
     "uploadButton": "画像をアップロード",
     "errors": {
       "unsupportedFileType": "サポートされていないファイル形式です。JPEG、PNG、HEIC、またはWebP画像を選択してください。",
-      "fileTooLarge": "ファイルサイズが大きすぎます。10MB未満の画像を選択してください。",
+      "fileTooLarge": "ファイルサイズが大きすぎます。20MB未満の画像を選択してください。",
       "processingFailed": "画像の処理に失敗しました"
     }
   }

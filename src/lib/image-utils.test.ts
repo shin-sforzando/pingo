@@ -35,7 +35,7 @@ describe("image-utils", () => {
     });
 
     it("should have correct max file size", () => {
-      expect(MAX_FILE_SIZE).toBe(10 * 1024 * 1024); // 10MB
+      expect(MAX_FILE_SIZE).toBe(20 * 1024 * 1024); // 20MB
     });
 
     it("should support correct image types", () => {
@@ -73,7 +73,7 @@ describe("image-utils", () => {
 
     it("should return false for files exceeding size limit", () => {
       const file = new File(["test"], "test.jpg", { type: "image/jpeg" });
-      Object.defineProperty(file, "size", { value: 15 * 1024 * 1024 }); // 15MB
+      Object.defineProperty(file, "size", { value: 30 * 1024 * 1024 }); // 15MB
       expect(isValidFileSize(file)).toBe(false);
     });
 
@@ -159,7 +159,7 @@ describe("image-utils", () => {
 
     it("should reject files that are too large", async () => {
       const file = new File(["test"], "test.jpg", { type: "image/jpeg" });
-      Object.defineProperty(file, "size", { value: 15 * 1024 * 1024 }); // 15MB
+      Object.defineProperty(file, "size", { value: 30 * 1024 * 1024 }); // 15MB
 
       await expect(processImage(file)).rejects.toThrow("File size too large");
     });

@@ -79,39 +79,82 @@ export function ImageUpload({
         return;
       }
 
-      // Create preview
-      const previewUrl = createImagePreviewUrl(file);
-      setPreview({
-        file,
-        previewUrl,
-      });
+      // For HEIC files, we need to process first to get a proper preview
+      const isHeicFile =
+        file.name.toLowerCase().endsWith(".heic") ||
+        file.name.toLowerCase().endsWith(".heif");
 
-      // Process image
-      setIsProcessing(true);
-      try {
-        const processedImage = await processImage(file);
-        setPreview((prev) =>
-          prev
-            ? {
-                ...prev,
-                processedImage,
-              }
-            : null,
-        );
-        onImageProcessed?.(processedImage);
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : t("errors.processingFailed");
-        setPreview((prev) =>
-          prev
-            ? {
-                ...prev,
-                error: errorMessage,
-              }
-            : null,
-        );
-      } finally {
-        setIsProcessing(false);
+      if (isHeicFile) {
+        // For HEIC files, process first then create preview from processed image
+        setPreview({
+          file,
+          previewUrl: "",
+        });
+
+        setIsProcessing(true);
+        try {
+          const processedImage = await processImage(file);
+
+          // Create preview URL from processed JPEG blob
+          const processedPreviewUrl = URL.createObjectURL(processedImage.blob);
+
+          setPreview({
+            file,
+            previewUrl: processedPreviewUrl,
+            processedImage,
+          });
+
+          onImageProcessed?.(processedImage);
+        } catch (error) {
+          const errorMessage =
+            error instanceof Error
+              ? error.message
+              : t("errors.processingFailed");
+          setPreview({
+            file,
+            previewUrl: "",
+            error: errorMessage,
+          });
+        } finally {
+          setIsProcessing(false);
+        }
+      } else {
+        // For other formats, create preview first then process
+        const previewUrl = createImagePreviewUrl(file);
+        setPreview({
+          file,
+          previewUrl,
+        });
+
+        // Process image
+        setIsProcessing(true);
+        try {
+          const processedImage = await processImage(file);
+          setPreview((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  processedImage,
+                }
+              : null,
+          );
+          onImageProcessed?.(processedImage);
+        } catch (error) {
+          const errorMessage =
+            error instanceof Error
+              ? error.message
+              : t("errors.processingFailed");
+          setPreview((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  error: errorMessage,
+                }
+              : null,
+          );
+        } finally {
+          setIsProcessing(false);
+        }
       }
     },
     [disabled, isUploading, cleanupPreview, onImageProcessed, t],
@@ -141,7 +184,7 @@ export function ImageUpload({
       if (disabled || isUploading) return;
 
       const files = Array.from(e.dataTransfer.files);
-      if (files.length > 0) {
+      if (0 < files.length) {
         handleFileSelect(files[0]);
       }
     },
@@ -152,7 +195,7 @@ export function ImageUpload({
   const handleFileInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const files = e.target.files;
-      if (files && files.length > 0) {
+      if (files && 0 < files.length) {
         handleFileSelect(files[0]);
       }
     },

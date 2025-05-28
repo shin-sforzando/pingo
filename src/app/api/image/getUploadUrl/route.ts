@@ -86,9 +86,6 @@ export async function POST(request: NextRequest) {
       action: "write",
       expires: Date.now() + 5 * 60 * 1000, // 5 minutes
       contentType: "image/jpeg", // Force JPEG content type
-      extensionHeaders: {
-        "x-goog-content-length-range": "0,10485760", // Max 10MB
-      },
     });
 
     return NextResponse.json({

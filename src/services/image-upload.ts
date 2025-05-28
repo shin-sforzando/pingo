@@ -30,6 +30,11 @@ export async function submitImage(
   const { signedUrl, filePath, submissionId } = await uploadUrlResponse.json();
 
   // Step 2: Upload image to Google Cloud Storage
+  console.log("Uploading to signed URL:", signedUrl);
+  console.log("Content-Type:", "image/jpeg");
+  console.log("Blob size:", processedImage.blob.size);
+  console.log("Blob type:", processedImage.blob.type);
+
   const uploadResponse = await fetch(signedUrl, {
     method: "PUT",
     headers: {
@@ -39,7 +44,16 @@ export async function submitImage(
   });
 
   if (!uploadResponse.ok) {
-    throw new Error("Failed to upload image to storage");
+    const errorText = await uploadResponse.text();
+    console.error("Upload failed:", {
+      status: uploadResponse.status,
+      statusText: uploadResponse.statusText,
+      headers: Object.fromEntries(uploadResponse.headers.entries()),
+      body: errorText,
+    });
+    throw new Error(
+      `Failed to upload image to storage: ${uploadResponse.status} ${uploadResponse.statusText} - ${errorText}`,
+    );
   }
 
   // Construct public URL

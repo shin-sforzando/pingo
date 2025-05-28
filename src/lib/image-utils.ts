@@ -77,14 +77,31 @@ export const SUPPORTED_IMAGE_TYPES = [
 ] as const;
 
 /**
- * Maximum file size in bytes (10MB)
+ * Supported file extensions
  */
-export const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const SUPPORTED_EXTENSIONS = [
+  ".jpg",
+  ".jpeg",
+  ".png",
+  ".heic",
+  ".heif",
+  ".webp",
+] as const;
+
+/**
+ * Maximum file size in bytes (20MB)
+ */
+export const MAX_FILE_SIZE = 20 * 1024 * 1024;
 
 /**
  * HEIC/HEIF file types that require conversion
  */
 const HEIC_TYPES = ["image/heic", "image/heif"] as const;
+
+/**
+ * HEIC/HEIF file extensions
+ */
+const HEIC_EXTENSIONS = [".heic", ".heif"] as const;
 
 /**
  * Dynamically imports heic2any to avoid SSR issues
@@ -98,10 +115,23 @@ async function getHeic2any() {
 }
 
 /**
- * Checks if the file is a HEIC/HEIF format
+ * Gets file extension from filename
+ */
+function getFileExtension(filename: string): string {
+  return filename.toLowerCase().substring(filename.lastIndexOf("."));
+}
+
+/**
+ * Checks if the file is a HEIC/HEIF format by MIME type or extension
  */
 function isHeicFile(file: File): boolean {
-  return HEIC_TYPES.includes(file.type as (typeof HEIC_TYPES)[number]);
+  const isMimeTypeHeic = HEIC_TYPES.includes(
+    file.type as (typeof HEIC_TYPES)[number],
+  );
+  const isExtensionHeic = HEIC_EXTENSIONS.includes(
+    getFileExtension(file.name) as (typeof HEIC_EXTENSIONS)[number],
+  );
+  return isMimeTypeHeic || isExtensionHeic;
 }
 
 /**
@@ -146,12 +176,21 @@ async function convertHeicToJpeg(file: File): Promise<File> {
 }
 
 /**
- * Validates if the file is a supported image type
+ * Validates if the file is a supported image type by MIME type or extension
  */
 export function isValidImageFile(file: File): boolean {
-  return SUPPORTED_IMAGE_TYPES.includes(
+  // Check MIME type
+  const isMimeTypeSupported = SUPPORTED_IMAGE_TYPES.includes(
     file.type as (typeof SUPPORTED_IMAGE_TYPES)[number],
   );
+
+  // Check file extension
+  const extension = getFileExtension(file.name);
+  const isExtensionSupported = SUPPORTED_EXTENSIONS.includes(
+    extension as (typeof SUPPORTED_EXTENSIONS)[number],
+  );
+
+  return isMimeTypeSupported || isExtensionSupported;
 }
 
 /**
@@ -214,7 +253,7 @@ export async function processImage(
 ): Promise<ProcessedImage> {
   // Validate file type
   if (!isValidImageFile(file)) {
-    throw new Error(`Unsupported file type: ${file.type}`);
+    throw new Error(`Unsupported file type: ${file.type} (${file.name})`);
   }
 
   // Validate file size
