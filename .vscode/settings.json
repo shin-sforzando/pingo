@@ -63,5 +63,8 @@
   ],
   "cSpell.ignoreWords": [
     "AIzaSyCYXPVHEMWgIXpDc2j-qFuvzD79eI24dws"
-  ]
+  ],
+  "[yaml]": {
+    "editor.defaultFormatter": "redhat.vscode-yaml"
+  }
 }

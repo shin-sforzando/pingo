@@ -84,7 +84,7 @@ async function main(): Promise<void> {
   // Build Docker command with template literals
   const escapedPrivateKey = credentials.privateKey.replace(/\n/g, "\\n");
 
-  const buildCmd = `docker build --no-cache --progress=plain --tag pingo:latest . --file Dockerfile --build-arg FIREBASE_PROJECT_ID="${credentials.projectId}" --build-arg FIREBASE_CLIENT_EMAIL="${credentials.clientEmail}" --build-arg FIREBASE_PRIVATE_KEY="${escapedPrivateKey}"`;
+  const buildCmd = `docker build --no-cache --progress=plain --tag pingo:latest . --file Dockerfile --build-arg FIREBASE_PROJECT_ID="${credentials.projectId}" --build-arg FIREBASE_CLIENT_EMAIL="${credentials.clientEmail}" --build-arg FIREBASE_PRIVATE_KEY="${escapedPrivateKey}" --build-arg GEMINI_API_KEY="${process.env.GEMINI_API_KEY}"`;
 
   // Execute build
   console.log("Building Docker image...");
