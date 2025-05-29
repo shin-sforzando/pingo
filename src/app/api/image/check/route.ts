@@ -1,5 +1,5 @@
 import { adminAuth } from "@/lib/firebase/admin";
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, Type } from "@google/genai";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -7,6 +7,19 @@ import { z } from "zod";
 const checkImageSchema = z.object({
   imageUrl: z.string().url("Valid image URL is required"),
 });
+
+// Define response schema for structured output
+const responseSchema = {
+  type: Type.OBJECT,
+  properties: {
+    error: {
+      type: Type.STRING,
+    },
+    ok: {
+      type: Type.STRING,
+    },
+  },
+};
 
 // Initialize Gemini AI
 if (!process.env.GEMINI_API_KEY) {
@@ -43,20 +56,11 @@ export async function POST(request: NextRequest) {
     const model = genAI.models.generateContent;
 
     // Prepare the prompt for content checking
-    const prompt = `Please check if the given image is safe to show to the general public and return an error with the reason if there is a problem.
-Output only the pure JSON object. Do not include any other explanations, introductions, or markdown like \`\`\`json ... \`\`\`.
+    const prompt = `Please check if the given image is safe to show to the general public.
 
-Error response example for sexual image:
+If the image contains inappropriate content (sexual expressions, violence, harmful elements, adult themes, or anything not suitable for all ages), respond with an error message explaining the reason.
 
-{
-  "error": "This image contains sexual expressions."
-}
-
-OK response example:
-
-{
-  "ok": "This image shows a white coffee cup on a wooden desk. Steam is coming out of the coffee, indicating that the coffee is hot."
-}`;
+If the image is appropriate, provide a brief description of what the image shows.`;
 
     // Fetch the image
     const imageResponse = await fetch(imageUrl);
@@ -70,7 +74,7 @@ OK response example:
     const imageBuffer = await imageResponse.arrayBuffer();
     const imageBase64 = Buffer.from(imageBuffer).toString("base64");
 
-    // Prepare the content for Gemini using the latest API
+    // Prepare the content for Gemini using structured output
     const result = await model({
       model: "gemini-2.0-flash-001",
       contents: [
@@ -82,13 +86,25 @@ OK response example:
           },
         },
       ],
+      config: {
+        responseMimeType: "application/json",
+        responseSchema,
+      },
     });
 
     const text = result.text || "";
 
+    if (!text) {
+      return NextResponse.json(
+        { error: "Empty response from AI" },
+        { status: 500 },
+      );
+    }
+
     // Parse the JSON response
     let parsedResponse: { error?: string; ok?: string };
     try {
+      // With structured output, we should get clean JSON
       parsedResponse = JSON.parse(text) as { error?: string; ok?: string };
     } catch {
       console.error("Failed to parse Gemini response:", text);

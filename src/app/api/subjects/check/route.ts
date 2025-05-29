@@ -1,6 +1,6 @@
 import type { Locale } from "@/i18n/config";
 import { getUserLocale } from "@/services/locale";
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, Type } from "@google/genai";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -23,6 +23,32 @@ interface CheckResponse {
   issues?: CheckIssue[];
 }
 
+// Define response schema for structured output
+const responseSchema = {
+  type: Type.OBJECT,
+  properties: {
+    ok: {
+      type: Type.BOOLEAN,
+    },
+    issues: {
+      type: Type.ARRAY,
+      items: {
+        type: Type.OBJECT,
+        properties: {
+          subject: {
+            type: Type.STRING,
+          },
+          reason: {
+            type: Type.STRING,
+          },
+        },
+        required: ["subject", "reason"],
+      },
+    },
+  },
+  required: ["ok"],
+};
+
 const getPromptTemplate = (params: CheckSubjectsRequest) => {
   const { subjects, language } = params;
   console.log("ℹ️ XXX: ~ route.ts ~ getPromptTemplate ~ params:", params);
@@ -41,11 +67,9 @@ Each subject must meet ALL of the following criteria:
 Subjects to check:
 ${subjects.map((subject) => `- "${subject}"`).join("\n")}
 
-Return ONLY a JSON object with:
-- If all subjects are appropriate: { "ok": true }
-- If there are issues: { "issues": [{ "subject": "問題のある文字列", "reason": "理由 (must be in ${language || "ja"})" }] }
-- Ensure reasons clearly explain which criteria were not met
-- Do not include any other text, explanations, or markdown formatting.`;
+If all subjects are appropriate, respond with ok: true.
+If there are issues, provide a list of issues with the subject and reason in ${language || "ja"}.
+Ensure reasons clearly explain which criteria were not met.`;
 };
 
 export async function POST(request: NextRequest) {
@@ -88,40 +112,36 @@ export async function POST(request: NextRequest) {
     const result = await genAI.models.generateContent({
       model: "gemini-2.0-flash-001",
       contents: [{ role: "user", parts: [{ text: prompt }] }],
+      config: {
+        responseMimeType: "application/json",
+        responseSchema,
+      },
     });
 
     const text = result.text;
     console.log("ℹ️ XXX: ~ route.ts ~ POST ~ AI Response:", text);
 
+    if (!text) {
+      return NextResponse.json(
+        { error: "Empty response from AI" },
+        { status: 500 },
+      );
+    }
+
     try {
-      if (!text) {
-        return NextResponse.json(
-          { error: "Empty response from AI" },
-          { status: 500 },
-        );
-      }
-
-      // Clean up the response if it contains markdown code block syntax
-      let cleanedText = text;
-      if (text.includes("```")) {
-        // Remove markdown code block syntax
-        cleanedText = text.replace(/```json\s*|\s*```/g, "");
-      }
-
-      const parsedResponse = JSON.parse(cleanedText);
+      // With structured output, we should get clean JSON without markdown
+      const parsedResponse = JSON.parse(text);
 
       // Normalize the response to match our expected format
       const jsonResponse: CheckResponse = parsedResponse.issues
         ? { ok: false, issues: parsedResponse.issues }
         : { ok: true };
 
-      // If there are issues, return them with 200 status
-      // This is different from generate API which returns 400 for inappropriate content
-      // because we're explicitly checking for issues here
+      // Always return with 200 status since we're explicitly checking for issues
       return NextResponse.json(jsonResponse);
     } catch (parseError) {
       console.error("parseError:", parseError);
-      // We need to handle parsing errors separately as the AI might not always return valid JSON
+      // This should be rare with structured output, but keep as fallback
       return NextResponse.json(
         { error: "Failed to parse AI response", rawResponse: text },
         { status: 500 },

@@ -4,33 +4,33 @@
 
 ### フロントエンド
 
-- **フレームワーク**: Next.js (App Router)
-- **言語**: TypeScript 5
-- **UIライブラリ**: React 19
-- **スタイリング**: Tailwind CSS 4
-- **状態管理**: React Context API
-- **多言語対応**: next-intl
-- **Gemini API**: @google/genai
-- **アニメーション**: View Transition API
+- フレームワーク: Next.js (App Router)
+- 言語: TypeScript 5
+- UIライブラリ: React 19
+- スタイリング: Tailwind CSS 4
+- 状態管理: React Context API
+- 多言語対応: next-intl
+- Gemini API: @google/genai
+- アニメーション: View Transition API
 
 ### バックエンド
 
-- **ランタイム**: Node.js 22
-- **デプロイ**: Docker → Google Cloud Run
-- **データベース**: Firestore
-- **ストレージ**: Google Cloud Storage
-- **認証**: Firebase Authentication
-- **AI/ML**: Google Gemini API
+- ランタイム: Node.js 22
+- デプロイ: Docker → Google Cloud Run
+- データベース: Firestore
+- ストレージ: Google Cloud Storage
+- 認証: Firebase Authentication
+- AI/ML: Google Gemini API
 
 ### 開発ツール
 
-- **コード品質**: Biome.js
-- **テスト**: Vitest
-- **コンポーネントライブラリ**: shadcn/ui
-- **UI確認**: Storybook
-- **Git フック**: Lefthook
-- **CI/CD**: Google Cloud Build (デプロイ), GitHub Actions (テスト・静的解析)
-- **分析**: Google Analytics 4
+- コード品質: Biome.js
+- テスト: Vitest
+- コンポーネントライブラリ: shadcn/ui
+- UI確認: Storybook
+- Git フック: Lefthook
+- CI/CD: Google Cloud Build (デプロイ), GitHub Actions (テスト・静的解析)
+- 分析: Google Analytics 4
 
 ## システムアーキテクチャ
 
@@ -58,11 +58,11 @@ flowchart TD
 
 ### コンポーネント間の関係
 
-- **クライアント**: ユーザーインターフェース、画像の前処理、リアルタイム更新の受信
-- **サーバー**: API処理、ビジネスロジック、AIとの連携、データ検証
-- **データベース**: ユーザー情報、ゲーム情報、ビンゴボード状態の保存
-- **ストレージ**: 画像ファイルの保存
-- **AI**: 画像判定、被写体候補生成、公序良俗チェック
+- クライアント: ユーザーインターフェース、画像の前処理、リアルタイム更新の受信
+- サーバー: API処理、ビジネスロジック、AIとの連携、データ検証
+- データベース: ユーザー情報、ゲーム情報、ビンゴボード状態の保存
+- ストレージ: 画像ファイルの保存
+- AI: 画像判定、被写体候補生成、公序良俗チェック
 
 ## データモデル
 
@@ -70,24 +70,24 @@ flowchart TD
 
 データモデルは以下のアプローチで実装されています：
 
-1. **型定義とバリデーション**
+1. 型定義とバリデーション
    - Zodスキーマを使用した型定義とバリデーション
    - React Hook Formとの連携を考慮した設計
    - 多言語対応のエラーメッセージキー
 
-2. **Firestoreとの連携**
+2. Firestoreとの連携
    - Firestoreドキュメントインターフェースの定義
    - クライアント/サーバー間のタイムスタンプ変換
    - 型安全な変換関数の実装
    - `withConverter`を使用した型変換の自動化
    - コレクション参照関数による型安全なアクセス
 
-3. **タイムスタンプの扱い**
+3. タイムスタンプの扱い
    - `firebase/firestore`と`firebase-admin/firestore`の両方に対応
    - 共通インターフェース`TimestampInterface`の定義
    - 型ガード関数による安全な型変換
 
-4. **ディレクトリ構造**
+4. ディレクトリ構造
 
 ```plain
 src/types/
@@ -243,48 +243,118 @@ src/types/
 - 被写体候補の生成: `/api/subjects/generate`
 - 被写体候補文字列の公序良俗チェック: `/api/subjects/check`
 
-#### 候補生成プロンプト
+#### 候補生成プロンプト（構造化出力対応）
+
+技術的実装:
+
+- Google GenAI構造化出力機能を使用
+- `responseMimeType: "application/json"`と`responseSchema`を設定
+- プロンプトからJSONフォーマット指定を削除し、約50%短縮
+
+responseSchema:
+
+```javascript
+const responseSchema = {
+  type: Type.OBJECT,
+  properties: {
+    candidates: {
+      type: Type.ARRAY,
+      items: {
+        type: Type.STRING,
+      },
+    },
+    error: {
+      type: Type.STRING,
+    },
+  },
+};
+```
+
+簡素化されたプロンプト:
 
 ```plain
-You are the expert in suggesting specific objects or subjects suitable for a photo bingo game based on the given criteria.
-Suggest **${numberOfCandidates}** distinct objects or subjects that can be photographed at the specified title and theme, matching the following conditions.
+You are an expert in suggesting specific objects or subjects suitable for a photo bingo game based on the given criteria.
+Suggest ${numberOfCandidates} distinct objects or subjects that can be photographed at the specified title and theme.
+
 Focus on concrete nouns or short descriptive phrases that clearly identify the target for a photo.
 Google Cloud Vision AI will be used to determine if a photo matches the suggested object/subject, so ensure the suggestions are visually identifiable and relatively unambiguous.
-Candidates should be subjects that are not offensive to public order and morals and that are safe for children to see or approach.
-If the given title or theme is offensive to public order and morals, return an error with the reason.
 
-Candidates must respond in ${language}.
+Each subject must meet ALL of the following criteria:
+- Be a concrete noun or short descriptive phrase that clearly identifies a photo target
+- Be visually identifiable in a photograph
+- Be suitable for recognition by Google Cloud Vision AI
+- Be unambiguous and specific enough for players to understand what to photograph
+- Be appropriate for all ages (no offensive content, harmful elements, adult themes, violence, or illegal activities)
+- Be unique within the list (not duplicated or too similar to other subjects)
+
+Candidates must be in ${language}.
+
+If the given title or theme is offensive to public order and morals, respond with an error message explaining the reason.
 
 # Conditions
 
 - Title: ${title}
 - Theme: ${theme}
-
-# Output Format
-
-- IMPORTANT: Your response MUST be a raw JSON object WITHOUT any markdown formatting.
-- DO NOT use \`\`\`json or \`\`\` markers around your response.
-- Strictly output a JSON object with a single key "candidates".
-- The value of "candidates" must be a JSON array of strings.
-- Each string in the array should be **only the name of the object or subject** (e.g., "White seashells", "wooden bench", "fisherman"), not a full sentence instruction.
-- Do not include any other explanations, introductions, or markdown. Output only the pure JSON object.
-
-English response example for Title: Summer Camp, Theme: Campsite by the beach:
-
-{
-  "candidates": ["White seashells", "wooden bench", "fisherman", "hibiscus", "turtle", "driftwood", "barbecue grill", "propped up surfboard"]
-}
-
-Error response example for immoral title/theme:
-
-{
-  "error": "The given theme contains racist expressions."
-}
 ```
 
-#### 候補文字列のチェックプロンプト
+#### 候補文字列のチェックプロンプト（構造化出力対応）
 
-T. B. D.
+技術的実装:
+
+- Google GenAI構造化出力機能を使用
+- `responseMimeType: "application/json"`と`responseSchema`を設定
+- プロンプトからJSONフォーマット指定を削除
+
+responseSchema:
+
+```javascript
+const responseSchema = {
+  type: Type.OBJECT,
+  properties: {
+    ok: {
+      type: Type.BOOLEAN,
+    },
+    issues: {
+      type: Type.ARRAY,
+      items: {
+        type: Type.OBJECT,
+        properties: {
+          subject: {
+            type: Type.STRING,
+          },
+          reason: {
+            type: Type.STRING,
+          },
+        },
+        required: ["subject", "reason"],
+      },
+    },
+  },
+  required: ["ok"],
+};
+```
+
+簡素化されたプロンプト:
+
+```plain
+You are a content moderator for a family-friendly photo bingo game.
+Please check if the following subjects are appropriate for the game.
+
+Each subject must meet ALL of the following criteria:
+- Be a concrete noun or short descriptive phrase that clearly identifies a photo target
+- Be visually identifiable in a photograph
+- Be suitable for recognition by Google Cloud Vision AI
+- Be unambiguous and specific enough for players to understand what to photograph
+- Be appropriate for all ages (no offensive content, harmful elements, adult themes, violence, or illegal activities)
+- Be unique within the list (not duplicated or too similar to other subjects)
+
+Subjects to check:
+${subjects.map((subject) => `- "${subject}"`).join("\n")}
+
+If all subjects are appropriate, respond with ok: true.
+If there are issues, provide a list of issues with the subject and reason in ${language || "ja"}.
+Ensure reasons clearly explain which criteria were not met.
+```
 
 ### 画像処理API
 
@@ -296,23 +366,38 @@ T. B. D.
   - 他のプレイヤーの画像: `acceptanceStatus == "accepted"`
 - セル画像一覧取得: `/api/game/[gameId]/cells/[cellId]/images` (特定のセルに対する画像)
 
-#### 画像のチェックプロンプト
+#### 画像のチェックプロンプト（構造化出力対応）
+
+技術的実装:
+
+- Google GenAI構造化出力機能を使用
+- `responseMimeType: "application/json"`と`responseSchema`を設定
+- プロンプトからJSONフォーマット指定を削除
+
+responseSchema:
+
+```javascript
+const responseSchema = {
+  type: Type.OBJECT,
+  properties: {
+    error: {
+      type: Type.STRING,
+    },
+    ok: {
+      type: Type.STRING,
+    },
+  },
+};
+```
+
+簡素化されたプロンプト:
 
 ```plain
-Please check if the given image is safe to show to the general public and return an error with the reason if there is a problem.
-Output only the pure JSON object. Do not include any other explanations, introductions, or markdown like \`\`\`json ... \`\`\`.
+Please check if the given image is safe to show to the general public.
 
-Error response example for sexual image:
+If the image contains inappropriate content (sexual expressions, violence, harmful elements, adult themes, or anything not suitable for all ages), respond with an error message explaining the reason.
 
-{
-  "error": "This image contains sexual expressions."
-}
-
-OK response example:
-
-{
-  "ok": "This image shows a white coffee cup on a wooden desk. Steam is coming out of the coffee, indicating that the coffee is hot."
-}
+If the image is appropriate, provide a brief description of what the image shows.
 ```
 
 #### 画像判定プロンプト
@@ -472,7 +557,7 @@ Google Cloud Storageの階層機能を活用し、ゲームIDごとにフォル�
 - Hacking Papa画像（[はっきんぐパパ](https://hacking-papa.com)へのリンク付き）
 - 2025年固定のコピーライト表記
 
-**実装ファイル**:
+実装ファイル:
 
 - `src/components/layout/Footer.tsx`
 
@@ -480,14 +565,14 @@ Google Cloud Storageの階層機能を活用し、ゲームIDごとにフォル�
 
 View Transition APIを活用したトランジションを実装する。
 
-**ブラウザサポート状況（2025年4月現在）**:
+ブラウザサポート状況（2025年4月現在）:
 
 - Chrome: サポート
 - Edge: サポート
 - Safari (iOS含む): サポート
 - Firefox: サポートなし
 
-**実装アプローチ**:
+実装アプローチ:
 
 - View Transition APIを基本的なトランジション方法として採用
 - Firefoxユーザー向けにはCSS Animationsによるフォールバックを実装
@@ -544,17 +629,17 @@ View Transition APIを活用したトランジションを実装する。
 
 ゲームID以外のすべてのIDをULIDに統一しました。ULIDを採用した理由は以下の通りです：
 
-1. **時間的にソート可能**: ULIDは時間的に単調増加するため、データベースのインデックス効率が向上し、時系列での取得が容易になります
-2. **人間にとって読みやすい**: UUIDに比べて読みやすい形式です（大文字と数字のみを使用）
-3. **URL安全**: Base32エンコーディングを使用しているため、URLなどでも安全に使用できます
-4. **タイムスタンプ内蔵**: 最初の10文字にミリ秒精度のタイムスタンプが埋め込まれており、作成時刻の概算が可能です
-5. **コリジョン確率が低い**: UUIDと同様に実用上は衝突の心配がほぼありません
+1. 時間的にソート可能: ULIDは時間的に単調増加するため、データベースのインデックス効率が向上し、時系列での取得が容易になります
+2. 人間にとって読みやすい: UUIDに比べて読みやすい形式です（大文字と数字のみを使用）
+3. URL安全: Base32エンコーディングを使用しているため、URLなどでも安全に使用できます
+4. タイムスタンプ内蔵: 最初の10文字にミリ秒精度のタイムスタンプが埋め込まれており、作成時刻の概算が可能です
+5. コリジョン確率が低い: UUIDと同様に実用上は衝突の心配がほぼありません
 
 ### 実装アプローチ
 
-1. **スキーマ定義**: Zodスキーマで`z.string().ulid()`を使用してバリデーション
-2. **ID生成**: `ulid()`関数を使用してIDを生成
-3. **スキーマの再利用**: `userSchema.shape.id`などを使用して、一貫性のあるバリデーションを実現
+1. スキーマ定義: Zodスキーマで`z.string().ulid()`を使用してバリデーション
+2. ID生成: `ulid()`関数を使用してIDを生成
+3. スキーマの再利用: `userSchema.shape.id`などを使用して、一貫性のあるバリデーションを実現
 
 ### ゲームIDの例外
 
@@ -608,20 +693,20 @@ View Transition APIを活用したトランジションを実装する。
 
 Google Cloud Buildでは、Secret Managerと連携して機密情報を安全に扱います。特にFirebase Admin SDKの初期化に必要な認証情報（秘密鍵など）は、以下の方法で管理しています：
 
-1. **Secret Managerでの保存**
+1. Secret Managerでの保存
    - `FIREBASE_PROJECT_ID`、`FIREBASE_CLIENT_EMAIL`、`FIREBASE_PRIVATE_KEY`をSecret Managerに保存
    - 各シークレットは最新バージョン（`versions/latest`）を参照
 
-2. **cloudbuild.yamlでの参照**
+2. cloudbuild.yamlでの参照
    - `secretEnv`フィールドで使用するシークレットを指定
    - `availableSecrets`セクションでSecret Managerからシークレットを取得する設定
    - bashスクリプトを使用して環境変数を適切に処理（特に改行や特殊文字を含む秘密鍵）
 
-3. **Dockerfileでの設定**
+3. Dockerfileでの設定
    - ビルド引数（ARG）として認証情報を受け取る
    - 環境変数（ENV）として設定し、引用符で囲んでフォーマットを保持
 
-4. **Firebase Admin SDKの初期化**
+4. Firebase Admin SDKの初期化
    - 環境変数から認証情報を取得
    - 秘密鍵の形式に応じた適切な処理（エスケープされた改行文字の置換など）
 

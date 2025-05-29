@@ -158,10 +158,14 @@ storybook-static/
 # End of https://www.toptal.com/developers/gitignore/api/osx,windows,linux,nextjs,vercel,visualstudiocode,data
 
 ### Project Specific ###
+# Git Secret
 .gitsecret/keys/random_seed
 !*.secret
 pingo-456817-ddc416f0394a.json
 pingo-456817-firebase-adminsdk-fbsvc-94b63a9da5.json
+
+# Repomix
+!repomix-output.xml
 
 # Lefthook local
 lefthook-local.yml

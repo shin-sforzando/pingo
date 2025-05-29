@@ -13,13 +13,17 @@ vi.mock("@/lib/firebase/admin", () => ({
 
 // Mock Google GenAI using vi.hoisted
 const mockGenerateContent = vi.hoisted(() => vi.fn());
-vi.mock("@google/genai", () => ({
-  GoogleGenAI: vi.fn().mockImplementation(() => ({
-    models: {
-      generateContent: mockGenerateContent,
-    },
-  })),
-}));
+vi.mock("@google/genai", async (importOriginal) => {
+  const actual = (await importOriginal()) as Record<string, unknown>;
+  return {
+    ...actual,
+    GoogleGenAI: vi.fn().mockImplementation(() => ({
+      models: {
+        generateContent: mockGenerateContent,
+      },
+    })),
+  };
+});
 
 describe("/api/image/check", () => {
   const mockVerifyIdToken = vi.mocked(adminAuth.verifyIdToken);
@@ -167,6 +171,13 @@ describe("/api/image/check", () => {
             },
           },
         ],
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: expect.objectContaining({
+            type: expect.any(String),
+            properties: expect.any(Object),
+          }),
+        },
       });
     });
 
