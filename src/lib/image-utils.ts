@@ -69,7 +69,6 @@ export const DEFAULT_IMAGE_OPTIONS: ImageProcessingOptions = {
  */
 export const SUPPORTED_IMAGE_TYPES = [
   "image/jpeg",
-  "image/jpg",
   "image/png",
   "image/heic",
   "image/heif",
@@ -159,6 +158,10 @@ async function convertHeicToJpeg(file: File): Promise<File> {
     const blob = Array.isArray(convertedBlob)
       ? convertedBlob[0]
       : convertedBlob;
+
+    if (!blob || !(blob instanceof Blob)) {
+      throw new Error("Conversion failed, no valid Blob returned");
+    }
 
     // Create new File object with JPEG type
     const convertedFile = new File(

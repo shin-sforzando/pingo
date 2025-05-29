@@ -23,7 +23,8 @@ export async function POST(request: NextRequest) {
     let decodedToken: DecodedIdToken;
     try {
       decodedToken = await adminAuth.verifyIdToken(idToken);
-    } catch {
+    } catch (error) {
+      console.error("Authentication error:", error);
       return NextResponse.json(
         { error: "Authentication failed" },
         { status: 401 },

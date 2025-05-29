@@ -9,8 +9,11 @@ const checkImageSchema = z.object({
 });
 
 // Initialize Gemini AI
+if (!process.env.GEMINI_API_KEY) {
+  throw new Error("GEMINI_API_KEY environment variable is not set");
+}
 const genAI = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY || "",
+  apiKey: process.env.GEMINI_API_KEY,
 });
 
 /**

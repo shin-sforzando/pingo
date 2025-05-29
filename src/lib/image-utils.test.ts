@@ -41,7 +41,6 @@ describe("image-utils", () => {
     it("should support correct image types", () => {
       expect(SUPPORTED_IMAGE_TYPES).toEqual([
         "image/jpeg",
-        "image/jpg",
         "image/png",
         "image/heic",
         "image/heif",

@@ -70,14 +70,12 @@ export default function ImageUploadDebugPage() {
               gameId="debug-game-123"
               isUploading={isUploading}
               disabled={false}
-              onImageProcessed={
-                handleImageProcessed as (...args: unknown[]) => unknown
-              }
-              onUploadStart={
-                handleUploadStart as (...args: unknown[]) => unknown
-              }
+              onUploadStart={handleUploadStart}
               onUploadComplete={
                 handleUploadComplete as (...args: unknown[]) => unknown
+              }
+              onImageProcessed={
+                handleImageProcessed as (...args: unknown[]) => unknown
               }
             />
 

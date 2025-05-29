@@ -314,6 +314,11 @@ export function ImageUpload({
                     src={preview.previewUrl}
                     alt="Preview"
                     className="h-auto w-full rounded-lg shadow-sm"
+                    loading="lazy"
+                    onError={(error) => {
+                      console.error("Image preview error:", error);
+                      error.currentTarget.style.display = "none";
+                    }}
                   />
                   <Button
                     variant="destructive"
