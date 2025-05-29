@@ -129,6 +129,13 @@ export function timestampToISOString(
 }
 
 /**
+ * Convert a Date to an ISO string
+ */
+export function dateToISOString(date: Date | null | undefined): string | null {
+  return date ? date.toISOString() : null;
+}
+
+/**
  * Base document interface with timestamp fields
  */
 export interface BaseDocument {

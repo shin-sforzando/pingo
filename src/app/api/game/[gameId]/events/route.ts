@@ -1,183 +1,19 @@
 import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
 import type { ApiResponse } from "@/types/common";
-import { ProcessingStatus } from "@/types/common";
-import { submissionToFirestore } from "@/types/game";
-import { type Submission, submissionSchema } from "@/types/schema";
+import { eventFromFirestore, eventToFirestore } from "@/types/game";
+import { type Event, eventSchema } from "@/types/schema";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { ulid } from "ulid";
 
-// Schema for creating submission - reuse from schema.ts
-const createSubmissionSchema = submissionSchema.pick({
-  imageUrl: true,
-  memo: true,
-});
-
 /**
- * Create a new submission for a game
- * Only allows participants to submit
- */
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ gameId: string }> },
-): Promise<NextResponse<ApiResponse<Submission>>> {
-  try {
-    const { gameId } = await params;
-
-    // Validate parameters
-    if (!gameId) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: "INVALID_PARAMS",
-            message: "Game ID is required",
-          },
-        },
-        { status: 400 },
-      );
-    }
-
-    // Verify authentication
-    const authHeader = request.headers.get("authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: "UNAUTHORIZED",
-            message: "Missing authentication token",
-          },
-        },
-        { status: 401 },
-      );
-    }
-
-    const token = authHeader.substring(7);
-    const decodedToken = await adminAuth.verifyIdToken(token);
-    const userId = decodedToken.uid;
-
-    // Parse request body
-    const body = await request.json();
-    const validationResult = createSubmissionSchema.safeParse(body);
-
-    if (!validationResult.success) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: "INVALID_INPUT",
-            message: "Invalid input data",
-            details: validationResult.error.errors,
-          },
-        },
-        { status: 400 },
-      );
-    }
-
-    const { imageUrl, memo } = validationResult.data;
-
-    // Verify game exists
-    const gameRef = adminFirestore.collection("games").doc(gameId);
-    const gameDoc = await gameRef.get();
-
-    if (!gameDoc.exists) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: "GAME_NOT_FOUND",
-            message: "Game not found",
-          },
-        },
-        { status: 404 },
-      );
-    }
-
-    // Check if user is participant in this game
-    const participantRef = adminFirestore
-      .collection("games")
-      .doc(gameId)
-      .collection("participants")
-      .doc(userId);
-
-    const participantDoc = await participantRef.get();
-    if (!participantDoc.exists) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: "NOT_PARTICIPANT",
-            message: "User is not a participant in this game",
-          },
-        },
-        { status: 403 },
-      );
-    }
-
-    // Create submission
-    const submissionId = ulid();
-    const now = new Date();
-
-    const submission: Submission = {
-      id: submissionId,
-      userId,
-      imageUrl,
-      submittedAt: now,
-      analyzedAt: null,
-      critique: null,
-      matchedCellId: null,
-      confidence: null,
-      processingStatus: ProcessingStatus.UPLOADED,
-      acceptanceStatus: null,
-      errorMessage: null,
-      createdAt: now,
-      updatedAt: null,
-      memo,
-    };
-
-    // Save submission to Firestore
-    const submissionRef = adminFirestore
-      .collection("games")
-      .doc(gameId)
-      .collection("submissions")
-      .doc(submissionId);
-
-    const submissionDoc = submissionToFirestore(submission);
-    await submissionRef.set(submissionDoc);
-
-    console.log(
-      `Created submission: ${submissionId} for game: ${gameId} by user: ${userId}`,
-    );
-
-    return NextResponse.json({
-      success: true,
-      data: submission,
-    });
-  } catch (error) {
-    console.error("Create submission error:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: {
-          code: "SERVER_ERROR",
-          message: "Failed to create submission",
-          details: error instanceof Error ? error.message : String(error),
-        },
-      },
-      { status: 500 },
-    );
-  }
-}
-
-/**
- * Get submissions for a game
- * Only allows participants to view submissions
+ * Get events for a game
+ * Only allows participants to view events
  */
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ gameId: string }> },
-): Promise<NextResponse<ApiResponse<Submission[]>>> {
+): Promise<NextResponse<ApiResponse<Event[]>>> {
   try {
     const { gameId } = await params;
 
@@ -254,22 +90,22 @@ export async function GET(
 
     // Get query parameters
     const url = new URL(request.url);
+    const eventType = url.searchParams.get("type");
     const userIdFilter = url.searchParams.get("userId");
-    const limit = Math.min(
-      Math.max(1, Number.parseInt(url.searchParams.get("limit") || "50", 10)),
-      100,
-    );
-    const offset = Math.max(
-      0,
-      Number.parseInt(url.searchParams.get("offset") || "0", 10),
-    );
+    const limit = Number.parseInt(url.searchParams.get("limit") || "50", 10);
+    const offset = Number.parseInt(url.searchParams.get("offset") || "0", 10);
 
     // Build query
     let query = adminFirestore
       .collection("games")
       .doc(gameId)
-      .collection("submissions")
-      .orderBy("submittedAt", "desc");
+      .collection("events")
+      .orderBy("timestamp", "desc");
+
+    // Filter by event type if specified
+    if (eventType) {
+      query = query.where("type", "==", eventType);
+    }
 
     // Filter by user if specified
     if (userIdFilter) {
@@ -292,44 +128,193 @@ export async function GET(
     query = query.limit(limit);
 
     // Execute query
-    const submissionsSnapshot = await query.get();
+    const eventsSnapshot = await query.get();
 
-    // Convert to Submission objects
-    const submissions: Submission[] = [];
-    for (const doc of submissionsSnapshot.docs) {
-      const submissionData = doc.data();
-      // Convert Firestore document to Submission type
-      const submission: Submission = {
-        id: submissionData.id,
-        userId: submissionData.userId,
-        imageUrl: submissionData.imageUrl,
-        submittedAt: submissionData.submittedAt.toDate(),
-        analyzedAt: submissionData.analyzedAt?.toDate() || null,
-        critique: submissionData.critique,
-        matchedCellId: submissionData.matchedCellId,
-        confidence: submissionData.confidence,
-        processingStatus: submissionData.processingStatus,
-        acceptanceStatus: submissionData.acceptanceStatus,
-        errorMessage: submissionData.errorMessage,
-        createdAt: submissionData.createdAt.toDate(),
-        updatedAt: submissionData.updatedAt?.toDate() || null,
-        memo: submissionData.memo,
-      };
-      submissions.push(submission);
+    // Convert to Event objects
+    const events: Event[] = [];
+    for (const doc of eventsSnapshot.docs) {
+      const eventData = doc.data();
+      const event = eventFromFirestore({
+        id: eventData.id,
+        type: eventData.type,
+        userId: eventData.userId,
+        timestamp: eventData.timestamp,
+        details: eventData.details,
+        createdAt: eventData.createdAt,
+        updatedAt: eventData.updatedAt,
+      });
+      events.push(event);
     }
 
     return NextResponse.json({
       success: true,
-      data: submissions,
+      data: events,
     });
   } catch (error) {
-    console.error("Get submissions error:", error);
+    console.error("Get events error:", error);
     return NextResponse.json(
       {
         success: false,
         error: {
           code: "SERVER_ERROR",
-          message: "Failed to get submissions",
+          message: "Failed to get events",
+          details: error instanceof Error ? error.message : String(error),
+        },
+      },
+      { status: 500 },
+    );
+  }
+}
+
+/**
+ * Create a new event for a game
+ * Only allows participants to create events
+ */
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ gameId: string }> },
+): Promise<NextResponse<ApiResponse<Event>>> {
+  try {
+    const { gameId } = await params;
+
+    // Validate parameters
+    if (!gameId) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "INVALID_PARAMS",
+            message: "Game ID is required",
+          },
+        },
+        { status: 400 },
+      );
+    }
+
+    // Verify authentication
+    const authHeader = request.headers.get("authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "UNAUTHORIZED",
+            message: "Missing authentication token",
+          },
+        },
+        { status: 401 },
+      );
+    }
+
+    const token = authHeader.substring(7);
+    const decodedToken = await adminAuth.verifyIdToken(token);
+    const userId = decodedToken.uid;
+
+    // Parse request body
+    const body = await request.json();
+
+    // Schema for creating event - reuse from schema.ts
+    const createEventSchema = eventSchema.pick({
+      type: true,
+      details: true,
+    });
+
+    const validationResult = createEventSchema.safeParse(body);
+
+    if (!validationResult.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "INVALID_INPUT",
+            message: "Invalid input data",
+            details: validationResult.error.errors,
+          },
+        },
+        { status: 400 },
+      );
+    }
+
+    const { type, details } = validationResult.data;
+
+    // Verify game exists
+    const gameRef = adminFirestore.collection("games").doc(gameId);
+    const gameDoc = await gameRef.get();
+
+    if (!gameDoc.exists) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "GAME_NOT_FOUND",
+            message: "Game not found",
+          },
+        },
+        { status: 404 },
+      );
+    }
+
+    // Check if user is participant in this game
+    const participantRef = adminFirestore
+      .collection("games")
+      .doc(gameId)
+      .collection("participants")
+      .doc(userId);
+
+    const participantDoc = await participantRef.get();
+    if (!participantDoc.exists) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "NOT_PARTICIPANT",
+            message: "User is not a participant in this game",
+          },
+        },
+        { status: 403 },
+      );
+    }
+
+    // Create event
+    const eventId = ulid();
+    const now = new Date();
+
+    const event: Event = {
+      id: eventId,
+      type,
+      userId,
+      timestamp: now,
+      details: details || {},
+      createdAt: now,
+      updatedAt: null,
+    };
+
+    // Save event to Firestore
+    const eventRef = adminFirestore
+      .collection("games")
+      .doc(gameId)
+      .collection("events")
+      .doc(eventId);
+
+    const eventDoc = eventToFirestore(event);
+    await eventRef.set(eventDoc);
+
+    console.log(
+      `Created event: ${eventId} for game: ${gameId} by user: ${userId}`,
+    );
+
+    return NextResponse.json({
+      success: true,
+      data: event,
+    });
+  } catch (error) {
+    console.error("Create event error:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: {
+          code: "SERVER_ERROR",
+          message: "Failed to create event",
           details: error instanceof Error ? error.message : String(error),
         },
       },

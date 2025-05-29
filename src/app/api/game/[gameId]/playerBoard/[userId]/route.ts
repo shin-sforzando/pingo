@@ -1,12 +1,15 @@
 import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
 import type { ApiResponse } from "@/types/common";
-import { LineType } from "@/types/common";
 import {
   type PlayerBoardDocument,
   playerBoardFromFirestore,
   playerBoardToFirestore,
 } from "@/types/game";
-import type { PlayerBoard } from "@/types/schema";
+import {
+  type PlayerBoard,
+  cellStateApiSchema,
+  completedLineApiSchema,
+} from "@/types/schema";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { z } from "zod";
@@ -165,37 +168,10 @@ export async function GET(
   }
 }
 
-// Schema for updating player board
+// Schema for updating player board - reuse API schemas from schema.ts
 const updatePlayerBoardSchema = z.object({
-  cellStates: z
-    .record(
-      z.string(),
-      z.object({
-        isOpen: z.boolean(),
-        openedAt: z
-          .union([z.date(), z.string().datetime()])
-          .nullable()
-          .transform((val) => {
-            if (val === null) return null;
-            return val instanceof Date ? val : new Date(val);
-          }),
-        openedBySubmissionId: z.string().nullable(),
-      }),
-    )
-    .optional(),
-  completedLines: z
-    .array(
-      z.object({
-        type: z.nativeEnum(LineType),
-        index: z.number(),
-        completedAt: z
-          .union([z.date(), z.string().datetime()])
-          .transform((val) => {
-            return val instanceof Date ? val : new Date(val);
-          }),
-      }),
-    )
-    .optional(),
+  cellStates: z.record(z.string(), cellStateApiSchema).optional(),
+  completedLines: z.array(completedLineApiSchema).optional(),
 });
 
 /**

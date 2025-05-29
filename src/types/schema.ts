@@ -112,12 +112,38 @@ export const cellStateSchema = z.object({
 });
 
 /**
+ * Cell state schema for API requests (with date transformation)
+ */
+export const cellStateApiSchema = z.object({
+  isOpen: z.boolean(),
+  openedAt: z
+    .union([z.date(), z.string().datetime()])
+    .nullable()
+    .transform((val) => {
+      if (val === null) return null;
+      return val instanceof Date ? val : new Date(val);
+    }),
+  openedBySubmissionId: z.string().nullable(),
+});
+
+/**
  * Completed line schema
  */
 export const completedLineSchema = z.object({
   type: z.nativeEnum(LineType),
   index: z.number().int().min(0).max(4),
   completedAt: z.date(),
+});
+
+/**
+ * Completed line schema for API requests (with date transformation)
+ */
+export const completedLineApiSchema = z.object({
+  type: z.nativeEnum(LineType),
+  index: z.number(),
+  completedAt: z.union([z.date(), z.string().datetime()]).transform((val) => {
+    return val instanceof Date ? val : new Date(val);
+  }),
 });
 
 /**

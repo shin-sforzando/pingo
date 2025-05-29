@@ -81,8 +81,22 @@ src/
         [gameId]/
           board/
             route.ts
+          events/
+            route.test.ts
+            route.ts
           participants/
             route.ts
+          playerBoard/
+            [userId]/
+              route.test.ts
+              route.ts
+          submission/
+            [submissionId]/
+              route.test.ts
+              route.ts
+            route.test.ts
+            route.ts
+          route.test.ts
           route.ts
         create/
           route.test.ts
@@ -205,7 +219,6 @@ src/
       client.ts
       collections.test.ts
       collections.ts
-      README.md
     api-utils.ts
     constants.ts
     image-utils.test.ts
@@ -228,7 +241,6 @@ src/
     index.ts
     schema.ts
     user.ts
-.clinerules
 .editorconfig
 biome.json
 cloudbuild.yaml
@@ -236,13 +248,11 @@ components.json
 cors.json
 Dockerfile
 lefthook.yml
-LICENSE.md
 middleware.ts
 next.config.ts
 package.json
 playwright.config.ts
 postcss.config.mjs
-README.md
 repomix.config.json
 tsconfig.build.json
 tsconfig.json
@@ -297,6 +307,83 @@ import ja from "../messages/ja.json";
         <text x="189.896px" y="104.977px" style="font-family:'MPLUS1Code-Bold', 'M PLUS 1 Code';font-size:480px;fill:rgb(255,46,99);">P</text>
     </g>
 </svg>
+</file>
+
+<file path="src/app/api/game/[gameId]/events/route.test.ts">
+import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
+import {
+  cleanupTestUsers,
+  createApiRequest,
+} from "@/test/helpers/api-test-helpers";
+import {
+  cleanupTestGames,
+  generateTestGameTitle,
+} from "@/test/helpers/game-test-helpers";
+import type { ApiResponse } from "@/types/common";
+import { GameStatus, Role } from "@/types/common";
+import type { Event } from "@/types/schema";
+import type { DecodedIdToken } from "firebase-admin/auth";
+import type { NextResponse } from "next/server";
+import { ulid } from "ulid";
+import {
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
+import { GET, POST } from "./route";
+</file>
+
+<file path="src/app/api/game/[gameId]/events/route.ts">
+import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
+import type { ApiResponse } from "@/types/common";
+import { eventFromFirestore, eventToFirestore } from "@/types/game";
+import { type Event, eventSchema } from "@/types/schema";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import { ulid } from "ulid";
+⋮----
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ gameId: string }> },
+): Promise<NextResponse<ApiResponse<Event[]>>>
+⋮----
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ gameId: string }> },
+): Promise<NextResponse<ApiResponse<Event>>>
+</file>
+
+<file path="src/app/api/game/[gameId]/route.test.ts">
+import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
+import {
+  cleanupTestUsers,
+  createApiRequest,
+} from "@/test/helpers/api-test-helpers";
+import {
+  cleanupTestGames,
+  generateTestGameTitle,
+} from "@/test/helpers/game-test-helpers";
+import type { ApiResponse } from "@/types/common";
+import { GameStatus, Role } from "@/types/common";
+import { gameToFirestore } from "@/types/game";
+import type { Game } from "@/types/schema";
+import type { DecodedIdToken } from "firebase-admin/auth";
+import type { NextResponse } from "next/server";
+import { ulid } from "ulid";
+import {
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
+import { PUT } from "./route";
 </file>
 
 <file path="src/components/layout/Footer.browser.test.tsx">
@@ -643,6 +730,12 @@ import { getUserLocale } from "@/services/locale";
 import { getRequestConfig } from "next-intl/server";
 </file>
 
+<file path="src/lib/firebase/client.ts">
+import { getApp, getApps, initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+</file>
+
 <file path="src/services/locale.test.ts">
 import { defaultLocale } from "@/i18n/config";
 ⋮----
@@ -759,111 +852,8 @@ trim_trailing_whitespace = false
 }
 </file>
 
-<file path="LICENSE.md">
-# LICENSE
-
-## GOOD HACKING PAPA LICENSE
-
-あなたの子どもを喜ばせるために利用してください。
-
-Please use for whatever your children would be happy about.
-
-## Creative Commons - Attribution-NonCommercial 4.0 International
-
-クリエイティブ・コモンズ 表示-非営利 4.0 国際 パブリック・ライセンス
-ライセンスされた権利（定義は後述します）の行使により、あなたは、クリエイティブ・コモンズ 表示-非営利 4.0 国際 パブリック・ライセンス（以下「パブリック・ライセンス」といいます）の条項に規律されることを受諾し、同意します。本パブリック・ライセンスが契約と解釈されるであろう範囲において、あなたはこれらの利用条件のあなたによる受諾と引き換えにライセンスされた権利を付与されます。そして、許諾者は、あなたに対し、それらの条項のもとでライセンス対象物を利用可能にすることから許諾者が受領する利益と引き換えに、そのような権利を付与します。
-
-### 第1条　定義
-
-「翻案物」とは、著作権およびそれに類する権利の対象となり、ライセンス対象物について許諾者が有する著作権およびそれに類する権利に基づく許諾が必要とされるような形で、翻訳され、改変され、編集され、変形され、またはその他の方法により変更されたマテリアルで、ライセンス対象物から派生したか、またはライセンス対象物に基づくものを意味します。本パブリック・ライセンスにおいては、ライセンス対象物が音楽作品、実演または録音物で、これらが動画と同期させられる場合には、翻案物が常に作成されることになります。
-「翻案者のライセンス」とは、翻案物に対してあなたが寄与した部分に生じる、あなたの著作権およびそれに類する権利について、本パブリック・ライセンスの条項に従って、あなたが適用するライセンスのことをいいます。
-「著作権およびそれに類する権利」とは、その権利がどのように名づけられ、または分類されるかにかかわらず、著作権および／または著作権に密接に関係する類似の権利をいいます（実演、放送、録音物、およびデータベース権を含むが、これに限られません）。本パブリック・ライセンスにおいては、第2条(b)(1)および(2)において規定される権利は、著作権およびそれに類する権利ではありません。
-「効果的な技術的保護手段」とは、1996年12月20日に採択されたWIPO著作権条約第11条、および／または類似の国際協定の義務を満たす諸法規の下で、正当な権限なしに回避されてはならないものとされる諸手段をいいます。
-「例外および権利制限」とは、ライセンス対象物をあなたが利用する場合に適用される、フェアユース、フェアディーリングおよび／または著作権およびそれに類する権利に対するその他の例外もしくは権利制限をいいます。
-「ライセンス対象物」とは、許諾者が本パブリック・ライセンスを適用した美術的または文学的著作物、データベース、またはその他のマテリアルを意味します。
-「ライセンスされた権利」とは、本パブリック・ライセンスの条項に基づき、あなたに与えられる権利をいい、かかる権利は、あなたによるライセンス対象物の利用に適用され、かつ、許諾者がライセンスする権限を有する、全ての著作権およびそれに類する権利に限定されます。
-「許諾者」とは、本パブリック・ライセンスのもとで権利を付与する個人または団体を意味します。
-「非営利」とは、商業的な利得や金銭的報酬を、主たる目的とせず、それらに主に向けられてもいないことを意味します。本パブリック・ライセンスにおいては、デジタル・ファイル共有または類似した手段による、ライセンス対象物と、著作権およびそれに類する権利の対象となるその他のマテリアルとの交換は、その交換に関連して金銭的報酬の支払いがない場合は、非営利に該当します。
-「共有」とは、複製、公開の展示、公開の上演・演奏、頒布、配布、通信または輸入のような、ライセンスされた権利に関する許諾を必要とするような手段または手法により、公衆に対しマテリアルを提供すること、および、公衆がマテリアルを利用できるようにすること（公衆の各人が、自ら独自に場所および時間を選択してマテリアルにアクセスすることができる方法を含みます）を意味します。
-「データベース権」とは、データベースの法的保護に関する1996年3月11日の欧州議会および理事会指令 96/9/ECの結果として生じた、著作権以外の権利、（この指令が修正および／または継承された場合それらを反映したもの）、および、世界中の本質的に同等な権利を意味します。
-「あなた」とは、本パブリック・ライセンスのもとでライセンスされた権利を行使する個人または団体をいいます。「あなたの」もそれに対応した意味となります。
-
-### 第2条　範囲
-
-ライセンス付与
-本パブリック・ライセンスの条項に従い、許諾者はあなたに対し、ライセンス対象物について、以下に掲げるライセンスされた権利を行使できる全世界的な、無償、再許諾不可、非排他的、かつ取消不可なライセンスを付与します：
-ライセンス対象物の全部または一部を、非営利目的のためにのみ、複製および共有すること、ならびに
-翻案物を非営利目的のためにのみ、作成、複製および共有すること
-例外および権利制限　誤解を避けるために記すと、例外および権利制限があなたの利用に適用される部分については、本パブリック・ライセンスは適用されず、あなたは本パブリック・ライセンスの条項に従う必要はありません。
-有効期間　本パブリック・ライセンスの有効期間は第6条(a)にて規定されます。
-媒体および形式；許可される技術的改変　許諾者は、あなたに対し、あらゆる媒体や形式（現在知られているか、または今後作られるか否かを問いません）において、ライセンスされた権利を行使する権限、およびその行使に必要とされる技術的な改変を行う権限を付与します。許諾者は、あなたが、ライセンスされた権利を行使するために必要とされる技術的な改変（効果的な技術的保護手段を回避するために必要とされる技術的な改変を含みます）を禁止するいかなる権利または権限を放棄し、および／またはこれらの権利または権限を行使しないことに同意します。本パブリック・ライセンスにおいては、本第2条(a)(4)により認められる改変をするだけでは翻案物を作り出すことにはなりません。
-ダウンストリーム（下流側）の受領者
-許諾者からの申し出－ライセンス対象物　ライセンス対象物の受領者は、許諾者から本パブリック・ライセンスの条項の下でライセンスされた権利を行使できるという申出を自動的に受け取ります。
-ダウンストリーム（下流側）への制限の禁止　あなたは、ライセンス対象物の受領者がライセンスされた権利を行使するのを制限されることになる場合には、ライセンス対象物に対して、いかなる追加条項または異なる条項も提案または課してはならず、あるいは、いかなる効果的な技術的保護手段も適用してはなりません。
-支持表明がないこと　許諾者または第3条3(a)(1)(A)(i)に定められている許諾者以外のクレジット表示の対象として指定されている者が、あなたまたはライセンス対象物のあなたによる利用について、関連している、援助・支持している、あるいは正式な地位を付与している、と主張または示唆することを本パブリック・ライセンスは許諾しておらず、またはそのように解釈されてはなりません。
-その他の権利
-
-同一性保持の権利のような著作者人格権は、本パブリック・ライセンスのもとではライセンスされません。パブリシティ権、プライバシー権、および／または他の類似した人格権も同様です。ただし、可能なかぎり、許諾者は、あなたがライセンスされた権利を行使するために必要とされる範囲内で、また、その範囲内でのみ、許諾者の保持する、いかなるそのような権利を放棄し、および／または主張しないことに同意します。
-特許権および商標権は本パブリック・ライセンスのもとではライセンスされません。
-可能なかぎり、許諾者は、ライセンスされた権利の行使について、直接か、または任意のもしくは放棄可能な法定のもしくは強制的なライセンスに関する仕組みに基づく集中管理団体を介するかを問わず、あなたからライセンス料を得るいかなる権利も放棄します。その他一切の場合において（ライセンス対象物が非営利目的以外で利用される場合も含む）、許諾者はそのようなライセンス料を得るいかなる権利も明確に保持します。
-
-### 第3条　ライセンス利用条件
-
-ライセンスされた権利をあなたが行使するにあたっては、以下に記載された諸条件に従う必要があります。
-
-表示
-
-あなたがライセンス対象物（変更されたものを含む）を共有する場合は以下のことを行う必要があります：
-
-ライセンス対象物と共に許諾者から提供されていれば、以下のものを保持すること。
-ライセンス対象物の作者その他クレジット表示される者として許諾者によって指定されている者を識別する情報を、いかなる形であれ許諾者によってリクエストされた形が合理的である場合はその形で（指定されている場合は仮名も含む）
-著作権表示
-本パブリック・ライセンスを参照する表示
-「無保証」を参照する表示
-合理的に実施可能な場合には、ライセンス対象物のURIまたはライセンス対象物へのハイパーリンク
-ライセンス対象物を改変した場合はその旨を記し、従前の改変点についての表示も保持すること。
-ライセンス対象物が本パブリック・ライセンスに基づきライセンスされていることを示すこと、および、本パブリック・ライセンスの全文またはそのURIか本パブリック・ライセンスへのハイパーリンクのいずれかを含めること。
-第3条(a)(1)の条件は、あなたがライセンス対象物を共有する媒体・方法・文脈に照らして、いかなる合理的な方法でも満たすことができます。例えば、必要とされる情報を含むリソースのURIやハイパーリンクを付すことで条件を満たすことが合理的な場合があります。
-許諾者からリクエストされれば、あなたは第3条(a)(1)(A)に掲げるいかなる情報も合理的に実施可能な範囲で削除しなければなりません。
-あなたが作成した翻案物を共有する場合、あなたが付与する翻案者のライセンスは、翻案物の受領者が本パブリック・ライセンスを遵守することを妨げてはなりません。
-
-### 第4条　データベース権
-
-ライセンスされた権利にデータベース権が含まれており、ライセンス対象物のあなたの利用に適用される場合：
-
-誤解を避けるために記すと、第2条(a)(1)に従い、非営利目的の場合にのみ、データベースの全てまたは実質的な部分のコンテンツの抽出、再利用、複製または共有をする権利をあなたに与えます。
-あなたがデータベース権を持つデータベースに、あなたが、本データベースのコンテンツの全てまたは実質的な部分を含める場合、あなたがデータベース権を持つデータベース（ただし、個々のコンテンツではありません）は翻案物となります。
-あなたは、データベースのコンテンツの全てまたは実質的な部分を共有する場合は、第3条(a)の条件に従わなくてはなりません。
-誤解を避けるために記すと、本第4条は、ライセンスされた権利が他の著作権およびそれに類する権利を含む場合の本パブリック・ライセンス下でのあなたの義務に追加されるものであり、置き換えるものではありません。
-
-### 第5条　無保証および責任制限
-
-許諾者が別途合意しない限り、許諾者は可能な範囲において、ライセンス対象物を現状有姿のまま、現在可能な限りで提供し、明示、黙示、法令上、その他に関わらずライセンス対象物について一切の表明または保証をしません。これには、権利の帰属、商品性、特定の利用目的への適合性、権利侵害の不存在、隠れた瑕疵その他の瑕疵の不存在、正確性または誤りの存在もしくは不存在を含みますが、これに限られず、既知であるか否か、発見可能であるか否かを問いません。全部または一部の無保証が認められない場合、この無保証はあなたには適用されないこともあります。
-可能な範囲において、本パブリック・ライセンスもしくはライセンス対象物の利用によって起きうる直接、特別、間接、偶発、結果的、懲罰的その他の損失、コスト、出費または損害について、例え損失、コスト、出費、損害の可能性について許諾者が知らされていたとしても、許諾者は、あなたに対し、いかなる法理（過失を含みますがこれに限られません）その他に基づいても責任を負いません。全部または一部の責任制限が認められない場合、この制限はあなたには適用されないこともあります。
-上記の無保証および責任制限は、可能な範囲において、全責任の完全な免責および免除に最も近いものとして解釈するものとします。
-
-### 第6条　期間および終了
-
-本パブリック・ライセンスは、ここでライセンスされた著作権およびそれに類する権利が有効な期間、適用されます。しかし、もしあなたが本パブリック・ライセンスに違反すると、本パブリック・ライセンスに定めるあなたの権利は自動的に終了します。
-ライセンス対象物をあなたが利用する権利が第6条(a)の事由により終了した場合でも：
-
-あなたが違反を発見してから30日以内に違反を是正した場合に限り、違反を是正したその日に、自動的に復活します。または、
-許諾者により権利の復活を明示された場合に、復活します。
-誤解を避けるために記すと、本第6条(b)は、許諾者が、あなたの本パブリック・ライセンスに関する違反に対する救済を求めるために有するであろういかなる権利にも影響を及ぼしません。
-誤解を避けるために記すと、許諾者は、いつでも、別の条項の下でライセンス対象物を提供したり、ライセンス対象物の配布を停止することができます。しかし、その場合でも、本パブリック・ライセンスは終了しません。
-第1条、第5条、第6条、第7条、第8条は、本パブリック・ライセンスが終了してもなお有効に存続します。
-
-### 第7条　その他の条項
-
-許諾者は、明確に合意しない限り、あなたが通知するいかなる追加のまたは異なる条項にも拘束されません。
-ライセンス対象物に関する取り決め、了解事項または合意でここに言明されていない一切のものは、本パブリック・ライセンスの条項とは切り離され、独立したものです。
-
-### 第8条　解釈
-
-誤解を避けるために記すと、本パブリック・ライセンスは、本パブリック・ライセンスによる許諾に基づかない、ライセンス対象物のいかなる合法的な利用も縮小したり、限定したり、制限したり、条件を課したりするものではなく、またそのように解釈されてはなりません。
-可能な範囲で、本パブリック・ライセンスのいずれかの規定が執行不能とみなされた場合には、本パブリック・ライセンスは、執行可能とするために必要最小限度の範囲で自動的に変更されます。もしある規定の変更が不可能な場合には、その他の条項の執行可能性に影響を与えることなく、当該規定は本パブリック・ライセンスから切り離されます。
-本パブリック・ライセンスのいかなる条項も、許諾者の明確な合意なしには、放棄されることはなく、また、順守しないことに同意することはありません。
-本パブリック・ライセンスのいかなる条項も、許諾者やあなたに適用される、あらゆる特権や免責（司法権や当局の法的手続からの特権や免責を含む）に対する制限や放棄を構成するものではなく、またそのように解釈されるものではありません。
+<file path="playwright.config.ts">
+import { defineConfig, devices } from "@playwright/test";
 </file>
 
 <file path="postcss.config.mjs">
@@ -913,6 +903,33 @@ import { withMockAuthContext } from "./decorators";
 import nextIntl from "./next-intl";
 </file>
 
+<file path="src/app/api/auth/login/route.test.ts">
+import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
+import {
+  cleanupTestUsers,
+  createApiRequest,
+  generateTestUsername,
+} from "@/test/helpers/api-test-helpers";
+import { userToFirestoreForTest } from "@/test/helpers/firebase-test-helpers";
+import type { ApiResponse } from "@/types/common";
+⋮----
+import type { User } from "@/types/schema";
+⋮----
+import bcrypt from "bcrypt";
+import type { NextResponse } from "next/server";
+import { ulid } from "ulid";
+import {
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
+import { POST } from "./route";
+</file>
+
 <file path="src/app/api/auth/logout/route.test.ts">
 import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
 import {
@@ -940,7 +957,7 @@ import {
 import { POST } from "./route";
 </file>
 
-<file path="src/app/api/auth/me/route.test.ts">
+<file path="src/app/api/auth/register/route.test.ts">
 import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
 import {
   cleanupTestUsers,
@@ -949,12 +966,9 @@ import {
 } from "@/test/helpers/api-test-helpers";
 import { userToFirestoreForTest } from "@/test/helpers/firebase-test-helpers";
 import type { ApiResponse } from "@/types/common";
-⋮----
 import type { User } from "@/types/schema";
 ⋮----
-import bcrypt from "bcrypt";
 import type { NextResponse } from "next/server";
-import { ulid } from "ulid";
 import {
   afterAll,
   afterEach,
@@ -964,7 +978,7 @@ import {
   it,
   vi,
 } from "vitest";
-import { GET } from "./route";
+import { POST } from "./route";
 </file>
 
 <file path="src/app/api/auth/update/route.test.ts">
@@ -994,6 +1008,69 @@ import {
 import { PUT } from "./route";
 </file>
 
+<file path="src/app/api/game/[gameId]/submission/[submissionId]/route.test.ts">
+import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
+import {
+  cleanupTestUsers,
+  createApiRequest,
+} from "@/test/helpers/api-test-helpers";
+import {
+  cleanupTestGames,
+  generateTestGameTitle,
+} from "@/test/helpers/game-test-helpers";
+import type { ApiResponse } from "@/types/common";
+import {
+  AcceptanceStatus,
+  GameStatus,
+  ProcessingStatus,
+  Role,
+} from "@/types/common";
+import { submissionToFirestore } from "@/types/game";
+import type { Submission } from "@/types/schema";
+import type { DecodedIdToken } from "firebase-admin/auth";
+import type { NextResponse } from "next/server";
+import { ulid } from "ulid";
+import {
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
+import { GET, PUT } from "./route";
+</file>
+
+<file path="src/app/api/game/[gameId]/submission/route.test.ts">
+import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
+import {
+  cleanupTestUsers,
+  createApiRequest,
+} from "@/test/helpers/api-test-helpers";
+import {
+  cleanupTestGames,
+  generateTestGameTitle,
+} from "@/test/helpers/game-test-helpers";
+import type { ApiResponse } from "@/types/common";
+import { GameStatus, ProcessingStatus, Role } from "@/types/common";
+import { submissionToFirestore } from "@/types/game";
+import type { Submission } from "@/types/schema";
+import type { DecodedIdToken } from "firebase-admin/auth";
+import type { NextResponse } from "next/server";
+import { ulid } from "ulid";
+import {
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
+import { GET, POST } from "./route";
+</file>
+
 <file path="src/app/api/game/create/route.test.ts">
 import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
 import {
@@ -1011,19 +1088,6 @@ import type { ApiResponse } from "@/types/common";
 import type { NextResponse } from "next/server";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { POST } from "./route";
-</file>
-
-<file path="src/app/api/image/check/route.test.ts">
-import { adminAuth } from "@/lib/firebase/admin";
-import type { DecodedIdToken } from "firebase-admin/auth";
-import type { NextRequest } from "next/server";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { POST } from "./route";
-⋮----
-const createMockRequest = (
-    body: unknown,
-    authHeader?: string,
-): NextRequest =>
 </file>
 
 <file path="src/app/api/image/getUploadUrl/route.test.ts">
@@ -1052,6 +1116,18 @@ interface CheckIssue {
 }
 </file>
 
+<file path="src/app/layout.tsx">
+import { Footer } from "@/components/layout/Footer";
+import { Header } from "@/components/layout/Header";
+import { AnimatedGridPattern } from "@/components/magicui/animated-grid-pattern";
+import { AuthProvider } from "@/contexts/AuthContext";
+import type { Metadata } from "next";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getTranslations } from "next-intl/server";
+⋮----
+export async function generateMetadata(): Promise<Metadata>
+</file>
+
 <file path="src/app/loading.stories.tsx">
 import type { Meta, StoryObj } from "@storybook/react";
 import Loading from "./loading";
@@ -1063,6 +1139,38 @@ type Story = StoryObj<typeof meta>;
 import { HyperText } from "@/components/magicui/hyper-text";
 ⋮----
 export default function Loading()
+</file>
+
+<file path="src/app/page.browser.test.tsx">
+import { page } from "@vitest/browser/context";
+import { NextIntlClientProvider } from "next-intl";
+import { ulid } from "ulid";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { render } from "vitest-browser-react";
+import enMessages from "../../messages/en.json";
+import jaMessages from "../../messages/ja.json";
+⋮----
+import { AuthProvider } from "@/contexts/AuthContext";
+import type { User } from "@/types/schema";
+import HomePage from "./page";
+</file>
+
+<file path="src/components/auth/LoginForm.stories.tsx">
+import type { Meta, StoryObj } from "@storybook/react";
+import { expect, userEvent, within } from "@storybook/test";
+⋮----
+import { LoginForm } from "./LoginForm";
+⋮----
+type Story = StoryObj<typeof meta>;
+</file>
+
+<file path="src/components/auth/RegisterForm.stories.tsx">
+import type { Meta, StoryObj } from "@storybook/react";
+import { expect, userEvent, within } from "@storybook/test";
+⋮----
+import { RegisterForm } from "./RegisterForm";
+⋮----
+type Story = StoryObj<typeof meta>;
 </file>
 
 <file path="src/components/game/DndContextWrapper.tsx">
@@ -1088,6 +1196,19 @@ export interface InfoCardProps {
 export function InfoCard(
 </file>
 
+<file path="src/components/layout/Header.browser.test.tsx">
+import { page } from "@vitest/browser/context";
+import { NextIntlClientProvider } from "next-intl";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { render } from "vitest-browser-react";
+import { Header } from "./Header";
+⋮----
+import enMessages from "../../../messages/en.json";
+import jaMessages from "../../../messages/ja.json";
+⋮----
+beforeEach(() =>
+</file>
+
 <file path="src/components/layout/Header.stories.tsx">
 import { AuthContext } from "@/contexts/AuthContext";
 import { faker } from "@faker-js/faker";
@@ -1095,6 +1216,17 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { Header } from "./Header";
 ⋮----
 type Story = StoryObj<typeof Header>;
+</file>
+
+<file path="src/components/layout/Header.tsx">
+import { useAuth } from "@/contexts/AuthContext";
+import { useTranslations } from "next-intl";
+import Link from "next/link";
+import type { ReactElement } from "react";
+import { LanguageSwitcher } from "./LanguageSwitcher";
+import { NotificationIcon } from "./NotificationIcon";
+import { UserMenu } from "./UserMenu";
+⋮----
 </file>
 
 <file path="src/components/layout/NotificationDrawer.tsx">
@@ -1141,6 +1273,48 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { NotificationIcon } from "./NotificationIcon";
 ⋮----
 type Story = StoryObj<typeof meta>;
+</file>
+
+<file path="src/components/layout/UserMenu.browser.test.tsx">
+import { faker } from "@faker-js/faker";
+import { page, userEvent } from "@vitest/browser/context";
+import { NextIntlClientProvider } from "next-intl";
+import { describe, expect, it, vi } from "vitest";
+import { render } from "vitest-browser-react";
+import enMessages from "../../../messages/en.json";
+import jaMessages from "../../../messages/ja.json";
+import { UserMenu } from "./UserMenu";
+</file>
+
+<file path="src/components/layout/UserMenu.stories.tsx">
+import { AuthContext } from "@/contexts/AuthContext";
+import { faker } from "@faker-js/faker";
+import type { Meta, StoryObj } from "@storybook/react";
+import { UserMenu } from "./UserMenu";
+⋮----
+type Story = StoryObj<typeof meta>;
+</file>
+
+<file path="src/components/layout/UserMenu.tsx">
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/contexts/AuthContext";
+import { setUserLocale } from "@/services/locale";
+import { Languages, LogOut, User as UserIcon } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import type { ReactElement } from "react";
+⋮----
+const toggleLocale = async (): Promise<void> =>
 </file>
 
 <file path="src/components/magicui/hyper-text.stories.tsx">
@@ -1314,12 +1488,6 @@ import { describe, expect, it } from "vitest";
 import { adminAuth, adminFirestore } from "./admin";
 </file>
 
-<file path="src/lib/firebase/client.ts">
-import { getApp, getApps, initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
-</file>
-
 <file path="src/lib/firebase/collections.test.ts">
 import { deleteDoc, doc, getDoc, getDocs, setDoc } from "firebase/firestore";
 import { afterEach, describe, expect, it } from "vitest";
@@ -1335,111 +1503,6 @@ import {
   notificationConverter,
   userConverter,
 } from "./collections";
-</file>
-
-<file path="src/lib/firebase/README.md">
-# Firebase Firestore with Type Converters
-
-このディレクトリには、Firebase Firestoreとの型安全な通信を行うためのユーティリティが含まれています。
-
-## 型変換（Type Conversion）の利点
-
-Firestoreの`withConverter`APIを使用することで、以下のメリットがあります：
-
-1. **型安全性**: TypeScriptの型チェックが強化され、コンパイル時にエラーを検出できます
-2. **コード量の削減**: 手動での型変換が不要になり、コードがシンプルになります
-3. **一貫性の保証**: データの変換プロセスが一元化され、一貫性が保たれます
-4. **開発効率の向上**: 自動補完が効くため、開発速度が向上します
-
-## 使用方法
-
-### コレクション参照の取得
-
-```typescript
-import { getUsersCollection, getUserDoc } from '@/lib/firebase/collections';
-
-// ユーザーコレクションの参照を取得（型変換付き）
-const usersRef = getUsersCollection();
-
-// 特定のユーザードキュメントの参照を取得（型変換付き）
-const userRef = getUserDoc('user-id');
-```
-
-### ドキュメントの読み取り
-
-```typescript
-import { getUserDoc } from '@/lib/firebase/collections';
-import { getDoc } from 'firebase/firestore';
-
-// ユーザードキュメントを取得
-const userRef = getUserDoc('user-id');
-const docSnap = await getDoc(userRef);
-
-if (docSnap.exists()) {
-  // データは自動的にUser型に変換されます
-  const userData = docSnap.data();
-  console.log(userData.username); // 型安全なアクセス
-  console.log(userData.createdAt.toLocaleDateString()); // Dateオブジェクトとして使用可能
-}
-```
-
-### ドキュメントの書き込み
-
-```typescript
-import { getUserDoc } from '@/lib/firebase/collections';
-import { setDoc, updateDoc } from 'firebase/firestore';
-import type { User } from '@/types/schema';
-
-// 新しいユーザーを作成
-const newUser: User = {
-  id: 'user-id',
-  username: 'username',
-  createdAt: new Date(),
-  lastLoginAt: null,
-  participatingGames: [],
-  gameHistory: [],
-  isTestUser: false
-};
-
-// ドキュメントを保存（User型からFirestoreドキュメントへの変換は自動的に行われます）
-const userRef = getUserDoc(newUser.id);
-await setDoc(userRef, newUser);
-
-// ドキュメントを更新
-await updateDoc(userRef, {
-  username: 'new-username',
-  updatedAt: new Date()
-});
-```
-
-### クエリの実行
-
-```typescript
-import { getUsersCollection } from '@/lib/firebase/collections';
-import { query, where, getDocs } from 'firebase/firestore';
-
-// クエリを作成
-const usersRef = getUsersCollection();
-const q = query(usersRef, where('isTestUser', '==', true));
-
-// クエリを実行
-const querySnapshot = await getDocs(q);
-
-// 結果を処理（各ドキュメントは自動的にUser型に変換されます）
-querySnapshot.forEach((doc) => {
-  const userData = doc.data();
-  console.log(userData.username);
-});
-```
-
-## 利用可能なコレクション
-
-現在、以下のコレクションに対する型変換が実装されています：
-
-- `users`: ユーザー情報
-- `notifications`: 通知情報
-
-必要に応じて、他のコレクションの型変換も同様のパターンで実装できます。
 </file>
 
 <file path="src/lib/api-utils.ts">
@@ -1551,10 +1614,6 @@ import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 </file>
 
-<file path="playwright.config.ts">
-import { defineConfig, devices } from "@playwright/test";
-</file>
-
 <file path="repomix.config.json">
 {
   "$schema": "https://repomix.com/schemas/latest/schema.json",
@@ -1614,7 +1673,36 @@ import { AuthContext } from "../src/contexts/AuthContext";
 export const withMockAuthContext = (Story: React.ComponentType) =>
 </file>
 
-<file path="src/app/api/auth/login/route.test.ts">
+<file path="src/app/api/auth/login/route.ts">
+import bcrypt from "bcrypt";
+import { type NextRequest, NextResponse } from "next/server";
+⋮----
+import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
+import type { ApiResponse } from "@/types/common";
+import { type TimestampInterface, dateToTimestamp } from "@/types/firestore";
+import { userLoginSchema } from "@/types/schema";
+import type { User } from "@/types/schema";
+import { userFromFirestore } from "@/types/user";
+import type { UserDocument } from "@/types/user";
+⋮----
+export async function POST(
+  request: NextRequest,
+): Promise<NextResponse<ApiResponse<
+</file>
+
+<file path="src/app/api/auth/logout/route.ts">
+import { type NextRequest, NextResponse } from "next/server";
+⋮----
+import { adminFirestore } from "@/lib/firebase/admin";
+import type { ApiResponse } from "@/types/common";
+import { dateToTimestamp } from "@/types/firestore";
+⋮----
+export async function POST(
+  request: NextRequest,
+): Promise<NextResponse<ApiResponse<
+</file>
+
+<file path="src/app/api/auth/me/route.test.ts">
 import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
 import {
   cleanupTestUsers,
@@ -1638,57 +1726,7 @@ import {
   it,
   vi,
 } from "vitest";
-import { POST } from "./route";
-</file>
-
-<file path="src/app/api/auth/logout/route.ts">
-import { type NextRequest, NextResponse } from "next/server";
-⋮----
-import { adminFirestore } from "@/lib/firebase/admin";
-import type { ApiResponse } from "@/types/common";
-import { dateToTimestamp } from "@/types/firestore";
-⋮----
-export async function POST(
-  request: NextRequest,
-): Promise<NextResponse<ApiResponse<
-</file>
-
-<file path="src/app/api/auth/me/route.ts">
-import { type NextRequest, NextResponse } from "next/server";
-⋮----
-import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
-import type { ApiResponse } from "@/types/common";
-import type { User } from "@/types/schema";
-import type { UserDocument } from "@/types/user";
-import { userFromFirestore } from "@/types/user";
-⋮----
-export async function GET(
-  request: NextRequest,
-): Promise<NextResponse<ApiResponse<
-</file>
-
-<file path="src/app/api/auth/register/route.test.ts">
-import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
-import {
-  cleanupTestUsers,
-  createApiRequest,
-  generateTestUsername,
-} from "@/test/helpers/api-test-helpers";
-import { userToFirestoreForTest } from "@/test/helpers/firebase-test-helpers";
-import type { ApiResponse } from "@/types/common";
-import type { User } from "@/types/schema";
-⋮----
-import type { NextResponse } from "next/server";
-import {
-  afterAll,
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from "vitest";
-import { POST } from "./route";
+import { GET } from "./route";
 </file>
 
 <file path="src/app/api/game/[gameId]/board/route.ts">
@@ -1715,16 +1753,133 @@ export async function GET(
 )
 </file>
 
+<file path="src/app/api/game/[gameId]/playerBoard/[userId]/route.test.ts">
+import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
+import {
+  cleanupTestUsers,
+  createApiRequest,
+} from "@/test/helpers/api-test-helpers";
+import {
+  cleanupTestGames,
+  generateTestGameTitle,
+} from "@/test/helpers/game-test-helpers";
+import type { ApiResponse } from "@/types/common";
+import { GameStatus, LineType, Role } from "@/types/common";
+import { playerBoardToFirestore } from "@/types/game";
+import type { PlayerBoard } from "@/types/schema";
+import type { DecodedIdToken } from "firebase-admin/auth";
+import type { NextResponse } from "next/server";
+import { ulid } from "ulid";
+import {
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
+import { GET, PUT } from "./route";
+</file>
+
+<file path="src/app/api/game/[gameId]/playerBoard/[userId]/route.ts">
+import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
+import type { ApiResponse } from "@/types/common";
+import {
+  type PlayerBoardDocument,
+  playerBoardFromFirestore,
+  playerBoardToFirestore,
+} from "@/types/game";
+import {
+  cellStateApiSchema,
+  completedLineApiSchema,
+  type PlayerBoard,
+} from "@/types/schema";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { z } from "zod";
+⋮----
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ gameId: string; userId: string }> },
+): Promise<NextResponse<ApiResponse<PlayerBoard>>>
+⋮----
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ gameId: string; userId: string }> },
+): Promise<NextResponse<ApiResponse<PlayerBoard>>>
+</file>
+
+<file path="src/app/api/game/[gameId]/submission/[submissionId]/route.ts">
+import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
+import type { ApiResponse } from "@/types/common";
+import { ProcessingStatus } from "@/types/common";
+import {
+  type SubmissionDocument,
+  submissionFromFirestore,
+  submissionToFirestore,
+} from "@/types/game";
+import { type Submission, submissionSchema } from "@/types/schema";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+⋮----
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ gameId: string; submissionId: string }> },
+): Promise<NextResponse<ApiResponse<Submission>>>
+⋮----
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ gameId: string; submissionId: string }> },
+): Promise<NextResponse<ApiResponse<Submission>>>
+</file>
+
+<file path="src/app/api/game/[gameId]/submission/route.ts">
+import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
+import type { ApiResponse } from "@/types/common";
+import { ProcessingStatus } from "@/types/common";
+import { submissionToFirestore } from "@/types/game";
+import { submissionSchema, type Submission } from "@/types/schema";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import { ulid } from "ulid";
+⋮----
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ gameId: string }> },
+): Promise<NextResponse<ApiResponse<Submission>>>
+⋮----
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ gameId: string }> },
+): Promise<NextResponse<ApiResponse<Submission[]>>>
+</file>
+
 <file path="src/app/api/game/[gameId]/route.ts">
 import { validateGameId } from "@/lib/api-utils";
-import { adminFirestore } from "@/lib/firebase/admin";
-import { type GameDocument, gameFromFirestore } from "@/types/game";
+import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
+import type { ApiResponse } from "@/types/common";
+import { dateToISOString } from "@/types/firestore";
+import {
+  type GameDocument,
+  gameFromFirestore,
+  gameToFirestore,
+} from "@/types/game";
+import type { Game } from "@/types/schema";
+import { gameSchema } from "@/types/schema";
+import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { z } from "zod";
 ⋮----
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ gameId: string }> },
 )
+⋮----
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ gameId: string }> },
+): Promise<NextResponse<ApiResponse<Game>>>
 </file>
 
 <file path="src/app/api/game/create/route.ts">
@@ -1742,13 +1897,15 @@ import {
   gameToFirestore,
   playerBoardToFirestore,
 } from "../../../../types/game";
-import type {
-  Cell,
-  CompletedLine,
-  Event,
-  Game,
-  GameParticipation,
-  PlayerBoard,
+import {
+  cellSchema,
+  gameCreationSchema,
+  type Cell,
+  type CompletedLine,
+  type Event,
+  type Game,
+  type GameParticipation,
+  type PlayerBoard,
 } from "../../../../types/schema";
 ⋮----
 function generateGameId(isTest = false): string
@@ -1762,37 +1919,17 @@ export async function POST(
 ): Promise<NextResponse<ApiResponse<
 </file>
 
-<file path="src/app/api/image/check/route.ts">
+<file path="src/app/api/image/check/route.test.ts">
 import { adminAuth } from "@/lib/firebase/admin";
-import { GoogleGenAI, Type } from "@google/genai";
-import { type NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
+import type { DecodedIdToken } from "firebase-admin/auth";
+import type { NextRequest } from "next/server";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { POST } from "./route";
 ⋮----
-export async function POST(request: NextRequest)
-</file>
-
-<file path="src/app/api/subjects/check/route.ts">
-import type { Locale } from "@/i18n/config";
-import { getUserLocale } from "@/services/locale";
-import { GoogleGenAI, Type } from "@google/genai";
-import { type NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
-⋮----
-type CheckSubjectsRequest = z.infer<typeof checkSubjectsSchema>;
-⋮----
-interface CheckIssue {
-  subject: string;
-  reason: string;
-}
-⋮----
-interface CheckResponse {
-  ok: boolean;
-  issues?: CheckIssue[];
-}
-⋮----
-const getPromptTemplate = (params: CheckSubjectsRequest) =>
-⋮----
-export async function POST(request: NextRequest)
+const createMockRequest = (
+    body: unknown,
+    authHeader?: string,
+): NextRequest =>
 </file>
 
 <file path="src/app/api/subjects/generate/route.test.ts">
@@ -1829,48 +1966,92 @@ import CreateGamePage from "./page";
 type Story = StoryObj<typeof meta>;
 </file>
 
-<file path="src/app/layout.tsx">
-import { Footer } from "@/components/layout/Footer";
-import { Header } from "@/components/layout/Header";
-import { AnimatedGridPattern } from "@/components/magicui/animated-grid-pattern";
-import { AuthProvider } from "@/contexts/AuthContext";
-import type { Metadata } from "next";
-import { NextIntlClientProvider } from "next-intl";
-import { getLocale, getTranslations } from "next-intl/server";
+<file path="src/app/page.tsx">
+import { useTranslations } from "next-intl";
+import Link from "next/link";
+import { useState } from "react";
 ⋮----
-export async function generateMetadata(): Promise<Metadata>
+import { LoginForm } from "@/components/auth/LoginForm";
+import { RegisterForm } from "@/components/auth/RegisterForm";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuth } from "@/contexts/AuthContext";
+⋮----
+const handleAuthSuccess = () =>
+⋮----
+const handleAuthError = (error: Error) =>
+⋮----
+<Link href="/game/create">
+⋮----
+<TabsTrigger value="login">
+<TabsTrigger value="register">
+⋮----
 </file>
 
-<file path="src/app/page.browser.test.tsx">
-import { page } from "@vitest/browser/context";
-import { NextIntlClientProvider } from "next-intl";
-import { ulid } from "ulid";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { render } from "vitest-browser-react";
-import enMessages from "../../messages/en.json";
-import jaMessages from "../../messages/ja.json";
+<file path="src/components/auth/LoginForm.tsx">
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
 ⋮----
-import { AuthProvider } from "@/contexts/AuthContext";
-import type { User } from "@/types/schema";
-import HomePage from "./page";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { TranslatedFormMessage } from "@/components/ui/translated-form-message";
+import { useAuth } from "@/contexts/AuthContext";
+import type { UserLoginData } from "@/types/schema";
+import { userLoginSchema } from "@/types/schema";
+⋮----
+interface LoginFormProps {
+  onSuccess?: () => void;
+  onError?: (error: Error) => void;
+}
+⋮----
+async function onSubmit(values: UserLoginData)
+⋮----
+<form onSubmit=
 </file>
 
-<file path="src/components/auth/LoginForm.stories.tsx">
-import type { Meta, StoryObj } from "@storybook/react";
-import { expect, userEvent, within } from "@storybook/test";
+<file path="src/components/auth/RegisterForm.tsx">
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 ⋮----
-import { LoginForm } from "./LoginForm";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { TranslatedFormMessage } from "@/components/ui/translated-form-message";
+import { useAuth } from "@/contexts/AuthContext";
+import type { UserCreationData } from "@/types/schema";
+import { userCreationSchema } from "@/types/schema";
 ⋮----
-type Story = StoryObj<typeof meta>;
-</file>
-
-<file path="src/components/auth/RegisterForm.stories.tsx">
-import type { Meta, StoryObj } from "@storybook/react";
-import { expect, userEvent, within } from "@storybook/test";
+type ExtendedUserCreationData = UserCreationData &
+  z.infer<typeof confirmPasswordSchema>;
 ⋮----
-import { RegisterForm } from "./RegisterForm";
+interface RegisterFormProps {
+  onSuccess?: () => void;
+  onError?: (error: Error) => void;
+}
 ⋮----
-type Story = StoryObj<typeof meta>;
+async function onSubmit(values: ExtendedUserCreationData)
+⋮----
+<form onSubmit=
 </file>
 
 <file path="src/components/game/BingoBoard.stories.tsx">
@@ -1994,30 +2175,6 @@ import { QRCodeCard } from "./QRCodeCard";
 type Story = StoryObj<typeof meta>;
 </file>
 
-<file path="src/components/layout/Header.browser.test.tsx">
-import { page } from "@vitest/browser/context";
-import { NextIntlClientProvider } from "next-intl";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { render } from "vitest-browser-react";
-import { Header } from "./Header";
-⋮----
-import enMessages from "../../../messages/en.json";
-import jaMessages from "../../../messages/ja.json";
-⋮----
-beforeEach(() =>
-</file>
-
-<file path="src/components/layout/Header.tsx">
-import { useAuth } from "@/contexts/AuthContext";
-import { useTranslations } from "next-intl";
-import Link from "next/link";
-import type { ReactElement } from "react";
-import { LanguageSwitcher } from "./LanguageSwitcher";
-import { NotificationIcon } from "./NotificationIcon";
-import { UserMenu } from "./UserMenu";
-⋮----
-</file>
-
 <file path="src/components/layout/NotificationIcon.tsx">
 import { Button } from "@/components/ui/button";
 import { Bell } from "lucide-react";
@@ -2028,48 +2185,6 @@ import { NotificationDrawer } from "./NotificationDrawer";
 type NotificationIconProps = {
   hasUnreadNotifications?: boolean;
 };
-</file>
-
-<file path="src/components/layout/UserMenu.browser.test.tsx">
-import { faker } from "@faker-js/faker";
-import { page, userEvent } from "@vitest/browser/context";
-import { NextIntlClientProvider } from "next-intl";
-import { describe, expect, it, vi } from "vitest";
-import { render } from "vitest-browser-react";
-import enMessages from "../../../messages/en.json";
-import jaMessages from "../../../messages/ja.json";
-import { UserMenu } from "./UserMenu";
-</file>
-
-<file path="src/components/layout/UserMenu.stories.tsx">
-import { AuthContext } from "@/contexts/AuthContext";
-import { faker } from "@faker-js/faker";
-import type { Meta, StoryObj } from "@storybook/react";
-import { UserMenu } from "./UserMenu";
-⋮----
-type Story = StoryObj<typeof meta>;
-</file>
-
-<file path="src/components/layout/UserMenu.tsx">
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useAuth } from "@/contexts/AuthContext";
-import { setUserLocale } from "@/services/locale";
-import { Languages, LogOut, User as UserIcon } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import type { ReactElement } from "react";
-⋮----
-const toggleLocale = async (): Promise<void> =>
 </file>
 
 <file path="src/components/ui/tabs.tsx">
@@ -2321,19 +2436,16 @@ export interface ApiResponse<T> {
 
 </file>
 
-<file path="src/app/api/auth/login/route.ts">
-import bcrypt from "bcrypt";
+<file path="src/app/api/auth/me/route.ts">
 import { type NextRequest, NextResponse } from "next/server";
 ⋮----
 import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
 import type { ApiResponse } from "@/types/common";
-import { type TimestampInterface, dateToTimestamp } from "@/types/firestore";
-import { userLoginSchema } from "@/types/schema";
 import type { User } from "@/types/schema";
-import { userFromFirestore } from "@/types/user";
 import type { UserDocument } from "@/types/user";
+import { userFromFirestore } from "@/types/user";
 ⋮----
-export async function POST(
+export async function GET(
   request: NextRequest,
 ): Promise<NextResponse<ApiResponse<
 </file>
@@ -2354,8 +2466,19 @@ export async function POST(
 ): Promise<NextResponse<ApiResponse<
 </file>
 
+<file path="src/app/api/image/check/route.ts">
+import { adminAuth } from "@/lib/firebase/admin";
+import { GoogleGenAI, Type } from "@google/genai";
+import { type NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+⋮----
+export async function POST(request: NextRequest)
+</file>
+
 <file path="src/app/api/image/getUploadUrl/route.ts">
 import { adminAuth } from "@/lib/firebase/admin";
+import { dateToISOString } from "@/types/firestore";
+import { imageSubmissionDataSchema } from "@/types/schema";
 import type { DecodedIdToken } from "firebase-admin/auth";
 import { getStorage } from "firebase-admin/storage";
 import { type NextRequest, NextResponse } from "next/server";
@@ -2375,16 +2498,26 @@ import { ulid } from "ulid";
 export async function POST(request: NextRequest)
 </file>
 
-<file path="src/app/api/subjects/generate/route.ts">
+<file path="src/app/api/subjects/check/route.ts">
 import type { Locale } from "@/i18n/config";
 import { getUserLocale } from "@/services/locale";
 import { GoogleGenAI, Type } from "@google/genai";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 ⋮----
-type GenerateSubjectsRequest = z.infer<typeof generateSubjectsSchema>;
+type CheckSubjectsRequest = z.infer<typeof checkSubjectsSchema>;
 ⋮----
-const getPromptTemplate = (params: GenerateSubjectsRequest) =>
+interface CheckIssue {
+  subject: string;
+  reason: string;
+}
+⋮----
+interface CheckResponse {
+  ok: boolean;
+  issues?: CheckIssue[];
+}
+⋮----
+const getPromptTemplate = (params: CheckSubjectsRequest) =>
 ⋮----
 export async function POST(request: NextRequest)
 </file>
@@ -2424,94 +2557,6 @@ body {
 @layer base {
 ⋮----
 * {
-</file>
-
-<file path="src/app/page.tsx">
-import { useTranslations } from "next-intl";
-import Link from "next/link";
-import { useState } from "react";
-⋮----
-import { LoginForm } from "@/components/auth/LoginForm";
-import { RegisterForm } from "@/components/auth/RegisterForm";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useAuth } from "@/contexts/AuthContext";
-⋮----
-const handleAuthSuccess = () =>
-⋮----
-const handleAuthError = (error: Error) =>
-⋮----
-<Link href="/game/create">
-⋮----
-<TabsTrigger value="login">
-<TabsTrigger value="register">
-⋮----
-</file>
-
-<file path="src/components/auth/LoginForm.tsx">
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useTranslations } from "next-intl";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-⋮----
-import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { TranslatedFormMessage } from "@/components/ui/translated-form-message";
-import { useAuth } from "@/contexts/AuthContext";
-import type { UserLoginData } from "@/types/schema";
-import { userLoginSchema } from "@/types/schema";
-⋮----
-interface LoginFormProps {
-  onSuccess?: () => void;
-  onError?: (error: Error) => void;
-}
-⋮----
-async function onSubmit(values: UserLoginData)
-⋮----
-<form onSubmit=
-</file>
-
-<file path="src/components/auth/RegisterForm.tsx">
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useTranslations } from "next-intl";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-⋮----
-import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { TranslatedFormMessage } from "@/components/ui/translated-form-message";
-import { useAuth } from "@/contexts/AuthContext";
-import type { UserCreationData } from "@/types/schema";
-import { userCreationSchema } from "@/types/schema";
-⋮----
-type ExtendedUserCreationData = UserCreationData &
-  z.infer<typeof confirmPasswordSchema>;
-⋮----
-interface RegisterFormProps {
-  onSuccess?: () => void;
-  onError?: (error: Error) => void;
-}
-⋮----
-async function onSubmit(values: ExtendedUserCreationData)
-⋮----
-<form onSubmit=
 </file>
 
 <file path="src/components/game/QRCodeCard.tsx">
@@ -2612,6 +2657,8 @@ export function timestampToISOString(
   timestamp: TimestampInterface | null | undefined,
 ): string | null
 ⋮----
+export function dateToISOString(date: Date | null | undefined): string | null
+⋮----
 export interface BaseDocument {
   createdAt: TimestampInterface;
   updatedAt?: TimestampInterface | null;
@@ -2663,6 +2710,23 @@ import { resolve } from "node:path";
 import { config } from "dotenv";
 </file>
 
+<file path="src/app/api/auth/update/route.ts">
+import bcrypt from "bcrypt";
+import { type NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+⋮----
+import { adminFirestore } from "@/lib/firebase/admin";
+import type { ApiResponse } from "@/types/common";
+import { dateToTimestamp } from "@/types/firestore";
+import { type User, userCreationSchema, userSchema } from "@/types/schema";
+import type { UserDocument } from "@/types/user";
+import { userFromFirestore } from "@/types/user";
+⋮----
+export async function PUT(
+  request: NextRequest,
+): Promise<NextResponse<ApiResponse<
+</file>
+
 <file path="src/app/api/health/route.test.ts">
 import { NextResponse } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -2670,9 +2734,24 @@ import { GET } from "./route";
 </file>
 
 <file path="src/app/api/health/route.ts">
+import { dateToISOString } from "@/types/firestore";
 import { NextResponse } from "next/server";
 ⋮----
 export async function GET()
+</file>
+
+<file path="src/app/api/subjects/generate/route.ts">
+import type { Locale } from "@/i18n/config";
+import { getUserLocale } from "@/services/locale";
+import { GoogleGenAI, Type } from "@google/genai";
+import { type NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+⋮----
+type GenerateSubjectsRequest = z.infer<typeof generateSubjectsSchema>;
+⋮----
+const getPromptTemplate = (params: GenerateSubjectsRequest) =>
+⋮----
+export async function POST(request: NextRequest)
 </file>
 
 <file path="src/components/game/ImageUpload.tsx">
@@ -2714,6 +2793,39 @@ console.error("Image preview error:", error);
 ⋮----
 e.stopPropagation();
 handleUpload();
+</file>
+
+<file path="src/contexts/AuthContext.tsx">
+import { signInWithCustomToken } from "firebase/auth";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+⋮----
+import { auth } from "@/lib/firebase/client";
+import type { User } from "@/types/schema";
+⋮----
+interface AuthContextType {
+  user: User | null;
+  loading: boolean;
+  error: Error | null;
+  login: (username: string, password: string) => Promise<void>;
+  register: (
+    username: string,
+    password: string,
+    isTestUser?: boolean,
+  ) => Promise<void>;
+  logout: () => Promise<void>;
+  updateUser: (userData: Partial<User>) => Promise<void>;
+}
+⋮----
+export function useAuth()
+⋮----
+export function AuthProvider(
 </file>
 
 <file path="src/lib/image-utils.test.ts">
@@ -3038,42 +3150,6 @@ setupFiles: ["./vitest.browser.setup.ts"], // Add browser setup file
 "**/stories/example/*.tsx", // Exclude example stories
 </file>
 
-<file path="scripts/docker-build.ts">
-import type { ExecSyncOptions } from "node:child_process";
-import { execSync } from "node:child_process";
-⋮----
-interface FirebaseCredentials {
-  projectId: string;
-  clientEmail: string;
-  privateKey: string;
-}
-⋮----
-async function extractFirebaseCredentials(
-  jsonFilePath: string,
-): Promise<FirebaseCredentials>
-⋮----
-function parseArguments(args: string[]):
-⋮----
-async function main(): Promise<void>
-</file>
-
-<file path="src/app/api/auth/update/route.ts">
-import bcrypt from "bcrypt";
-import { type NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
-⋮----
-import { adminFirestore } from "@/lib/firebase/admin";
-import type { ApiResponse } from "@/types/common";
-import { dateToTimestamp } from "@/types/firestore";
-import { type User, userCreationSchema, userSchema } from "@/types/schema";
-import type { UserDocument } from "@/types/user";
-import { userFromFirestore } from "@/types/user";
-⋮----
-export async function PUT(
-  request: NextRequest,
-): Promise<NextResponse<ApiResponse<
-</file>
-
 <file path="src/app/game/[gameId]/share/page.tsx">
 import { BingoBoard } from "@/components/game/BingoBoard";
 import { InfoCard } from "@/components/game/InfoCard";
@@ -3219,37 +3295,23 @@ const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) =>
 const handleInputBlur = () =>
 </file>
 
-<file path="src/contexts/AuthContext.tsx">
-import { signInWithCustomToken } from "firebase/auth";
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+<file path="scripts/docker-build.ts">
+import type { ExecSyncOptions } from "node:child_process";
+import { execSync } from "node:child_process";
 ⋮----
-import { auth } from "@/lib/firebase/client";
-import type { User } from "@/types/schema";
-⋮----
-interface AuthContextType {
-  user: User | null;
-  loading: boolean;
-  error: Error | null;
-  login: (username: string, password: string) => Promise<void>;
-  register: (
-    username: string,
-    password: string,
-    isTestUser?: boolean,
-  ) => Promise<void>;
-  logout: () => Promise<void>;
-  updateUser: (userData: Partial<User>) => Promise<void>;
+interface FirebaseCredentials {
+  projectId: string;
+  clientEmail: string;
+  privateKey: string;
 }
 ⋮----
-export function useAuth()
+async function extractFirebaseCredentials(
+  jsonFilePath: string,
+): Promise<FirebaseCredentials>
 ⋮----
-export function AuthProvider(
+function parseArguments(args: string[]):
+⋮----
+async function main(): Promise<void>
 </file>
 
 <file path="src/components/game/SubjectList.tsx">
@@ -3316,151 +3378,19 @@ const handleDragEnd = (event: DragEndEvent) =>
 // Dynamic import DndContextWrapper with SSR disabled
 </file>
 
-<file path=".clinerules">
-# Rules for Cline
-
-## Project-Specific Rules & Intelligence
-
-- If you have questions or concerns about a user's instructions, ask the right questions before you do anything.
-- All Markdown files will be in GitHub Flavored Markdown format, with no markdownlint violations.
-- Documents other than README.md are written in Japanese, while README.md is written in English.
-- GitHub Issues and Pull Requests should be in English, follow the templates in `/.github`.
-- All comments in source code, and log outputs should be in English.
-- All comments should only be useful to co-developers and to Cline, which has amnesia after a reset, and should not be self-explanatory from the source code and its change history.
-  - In other words, comments that explain **why** are good comments, and comments that explain what, how, or when should not exist.
-- Use standard libraries whenever possible, and reduce the number of external libraries that depend on them.
-- The world of software development is very fast evolving, so always be suspicious of the possibility that your knowledge is out of date, and read the latest documentation before starting. Use `browser_action` if necessary.
-  - When working with cloud services like Google Cloud Build, Firebase, or any other external service, **always read the official documentation thoroughly** before implementing solutions. This is especially important for handling sensitive information like credentials, environment variables, and secrets.
-- Never ignore Linter warnings, pay particular attention to the following rules.
-  - noExplicitAny: Disallow the any type usage.
-  - noForEach: Prefer `for...of` statement instead of `Array.forEach`.
-  - noNonNullAssertion: Disallow non-null assertions using the ! postfix operator.
-  - noUnusedImports: Disallow unused imports.
-  - noUnusedVariables: Disallow unused variables.
-  - useImportType: Promotes the use of import type for types.
-  - useTemplate: Prefer template literals over string concatenation.
-- Utilize type definitions aggressively and be as rigorous as possible.
-- All source code should be robust with automated tests.
-  - Use `npm run test:once` instead of `npm test` in Watch mode to run tests.
-  - Do not start the next task until the test passes.
-- All components should be individually viewable in the Storybook.
-- To avoid rework, implementations should be tested and verified frequently and persistently.
-  - Wait for user confirmation of completion before updating memory banks or starting the next task.
-- A task is never "Task Completed" until the user has confirmed that it is working.
-  - If a similar problem cannot be corrected after three attempts, consider the possibility that the approach itself is incorrect.
-
-## Memory Bank
-
-I am Cline, an expert software engineer: my memory resets completely between sessions.
-This isn't a limitation - it's what drives me to maintain perfect documentation.
-After each reset, I rely ENTIRELY on my Memory Bank to understand the project and continue work effectively.
-I MUST read ALL memory bank files at the start of EVERY task - this is not optional.
-
-### Memory Bank Structure
-
-The Memory Bank consists of required core files and optional context files, all in GitHub Flavored Markdown format.
-Files build upon each other in a clear hierarchy:
-
-```mermaid
-flowchart TB
-  README.md
-  .clinerules
-
-  PB[ProjectBrief.md]
-  PB --> TC[TechnicalSpecification.md]
-  TC --> P[Progress.md]
-```
-
-#### Core Files (Required)
-
-##### `./README.md`
-
-Overall project overview for developers and users.
-
-##### `./.clinerules`
-
-Development rules that Cline must follow with the highest priority in this project
-
-##### `./cline_docs/ProjectBrief.md`
-
-Foundation document that shapes all other memory bank files.
-it defines core requirements and goals.
-
-##### `./cline_docs/TechnicalSpecification.md.md`
-
-Documentation with all technical specifications.
-For example, it includes the following chapters:
-
-- Technologies used
-- Development setup
-- Technical constraints
-- Dependencies
-- System architecture
-- Key technical decisions
-- Design patterns in use
-- Component relationships
-
-##### `./cline_docs/Progress.md`
-
-Documents that manage progress.
-For example, include the following chapters:
-
-- Current status
-- Recent changes
-- Next steps
-- Active decisions and considerations
-- What's left to build
-- Known issues
-
-#### Additional Context
-
-Create additional files/folders within `cline_docs/` when they help organize:
-
-- Complex feature documentation
-- Integration specifications
-- API documentation
-- Testing strategies
-- Deployment procedures
-
-### Documentation Updates
-
-Memory Bank updates occur when:
-
-1. Discovering new project patterns
-2. After implementing significant changes
-3. When user requests with **update memory bank** (MUST review ALL files)
-4. When context needs clarification
-
-```mermaid
-flowchart TD
-    Start[Update Process]
-
-    subgraph Process
-        P1[Review ALL Files]
-        P2[Document Current State]
-        P3[Clarify Next Steps]
-
-        P1 --> P2 --> P3
-    end
-
-    Start --> Process
-```
-
-Note: When triggered by **update memory bank**, I MUST review every memory bank file, even if some don't require updates. Focus particularly on activeContext.md and progress.md as they track current state.
-
-#### Improved Efficiency of Memory Banks
-
-To avoid extreme bloating of the memory bank, create `./cline_docs/Archived_YYYYMMDD.md` by summarizing information no longer needed for future task execution and organize the current memory bank.
-This is done with the instruction **organize memory bank** from user.
+<file path="src/lib/firebase/admin.ts">
+import { cert, getApps, initializeApp } from "firebase-admin/app";
+import { getAuth } from "firebase-admin/auth";
+import { getFirestore } from "firebase-admin/firestore";
 </file>
 
 <file path="cloudbuild.yaml">
 steps:
 
   - name: gcr.io/cloud-builders/docker
-    entrypoint: 'bash'
+    entrypoint: "bash"
     args:
-      - '-c'
+      - "-c"
       - |
         docker build \
           --no-cache \
@@ -3469,8 +3399,15 @@ steps:
           -f Dockerfile \
           --build-arg FIREBASE_PROJECT_ID="$$FIREBASE_PROJECT_ID" \
           --build-arg FIREBASE_CLIENT_EMAIL="$$FIREBASE_CLIENT_EMAIL" \
-          --build-arg FIREBASE_PRIVATE_KEY="$$FIREBASE_PRIVATE_KEY"
-    secretEnv: ['FIREBASE_PROJECT_ID', 'FIREBASE_CLIENT_EMAIL', 'FIREBASE_PRIVATE_KEY']
+          --build-arg FIREBASE_PRIVATE_KEY="$$FIREBASE_PRIVATE_KEY" \
+          --build-arg GEMINI_API_KEY="$$GEMINI_API_KEY"
+    secretEnv:
+      [
+        "FIREBASE_PROJECT_ID",
+        "FIREBASE_CLIENT_EMAIL",
+        "FIREBASE_PRIVATE_KEY",
+        "GEMINI_API_KEY",
+      ]
     id: Build
 
   - name: gcr.io/cloud-builders/docker
@@ -3480,19 +3417,19 @@ steps:
         $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
     id: Push
 
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk:slim"
     args:
       - run
       - services
       - update
       - $_SERVICE_NAME
-      - '--platform=managed'
+      - "--platform=managed"
       - >-
         --image=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
       - >-
         --labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID,gcb-trigger-id=$_TRIGGER_ID
-      - '--region=$_DEPLOY_REGION'
-      - '--quiet'
+      - "--region=$_DEPLOY_REGION"
+      - "--quiet"
     id: Deploy
     entrypoint: gcloud
 
@@ -3521,214 +3458,13 @@ tags:
 availableSecrets:
   secretManager:
     - versionName: projects/pingo-456817/secrets/FIREBASE_PROJECT_ID/versions/latest
-      env: 'FIREBASE_PROJECT_ID'
+      env: "FIREBASE_PROJECT_ID"
     - versionName: projects/pingo-456817/secrets/FIREBASE_CLIENT_EMAIL/versions/latest
-      env: 'FIREBASE_CLIENT_EMAIL'
+      env: "FIREBASE_CLIENT_EMAIL"
     - versionName: projects/pingo-456817/secrets/FIREBASE_PRIVATE_KEY/versions/latest
-      env: 'FIREBASE_PRIVATE_KEY'
-</file>
-
-<file path="README.md">
-# Pingo
-
-<!-- Badges -->
-
-[![Last Commit](https://img.shields.io/github/last-commit/shin-sforzando/pingo)](https://github.com/shin-sforzando/pingo/graphs/commit-activity)
-[![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
-
-<!-- Synopsis -->
-
-Pingo: Bingo game where AI judges based on photos
-
-<!-- TOC -->
-
-- [Prerequisites](#prerequisites)
-  - [Tool](#tool)
-- [How to](#how-to)
-  - [Setup](#setup)
-    - [Environment Variables](#environment-variables)
-      - [.env](#env)
-      - [.env.local](#envlocal)
-    - [Google Cloud](#google-cloud)
-      - [Application Default Credentials (ADC)](#application-default-credentials-adc)
-      - [Google Cloud Storage (GCS) CORS Configuration](#google-cloud-storage-gcs-cors-configuration)
-    - [Firebase](#firebase)
-  - [Development](#development)
-    - [Lint \& Format](#lint--format)
-    - [i18n](#i18n)
-  - [Storybook](#storybook)
-  - [Build for Production](#build-for-production)
-  - [Local Docker](#local-docker)
-- [Test](#test)
-- [Deploy](#deploy)
-- [Misc](#misc)
-
-## Prerequisites
-
-- Docker (v28.0.4 or higher)
-- Node.js (v22 or higher)
-- TypeScript (v5 or higher)
-- [Next.js](https://nextjs.org) (v15.3.0)
-  - [React](https://ja.react.dev) (v19.1.0)
-  - [next-intl](https://next-intl.dev)
-  - [@google/genai](https://googleapis.github.io/js-genai/release_docs/index.html) (v1.1.0)
-- [Storybook](https://storybook.js.org) (v8.6.14)
-- [shadcn/ui](https://ui.shadcn.com)
-
-### Tool
-
-- [Biome](https://biomejs.dev) (v1.9.4) - Formatter and Linter
-- [lefthook](https://github.com/evilmartians/lefthook) (v1.11.13) - Git hooks manager
-- [git-secret](https://sobolevn.me/git-secret/) - A bash-tool to store your private data inside a git repository
-
-## How to
-
-### Setup
-
-```shell
-# Clone the repository
-git clone https://github.com/shin-sforzando/pingo.git
-cd pingo
-
-# Reveal secrets
-git secret reveal
-
-# Install dependencies
-npm install --legacy-peer-deps
-```
-
-> [!NOTE]
-> If git-secret is not available, decrypt secrets one by one using GPG as in
-> `gpg --output something --decrypt something.secret`
-
-#### Environment Variables
-
-##### .env
-
-`.env` contains common environment variables that are safe to disclose.
-
-```.env
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=pingo-456817
-NEXT_PUBLIC_FIREBASE_API_KEY=AIzaSyCYXPVHEMWgIXpDc2j-qFuvzD79eI24dws
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=pingo-456817.firebaseapp.com
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=pingo-456817.firebasestorage.app
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=617969816285
-NEXT_PUBLIC_FIREBASE_APP_ID=1:617969816285:web:09a7ffe5ea531b45648134
-```
-
-##### .env.local
-
-`.env.local` contains environment variables for the local development environment that cannot be disclosed.
-
-```.env.local
-GOOGLE_CLOUD_PROJECT_ID=XXXXXXXXXXXXXXXX
-# Gemini API Key for local development
-GEMINI_API_KEY=XXXXXXXXXXXXXXXX
-# ADC Service account key for Google Cloud
-GOOGLE_APPLICATION_CREDENTIALS=./XXXXXXXXXXXXXXXX.json
-# Google Cloud Storage bucket for image uploads
-GOOGLE_CLOUD_STORAGE_BUCKET=XXXXXXXXXXXXXXXX
-```
-
-#### Google Cloud
-
-##### Application Default Credentials (ADC)
-
-For most server-side operations interacting with Google Cloud (like Firestore access from API routes, or operations on Cloud Run), ADC is used. Set it up for local development:
-
-```shell
-gcloud auth application-default login
-```
-
-> [!IMPORTANT]
-> For generating **v4 Signed URLs** locally (used for direct GCS uploads), ADC with user credentials is **not sufficient**.
-> You need to use a **Service Account Key**.
-
-##### Google Cloud Storage (GCS) CORS Configuration
-
-To allow the browser (running on `localhost:3000` or the deployed app URL) to directly upload files to the GCS bucket (`gcs-pingo`), you need to configure CORS (Cross-Origin Resource Sharing) on the bucket.
-
-```shell
-gsutil cors set gcs-pingo-cors-config.json gs://gcs-pingo
-```
-
-#### Firebase
-
-T. B. D.
-
-### Development
-
-```shell
-# Start the development server with Turbopack and pretty-printed logs
-npm run dev
-
-# The application will be available at http://localhost:3000
-```
-
-#### Lint & Format
-
-```shell
-# Run Biome
-npm run check
-```
-
-#### i18n
-
-(T. B. D.)
-
-### Storybook
-
-Pingo uses [Storybook](https://storybook.js.org) for UI component development and documentation.
-Each UI component has a corresponding story that showcases its variants, sizes, and states.
-
-```shell
-# Start Storybook development server
-npm run storybook
-
-# The Storybook will be available at http://localhost:6006
-```
-
-### Build for Production
-
-```shell
-# Create an optimized production build
-npm run build
-
-# Start the production server
-npm run start
-```
-
-### Local Docker
-
-```shell
-# Build image and run container
-npm run docker
-# The container will be exposed at http://localhost:3000
-```
-
-## Test
-
-```shell
-# Run Vitest watch mode
-npm test
-
-# Run Vitest only once
-npm test:once
-```
-
-## Deploy
-
-(T. B. D.)
-
-## Misc
-
-This repository is [Commitizen](https://commitizen.github.io/cz-cli/) friendly, following [GitHub flow](https://docs.github.com/en/get-started/quickstart/github-flow).
-</file>
-
-<file path="src/lib/firebase/admin.ts">
-import { cert, getApps, initializeApp } from "firebase-admin/app";
-import { getAuth } from "firebase-admin/auth";
-import { getFirestore } from "firebase-admin/firestore";
+      env: "FIREBASE_PRIVATE_KEY"
+    - versionName: projects/pingo-456817/secrets/GEMINI_API_KEY/versions/latest
+      env: "GEMINI_API_KEY"
 </file>
 
 <file path="src/types/schema.ts">
@@ -4152,21 +3888,126 @@ export type ImageSubmissionResult = z.infer<typeof imageSubmissionResultSchema>;
 }
 </file>
 
+<file path="package.json">
+{
+  "name": "pingo",
+  "version": "0.1.0",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shin-sforzando/pingo.git"
+  },
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "check": "biome check --write --unsafe --verbose",
+    "check:i18n": "i18n-check --source ja --locales messages && i18n-check --source en --locales messages",
+    "test": "vitest",
+    "test:watch": "vitest",
+    "test:once": "vitest run",
+    "test:e2e": "playwright test",
+    "test:e2e:debug": "playwright test --headed --debug",
+    "test:e2e:mobile": "playwright test --project=\"Mobile Safari\"",
+    "storybook": "storybook dev --port 6006 --no-open",
+    "build-storybook": "storybook build",
+    "docker": "npm run docker:build -- --run",
+    "docker:build": "npx tsx scripts/docker-build.ts"
+  },
+  "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
+    "@google/genai": "^1.2.0",
+    "@hookform/resolvers": "^5.0.1",
+    "@radix-ui/react-avatar": "^1.1.10",
+    "@radix-ui/react-dialog": "^1.1.14",
+    "@radix-ui/react-dropdown-menu": "^2.1.15",
+    "@radix-ui/react-label": "^2.1.7",
+    "@radix-ui/react-popover": "^1.1.14",
+    "@radix-ui/react-separator": "^1.1.7",
+    "@radix-ui/react-slot": "^1.2.3",
+    "@radix-ui/react-switch": "^1.2.5",
+    "@radix-ui/react-tabs": "^1.1.12",
+    "bcrypt": "^6.0.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
+    "firebase": "^11.8.1",
+    "firebase-admin": "^13.4.0",
+    "heic2any": "^0.0.4",
+    "lucide-react": "^0.511.0",
+    "motion": "^12.15.0",
+    "next": "15.3.2",
+    "next-intl": "^4.1.0",
+    "qrcode.react": "^4.2.0",
+    "react": "^19.1.0",
+    "react-day-picker": "^8.10.1",
+    "react-dom": "^19.1.0",
+    "react-hook-form": "^7.56.4",
+    "tailwind-merge": "^3.3.0",
+    "ulid": "^3.0.0",
+    "uuid": "^11.1.0",
+    "vaul": "^1.1.2",
+    "zod": "^3.25.36"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.9.4",
+    "@faker-js/faker": "^9.8.0",
+    "@lingual/i18n-check": "^0.8.4",
+    "@playwright/test": "^1.52.0",
+    "@storybook/addon-a11y": "^8.6.14",
+    "@storybook/addon-essentials": "^8.6.14",
+    "@storybook/addon-interactions": "^8.6.14",
+    "@storybook/addon-onboarding": "^8.6.14",
+    "@storybook/blocks": "^8.6.14",
+    "@storybook/nextjs": "^8.6.14",
+    "@storybook/react": "^8.6.14",
+    "@storybook/test": "^8.6.14",
+    "@tailwindcss/postcss": "^4",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/react": "^16.3.0",
+    "@types/bcrypt": "^5.0.2",
+    "@types/node": "^22",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@types/uuid": "^10.0.0",
+    "@vitejs/plugin-react": "^4.5.0",
+    "@vitest/browser": "^3.1.4",
+    "@vitest/coverage-istanbul": "^3.1.4",
+    "dotenv": "^16.5.0",
+    "jsdom": "^26.1.0",
+    "lefthook": "^1.11.13",
+    "playwright": "^1.52.0",
+    "storybook": "^8.6.14",
+    "storybook-next-intl": "^1.2.6",
+    "tailwindcss": "^4",
+    "tsx": "^4.19.4",
+    "tw-animate-css": "^1.3.1",
+    "typescript": "^5",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^3.1.4",
+    "vitest-browser-react": "^0.2.0"
+  }
+}
+</file>
+
 <file path="Dockerfile">
 # ---------------- Build Stage ----------------
 FROM node:lts-slim AS base
 
-# Define build arguments for Firebase credentials
+# Define build arguments
 ARG FIREBASE_PROJECT_ID
 ARG FIREBASE_CLIENT_EMAIL
 ARG FIREBASE_PRIVATE_KEY
-# Define build argument for Google Cloud Storage bucket
+ARG GEMINI_API_KEY
 ARG GOOGLE_CLOUD_STORAGE_BUCKET="pingo-456817-images"
 
 # Set non-public environment variables
-ENV FIREBASE_PROJECT_ID=$FIREBASE_PROJECT_ID
-ENV FIREBASE_CLIENT_EMAIL=$FIREBASE_CLIENT_EMAIL
-ENV FIREBASE_PRIVATE_KEY=$FIREBASE_PRIVATE_KEY
+ENV FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID}
+ENV FIREBASE_CLIENT_EMAIL=${FIREBASE_CLIENT_EMAIL}
+ENV FIREBASE_PRIVATE_KEY=${FIREBASE_PRIVATE_KEY}
+ENV GEMINI_API_KEY=${GEMINI_API_KEY}
 
 # Set publishable environment variables
 ENV GOOGLE_CLOUD_STORAGE_BUCKET=${GOOGLE_CLOUD_STORAGE_BUCKET}
@@ -4217,9 +4058,10 @@ ENV NODE_ENV=production
 ENV PORT=8080
 
 # Set non-public credentials for production stage
-ENV FIREBASE_PROJECT_ID=$FIREBASE_PROJECT_ID
-ENV FIREBASE_CLIENT_EMAIL=$FIREBASE_CLIENT_EMAIL
-ENV FIREBASE_PRIVATE_KEY=$FIREBASE_PRIVATE_KEY
+ENV FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID}
+ENV FIREBASE_CLIENT_EMAIL=${FIREBASE_CLIENT_EMAIL}
+ENV FIREBASE_PRIVATE_KEY=${FIREBASE_PRIVATE_KEY}
+ENV GEMINI_API_KEY=${GEMINI_API_KEY}
 
 # Set publishable environment variables for production stage
 ENV GOOGLE_CLOUD_STORAGE_BUCKET=${GOOGLE_CLOUD_STORAGE_BUCKET}
@@ -4246,110 +4088,6 @@ EXPOSE 8080
 # Command to run the application
 # Uses the Node.js server included in the standalone output
 CMD ["node", "server.js"]
-</file>
-
-<file path="package.json">
-{
-  "name": "pingo",
-  "version": "0.1.0",
-  "private": true,
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/shin-sforzando/pingo.git"
-  },
-  "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build",
-    "start": "next start",
-    "check": "biome check --write --unsafe --verbose",
-    "check:i18n": "i18n-check --source ja --locales messages && i18n-check --source en --locales messages",
-    "test": "vitest",
-    "test:watch": "vitest",
-    "test:once": "vitest run",
-    "test:e2e": "playwright test",
-    "test:e2e:debug": "playwright test --headed --debug",
-    "test:e2e:mobile": "playwright test --project=\"Mobile Safari\"",
-    "storybook": "storybook dev --port 6006 --no-open",
-    "build-storybook": "storybook build",
-    "docker": "npm run docker:build -- --run",
-    "docker:build": "npx tsx scripts/docker-build.ts"
-  },
-  "dependencies": {
-    "@dnd-kit/core": "^6.3.1",
-    "@dnd-kit/sortable": "^10.0.0",
-    "@dnd-kit/utilities": "^3.2.2",
-    "@google/genai": "^1.1.0",
-    "@hookform/resolvers": "^5.0.1",
-    "@radix-ui/react-avatar": "^1.1.10",
-    "@radix-ui/react-dialog": "^1.1.14",
-    "@radix-ui/react-dropdown-menu": "^2.1.15",
-    "@radix-ui/react-label": "^2.1.7",
-    "@radix-ui/react-popover": "^1.1.14",
-    "@radix-ui/react-separator": "^1.1.7",
-    "@radix-ui/react-slot": "^1.2.3",
-    "@radix-ui/react-switch": "^1.2.5",
-    "@radix-ui/react-tabs": "^1.1.12",
-    "bcrypt": "^6.0.0",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
-    "date-fns": "^4.1.0",
-    "firebase": "^11.8.1",
-    "firebase-admin": "^13.4.0",
-    "heic2any": "^0.0.4",
-    "lucide-react": "^0.511.0",
-    "motion": "^12.15.0",
-    "next": "15.3.2",
-    "next-intl": "^4.1.0",
-    "qrcode.react": "^4.2.0",
-    "react": "^19.1.0",
-    "react-day-picker": "^8.10.1",
-    "react-dom": "^19.1.0",
-    "react-hook-form": "^7.56.4",
-    "tailwind-merge": "^3.3.0",
-    "ulid": "^3.0.0",
-    "uuid": "^11.1.0",
-    "vaul": "^1.1.2",
-    "zod": "^3.25.24"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "1.9.4",
-    "@faker-js/faker": "^9.8.0",
-    "@lingual/i18n-check": "^0.8.4",
-    "@playwright/test": "^1.52.0",
-    "@storybook/addon-a11y": "^8.6.14",
-    "@storybook/addon-essentials": "^8.6.14",
-    "@storybook/addon-interactions": "^8.6.14",
-    "@storybook/addon-onboarding": "^8.6.14",
-    "@storybook/blocks": "^8.6.14",
-    "@storybook/nextjs": "^8.6.14",
-    "@storybook/react": "^8.6.14",
-    "@storybook/test": "^8.6.14",
-    "@tailwindcss/postcss": "^4",
-    "@testing-library/dom": "^10.4.0",
-    "@testing-library/react": "^16.3.0",
-    "@types/bcrypt": "^5.0.2",
-    "@types/node": "^22",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "@types/uuid": "^10.0.0",
-    "@vitejs/plugin-react": "^4.5.0",
-    "@vitest/browser": "^3.1.4",
-    "@vitest/coverage-istanbul": "^3.1.4",
-    "dotenv": "^16.5.0",
-    "jsdom": "^26.1.0",
-    "lefthook": "^1.11.13",
-    "playwright": "^1.52.0",
-    "storybook": "^8.6.14",
-    "storybook-next-intl": "^1.2.6",
-    "tailwindcss": "^4",
-    "tsx": "^4.19.4",
-    "tw-animate-css": "^1.3.0",
-    "typescript": "^5",
-    "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^3.1.4",
-    "vitest-browser-react": "^0.2.0"
-  }
-}
 </file>
 
 </files>

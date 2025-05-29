@@ -1,26 +1,27 @@
 import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
 import type { ApiResponse } from "@/types/common";
-import { AcceptanceStatus, ProcessingStatus } from "@/types/common";
+import { ProcessingStatus } from "@/types/common";
 import {
   type SubmissionDocument,
   submissionFromFirestore,
   submissionToFirestore,
 } from "@/types/game";
-import type { Submission } from "@/types/schema";
+import { type Submission, submissionSchema } from "@/types/schema";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { z } from "zod";
 
-// Schema for updating submission
-const updateSubmissionSchema = z.object({
-  critique: z.string().nullable().optional(),
-  matchedCellId: z.string().nullable().optional(),
-  confidence: z.number().min(0).max(1).nullable().optional(),
-  processingStatus: z.nativeEnum(ProcessingStatus).optional(),
-  acceptanceStatus: z.nativeEnum(AcceptanceStatus).nullable().optional(),
-  errorMessage: z.string().nullable().optional(),
-  memo: z.string().optional(),
-});
+// Schema for updating submission - reuse from schema.ts
+const updateSubmissionSchema = submissionSchema
+  .pick({
+    critique: true,
+    matchedCellId: true,
+    confidence: true,
+    processingStatus: true,
+    acceptanceStatus: true,
+    errorMessage: true,
+    memo: true,
+  })
+  .partial();
 
 /**
  * Get a specific submission

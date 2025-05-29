@@ -19,13 +19,15 @@ import {
   gameToFirestore,
   playerBoardToFirestore,
 } from "../../../../types/game";
-import type {
-  Cell,
-  CompletedLine,
-  Event,
-  Game,
-  GameParticipation,
-  PlayerBoard,
+import {
+  type Cell,
+  type CompletedLine,
+  type Event,
+  type Game,
+  type GameParticipation,
+  type PlayerBoard,
+  cellSchema,
+  gameCreationSchema,
 } from "../../../../types/schema";
 
 // Constants
@@ -33,47 +35,9 @@ const PROD_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const TEST_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 const GAME_ID_LENGTH = 6;
 
-// Schema for cell input
-const cellInputSchema = z.object({
-  position: z.object({
-    x: z.number().int().min(0).max(4),
-    y: z.number().int().min(0).max(4),
-  }),
-  subject: z.string().min(1),
-  isFree: z.boolean().optional().default(false),
-});
-
-// Schema for game creation request
-const gameCreateSchema = z.object({
-  title: z
-    .string()
-    .min(1, { message: "Game.errors.titleRequired" })
-    .max(50, { message: "Game.errors.titleTooLong" }),
-  theme: z
-    .string()
-    .min(1, { message: "Game.errors.themeRequired" })
-    .max(50, { message: "Game.errors.themeTooLong" }),
-  expiresAt: z
-    .string()
-    .refine((val) => !Number.isNaN(Date.parse(val)), {
-      message: "Game.errors.expiresAtInvalid",
-    })
-    .refine(
-      (val) => {
-        const date = new Date(val);
-        const now = new Date();
-        return date > now;
-      },
-      {
-        message: "Game.errors.expiresAtMustBeFuture",
-      },
-    ),
-  isPublic: z.boolean().default(false),
-  isPhotoSharingEnabled: z.boolean().default(true),
-  requiredBingoLines: z.number().int().min(1).max(5).default(1),
-  confidenceThreshold: z.number().min(0).max(1).default(0.5),
-  notes: z.string().optional(),
-  cells: z.array(cellInputSchema).length(25),
+// Schema for game creation request with cells
+const gameCreateSchema = gameCreationSchema.extend({
+  cells: z.array(cellSchema.omit({ id: true })).length(25),
 });
 
 /**
@@ -169,6 +133,10 @@ export async function POST(
 
     // Parse and validate request body
     const requestData = await request.json();
+    // Convert expiresAt string to Date if needed
+    if (requestData.expiresAt && typeof requestData.expiresAt === "string") {
+      requestData.expiresAt = new Date(requestData.expiresAt);
+    }
     const validationResult = gameCreateSchema.safeParse(requestData);
 
     if (!validationResult.success) {

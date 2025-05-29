@@ -3,6 +3,7 @@
 # *.log
 # tmp/
 
+.clinerules
 .dockerignore
 .github/
 .gitignore
@@ -13,6 +14,8 @@
 cline_docs/
 coverage/
 node_modules/
+LICENSE.md
+README.md
 src/stories/example/
 *.secret
 package-lock.json
