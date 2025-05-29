@@ -40,7 +40,7 @@ Pingo: Bingo game where AI judges based on photos
 - [Next.js](https://nextjs.org) (v15.3.0)
   - [React](https://ja.react.dev) (v19.1.0)
   - [next-intl](https://next-intl.dev)
-  - [@google/genai](https://googleapis.github.io/js-genai/release_docs/index.html) (v1.0.1)
+  - [@google/genai](https://googleapis.github.io/js-genai/release_docs/index.html) (v1.1.0)
 - [Storybook](https://storybook.js.org) (v8.6.14)
 - [shadcn/ui](https://ui.shadcn.com)
 
@@ -92,9 +92,11 @@ NEXT_PUBLIC_FIREBASE_APP_ID=1:617969816285:web:09a7ffe5ea531b45648134
 ```.env.local
 GOOGLE_CLOUD_PROJECT_ID=XXXXXXXXXXXXXXXX
 # Gemini API Key for local development
-GEMINI_API_KEY=YYYYYYYYYYYYYYYY
+GEMINI_API_KEY=XXXXXXXXXXXXXXXX
 # ADC Service account key for Google Cloud
-GOOGLE_APPLICATION_CREDENTIALS=./ZZZZZZZZZZZZZZZZ.json
+GOOGLE_APPLICATION_CREDENTIALS=./XXXXXXXXXXXXXXXX.json
+# Google Cloud Storage bucket for image uploads
+GOOGLE_CLOUD_STORAGE_BUCKET=XXXXXXXXXXXXXXXX
 ```
 
 #### Google Cloud

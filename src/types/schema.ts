@@ -204,6 +204,47 @@ export const eventSchema = baseSchema.extend({
   details: z.record(z.unknown()).optional(),
 });
 
+/**
+ * Image upload props schema
+ */
+export const imageUploadPropsSchema = z.object({
+  gameId: z.string().regex(/^[A-Z0-9]{6}$/),
+  onImageProcessed: z.function().optional(),
+  onUploadStart: z.function().optional(),
+  onUploadComplete: z.function().optional(),
+  isUploading: z.boolean().default(false),
+  className: z.string().optional(),
+  disabled: z.boolean().default(false),
+});
+
+/**
+ * Image submission data schema
+ */
+export const imageSubmissionDataSchema = z.object({
+  gameId: z.string().regex(/^[A-Z0-9]{6}$/),
+  fileName: z.string().min(1),
+  contentType: z.string().min(1),
+  processedSize: z.number().int().positive(),
+  originalDimensions: z.object({
+    width: z.number().int().positive(),
+    height: z.number().int().positive(),
+  }),
+  processedDimensions: z.object({
+    width: z.number().int().positive(),
+    height: z.number().int().positive(),
+  }),
+});
+
+/**
+ * Image submission result schema
+ */
+export const imageSubmissionResultSchema = z.object({
+  submissionId: z.string().ulid(),
+  imageUrl: z.string().url(),
+  appropriate: z.boolean(),
+  reason: z.string().optional(),
+});
+
 // Export types derived from schemas
 export type User = z.infer<typeof userSchema>;
 export type UserCreationData = z.infer<typeof userCreationSchema>;
@@ -219,3 +260,6 @@ export type Game = z.infer<typeof gameSchema>;
 export type GameCreationData = z.infer<typeof gameCreationSchema>;
 export type Submission = z.infer<typeof submissionSchema>;
 export type Event = z.infer<typeof eventSchema>;
+export type ImageUploadProps = z.infer<typeof imageUploadPropsSchema>;
+export type ImageSubmissionData = z.infer<typeof imageSubmissionDataSchema>;
+export type ImageSubmissionResult = z.infer<typeof imageSubmissionResultSchema>;

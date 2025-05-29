@@ -20,10 +20,12 @@ pre-commit:
       glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx}"
       run: npm run build
 
-post-merge:
+post-checkout:
   commands:
     reveal:
       interactive: true
       run: git secret reveal -v
     install:
       run: npm install --legacy-peer-deps
+    adc:
+      run: gcloud auth application-default login
