@@ -62,7 +62,7 @@ export async function POST(
       {
         success: false,
         error: {
-          code: "server_error",
+          code: "SERVER_ERROR",
           message: "Auth.errors.serverError",
           details: error instanceof Error ? error.message : String(error),
         },

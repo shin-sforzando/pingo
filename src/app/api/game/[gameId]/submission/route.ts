@@ -3,8 +3,8 @@ import type { ApiResponse } from "@/types/common";
 import { ProcessingStatus } from "@/types/common";
 import { submissionToFirestore } from "@/types/game";
 import type { Submission } from "@/types/schema";
-import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { ulid } from "ulid";
 import { z } from "zod";
 
@@ -161,7 +161,7 @@ export async function POST(
       {
         success: false,
         error: {
-          code: "server_error",
+          code: "SERVER_ERROR",
           message: "Failed to create submission",
           details: error instanceof Error ? error.message : String(error),
         },
@@ -256,8 +256,14 @@ export async function GET(
     // Get query parameters
     const url = new URL(request.url);
     const userIdFilter = url.searchParams.get("userId");
-    const limit = Number.parseInt(url.searchParams.get("limit") || "50", 10);
-    const offset = Number.parseInt(url.searchParams.get("offset") || "0", 10);
+    const limit = Math.min(
+      Math.max(1, Number.parseInt(url.searchParams.get("limit") || "50", 10)),
+      100,
+    );
+    const offset = Math.max(
+      0,
+      Number.parseInt(url.searchParams.get("offset") || "0", 10),
+    );
 
     // Build query
     let query = adminFirestore
@@ -272,12 +278,16 @@ export async function GET(
     }
 
     // Apply pagination
-    if (offset > 0) {
+    if (0 < offset) {
       const offsetSnapshot = await query.limit(offset).get();
-      if (!offsetSnapshot.empty) {
-        const lastDoc = offsetSnapshot.docs[offsetSnapshot.docs.length - 1];
-        query = query.startAfter(lastDoc);
+      if (offsetSnapshot.empty) {
+        return NextResponse.json({
+          success: true,
+          data: [],
+        });
       }
+      const lastDoc = offsetSnapshot.docs[offsetSnapshot.docs.length - 1];
+      query = query.startAfter(lastDoc);
     }
 
     query = query.limit(limit);
@@ -319,7 +329,7 @@ export async function GET(
       {
         success: false,
         error: {
-          code: "server_error",
+          code: "SERVER_ERROR",
           message: "Failed to get submissions",
           details: error instanceof Error ? error.message : String(error),
         },

@@ -140,7 +140,7 @@ export async function GET(
       {
         success: false,
         error: {
-          code: "server_error",
+          code: "SERVER_ERROR",
           message: "Failed to get submission",
           details: error instanceof Error ? error.message : String(error),
         },
@@ -360,7 +360,7 @@ export async function PUT(
       {
         success: false,
         error: {
-          code: "server_error",
+          code: "SERVER_ERROR",
           message: "Failed to update submission",
           details: error instanceof Error ? error.message : String(error),
         },

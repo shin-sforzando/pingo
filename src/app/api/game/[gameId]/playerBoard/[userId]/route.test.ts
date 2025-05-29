@@ -493,6 +493,35 @@ describe("/api/game/[gameId]/playerBoard/[userId]", () => {
       expect(responseData.data).toBeDefined();
       expect(responseData.data?.userId).toBe(mockUserId);
       expect(mockSet).toHaveBeenCalledWith(expect.any(Object), { merge: true });
+
+      // Verify that the merged data contains both existing and new data
+      const setCallArgs = mockSet.mock.calls[0][0];
+      expect(setCallArgs).toMatchObject({
+        userId: mockUserId,
+        // Should contain existing cellStates
+        cellStates: expect.objectContaining({
+          cell1: expect.objectContaining({
+            isOpen: true,
+            openedBySubmissionId: "submission1",
+          }),
+          cell2: expect.objectContaining({
+            isOpen: false,
+            openedBySubmissionId: null,
+          }),
+          // Should contain new cellState
+          cell3: expect.objectContaining({
+            isOpen: true,
+            openedBySubmissionId: "submission2",
+          }),
+        }),
+        // Should contain existing completedLines
+        completedLines: expect.arrayContaining([
+          expect.objectContaining({
+            type: "row",
+            index: 0,
+          }),
+        ]),
+      });
     });
 
     it("should return 403 when trying to update another user's board", async () => {

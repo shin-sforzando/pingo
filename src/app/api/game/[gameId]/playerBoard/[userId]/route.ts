@@ -155,7 +155,7 @@ export async function GET(
       {
         success: false,
         error: {
-          code: "server_error",
+          code: "SERVER_ERROR",
           message: "Failed to get player board",
           details: error instanceof Error ? error.message : String(error),
         },
@@ -340,13 +340,18 @@ export async function PUT(
     const currentPlayerBoardData = playerBoardDoc.data() as PlayerBoardDocument;
     const currentPlayerBoard = playerBoardFromFirestore(currentPlayerBoardData);
 
-    // Create updated player board
+    // Create updated player board by merging existing and new data
     const updatedPlayerBoard: PlayerBoard = {
       ...currentPlayerBoard,
-      ...(updateData.cellStates && { cellStates: updateData.cellStates }),
-      ...(updateData.completedLines && {
-        completedLines: updateData.completedLines,
-      }),
+      // Merge cellStates: combine existing and new cell states
+      cellStates: {
+        ...currentPlayerBoard.cellStates,
+        ...(updateData.cellStates || {}),
+      },
+      // Merge completedLines: combine existing and new completed lines
+      completedLines: updateData.completedLines
+        ? [...currentPlayerBoard.completedLines, ...updateData.completedLines]
+        : currentPlayerBoard.completedLines,
     };
 
     // Convert to Firestore format and update
@@ -363,7 +368,7 @@ export async function PUT(
       {
         success: false,
         error: {
-          code: "server_error",
+          code: "SERVER_ERROR",
           message: "Failed to update player board",
           details: error instanceof Error ? error.message : String(error),
         },
