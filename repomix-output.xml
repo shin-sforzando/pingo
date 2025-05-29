@@ -309,83 +309,6 @@ import ja from "../messages/ja.json";
 </svg>
 </file>
 
-<file path="src/app/api/game/[gameId]/events/route.test.ts">
-import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
-import {
-  cleanupTestUsers,
-  createApiRequest,
-} from "@/test/helpers/api-test-helpers";
-import {
-  cleanupTestGames,
-  generateTestGameTitle,
-} from "@/test/helpers/game-test-helpers";
-import type { ApiResponse } from "@/types/common";
-import { GameStatus, Role } from "@/types/common";
-import type { Event } from "@/types/schema";
-import type { DecodedIdToken } from "firebase-admin/auth";
-import type { NextResponse } from "next/server";
-import { ulid } from "ulid";
-import {
-  afterAll,
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from "vitest";
-import { GET, POST } from "./route";
-</file>
-
-<file path="src/app/api/game/[gameId]/events/route.ts">
-import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
-import type { ApiResponse } from "@/types/common";
-import { eventFromFirestore, eventToFirestore } from "@/types/game";
-import { type Event, eventSchema } from "@/types/schema";
-import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
-import { ulid } from "ulid";
-⋮----
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ gameId: string }> },
-): Promise<NextResponse<ApiResponse<Event[]>>>
-⋮----
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ gameId: string }> },
-): Promise<NextResponse<ApiResponse<Event>>>
-</file>
-
-<file path="src/app/api/game/[gameId]/route.test.ts">
-import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
-import {
-  cleanupTestUsers,
-  createApiRequest,
-} from "@/test/helpers/api-test-helpers";
-import {
-  cleanupTestGames,
-  generateTestGameTitle,
-} from "@/test/helpers/game-test-helpers";
-import type { ApiResponse } from "@/types/common";
-import { GameStatus, Role } from "@/types/common";
-import { gameToFirestore } from "@/types/game";
-import type { Game } from "@/types/schema";
-import type { DecodedIdToken } from "firebase-admin/auth";
-import type { NextResponse } from "next/server";
-import { ulid } from "ulid";
-import {
-  afterAll,
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from "vitest";
-import { PUT } from "./route";
-</file>
-
 <file path="src/components/layout/Footer.browser.test.tsx">
 import { page } from "@vitest/browser/context";
 import { NextIntlClientProvider } from "next-intl";
@@ -1008,6 +931,34 @@ import {
 import { PUT } from "./route";
 </file>
 
+<file path="src/app/api/game/[gameId]/events/route.test.ts">
+import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
+import {
+  cleanupTestUsers,
+  createApiRequest,
+} from "@/test/helpers/api-test-helpers";
+import {
+  cleanupTestGames,
+  generateTestGameTitle,
+} from "@/test/helpers/game-test-helpers";
+import type { ApiResponse } from "@/types/common";
+import { GameStatus, Role } from "@/types/common";
+import type { Event } from "@/types/schema";
+import type { DecodedIdToken } from "firebase-admin/auth";
+import type { NextResponse } from "next/server";
+import { ulid } from "ulid";
+import {
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
+import { GET, POST } from "./route";
+</file>
+
 <file path="src/app/api/game/[gameId]/submission/[submissionId]/route.test.ts">
 import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
 import {
@@ -1069,6 +1020,35 @@ import {
   vi,
 } from "vitest";
 import { GET, POST } from "./route";
+</file>
+
+<file path="src/app/api/game/[gameId]/route.test.ts">
+import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
+import {
+  cleanupTestUsers,
+  createApiRequest,
+} from "@/test/helpers/api-test-helpers";
+import {
+  cleanupTestGames,
+  generateTestGameTitle,
+} from "@/test/helpers/game-test-helpers";
+import type { ApiResponse } from "@/types/common";
+import { GameStatus, Role } from "@/types/common";
+import { gameToFirestore } from "@/types/game";
+import type { Game } from "@/types/schema";
+import type { DecodedIdToken } from "firebase-admin/auth";
+import type { NextResponse } from "next/server";
+import { ulid } from "ulid";
+import {
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
+import { PUT } from "./route";
 </file>
 
 <file path="src/app/api/game/create/route.test.ts">
@@ -1741,6 +1721,35 @@ export async function GET(
 )
 </file>
 
+<file path="src/app/api/game/[gameId]/events/route.ts">
+import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
+import type { ApiResponse } from "@/types/common";
+import { eventFromFirestore, eventToFirestore } from "@/types/game";
+import { type Event, eventSchema } from "@/types/schema";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import { ulid } from "ulid";
+⋮----
+async function authenticateUser(
+  request: NextRequest,
+): Promise<string | NextResponse<ApiResponse<never>>>
+⋮----
+async function verifyGameParticipant(
+  gameId: string,
+  userId: string,
+): Promise<NextResponse<ApiResponse<never>> | null>
+⋮----
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ gameId: string }> },
+): Promise<NextResponse<ApiResponse<Event[]>>>
+⋮----
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ gameId: string }> },
+): Promise<NextResponse<ApiResponse<Event>>>
+</file>
+
 <file path="src/app/api/game/[gameId]/participants/route.ts">
 import { validateGameId } from "@/lib/api-utils";
 import { adminFirestore } from "@/lib/firebase/admin";
@@ -1780,143 +1789,6 @@ import {
   vi,
 } from "vitest";
 import { GET, PUT } from "./route";
-</file>
-
-<file path="src/app/api/game/[gameId]/playerBoard/[userId]/route.ts">
-import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
-import type { ApiResponse } from "@/types/common";
-import {
-  type PlayerBoardDocument,
-  playerBoardFromFirestore,
-  playerBoardToFirestore,
-} from "@/types/game";
-import {
-  cellStateApiSchema,
-  completedLineApiSchema,
-  type PlayerBoard,
-} from "@/types/schema";
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-import { z } from "zod";
-⋮----
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ gameId: string; userId: string }> },
-): Promise<NextResponse<ApiResponse<PlayerBoard>>>
-⋮----
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ gameId: string; userId: string }> },
-): Promise<NextResponse<ApiResponse<PlayerBoard>>>
-</file>
-
-<file path="src/app/api/game/[gameId]/submission/[submissionId]/route.ts">
-import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
-import type { ApiResponse } from "@/types/common";
-import { ProcessingStatus } from "@/types/common";
-import {
-  type SubmissionDocument,
-  submissionFromFirestore,
-  submissionToFirestore,
-} from "@/types/game";
-import { type Submission, submissionSchema } from "@/types/schema";
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-⋮----
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ gameId: string; submissionId: string }> },
-): Promise<NextResponse<ApiResponse<Submission>>>
-⋮----
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ gameId: string; submissionId: string }> },
-): Promise<NextResponse<ApiResponse<Submission>>>
-</file>
-
-<file path="src/app/api/game/[gameId]/submission/route.ts">
-import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
-import type { ApiResponse } from "@/types/common";
-import { ProcessingStatus } from "@/types/common";
-import { submissionToFirestore } from "@/types/game";
-import { submissionSchema, type Submission } from "@/types/schema";
-import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
-import { ulid } from "ulid";
-⋮----
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ gameId: string }> },
-): Promise<NextResponse<ApiResponse<Submission>>>
-⋮----
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ gameId: string }> },
-): Promise<NextResponse<ApiResponse<Submission[]>>>
-</file>
-
-<file path="src/app/api/game/[gameId]/route.ts">
-import { validateGameId } from "@/lib/api-utils";
-import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
-import type { ApiResponse } from "@/types/common";
-import { dateToISOString } from "@/types/firestore";
-import {
-  type GameDocument,
-  gameFromFirestore,
-  gameToFirestore,
-} from "@/types/game";
-import type { Game } from "@/types/schema";
-import { gameSchema } from "@/types/schema";
-import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
-import { z } from "zod";
-⋮----
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ gameId: string }> },
-)
-⋮----
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ gameId: string }> },
-): Promise<NextResponse<ApiResponse<Game>>>
-</file>
-
-<file path="src/app/api/game/create/route.ts">
-import { FieldValue } from "firebase-admin/firestore";
-import { customAlphabet } from "nanoid";
-import { type NextRequest, NextResponse } from "next/server";
-import { ulid } from "ulid";
-import { z } from "zod";
-import { adminAuth, adminFirestore } from "../../../../lib/firebase/admin";
-import { type ApiResponse, GameStatus, Role } from "../../../../types/common";
-import {
-  cellToFirestore,
-  eventToFirestore,
-  gameParticipationToFirestore,
-  gameToFirestore,
-  playerBoardToFirestore,
-} from "../../../../types/game";
-import {
-  cellSchema,
-  gameCreationSchema,
-  type Cell,
-  type CompletedLine,
-  type Event,
-  type Game,
-  type GameParticipation,
-  type PlayerBoard,
-} from "../../../../types/schema";
-⋮----
-function generateGameId(isTest = false): string
-⋮----
-async function gameIdExists(gameId: string): Promise<boolean>
-⋮----
-async function generateUniqueGameId(isTest = false): Promise<string>
-⋮----
-export async function POST(
-  request: NextRequest,
-): Promise<NextResponse<ApiResponse<
 </file>
 
 <file path="src/app/api/image/check/route.test.ts">
@@ -2466,23 +2338,148 @@ export async function POST(
 ): Promise<NextResponse<ApiResponse<
 </file>
 
+<file path="src/app/api/game/[gameId]/playerBoard/[userId]/route.ts">
+import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
+import type { ApiResponse } from "@/types/common";
+import {
+  type PlayerBoardDocument,
+  playerBoardFromFirestore,
+  playerBoardToFirestore,
+} from "@/types/game";
+import {
+  type PlayerBoard,
+  cellStateApiSchema,
+  completedLineApiSchema,
+} from "@/types/schema";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { z } from "zod";
+⋮----
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ gameId: string; userId: string }> },
+): Promise<NextResponse<ApiResponse<PlayerBoard>>>
+⋮----
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ gameId: string; userId: string }> },
+): Promise<NextResponse<ApiResponse<PlayerBoard>>>
+</file>
+
+<file path="src/app/api/game/[gameId]/submission/[submissionId]/route.ts">
+import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
+import type { ApiResponse } from "@/types/common";
+import { ProcessingStatus } from "@/types/common";
+import {
+  type SubmissionDocument,
+  submissionFromFirestore,
+  submissionToFirestore,
+} from "@/types/game";
+import { type Submission, submissionSchema } from "@/types/schema";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+⋮----
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ gameId: string; submissionId: string }> },
+): Promise<NextResponse<ApiResponse<Submission>>>
+⋮----
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ gameId: string; submissionId: string }> },
+): Promise<NextResponse<ApiResponse<Submission>>>
+</file>
+
+<file path="src/app/api/game/[gameId]/submission/route.ts">
+import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
+import type { ApiResponse } from "@/types/common";
+import { ProcessingStatus } from "@/types/common";
+import { submissionToFirestore } from "@/types/game";
+import { type Submission, submissionSchema } from "@/types/schema";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import { ulid } from "ulid";
+⋮----
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ gameId: string }> },
+): Promise<NextResponse<ApiResponse<Submission>>>
+⋮----
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ gameId: string }> },
+): Promise<NextResponse<ApiResponse<Submission[]>>>
+</file>
+
+<file path="src/app/api/game/[gameId]/route.ts">
+import { validateGameId } from "@/lib/api-utils";
+import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
+import type { ApiResponse } from "@/types/common";
+import { dateToISOString } from "@/types/firestore";
+import {
+  type GameDocument,
+  gameFromFirestore,
+  gameToFirestore,
+} from "@/types/game";
+import type { Game } from "@/types/schema";
+import { gameSchema } from "@/types/schema";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import { z } from "zod";
+⋮----
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ gameId: string }> },
+)
+⋮----
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ gameId: string }> },
+): Promise<NextResponse<ApiResponse<Game>>>
+</file>
+
+<file path="src/app/api/game/create/route.ts">
+import { FieldValue } from "firebase-admin/firestore";
+import { customAlphabet } from "nanoid";
+import { type NextRequest, NextResponse } from "next/server";
+import { ulid } from "ulid";
+import { z } from "zod";
+import { adminAuth, adminFirestore } from "../../../../lib/firebase/admin";
+import { type ApiResponse, GameStatus, Role } from "../../../../types/common";
+import { convertTimestampsToDate } from "../../../../types/firestore";
+import {
+  cellToFirestore,
+  eventToFirestore,
+  gameParticipationToFirestore,
+  gameToFirestore,
+  playerBoardToFirestore,
+} from "../../../../types/game";
+import {
+  type Cell,
+  type CompletedLine,
+  type Event,
+  type Game,
+  type GameParticipation,
+  type PlayerBoard,
+  cellSchema,
+  gameCreationSchema,
+} from "../../../../types/schema";
+⋮----
+function generateGameId(isTest = false): string
+⋮----
+async function gameIdExists(gameId: string): Promise<boolean>
+⋮----
+async function generateUniqueGameId(isTest = false): Promise<string>
+⋮----
+export async function POST(
+  request: NextRequest,
+): Promise<NextResponse<ApiResponse<
+</file>
+
 <file path="src/app/api/image/check/route.ts">
 import { adminAuth } from "@/lib/firebase/admin";
 import { GoogleGenAI, Type } from "@google/genai";
 import { type NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
-⋮----
-export async function POST(request: NextRequest)
-</file>
-
-<file path="src/app/api/image/getUploadUrl/route.ts">
-import { adminAuth } from "@/lib/firebase/admin";
-import { dateToISOString } from "@/types/firestore";
-import { imageSubmissionDataSchema } from "@/types/schema";
-import type { DecodedIdToken } from "firebase-admin/auth";
-import { getStorage } from "firebase-admin/storage";
-import { type NextRequest, NextResponse } from "next/server";
-import { ulid } from "ulid";
 import { z } from "zod";
 ⋮----
 export async function POST(request: NextRequest)
@@ -2607,73 +2604,6 @@ const generateSampleSubjects = (
 const renderWithState = (args: React.ComponentProps<typeof SubjectList>) =>
 </file>
 
-<file path="src/types/firestore.ts">
-import { Timestamp as AdminTimestamp } from "firebase-admin/firestore";
-import { Timestamp as ClientTimestamp } from "firebase/firestore";
-⋮----
-export interface TimestampInterface {
-  toDate(): Date;
-  toMillis(): number;
-  isEqual(other: TimestampInterface): boolean;
-  valueOf(): string;
-}
-⋮----
-toDate(): Date;
-toMillis(): number;
-isEqual(other: TimestampInterface): boolean;
-valueOf(): string;
-⋮----
-export function isClientTimestamp(
-  timestamp: unknown,
-): timestamp is ClientTimestamp
-⋮----
-export function isAdminTimestamp(
-  timestamp: unknown,
-): timestamp is AdminTimestamp
-⋮----
-export function isTimestamp(
-  timestamp: unknown,
-): timestamp is TimestampInterface
-⋮----
-export function timestampToDate(
-  timestamp: TimestampInterface | null | undefined,
-): Date | null
-⋮----
-export function dateToClientTimestamp(
-  date: Date | null | undefined,
-): ClientTimestamp | null
-⋮----
-export function dateToAdminTimestamp(
-  date: Date | null | undefined,
-): AdminTimestamp | null
-⋮----
-export function dateToTimestamp(
-  date: Date | null | undefined,
-): TimestampInterface | null
-⋮----
-export function nonNullDateToTimestamp(date: Date): TimestampInterface
-⋮----
-export function timestampToISOString(
-  timestamp: TimestampInterface | null | undefined,
-): string | null
-⋮----
-export function dateToISOString(date: Date | null | undefined): string | null
-⋮----
-export interface BaseDocument {
-  createdAt: TimestampInterface;
-  updatedAt?: TimestampInterface | null;
-}
-⋮----
-export interface BaseModel {
-  createdAt: Date;
-  updatedAt?: Date | null;
-}
-⋮----
-export function convertTimestampsToDate<T extends Record<string, unknown>>(
-  data: T,
-): T
-</file>
-
 <file path="lefthook.yml">
 pre-commit:
   commands:
@@ -2733,11 +2663,17 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { GET } from "./route";
 </file>
 
-<file path="src/app/api/health/route.ts">
+<file path="src/app/api/image/getUploadUrl/route.ts">
+import { adminAuth } from "@/lib/firebase/admin";
 import { dateToISOString } from "@/types/firestore";
-import { NextResponse } from "next/server";
+import { imageSubmissionDataSchema } from "@/types/schema";
+import type { DecodedIdToken } from "firebase-admin/auth";
+import { getStorage } from "firebase-admin/storage";
+import { type NextRequest, NextResponse } from "next/server";
+import { ulid } from "ulid";
+import { z } from "zod";
 ⋮----
-export async function GET()
+export async function POST(request: NextRequest)
 </file>
 
 <file path="src/app/api/subjects/generate/route.ts">
@@ -2921,6 +2857,73 @@ export async function processImage(
 export function createImagePreviewUrl(file: File): string
 ⋮----
 export function revokeImagePreviewUrl(url: string): void
+</file>
+
+<file path="src/types/firestore.ts">
+import { Timestamp as AdminTimestamp } from "firebase-admin/firestore";
+import { Timestamp as ClientTimestamp } from "firebase/firestore";
+⋮----
+export interface TimestampInterface {
+  toDate(): Date;
+  toMillis(): number;
+  isEqual(other: TimestampInterface): boolean;
+  valueOf(): string;
+}
+⋮----
+toDate(): Date;
+toMillis(): number;
+isEqual(other: TimestampInterface): boolean;
+valueOf(): string;
+⋮----
+export function isClientTimestamp(
+  timestamp: unknown,
+): timestamp is ClientTimestamp
+⋮----
+export function isAdminTimestamp(
+  timestamp: unknown,
+): timestamp is AdminTimestamp
+⋮----
+export function isTimestamp(
+  timestamp: unknown,
+): timestamp is TimestampInterface
+⋮----
+export function timestampToDate(
+  timestamp: TimestampInterface | null | undefined,
+): Date | null
+⋮----
+export function dateToClientTimestamp(
+  date: Date | null | undefined,
+): ClientTimestamp | null
+⋮----
+export function dateToAdminTimestamp(
+  date: Date | null | undefined,
+): AdminTimestamp | null
+⋮----
+export function dateToTimestamp(
+  date: Date | null | undefined,
+): TimestampInterface | null
+⋮----
+export function nonNullDateToTimestamp(date: Date): TimestampInterface
+⋮----
+export function timestampToISOString(
+  timestamp: TimestampInterface | null | undefined,
+): string | null
+⋮----
+export function dateToISOString(date: Date | null | undefined): string | null
+⋮----
+export interface BaseDocument {
+  createdAt: TimestampInterface;
+  updatedAt?: TimestampInterface | null;
+}
+⋮----
+export interface BaseModel {
+  createdAt: Date;
+  updatedAt?: Date | null;
+}
+⋮----
+export function convertTimestampsToDate<T extends Record<string, unknown>>(
+  data: T,
+): T
 </file>
 
 <file path="src/types/game.ts">
@@ -3148,6 +3151,13 @@ setupFiles: ["./vitest.browser.setup.ts"], // Add browser setup file
 "src/i18n/*.ts", // Exclude i18n config
 "**/*.stories.{ts,tsx}", // Exclude Storybook stories
 "**/stories/example/*.tsx", // Exclude example stories
+</file>
+
+<file path="src/app/api/health/route.ts">
+import { dateToISOString } from "@/types/firestore";
+import { NextResponse } from "next/server";
+⋮----
+export async function GET()
 </file>
 
 <file path="src/app/game/[gameId]/share/page.tsx">

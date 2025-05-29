@@ -12,6 +12,7 @@ import { ulid } from "ulid";
 import { z } from "zod";
 import { adminAuth, adminFirestore } from "../../../../lib/firebase/admin";
 import { type ApiResponse, GameStatus, Role } from "../../../../types/common";
+import { convertTimestampsToDate } from "../../../../types/firestore";
 import {
   cellToFirestore,
   eventToFirestore,
@@ -132,8 +133,10 @@ export async function POST(
     const userId = decodedToken.uid;
 
     // Parse and validate request body
-    const requestData = await request.json();
-    // Convert expiresAt string to Date if needed
+    const rawRequestData = await request.json();
+    // Convert timestamps to dates using the utility function
+    const requestData = convertTimestampsToDate(rawRequestData);
+    // Convert string dates to Date objects for validation
     if (requestData.expiresAt && typeof requestData.expiresAt === "string") {
       requestData.expiresAt = new Date(requestData.expiresAt);
     }
