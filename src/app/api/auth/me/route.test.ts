@@ -229,6 +229,6 @@ describe("User Me API Integration Test", () => {
     // Verify response
     expect(response.status).toBe(500);
     expect(responseData.success).toBe(false);
-    expect(responseData.error?.code).toBe("server_error");
+    expect(responseData.error?.code).toBe("SERVER_ERROR");
   });
 });

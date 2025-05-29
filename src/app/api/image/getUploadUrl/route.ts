@@ -1,15 +1,17 @@
 import { adminAuth } from "@/lib/firebase/admin";
+import { dateToISOString } from "@/types/firestore";
+import { imageSubmissionDataSchema } from "@/types/schema";
 import type { DecodedIdToken } from "firebase-admin/auth";
 import { getStorage } from "firebase-admin/storage";
 import { type NextRequest, NextResponse } from "next/server";
 import { ulid } from "ulid";
 import { z } from "zod";
 
-// Request schema
-const getUploadUrlSchema = z.object({
-  gameId: z.string().min(1, "Game ID is required"),
-  fileName: z.string().min(1, "File name is required"),
-  contentType: z.string().min(1, "Content type is required"),
+// Request schema - reuse from schema.ts with additional fields
+const getUploadUrlSchema = imageSubmissionDataSchema.pick({
+  gameId: true,
+  fileName: true,
+  contentType: true,
 });
 
 /**
@@ -92,7 +94,7 @@ export async function POST(request: NextRequest) {
       signedUrl,
       filePath,
       submissionId,
-      expiresAt: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
+      expiresAt: dateToISOString(new Date(Date.now() + 5 * 60 * 1000)),
     });
   } catch (error) {
     console.error("Error generating upload URL:", error);
