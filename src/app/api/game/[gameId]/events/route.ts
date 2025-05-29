@@ -7,6 +7,81 @@ import { NextResponse } from "next/server";
 import { ulid } from "ulid";
 
 /**
+ * Authenticate user from request headers
+ * Returns userId if authentication succeeds, or NextResponse with error if it fails
+ */
+async function authenticateUser(
+  request: NextRequest,
+): Promise<string | NextResponse<ApiResponse<never>>> {
+  const authHeader = request.headers.get("authorization");
+  if (!authHeader?.startsWith("Bearer ")) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: {
+          code: "UNAUTHORIZED",
+          message: "Missing authentication token",
+        },
+      },
+      { status: 401 },
+    );
+  }
+
+  const token = authHeader.substring(7);
+  const decodedToken = await adminAuth.verifyIdToken(token);
+  return decodedToken.uid;
+}
+
+/**
+ * Verify that a game exists and user is a participant
+ * Returns null if verification succeeds, or NextResponse with error if it fails
+ */
+async function verifyGameParticipant(
+  gameId: string,
+  userId: string,
+): Promise<NextResponse<ApiResponse<never>> | null> {
+  // Verify game exists
+  const gameRef = adminFirestore.collection("games").doc(gameId);
+  const gameDoc = await gameRef.get();
+
+  if (!gameDoc.exists) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: {
+          code: "GAME_NOT_FOUND",
+          message: "Game not found",
+        },
+      },
+      { status: 404 },
+    );
+  }
+
+  // Check if user is participant in this game
+  const participantRef = adminFirestore
+    .collection("games")
+    .doc(gameId)
+    .collection("participants")
+    .doc(userId);
+
+  const participantDoc = await participantRef.get();
+  if (!participantDoc.exists) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: {
+          code: "NOT_PARTICIPANT",
+          message: "User is not a participant in this game",
+        },
+      },
+      { status: 403 },
+    );
+  }
+
+  return null;
+}
+
+/**
  * Get events for a game
  * Only allows participants to view events
  */
@@ -32,60 +107,16 @@ export async function GET(
     }
 
     // Verify authentication
-    const authHeader = request.headers.get("authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: "UNAUTHORIZED",
-            message: "Missing authentication token",
-          },
-        },
-        { status: 401 },
-      );
+    const authResult = await authenticateUser(request);
+    if (typeof authResult !== "string") {
+      return authResult;
     }
+    const userId = authResult;
 
-    const token = authHeader.substring(7);
-    const decodedToken = await adminAuth.verifyIdToken(token);
-    const userId = decodedToken.uid;
-
-    // Verify game exists
-    const gameRef = adminFirestore.collection("games").doc(gameId);
-    const gameDoc = await gameRef.get();
-
-    if (!gameDoc.exists) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: "GAME_NOT_FOUND",
-            message: "Game not found",
-          },
-        },
-        { status: 404 },
-      );
-    }
-
-    // Check if user is participant in this game
-    const participantRef = adminFirestore
-      .collection("games")
-      .doc(gameId)
-      .collection("participants")
-      .doc(userId);
-
-    const participantDoc = await participantRef.get();
-    if (!participantDoc.exists) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: "NOT_PARTICIPANT",
-            message: "User is not a participant in this game",
-          },
-        },
-        { status: 403 },
-      );
+    // Verify game exists and user is participant
+    const verificationError = await verifyGameParticipant(gameId, userId);
+    if (verificationError) {
+      return verificationError;
     }
 
     // Get query parameters
@@ -192,23 +223,11 @@ export async function POST(
     }
 
     // Verify authentication
-    const authHeader = request.headers.get("authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: "UNAUTHORIZED",
-            message: "Missing authentication token",
-          },
-        },
-        { status: 401 },
-      );
+    const authResult = await authenticateUser(request);
+    if (typeof authResult !== "string") {
+      return authResult;
     }
-
-    const token = authHeader.substring(7);
-    const decodedToken = await adminAuth.verifyIdToken(token);
-    const userId = decodedToken.uid;
+    const userId = authResult;
 
     // Parse request body
     const body = await request.json();
@@ -237,42 +256,10 @@ export async function POST(
 
     const { type, details } = validationResult.data;
 
-    // Verify game exists
-    const gameRef = adminFirestore.collection("games").doc(gameId);
-    const gameDoc = await gameRef.get();
-
-    if (!gameDoc.exists) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: "GAME_NOT_FOUND",
-            message: "Game not found",
-          },
-        },
-        { status: 404 },
-      );
-    }
-
-    // Check if user is participant in this game
-    const participantRef = adminFirestore
-      .collection("games")
-      .doc(gameId)
-      .collection("participants")
-      .doc(userId);
-
-    const participantDoc = await participantRef.get();
-    if (!participantDoc.exists) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: "NOT_PARTICIPANT",
-            message: "User is not a participant in this game",
-          },
-        },
-        { status: 403 },
-      );
+    // Verify game exists and user is participant
+    const verificationError = await verifyGameParticipant(gameId, userId);
+    if (verificationError) {
+      return verificationError;
     }
 
     // Create event
