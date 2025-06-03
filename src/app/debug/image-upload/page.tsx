@@ -67,7 +67,7 @@ export default function ImageUploadDebugPage() {
           </CardHeader>
           <CardContent>
             <ImageUpload
-              gameId="debug-game-123"
+              gameId="DEBUG1"
               isUploading={isUploading}
               disabled={false}
               onUploadStart={handleUploadStart}
