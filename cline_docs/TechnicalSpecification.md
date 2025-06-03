@@ -27,7 +27,7 @@
 - コード品質: Biome.js
 - テスト: Vitest
 - コンポーネントライブラリ: shadcn/ui
-- UI確認: Storybook
+- UI確認: Storybook 8
 - Git フック: Lefthook
 - CI/CD: Google Cloud Build (デプロイ), GitHub Actions (テスト・静的解析)
 - 分析: Google Analytics 4

@@ -43,217 +43,164 @@ The content is organized as follows:
 </file_summary>
 
 <directory_structure>
-.storybook/
-  decorators.tsx
-  main.ts
-  next-intl.ts
-  preview.ts
-messages/
-  en.json
-  ja.json
-public/
-  favicon/
-    site.webmanifest
-  images/
-    pingo.svg
-scripts/
-  docker-build.ts
-src/
-  app/
-    api/
-      auth/
-        login/
-          route.test.ts
-          route.ts
-        logout/
-          route.test.ts
-          route.ts
-        me/
-          route.test.ts
-          route.ts
-        register/
-          route.test.ts
-          route.ts
-        update/
-          route.test.ts
-          route.ts
-      game/
-        [gameId]/
-          board/
-            route.ts
-          events/
-            route.test.ts
-            route.ts
-          participants/
-            route.ts
-          playerBoard/
-            [userId]/
-              route.test.ts
-              route.ts
-          submission/
-            [submissionId]/
-              route.test.ts
-              route.ts
-            route.test.ts
-            route.ts
-          route.test.ts
-          route.ts
-        create/
-          route.test.ts
-          route.ts
-      health/
-        route.test.ts
-        route.ts
-      image/
-        check/
-          route.test.ts
-          route.ts
-        getUploadUrl/
-          route.test.ts
-          route.ts
-        upload/
-          route.ts
-      subjects/
-        check/
-          route.test.ts
-          route.ts
-        generate/
-          route.test.ts
-          route.ts
-    debug/
-      image-upload/
-        page.tsx
-    game/
-      [gameId]/
-        share/
-          page.stories.tsx
-          page.tsx
-      create/
-        page.browser.test.tsx
-        page.stories.tsx
-        page.tsx
-    globals.css
-    layout.tsx
-    loading.stories.tsx
-    loading.tsx
-    page.browser.test.tsx
-    page.tsx
-  components/
-    auth/
-      LoginForm.stories.tsx
-      LoginForm.tsx
-      RegisterForm.stories.tsx
-      RegisterForm.tsx
-    game/
-      BingoBoard.stories.tsx
-      BingoBoard.tsx
-      BingoCell.stories.tsx
-      BingoCell.tsx
-      DndContextWrapper.tsx
-      ImageUpload.stories.tsx
-      ImageUpload.tsx
-      InfoCard.tsx
-      QRCodeCard.stories.tsx
-      QRCodeCard.tsx
-      SubjectItem.stories.tsx
-      SubjectItem.tsx
-      SubjectList.stories.tsx
-      SubjectList.tsx
-    layout/
-      Footer.browser.test.tsx
-      Footer.stories.tsx
-      Footer.tsx
-      Header.browser.test.tsx
-      Header.stories.tsx
-      Header.tsx
-      LanguageSwitcher.browser.test.tsx
-      LanguageSwitcher.stories.tsx
-      LanguageSwitcher.tsx
-      NotificationDrawer.browser.test.tsx
-      NotificationDrawer.stories.tsx
-      NotificationDrawer.tsx
-      NotificationIcon.browser.test.tsx
-      NotificationIcon.stories.tsx
-      NotificationIcon.tsx
-      UserMenu.browser.test.tsx
-      UserMenu.stories.tsx
-      UserMenu.tsx
-    magicui/
-      animated-grid-pattern.tsx
-      AnimatedGridPattern.stories.tsx
-      hyper-text.stories.tsx
-      hyper-text.tsx
-      shine-border.tsx
-      ShineBorder.stories.tsx
-    ui/
-      avatar.tsx
-      badge.tsx
-      Button.stories.tsx
-      button.tsx
-      calendar.tsx
-      Card.stories.tsx
-      card.tsx
-      drawer.tsx
-      dropdown-menu.tsx
-      Form.stories.tsx
-      form.tsx
-      Input.stories.tsx
-      input.tsx
-      label.tsx
-      popover.tsx
-      separator.tsx
-      skeleton.tsx
-      switch.tsx
-      tabs.tsx
-      textarea.tsx
-      translated-form-message.tsx
-  contexts/
-    AuthContext.tsx
-  i18n/
-    config.ts
-    request.ts
-  lib/
-    firebase/
-      admin.test.ts
-      admin.ts
-      client.ts
-      collections.test.ts
-      collections.ts
-    api-utils.ts
-    constants.ts
-    image-utils.test.ts
-    image-utils.ts
-    utils.ts
-  services/
-    game.ts
-    image-upload.ts
-    locale.test.ts
-    locale.ts
-  test/
-    helpers/
-      api-test-helpers.ts
-      firebase-test-helpers.ts
-      game-test-helpers.ts
-  types/
-    common.ts
-    firestore.ts
-    game.ts
-    index.ts
-    schema.ts
-    user.ts
 .editorconfig
+.storybook/decorators.tsx
+.storybook/main.ts
+.storybook/next-intl.ts
+.storybook/preview.ts
 biome.json
 cloudbuild.yaml
 components.json
 cors.json
 Dockerfile
 lefthook.yml
+messages/en.json
+messages/ja.json
 middleware.ts
 next.config.ts
 package.json
 playwright.config.ts
 postcss.config.mjs
+public/favicon/site.webmanifest
+public/images/pingo.svg
 repomix.config.json
+scripts/docker-build.ts
+src/app/api/auth/login/route.test.ts
+src/app/api/auth/login/route.ts
+src/app/api/auth/logout/route.test.ts
+src/app/api/auth/logout/route.ts
+src/app/api/auth/me/route.test.ts
+src/app/api/auth/me/route.ts
+src/app/api/auth/register/route.test.ts
+src/app/api/auth/register/route.ts
+src/app/api/auth/update/route.test.ts
+src/app/api/auth/update/route.ts
+src/app/api/game/[gameId]/board/route.ts
+src/app/api/game/[gameId]/events/route.test.ts
+src/app/api/game/[gameId]/events/route.ts
+src/app/api/game/[gameId]/participants/route.ts
+src/app/api/game/[gameId]/playerBoard/[userId]/route.test.ts
+src/app/api/game/[gameId]/playerBoard/[userId]/route.ts
+src/app/api/game/[gameId]/route.test.ts
+src/app/api/game/[gameId]/route.ts
+src/app/api/game/[gameId]/submission/[submissionId]/route.test.ts
+src/app/api/game/[gameId]/submission/[submissionId]/route.ts
+src/app/api/game/[gameId]/submission/route.test.ts
+src/app/api/game/[gameId]/submission/route.ts
+src/app/api/game/create/route.test.ts
+src/app/api/game/create/route.ts
+src/app/api/health/route.test.ts
+src/app/api/health/route.ts
+src/app/api/image/check/route.test.ts
+src/app/api/image/check/route.ts
+src/app/api/image/getUploadUrl/route.test.ts
+src/app/api/image/getUploadUrl/route.ts
+src/app/api/image/upload/route.ts
+src/app/api/subjects/check/route.test.ts
+src/app/api/subjects/check/route.ts
+src/app/api/subjects/generate/route.test.ts
+src/app/api/subjects/generate/route.ts
+src/app/debug/image-upload/page.tsx
+src/app/game/[gameId]/share/page.stories.tsx
+src/app/game/[gameId]/share/page.tsx
+src/app/game/create/page.browser.test.tsx
+src/app/game/create/page.stories.tsx
+src/app/game/create/page.tsx
+src/app/globals.css
+src/app/layout.tsx
+src/app/loading.stories.tsx
+src/app/loading.tsx
+src/app/page.browser.test.tsx
+src/app/page.tsx
+src/components/auth/LoginForm.stories.tsx
+src/components/auth/LoginForm.tsx
+src/components/auth/RegisterForm.stories.tsx
+src/components/auth/RegisterForm.tsx
+src/components/game/BingoBoard.stories.tsx
+src/components/game/BingoBoard.tsx
+src/components/game/BingoCell.stories.tsx
+src/components/game/BingoCell.tsx
+src/components/game/DndContextWrapper.tsx
+src/components/game/ImageUpload.stories.tsx
+src/components/game/ImageUpload.tsx
+src/components/game/InfoCard.tsx
+src/components/game/QRCodeCard.stories.tsx
+src/components/game/QRCodeCard.tsx
+src/components/game/SubjectItem.stories.tsx
+src/components/game/SubjectItem.tsx
+src/components/game/SubjectList.stories.tsx
+src/components/game/SubjectList.tsx
+src/components/layout/Footer.browser.test.tsx
+src/components/layout/Footer.stories.tsx
+src/components/layout/Footer.tsx
+src/components/layout/Header.browser.test.tsx
+src/components/layout/Header.stories.tsx
+src/components/layout/Header.tsx
+src/components/layout/LanguageSwitcher.browser.test.tsx
+src/components/layout/LanguageSwitcher.stories.tsx
+src/components/layout/LanguageSwitcher.tsx
+src/components/layout/NotificationDrawer.browser.test.tsx
+src/components/layout/NotificationDrawer.stories.tsx
+src/components/layout/NotificationDrawer.tsx
+src/components/layout/NotificationIcon.browser.test.tsx
+src/components/layout/NotificationIcon.stories.tsx
+src/components/layout/NotificationIcon.tsx
+src/components/layout/UserMenu.browser.test.tsx
+src/components/layout/UserMenu.stories.tsx
+src/components/layout/UserMenu.tsx
+src/components/magicui/animated-grid-pattern.tsx
+src/components/magicui/AnimatedGridPattern.stories.tsx
+src/components/magicui/hyper-text.stories.tsx
+src/components/magicui/hyper-text.tsx
+src/components/magicui/shine-border.tsx
+src/components/magicui/ShineBorder.stories.tsx
+src/components/ui/avatar.tsx
+src/components/ui/badge.tsx
+src/components/ui/Button.stories.tsx
+src/components/ui/button.tsx
+src/components/ui/calendar.tsx
+src/components/ui/Card.stories.tsx
+src/components/ui/card.tsx
+src/components/ui/drawer.tsx
+src/components/ui/dropdown-menu.tsx
+src/components/ui/Form.stories.tsx
+src/components/ui/form.tsx
+src/components/ui/Input.stories.tsx
+src/components/ui/input.tsx
+src/components/ui/label.tsx
+src/components/ui/popover.tsx
+src/components/ui/separator.tsx
+src/components/ui/skeleton.tsx
+src/components/ui/switch.tsx
+src/components/ui/tabs.tsx
+src/components/ui/textarea.tsx
+src/components/ui/translated-form-message.tsx
+src/contexts/AuthContext.tsx
+src/i18n/config.ts
+src/i18n/request.ts
+src/lib/api-utils.ts
+src/lib/constants.ts
+src/lib/firebase/admin.test.ts
+src/lib/firebase/admin.ts
+src/lib/firebase/client.ts
+src/lib/firebase/collections.test.ts
+src/lib/firebase/collections.ts
+src/lib/image-utils.test.ts
+src/lib/image-utils.ts
+src/lib/utils.ts
+src/services/game.ts
+src/services/image-upload.ts
+src/services/locale.test.ts
+src/services/locale.ts
+src/test/helpers/api-test-helpers.ts
+src/test/helpers/firebase-test-helpers.ts
+src/test/helpers/game-test-helpers.ts
+src/types/common.ts
+src/types/firestore.ts
+src/types/game.ts
+src/types/index.ts
+src/types/schema.ts
+src/types/user.ts
 tsconfig.build.json
 tsconfig.json
 vitest.browser.setup.ts
@@ -265,6 +212,22 @@ vitest.shims.d.ts
 <files>
 This section contains the contents of the repository's files.
 
+<file path=".editorconfig">
+root = true
+
+# Unix-style newlines with a newline ending every file
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.md]
+trim_trailing_whitespace = false
+</file>
+
 <file path=".storybook/main.ts">
 import type { StorybookConfig } from "@storybook/nextjs";
 </file>
@@ -272,6 +235,96 @@ import type { StorybookConfig } from "@storybook/nextjs";
 <file path=".storybook/next-intl.ts">
 import en from "../messages/en.json";
 import ja from "../messages/ja.json";
+</file>
+
+<file path="biome.json">
+{
+  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "ignoreUnknown": true,
+    "ignore": [
+      ".github",
+      ".next",
+      ".vscode",
+      "node_modules",
+      "package-lock.json"
+    ]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "useEditorconfig": true
+  },
+  "organizeImports": {
+    "enabled": true
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "correctness": {
+        "noUnusedVariables": "error",
+        "noUnusedImports": "error"
+      },
+      "nursery": {
+        "useSortedClasses": {
+          "level": "warn",
+          "options": {
+            "functions": ["clsx", "cva", "tw"]
+          }
+        }
+      }
+    }
+  },
+  "javascript": {
+    "formatter": {
+      "lineWidth": 80,
+      "quoteStyle": "double"
+    }
+  },
+  "css": {
+    "formatter": {
+      "enabled": true
+    }
+  }
+}
+</file>
+
+<file path="components.json">
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "default",
+  "rsc": true,
+  "tsx": true,
+  "tailwind": {
+    "config": "",
+    "css": "src/app/globals.css",
+    "baseColor": "neutral",
+    "cssVariables": true,
+    "prefix": ""
+  },
+  "aliases": {
+    "components": "@/components",
+    "utils": "@/lib/utils",
+    "ui": "@/components/ui",
+    "lib": "@/lib",
+    "hooks": "@/hooks"
+  },
+  "iconLibrary": "lucide"
+}
+</file>
+
+<file path="playwright.config.ts">
+import { defineConfig, devices } from "@playwright/test";
+</file>
+
+<file path="postcss.config.mjs">
+
 </file>
 
 <file path="public/favicon/site.webmanifest">
@@ -677,112 +730,6 @@ export async function setUserLocale(locale: Locale)
 export async function clearUserLocale()
 </file>
 
-<file path=".editorconfig">
-root = true
-
-# Unix-style newlines with a newline ending every file
-[*]
-charset = utf-8
-end_of_line = lf
-indent_style = space
-indent_size = 2
-insert_final_newline = true
-trim_trailing_whitespace = true
-
-[*.md]
-trim_trailing_whitespace = false
-</file>
-
-<file path="biome.json">
-{
-  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
-  "vcs": {
-    "enabled": true,
-    "clientKind": "git",
-    "useIgnoreFile": true
-  },
-  "files": {
-    "ignoreUnknown": true,
-    "ignore": [
-      ".github",
-      ".next",
-      ".vscode",
-      "node_modules",
-      "package-lock.json"
-    ]
-  },
-  "formatter": {
-    "enabled": true,
-    "indentStyle": "space",
-    "useEditorconfig": true
-  },
-  "organizeImports": {
-    "enabled": true
-  },
-  "linter": {
-    "enabled": true,
-    "rules": {
-      "recommended": true,
-      "correctness": {
-        "noUnusedVariables": "error",
-        "noUnusedImports": "error"
-      },
-      "nursery": {
-        "useSortedClasses": {
-          "level": "warn",
-          "options": {
-            "functions": ["clsx", "cva", "tw"]
-          }
-        }
-      }
-    }
-  },
-  "javascript": {
-    "formatter": {
-      "lineWidth": 80,
-      "quoteStyle": "double"
-    }
-  },
-  "css": {
-    "formatter": {
-      "enabled": true
-    }
-  }
-}
-</file>
-
-<file path="components.json">
-{
-  "$schema": "https://ui.shadcn.com/schema.json",
-  "style": "default",
-  "rsc": true,
-  "tsx": true,
-  "tailwind": {
-    "config": "",
-    "css": "src/app/globals.css",
-    "baseColor": "neutral",
-    "cssVariables": true,
-    "prefix": ""
-  },
-  "aliases": {
-    "components": "@/components",
-    "utils": "@/lib/utils",
-    "ui": "@/components/ui",
-    "lib": "@/lib",
-    "hooks": "@/hooks"
-  },
-  "iconLibrary": "lucide"
-}
-</file>
-
-<file path="playwright.config.ts">
-import { defineConfig, devices } from "@playwright/test";
-</file>
-
-<file path="postcss.config.mjs">
-
-</file>
-
 <file path="tsconfig.json">
 {
   "compilerOptions": {
@@ -824,6 +771,80 @@ import type { Preview } from "@storybook/react";
 import { withMockAuthContext } from "./decorators";
 ⋮----
 import nextIntl from "./next-intl";
+</file>
+
+<file path="cors.json">
+[
+  {
+    "origin": [
+      "http://localhost:3000",
+      "http://localhost:6006",
+      "http://localhost:8080",
+      "https://pingo-456817.web.app",
+      "https://pingo-617969816285.asia-northeast1.run.app",
+      "https://pingo-lziscmbaca-an.a.run.app"
+    ],
+    "method": ["GET", "HEAD", "PUT", "POST", "DELETE"],
+    "responseHeader": [
+      "Content-Type",
+      "Access-Control-Allow-Origin",
+      "x-goog-resumable"
+    ],
+    "maxAgeSeconds": 3600
+  }
+]
+</file>
+
+<file path="middleware.ts">
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+⋮----
+export function middleware(request: NextRequest)
+</file>
+
+<file path="next.config.ts">
+import type { NextConfig } from "next";
+import createNextIntlPlugin from "next-intl/plugin";
+</file>
+
+<file path="repomix.config.json">
+{
+  "$schema": "https://repomix.com/schemas/latest/schema.json",
+  "input": {
+    "maxFileSize": 52428800
+  },
+  "output": {
+    "filePath": "repomix-output.xml",
+    "style": "xml",
+    "parsableStyle": false,
+    "fileSummary": true,
+    "directoryStructure": true,
+    "files": true,
+    "removeComments": true,
+    "removeEmptyLines": false,
+    "compress": true,
+    "topFilesLength": 5,
+    "showLineNumbers": false,
+    "copyToClipboard": false,
+    "git": {
+      "sortByChanges": true,
+      "sortByChangesMaxCommits": 100,
+      "includeDiffs": false
+    }
+  },
+  "include": [],
+  "ignore": {
+    "useGitignore": true,
+    "useDefaultPatterns": true,
+    "customPatterns": []
+  },
+  "security": {
+    "enableSecurityCheck": true
+  },
+  "tokenCount": {
+    "encoding": "o200k_base"
+  }
+}
 </file>
 
 <file path="src/app/api/auth/login/route.test.ts">
@@ -959,6 +980,35 @@ import {
 import { GET, POST } from "./route";
 </file>
 
+<file path="src/app/api/game/[gameId]/route.test.ts">
+import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
+import {
+  cleanupTestUsers,
+  createApiRequest,
+} from "@/test/helpers/api-test-helpers";
+import {
+  cleanupTestGames,
+  generateTestGameTitle,
+} from "@/test/helpers/game-test-helpers";
+import type { ApiResponse } from "@/types/common";
+import { GameStatus, Role } from "@/types/common";
+import { gameToFirestore } from "@/types/game";
+import type { Game } from "@/types/schema";
+import type { DecodedIdToken } from "firebase-admin/auth";
+import type { NextResponse } from "next/server";
+import { ulid } from "ulid";
+import {
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
+import { PUT } from "./route";
+</file>
+
 <file path="src/app/api/game/[gameId]/submission/[submissionId]/route.test.ts">
 import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
 import {
@@ -1020,35 +1070,6 @@ import {
   vi,
 } from "vitest";
 import { GET, POST } from "./route";
-</file>
-
-<file path="src/app/api/game/[gameId]/route.test.ts">
-import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
-import {
-  cleanupTestUsers,
-  createApiRequest,
-} from "@/test/helpers/api-test-helpers";
-import {
-  cleanupTestGames,
-  generateTestGameTitle,
-} from "@/test/helpers/game-test-helpers";
-import type { ApiResponse } from "@/types/common";
-import { GameStatus, Role } from "@/types/common";
-import { gameToFirestore } from "@/types/game";
-import type { Game } from "@/types/schema";
-import type { DecodedIdToken } from "firebase-admin/auth";
-import type { NextResponse } from "next/server";
-import { ulid } from "ulid";
-import {
-  afterAll,
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from "vitest";
-import { PUT } from "./route";
 </file>
 
 <file path="src/app/api/game/create/route.test.ts">
@@ -1463,6 +1484,21 @@ export function TranslatedFormMessage({
 className=
 </file>
 
+<file path="src/lib/api-utils.ts">
+import { NextResponse } from "next/server";
+⋮----
+export async function withErrorHandling<T>(
+  operation: () => Promise<T>,
+  errorMessage: string,
+)
+⋮----
+export function validateGameId(gameId: string | undefined)
+</file>
+
+<file path="src/lib/constants.ts">
+
+</file>
+
 <file path="src/lib/firebase/admin.test.ts">
 import { describe, expect, it } from "vitest";
 import { adminAuth, adminFirestore } from "./admin";
@@ -1483,21 +1519,6 @@ import {
   notificationConverter,
   userConverter,
 } from "./collections";
-</file>
-
-<file path="src/lib/api-utils.ts">
-import { NextResponse } from "next/server";
-⋮----
-export async function withErrorHandling<T>(
-  operation: () => Promise<T>,
-  errorMessage: string,
-)
-⋮----
-export function validateGameId(gameId: string | undefined)
-</file>
-
-<file path="src/lib/constants.ts">
-
 </file>
 
 <file path="src/lib/utils.ts">
@@ -1560,78 +1581,94 @@ export const cleanupTestGames = async (gameIds: string[]) =>
 export const generateTestCells = () =>
 </file>
 
-<file path="cors.json">
-[
-  {
-    "origin": [
-      "http://localhost:3000",
-      "http://localhost:6006",
-      "http://localhost:8080",
-      "https://pingo-456817.web.app",
-      "https://pingo-617969816285.asia-northeast1.run.app",
-      "https://pingo-lziscmbaca-an.a.run.app"
-    ],
-    "method": ["GET", "HEAD", "PUT", "POST", "DELETE"],
-    "responseHeader": [
-      "Content-Type",
-      "Access-Control-Allow-Origin",
-      "x-goog-resumable"
-    ],
-    "maxAgeSeconds": 3600
-  }
-]
-</file>
-
-<file path="middleware.ts">
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-⋮----
-export function middleware(request: NextRequest)
-</file>
-
-<file path="next.config.ts">
-import type { NextConfig } from "next";
-import createNextIntlPlugin from "next-intl/plugin";
-</file>
-
-<file path="repomix.config.json">
-{
-  "$schema": "https://repomix.com/schemas/latest/schema.json",
-  "input": {
-    "maxFileSize": 52428800
-  },
-  "output": {
-    "filePath": "repomix-output.xml",
-    "style": "xml",
-    "parsableStyle": false,
-    "fileSummary": true,
-    "directoryStructure": true,
-    "files": true,
-    "removeComments": true,
-    "removeEmptyLines": false,
-    "compress": true,
-    "topFilesLength": 5,
-    "showLineNumbers": false,
-    "copyToClipboard": false,
-    "git": {
-      "sortByChanges": true,
-      "sortByChangesMaxCommits": 100,
-      "includeDiffs": false
-    }
-  },
-  "include": [],
-  "ignore": {
-    "useGitignore": true,
-    "useDefaultPatterns": true,
-    "customPatterns": []
-  },
-  "security": {
-    "enableSecurityCheck": true
-  },
-  "tokenCount": {
-    "encoding": "o200k_base"
-  }
+<file path="src/types/common.ts">
+export enum Role {
+  CREATOR = "creator",
+  ADMIN = "admin",
+  PARTICIPANT = "participant",
 }
+⋮----
+export enum GameStatus {
+  ACTIVE = "active",
+  ENDED = "ended",
+  ARCHIVED = "archived",
+}
+⋮----
+export enum ProcessingStatus {
+  UPLOADED = "uploaded",
+  CONTENT_CHECKING = "content_checking",
+  ANALYZING = "analyzing",
+  ANALYZED = "analyzed",
+  ERROR = "error",
+}
+⋮----
+export enum AcceptanceStatus {
+  ACCEPTED = "accepted",
+  INAPPROPRIATE_CONTENT = "inappropriate_content",
+  NO_MATCH = "no_match",
+}
+⋮----
+export enum NotificationType {
+
+  SYSTEM_NOTIFICATION = "system_notification",
+
+
+  ACCOUNT_REGISTERED = "account_registered",
+  LOGIN = "login",
+  LOGOUT = "logout",
+
+
+  GAME_INVITATION = "game_invitation",
+  GAME_STARTED = "game_started",
+  GAME_ENDED = "game_ended",
+
+
+  PLAYER_ACHIEVED_BINGO = "player_achieved_bingo",
+  PLAYER_COMPLETED_GAME = "player_completed_game",
+  SOMEONE_ACHIEVED_BINGO = "someone_achieved_bingo",
+  SOMEONE_COMPLETED_GAME = "someone_completed_game",
+
+
+  NEW_SUBMISSION = "new_submission",
+  SUBMISSION_ACCEPTED = "submission_accepted",
+  SUBMISSION_REJECTED = "submission_rejected",
+}
+⋮----
+export enum NotificationDisplayType {
+  TOAST = "toast",
+  POPUP = "popup",
+}
+⋮----
+export enum LineType {
+  ROW = "row",
+  COLUMN = "column",
+  DIAGONAL = "diagonal",
+}
+⋮----
+export interface CompletedLine {
+  type: LineType;
+  index: number;
+  completedAt: Date;
+}
+⋮----
+export interface CellPosition {
+  x: number;
+  y: number;
+}
+⋮----
+export interface ApiResponse<T> {
+  success: boolean;
+  data?: T;
+  error?: {
+    code: string;
+    message: string;
+    details?: unknown;
+  };
+}
+</file>
+
+<file path="src/types/index.ts">
+
 </file>
 
 <file path="tsconfig.build.json">
@@ -2218,94 +2255,35 @@ export const createApiRequest = (
 export const cleanupTestUsers = async (userIds: string[]) =>
 </file>
 
-<file path="src/types/common.ts">
-export enum Role {
-  CREATOR = "creator",
-  ADMIN = "admin",
-  PARTICIPANT = "participant",
-}
-⋮----
-export enum GameStatus {
-  ACTIVE = "active",
-  ENDED = "ended",
-  ARCHIVED = "archived",
-}
-⋮----
-export enum ProcessingStatus {
-  UPLOADED = "uploaded",
-  CONTENT_CHECKING = "content_checking",
-  ANALYZING = "analyzing",
-  ANALYZED = "analyzed",
-  ERROR = "error",
-}
-⋮----
-export enum AcceptanceStatus {
-  ACCEPTED = "accepted",
-  INAPPROPRIATE_CONTENT = "inappropriate_content",
-  NO_MATCH = "no_match",
-}
-⋮----
-export enum NotificationType {
+<file path="lefthook.yml">
+pre-commit:
+  commands:
+    hide:
+      run: git secret hide -mF
+      stage_fixed: true
+    check:
+      glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}"
+      run: npx @biomejs/biome check --write --no-errors-on-unmatched --files-ignore-unknown=true --colors=off {staged_files}
+      stage_fixed: true
+    test:
+      glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx}"
+      run: npm run test:once -- --no-coverage
+    i18n:
+      glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}"
+      run: npm run check:i18n
+    build:
+      glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx}"
+      run: npm run build
 
-  SYSTEM_NOTIFICATION = "system_notification",
-
-
-  ACCOUNT_REGISTERED = "account_registered",
-  LOGIN = "login",
-  LOGOUT = "logout",
-
-
-  GAME_INVITATION = "game_invitation",
-  GAME_STARTED = "game_started",
-  GAME_ENDED = "game_ended",
-
-
-  PLAYER_ACHIEVED_BINGO = "player_achieved_bingo",
-  PLAYER_COMPLETED_GAME = "player_completed_game",
-  SOMEONE_ACHIEVED_BINGO = "someone_achieved_bingo",
-  SOMEONE_COMPLETED_GAME = "someone_completed_game",
-
-
-  NEW_SUBMISSION = "new_submission",
-  SUBMISSION_ACCEPTED = "submission_accepted",
-  SUBMISSION_REJECTED = "submission_rejected",
-}
-⋮----
-export enum NotificationDisplayType {
-  TOAST = "toast",
-  POPUP = "popup",
-}
-⋮----
-export enum LineType {
-  ROW = "row",
-  COLUMN = "column",
-  DIAGONAL = "diagonal",
-}
-⋮----
-export interface CompletedLine {
-  type: LineType;
-  index: number;
-  completedAt: Date;
-}
-⋮----
-export interface CellPosition {
-  x: number;
-  y: number;
-}
-⋮----
-export interface ApiResponse<T> {
-  success: boolean;
-  data?: T;
-  error?: {
-    code: string;
-    message: string;
-    details?: unknown;
-  };
-}
-</file>
-
-<file path="src/types/index.ts">
-
+post-checkout:
+  commands:
+    reveal:
+      interactive: true
+      run: git secret reveal -v
+    install:
+      run: npm install --legacy-peer-deps
+    adc:
+      run: gcloud auth application-default login
 </file>
 
 <file path="src/app/api/auth/me/route.ts">
@@ -2366,6 +2344,33 @@ export async function PUT(
 ): Promise<NextResponse<ApiResponse<PlayerBoard>>>
 </file>
 
+<file path="src/app/api/game/[gameId]/route.ts">
+import { validateGameId } from "@/lib/api-utils";
+import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
+import type { ApiResponse } from "@/types/common";
+import { dateToISOString } from "@/types/firestore";
+import {
+  type GameDocument,
+  gameFromFirestore,
+  gameToFirestore,
+} from "@/types/game";
+import type { Game } from "@/types/schema";
+import { gameSchema } from "@/types/schema";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import { z } from "zod";
+⋮----
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ gameId: string }> },
+)
+⋮----
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ gameId: string }> },
+): Promise<NextResponse<ApiResponse<Game>>>
+</file>
+
 <file path="src/app/api/game/[gameId]/submission/[submissionId]/route.ts">
 import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
 import type { ApiResponse } from "@/types/common";
@@ -2409,71 +2414,6 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ gameId: string }> },
 ): Promise<NextResponse<ApiResponse<Submission[]>>>
-</file>
-
-<file path="src/app/api/game/[gameId]/route.ts">
-import { validateGameId } from "@/lib/api-utils";
-import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
-import type { ApiResponse } from "@/types/common";
-import { dateToISOString } from "@/types/firestore";
-import {
-  type GameDocument,
-  gameFromFirestore,
-  gameToFirestore,
-} from "@/types/game";
-import type { Game } from "@/types/schema";
-import { gameSchema } from "@/types/schema";
-import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
-import { z } from "zod";
-⋮----
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ gameId: string }> },
-)
-⋮----
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ gameId: string }> },
-): Promise<NextResponse<ApiResponse<Game>>>
-</file>
-
-<file path="src/app/api/game/create/route.ts">
-import { FieldValue } from "firebase-admin/firestore";
-import { customAlphabet } from "nanoid";
-import { type NextRequest, NextResponse } from "next/server";
-import { ulid } from "ulid";
-import { z } from "zod";
-import { adminAuth, adminFirestore } from "../../../../lib/firebase/admin";
-import { type ApiResponse, GameStatus, Role } from "../../../../types/common";
-import { convertTimestampsToDate } from "../../../../types/firestore";
-import {
-  cellToFirestore,
-  eventToFirestore,
-  gameParticipationToFirestore,
-  gameToFirestore,
-  playerBoardToFirestore,
-} from "../../../../types/game";
-import {
-  type Cell,
-  type CompletedLine,
-  type Event,
-  type Game,
-  type GameParticipation,
-  type PlayerBoard,
-  cellSchema,
-  gameCreationSchema,
-} from "../../../../types/schema";
-⋮----
-function generateGameId(isTest = false): string
-⋮----
-async function gameIdExists(gameId: string): Promise<boolean>
-⋮----
-async function generateUniqueGameId(isTest = false): Promise<string>
-⋮----
-export async function POST(
-  request: NextRequest,
-): Promise<NextResponse<ApiResponse<
 </file>
 
 <file path="src/app/api/image/check/route.ts">
@@ -2602,261 +2542,6 @@ const generateSampleSubjects = (
 ): Subject[] =>
 ⋮----
 const renderWithState = (args: React.ComponentProps<typeof SubjectList>) =>
-</file>
-
-<file path="lefthook.yml">
-pre-commit:
-  commands:
-    hide:
-      run: git secret hide -mF
-      stage_fixed: true
-    check:
-      glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}"
-      run: npx @biomejs/biome check --write --no-errors-on-unmatched --files-ignore-unknown=true --colors=off {staged_files}
-      stage_fixed: true
-    test:
-      glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx}"
-      run: npm run test:once -- --no-coverage
-    i18n:
-      glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}"
-      run: npm run check:i18n
-    build:
-      glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx}"
-      run: npm run build
-
-post-checkout:
-  commands:
-    reveal:
-      interactive: true
-      run: git secret reveal -v
-    install:
-      run: npm install --legacy-peer-deps
-    adc:
-      run: gcloud auth application-default login
-</file>
-
-<file path="vitest.setup.ts">
-import { resolve } from "node:path";
-import { config } from "dotenv";
-</file>
-
-<file path="src/app/api/auth/update/route.ts">
-import bcrypt from "bcrypt";
-import { type NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
-⋮----
-import { adminFirestore } from "@/lib/firebase/admin";
-import type { ApiResponse } from "@/types/common";
-import { dateToTimestamp } from "@/types/firestore";
-import { type User, userCreationSchema, userSchema } from "@/types/schema";
-import type { UserDocument } from "@/types/user";
-import { userFromFirestore } from "@/types/user";
-⋮----
-export async function PUT(
-  request: NextRequest,
-): Promise<NextResponse<ApiResponse<
-</file>
-
-<file path="src/app/api/health/route.test.ts">
-import { NextResponse } from "next/server";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { GET } from "./route";
-</file>
-
-<file path="src/app/api/image/getUploadUrl/route.ts">
-import { adminAuth } from "@/lib/firebase/admin";
-import { dateToISOString } from "@/types/firestore";
-import { imageSubmissionDataSchema } from "@/types/schema";
-import type { DecodedIdToken } from "firebase-admin/auth";
-import { getStorage } from "firebase-admin/storage";
-import { type NextRequest, NextResponse } from "next/server";
-import { ulid } from "ulid";
-import { z } from "zod";
-⋮----
-export async function POST(request: NextRequest)
-</file>
-
-<file path="src/app/api/subjects/generate/route.ts">
-import type { Locale } from "@/i18n/config";
-import { getUserLocale } from "@/services/locale";
-import { GoogleGenAI, Type } from "@google/genai";
-import { type NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
-⋮----
-type GenerateSubjectsRequest = z.infer<typeof generateSubjectsSchema>;
-⋮----
-const getPromptTemplate = (params: GenerateSubjectsRequest) =>
-⋮----
-export async function POST(request: NextRequest)
-</file>
-
-<file path="src/components/game/ImageUpload.tsx">
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { useAuth } from "@/contexts/AuthContext";
-import {
-  type ProcessedImage,
-  createImagePreviewUrl,
-  isValidFileSize,
-  isValidImageFile,
-  processImage,
-  revokeImagePreviewUrl,
-} from "@/lib/image-utils";
-import { cn } from "@/lib/utils";
-import { submitImage } from "@/services/image-upload";
-import type { ImageSubmissionResult, ImageUploadProps } from "@/types/schema";
-import { Image as ImageIcon, Loader2, Upload, X } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useCallback, useRef, useState } from "react";
-⋮----
-interface ImagePreview {
-  file: File;
-  previewUrl: string;
-  processedImage?: ProcessedImage;
-  error?: string;
-}
-⋮----
-// Create preview URL from processed JPEG blob
-⋮----
-// For other formats, create preview first then process
-⋮----
-// Process image
-⋮----
-// Handle upload
-⋮----
-onError=
-console.error("Image preview error:", error);
-⋮----
-e.stopPropagation();
-handleUpload();
-</file>
-
-<file path="src/contexts/AuthContext.tsx">
-import { signInWithCustomToken } from "firebase/auth";
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-⋮----
-import { auth } from "@/lib/firebase/client";
-import type { User } from "@/types/schema";
-⋮----
-interface AuthContextType {
-  user: User | null;
-  loading: boolean;
-  error: Error | null;
-  login: (username: string, password: string) => Promise<void>;
-  register: (
-    username: string,
-    password: string,
-    isTestUser?: boolean,
-  ) => Promise<void>;
-  logout: () => Promise<void>;
-  updateUser: (userData: Partial<User>) => Promise<void>;
-}
-⋮----
-export function useAuth()
-⋮----
-export function AuthProvider(
-</file>
-
-<file path="src/lib/image-utils.test.ts">
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  DEFAULT_IMAGE_OPTIONS,
-  MAX_FILE_SIZE,
-  SUPPORTED_IMAGE_TYPES,
-  createImagePreviewUrl,
-  isValidFileSize,
-  isValidImageFile,
-  processImage,
-  revokeImagePreviewUrl,
-} from "./image-utils";
-⋮----
-// Mock document.createElement
-</file>
-
-<file path="src/lib/image-utils.ts">
-export interface ImageProcessingOptions {
-
-
-
-  maxLongSide: number;
-
-
-
-  quality: number;
-
-
-
-  format: "image/jpeg";
-}
-⋮----
-export interface ProcessedImage {
-
-
-
-  blob: Blob;
-
-
-
-  originalName: string;
-
-
-
-  originalSize: number;
-
-
-
-  processedSize: number;
-
-
-
-  originalDimensions: {
-    width: number;
-    height: number;
-  };
-
-
-
-  processedDimensions: {
-    width: number;
-    height: number;
-  };
-}
-⋮----
-async function getHeic2any()
-⋮----
-function getFileExtension(filename: string): string
-⋮----
-function isHeicFile(file: File): boolean
-⋮----
-async function convertHeicToJpeg(file: File): Promise<File>
-⋮----
-export function isValidImageFile(file: File): boolean
-⋮----
-export function isValidFileSize(file: File): boolean
-⋮----
-function createImageFromFile(file: File): Promise<HTMLImageElement>
-⋮----
-function calculateNewDimensions(
-  originalWidth: number,
-  originalHeight: number,
-  maxLongSide: number,
-):
-⋮----
-export async function processImage(
-  file: File,
-  options: ImageProcessingOptions = DEFAULT_IMAGE_OPTIONS,
-): Promise<ProcessedImage>
-⋮----
-export function createImagePreviewUrl(file: File): string
-⋮----
-export function revokeImagePreviewUrl(url: string): void
 </file>
 
 <file path="src/types/firestore.ts">
@@ -3132,6 +2817,268 @@ export function notificationToFirestore(
 ): NotificationDocument
 </file>
 
+<file path="vitest.setup.ts">
+import { resolve } from "node:path";
+import { config } from "dotenv";
+</file>
+
+<file path="src/app/api/auth/update/route.ts">
+import bcrypt from "bcrypt";
+import { type NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+⋮----
+import { adminFirestore } from "@/lib/firebase/admin";
+import type { ApiResponse } from "@/types/common";
+import { dateToTimestamp } from "@/types/firestore";
+import { type User, userCreationSchema, userSchema } from "@/types/schema";
+import type { UserDocument } from "@/types/user";
+import { userFromFirestore } from "@/types/user";
+⋮----
+export async function PUT(
+  request: NextRequest,
+): Promise<NextResponse<ApiResponse<
+</file>
+
+<file path="src/app/api/game/create/route.ts">
+import { FieldValue } from "firebase-admin/firestore";
+import { customAlphabet } from "nanoid";
+import { type NextRequest, NextResponse } from "next/server";
+import { ulid } from "ulid";
+import { z } from "zod";
+import { adminAuth, adminFirestore } from "../../../../lib/firebase/admin";
+import { type ApiResponse, GameStatus, Role } from "../../../../types/common";
+import { convertTimestampsToDate } from "../../../../types/firestore";
+import {
+  cellToFirestore,
+  eventToFirestore,
+  gameParticipationToFirestore,
+  gameToFirestore,
+  playerBoardToFirestore,
+} from "../../../../types/game";
+import {
+  type Cell,
+  type CompletedLine,
+  type Event,
+  type Game,
+  type GameParticipation,
+  type PlayerBoard,
+  cellSchema,
+  gameCreationSchema,
+} from "../../../../types/schema";
+⋮----
+function generateGameId(isTest = false): string
+⋮----
+async function gameIdExists(gameId: string): Promise<boolean>
+⋮----
+async function generateUniqueGameId(isTest = false): Promise<string>
+⋮----
+export async function POST(
+  request: NextRequest,
+): Promise<NextResponse<ApiResponse<
+</file>
+
+<file path="src/app/api/health/route.test.ts">
+import { NextResponse } from "next/server";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { GET } from "./route";
+</file>
+
+<file path="src/app/api/image/getUploadUrl/route.ts">
+import { adminAuth } from "@/lib/firebase/admin";
+import { dateToISOString } from "@/types/firestore";
+import { imageSubmissionDataSchema } from "@/types/schema";
+import type { DecodedIdToken } from "firebase-admin/auth";
+import { getStorage } from "firebase-admin/storage";
+import { type NextRequest, NextResponse } from "next/server";
+import { ulid } from "ulid";
+import { z } from "zod";
+⋮----
+export async function POST(request: NextRequest)
+</file>
+
+<file path="src/app/api/subjects/generate/route.ts">
+import type { Locale } from "@/i18n/config";
+import { getUserLocale } from "@/services/locale";
+import { GoogleGenAI, Type } from "@google/genai";
+import { type NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+⋮----
+type GenerateSubjectsRequest = z.infer<typeof generateSubjectsSchema>;
+⋮----
+const getPromptTemplate = (params: GenerateSubjectsRequest) =>
+⋮----
+export async function POST(request: NextRequest)
+</file>
+
+<file path="src/components/game/ImageUpload.tsx">
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { useAuth } from "@/contexts/AuthContext";
+import {
+  type ProcessedImage,
+  createImagePreviewUrl,
+  isValidFileSize,
+  isValidImageFile,
+  processImage,
+  revokeImagePreviewUrl,
+} from "@/lib/image-utils";
+import { cn } from "@/lib/utils";
+import { submitImage } from "@/services/image-upload";
+import type { ImageSubmissionResult, ImageUploadProps } from "@/types/schema";
+import { Image as ImageIcon, Loader2, Upload, X } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useCallback, useRef, useState } from "react";
+⋮----
+interface ImagePreview {
+  file: File;
+  previewUrl: string;
+  processedImage?: ProcessedImage;
+  error?: string;
+}
+⋮----
+// Create preview URL from processed JPEG blob
+⋮----
+// For other formats, create preview first then process
+⋮----
+// Process image
+⋮----
+// Handle upload
+⋮----
+onError=
+console.error("Image preview error:", error);
+⋮----
+e.stopPropagation();
+handleUpload();
+</file>
+
+<file path="src/contexts/AuthContext.tsx">
+import { signInWithCustomToken } from "firebase/auth";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+⋮----
+import { auth } from "@/lib/firebase/client";
+import type { User } from "@/types/schema";
+⋮----
+interface AuthContextType {
+  user: User | null;
+  loading: boolean;
+  error: Error | null;
+  login: (username: string, password: string) => Promise<void>;
+  register: (
+    username: string,
+    password: string,
+    isTestUser?: boolean,
+  ) => Promise<void>;
+  logout: () => Promise<void>;
+  updateUser: (userData: Partial<User>) => Promise<void>;
+}
+⋮----
+export function useAuth()
+⋮----
+export function AuthProvider(
+</file>
+
+<file path="src/lib/image-utils.test.ts">
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  DEFAULT_IMAGE_OPTIONS,
+  MAX_FILE_SIZE,
+  SUPPORTED_IMAGE_TYPES,
+  createImagePreviewUrl,
+  isValidFileSize,
+  isValidImageFile,
+  processImage,
+  revokeImagePreviewUrl,
+} from "./image-utils";
+⋮----
+// Mock document.createElement
+</file>
+
+<file path="src/lib/image-utils.ts">
+export interface ImageProcessingOptions {
+
+
+
+  maxLongSide: number;
+
+
+
+  quality: number;
+
+
+
+  format: "image/jpeg";
+}
+⋮----
+export interface ProcessedImage {
+
+
+
+  blob: Blob;
+
+
+
+  originalName: string;
+
+
+
+  originalSize: number;
+
+
+
+  processedSize: number;
+
+
+
+  originalDimensions: {
+    width: number;
+    height: number;
+  };
+
+
+
+  processedDimensions: {
+    width: number;
+    height: number;
+  };
+}
+⋮----
+async function getHeic2any()
+⋮----
+function getFileExtension(filename: string): string
+⋮----
+function isHeicFile(file: File): boolean
+⋮----
+async function convertHeicToJpeg(file: File): Promise<File>
+⋮----
+export function isValidImageFile(file: File): boolean
+⋮----
+export function isValidFileSize(file: File): boolean
+⋮----
+function createImageFromFile(file: File): Promise<HTMLImageElement>
+⋮----
+function calculateNewDimensions(
+  originalWidth: number,
+  originalHeight: number,
+  maxLongSide: number,
+):
+⋮----
+export async function processImage(
+  file: File,
+  options: ImageProcessingOptions = DEFAULT_IMAGE_OPTIONS,
+): Promise<ProcessedImage>
+⋮----
+export function createImagePreviewUrl(file: File): string
+⋮----
+export function revokeImagePreviewUrl(url: string): void
+</file>
+
 <file path="vitest.config.mts">
 import react from "@vitejs/plugin-react";
 import tsconfigPaths from "vite-tsconfig-paths";
@@ -3388,12 +3335,6 @@ const handleDragEnd = (event: DragEndEvent) =>
 // Dynamic import DndContextWrapper with SSR disabled
 </file>
 
-<file path="src/lib/firebase/admin.ts">
-import { cert, getApps, initializeApp } from "firebase-admin/app";
-import { getAuth } from "firebase-admin/auth";
-import { getFirestore } from "firebase-admin/firestore";
-</file>
-
 <file path="cloudbuild.yaml">
 steps:
 
@@ -3475,6 +3416,12 @@ availableSecrets:
       env: "FIREBASE_PRIVATE_KEY"
     - versionName: projects/pingo-456817/secrets/GEMINI_API_KEY/versions/latest
       env: "GEMINI_API_KEY"
+</file>
+
+<file path="src/lib/firebase/admin.ts">
+import { cert, getApps, initializeApp } from "firebase-admin/app";
+import { getAuth } from "firebase-admin/auth";
+import { getFirestore } from "firebase-admin/firestore";
 </file>
 
 <file path="src/types/schema.ts">
@@ -3921,6 +3868,7 @@ export type ImageSubmissionResult = z.infer<typeof imageSubmissionResultSchema>;
     "test:e2e:mobile": "playwright test --project=\"Mobile Safari\"",
     "storybook": "storybook dev --port 6006 --no-open",
     "build-storybook": "storybook build",
+    "repomix": "npx repomix",
     "docker": "npm run docker:build -- --run",
     "docker:build": "npx tsx scripts/docker-build.ts"
   },
@@ -3928,7 +3876,7 @@ export type ImageSubmissionResult = z.infer<typeof imageSubmissionResultSchema>;
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
-    "@google/genai": "^1.2.0",
+    "@google/genai": "^1.3.0",
     "@hookform/resolvers": "^5.0.1",
     "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-dialog": "^1.1.14",
@@ -3948,18 +3896,18 @@ export type ImageSubmissionResult = z.infer<typeof imageSubmissionResultSchema>;
     "heic2any": "^0.0.4",
     "lucide-react": "^0.511.0",
     "motion": "^12.15.0",
-    "next": "15.3.2",
+    "next": "15.3.3",
     "next-intl": "^4.1.0",
     "qrcode.react": "^4.2.0",
     "react": "^19.1.0",
     "react-day-picker": "^8.10.1",
     "react-dom": "^19.1.0",
-    "react-hook-form": "^7.56.4",
+    "react-hook-form": "^7.57.0",
     "tailwind-merge": "^3.3.0",
     "ulid": "^3.0.0",
     "uuid": "^11.1.0",
     "vaul": "^1.1.2",
-    "zod": "^3.25.36"
+    "zod": "^3.25.49"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
@@ -3982,9 +3930,9 @@ export type ImageSubmissionResult = z.infer<typeof imageSubmissionResultSchema>;
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/uuid": "^10.0.0",
-    "@vitejs/plugin-react": "^4.5.0",
-    "@vitest/browser": "^3.1.4",
-    "@vitest/coverage-istanbul": "^3.1.4",
+    "@vitejs/plugin-react": "^4.5.1",
+    "@vitest/browser": "^3.2.0",
+    "@vitest/coverage-istanbul": "^3.2.0",
     "dotenv": "^16.5.0",
     "jsdom": "^26.1.0",
     "lefthook": "^1.11.13",
@@ -3993,10 +3941,10 @@ export type ImageSubmissionResult = z.infer<typeof imageSubmissionResultSchema>;
     "storybook-next-intl": "^1.2.6",
     "tailwindcss": "^4",
     "tsx": "^4.19.4",
-    "tw-animate-css": "^1.3.1",
+    "tw-animate-css": "^1.3.3",
     "typescript": "^5",
     "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^3.1.4",
+    "vitest": "^3.2.0",
     "vitest-browser-react": "^0.2.0"
   }
 }

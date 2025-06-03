@@ -37,10 +37,10 @@ Pingo: Bingo game where AI judges based on photos
 - Docker (v28.0.4 or higher)
 - Node.js (v22 or higher)
 - TypeScript (v5 or higher)
-- [Next.js](https://nextjs.org) (v15.3.0)
+- [Next.js](https://nextjs.org) (v15.3.3)
   - [React](https://ja.react.dev) (v19.1.0)
   - [next-intl](https://next-intl.dev)
-  - [@google/genai](https://googleapis.github.io/js-genai/release_docs/index.html) (v1.2.0)
+  - [@google/genai](https://googleapis.github.io/js-genai/release_docs/index.html) (v1.3.0)
 - [Storybook](https://storybook.js.org) (v8.6.14)
 - [shadcn/ui](https://ui.shadcn.com)
 
