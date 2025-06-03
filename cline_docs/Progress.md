@@ -10,6 +10,34 @@ Pingoプロジェクトは現在、機能実装段階に入っています。基
 
 ## 最近の変更
 
+- APIリファクタリング
+  - データアクセス層移行: 12個のAPIファイルを直接Firestore操作からデータアクセス層経由に移行
+    - ゲームAPI（7ファイル）: `[gameId]`、`board`、`participants`、`playerBoard/[userId]`、`submission`、`submission/[submissionId]`、`events`
+    - 認証API（5ファイル）: `login`、`register`、`me`、`update`、`logout`
+  - `game/create`APIは複雑なトランザクション処理のため直接Firestore操作を維持
+  - データアクセス層の実装（`src/lib/firebase/admin-collections.ts`）
+    - `AdminGameService`: ゲームCRUD操作
+    - `AdminGameParticipationService`: 参加者管理
+    - `AdminSubmissionService`: 投稿処理
+    - `AdminPlayerBoardService`: プレイヤーボード操作
+    - `AdminEventService`: イベントログ
+    - `AdminGameBoardService`: ゲームボード管理
+    - `AdminUserService`: ユーザー操作（認証サポート付き）
+    - `AdminBatchService`: 最適化されたバッチ操作
+  - Firebase Admin SDK制約への対応
+    - `.withConverter()`未サポートのため手動型変換を実装
+    - パフォーマンスと柔軟性を重視した設計
+  - APIレスポンス形式の統一
+    - 全APIで`{success: boolean, data: T, error?: ErrorInfo}`形式を採用
+    - 一貫したエラーハンドリングパターンの実装
+  - 重要なバグ修正
+    - ゲーム共有画面の`Cannot read properties of undefined (reading 'slice')`エラーを解決
+    - `BingoBoard`コンポーネントでの`cells`プロパティのnull/undefined チェック追加
+    - フロントエンドでの新しいAPIレスポンス形式への対応
+  - 動作確認完了
+    - テストゲーム作成成功
+    - ゲーム共有画面の完全表示（ビンゴボード、ゲーム情報、参加者情報）
+    - ブラウザコンソールでのランタイムエラーなし
 - Google GenAI構造化出力への移行
   - 3つのAPIエンドポイントすべてを構造化出力に移行
     - `subjects/generate`: 被写体候補生成API
