@@ -19,6 +19,9 @@ pre-commit:
     build:
       glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx}"
       run: npm run build
+    knip:
+      glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx}"
+      run: npm run knip -- --production --no-exit-code
 
 post-checkout:
   commands:

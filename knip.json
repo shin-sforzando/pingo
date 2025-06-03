@@ -1,0 +1,3 @@
+{
+  "ignore": ["vitest.*.ts", "src/stories/example/*.{ts,tsx}"]
+}
