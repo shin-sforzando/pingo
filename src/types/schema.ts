@@ -231,17 +231,75 @@ export const eventSchema = baseSchema.extend({
 });
 
 /**
- * Image upload props schema
+ * Image processing options interface
  */
-export const imageUploadPropsSchema = z.object({
-  gameId: z.string().regex(/^[A-Z0-9]{6}$/),
-  onImageProcessed: z.function().optional(),
-  onUploadStart: z.function().optional(),
-  onUploadComplete: z.function().optional(),
-  isUploading: z.boolean().default(false),
-  className: z.string().optional(),
-  disabled: z.boolean().default(false),
-});
+export interface ImageProcessingOptions {
+  /**
+   * Maximum dimension for the longer side of the image
+   */
+  maxLongSide: number;
+  /**
+   * JPEG quality (0.0 to 1.0)
+   */
+  quality: number;
+  /**
+   * Output format
+   */
+  format: "image/jpeg";
+}
+
+/**
+ * Processed image interface
+ */
+export interface ProcessedImage {
+  /**
+   * Processed image as Blob
+   */
+  blob: Blob;
+  /**
+   * Original file name
+   */
+  originalName: string;
+  /**
+   * Original file size in bytes
+   */
+  originalSize: number;
+  /**
+   * Processed file size in bytes
+   */
+  processedSize: number;
+  /**
+   * Original dimensions
+   */
+  originalDimensions: {
+    width: number;
+    height: number;
+  };
+  /**
+   * Processed dimensions
+   */
+  processedDimensions: {
+    width: number;
+    height: number;
+  };
+}
+
+/**
+ * Image upload props interface (not using Zod due to function types)
+ */
+export interface ImageUploadProps {
+  gameId: string;
+  onImageProcessed?: (processedImage: ProcessedImage) => void;
+  onUploadStart?: () => void;
+  onUploadComplete?: (
+    success: boolean,
+    result?: ImageSubmissionResult,
+    error?: string,
+  ) => void;
+  isUploading?: boolean;
+  className?: string;
+  disabled?: boolean;
+}
 
 /**
  * Image submission data schema
@@ -286,6 +344,5 @@ export type Game = z.infer<typeof gameSchema>;
 export type GameCreationData = z.infer<typeof gameCreationSchema>;
 export type Submission = z.infer<typeof submissionSchema>;
 export type Event = z.infer<typeof eventSchema>;
-export type ImageUploadProps = z.infer<typeof imageUploadPropsSchema>;
 export type ImageSubmissionData = z.infer<typeof imageSubmissionDataSchema>;
 export type ImageSubmissionResult = z.infer<typeof imageSubmissionResultSchema>;

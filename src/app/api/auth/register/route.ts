@@ -2,11 +2,11 @@ import bcrypt from "bcrypt";
 import { type NextRequest, NextResponse } from "next/server";
 import { ulid } from "ulid";
 
-import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
+import { adminAuth } from "@/lib/firebase/admin";
+import { AdminUserService } from "@/lib/firebase/admin-collections";
 import type { ApiResponse } from "@/types/common";
 import { userCreationSchema } from "@/types/schema";
 import type { User } from "@/types/schema";
-import { userToFirestore } from "@/types/user";
 
 /**
  * User registration API
@@ -26,7 +26,7 @@ export async function POST(
         {
           success: false,
           error: {
-            code: "validation_error",
+            code: "VALIDATION_ERROR",
             message: "Auth.errors.invalidInput",
             details: validationResult.error.format(),
           },
@@ -37,18 +37,14 @@ export async function POST(
 
     const { username, password, isTestUser } = validationResult.data;
 
-    // Check for duplicate username
-    const usersRef = adminFirestore.collection("users");
-    const usernameQuery = await usersRef
-      .where("username", "==", username)
-      .get();
-
-    if (!usernameQuery.empty) {
+    // Check for duplicate username using data access layer
+    const isUsernameTaken = await AdminUserService.isUsernameTaken(username);
+    if (isUsernameTaken) {
       return NextResponse.json(
         {
           success: false,
           error: {
-            code: "username_exists",
+            code: "USERNAME_EXISTS",
             message: "Auth.errors.usernameExists",
           },
         },
@@ -74,9 +70,8 @@ export async function POST(
       isTestUser: isTestUser || false,
     };
 
-    // Save user data to Firestore
-    const userDoc = userToFirestore(user, passwordHash);
-    await usersRef.doc(userId).set(userDoc);
+    // Save user data to Firestore using data access layer
+    await AdminUserService.createUser(user, passwordHash);
 
     // Create custom token for authentication
     const customToken = await adminAuth.createCustomToken(userId);

@@ -1,6 +1,10 @@
-import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
+import { adminAuth } from "@/lib/firebase/admin";
+import {
+  AdminEventService,
+  AdminGameParticipationService,
+  AdminGameService,
+} from "@/lib/firebase/admin-collections";
 import type { ApiResponse } from "@/types/common";
-import { eventFromFirestore, eventToFirestore } from "@/types/game";
 import { type Event, eventSchema } from "@/types/schema";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
@@ -41,10 +45,8 @@ async function verifyGameParticipant(
   userId: string,
 ): Promise<NextResponse<ApiResponse<never>> | null> {
   // Verify game exists
-  const gameRef = adminFirestore.collection("games").doc(gameId);
-  const gameDoc = await gameRef.get();
-
-  if (!gameDoc.exists) {
+  const gameExists = await AdminGameService.gameExists(gameId);
+  if (!gameExists) {
     return NextResponse.json(
       {
         success: false,
@@ -58,14 +60,11 @@ async function verifyGameParticipant(
   }
 
   // Check if user is participant in this game
-  const participantRef = adminFirestore
-    .collection("games")
-    .doc(gameId)
-    .collection("participants")
-    .doc(userId);
-
-  const participantDoc = await participantRef.get();
-  if (!participantDoc.exists) {
+  const isParticipant = await AdminGameParticipationService.isParticipant(
+    gameId,
+    userId,
+  );
+  if (!isParticipant) {
     return NextResponse.json(
       {
         success: false,
@@ -126,56 +125,13 @@ export async function GET(
     const limit = Number.parseInt(url.searchParams.get("limit") || "50", 10);
     const offset = Number.parseInt(url.searchParams.get("offset") || "0", 10);
 
-    // Build query
-    let query = adminFirestore
-      .collection("games")
-      .doc(gameId)
-      .collection("events")
-      .orderBy("timestamp", "desc");
-
-    // Filter by event type if specified
-    if (eventType) {
-      query = query.where("type", "==", eventType);
-    }
-
-    // Filter by user if specified
-    if (userIdFilter) {
-      query = query.where("userId", "==", userIdFilter);
-    }
-
-    // Apply pagination
-    if (0 < offset) {
-      const offsetSnapshot = await query.limit(offset).get();
-      if (offsetSnapshot.empty) {
-        return NextResponse.json({
-          success: true,
-          data: [],
-        });
-      }
-      const lastDoc = offsetSnapshot.docs[offsetSnapshot.docs.length - 1];
-      query = query.startAfter(lastDoc);
-    }
-
-    query = query.limit(limit);
-
-    // Execute query
-    const eventsSnapshot = await query.get();
-
-    // Convert to Event objects
-    const events: Event[] = [];
-    for (const doc of eventsSnapshot.docs) {
-      const eventData = doc.data();
-      const event = eventFromFirestore({
-        id: eventData.id,
-        type: eventData.type,
-        userId: eventData.userId,
-        timestamp: eventData.timestamp,
-        details: eventData.details,
-        createdAt: eventData.createdAt,
-        updatedAt: eventData.updatedAt,
-      });
-      events.push(event);
-    }
+    // Get events using data access layer
+    const events = await AdminEventService.getEvents(gameId, {
+      eventType: eventType || undefined,
+      userId: userIdFilter || undefined,
+      limit,
+      offset,
+    });
 
     return NextResponse.json({
       success: true,
@@ -276,15 +232,8 @@ export async function POST(
       updatedAt: null,
     };
 
-    // Save event to Firestore
-    const eventRef = adminFirestore
-      .collection("games")
-      .doc(gameId)
-      .collection("events")
-      .doc(eventId);
-
-    const eventDoc = eventToFirestore(event);
-    await eventRef.set(eventDoc);
+    // Save event using data access layer
+    await AdminEventService.createEvent(gameId, event);
 
     console.log(
       `Created event: ${eventId} for game: ${gameId} by user: ${userId}`,

@@ -45,14 +45,21 @@ export default function SharePage() {
           setError(true);
           return;
         }
-        const gameData = await gameResponse.json();
-        setGame(gameData);
+        const gameResult = await gameResponse.json();
+        if (gameResult.success) {
+          setGame(gameResult.data);
+        } else {
+          setError(true);
+          return;
+        }
 
         // Fetch board data
         const boardResponse = await fetch(`/api/game/${gameId}/board`);
         if (boardResponse.ok) {
-          const boardData = await boardResponse.json();
-          setBoard(boardData);
+          const boardResult = await boardResponse.json();
+          if (boardResult.success) {
+            setBoard(boardResult.data);
+          }
         }
 
         // Fetch participants
@@ -60,8 +67,10 @@ export default function SharePage() {
           `/api/game/${gameId}/participants`,
         );
         if (participantsResponse.ok) {
-          const participantsData = await participantsResponse.json();
-          setParticipants(participantsData);
+          const participantsResult = await participantsResponse.json();
+          if (participantsResult.success) {
+            setParticipants(participantsResult.data);
+          }
         }
       } catch (err) {
         console.error("Error fetching game data:", err);

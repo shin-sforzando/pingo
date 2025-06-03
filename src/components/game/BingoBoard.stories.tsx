@@ -34,7 +34,7 @@ const generateSampleCells = (): Cell[] => {
       cells.push({
         id: `cell-${index}`,
         position: { x, y },
-        subject: isFree ? "FREE" : subjects[index > 12 ? index - 1 : index],
+        subject: isFree ? "FREE" : subjects[12 < index ? index - 1 : index],
         isFree,
       });
     }
@@ -63,11 +63,11 @@ const generateSampleCellStates = (
         states[cellId] = "CLOSE";
         break;
       case "random":
-        states[cellId] = Math.random() > 0.5 ? "OPEN" : "CLOSE";
+        states[cellId] = 0.5 < Math.random() ? "OPEN" : "CLOSE";
         break;
       case "row":
         // Open the middle row (cells 10-14)
-        states[cellId] = i >= 10 && i < 15 ? "OPEN" : "CLOSE";
+        states[cellId] = 10 <= i && i < 15 ? "OPEN" : "CLOSE";
         break;
       case "column":
         // Open the middle column (cells 2, 7, 12, 17, 22)

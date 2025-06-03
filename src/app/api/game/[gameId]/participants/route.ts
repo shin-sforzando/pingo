@@ -1,78 +1,49 @@
-import { validateGameId } from "@/lib/api-utils";
-import { adminFirestore } from "@/lib/firebase/admin";
-import { type UserDocument, userFromFirestore } from "@/types/user";
+import { AdminGameParticipationService } from "@/lib/firebase/admin-collections";
+import type { ApiResponse } from "@/types/common";
 import { NextResponse } from "next/server";
 
 /**
  * GET handler for retrieving game participants
  */
 export async function GET(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ gameId: string }> },
-) {
-  console.log("ℹ️ XXX: ~ route.ts ~ request:", request);
+): Promise<NextResponse<ApiResponse<Array<{ id: string; username: string }>>>> {
   try {
     const { gameId } = await params;
 
-    const validationError = validateGameId(gameId);
-    if (validationError) return validationError;
-
-    const participantsSnapshot = await adminFirestore
-      .collection(`games/${gameId}/participants`)
-      .get();
-
-    if (participantsSnapshot.empty) {
-      return NextResponse.json([]);
+    if (!gameId) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "INVALID_PARAMS",
+            message: "Game ID is required",
+          },
+        },
+        { status: 400 },
+      );
     }
 
-    // Get all participant user IDs
-    const userIds = participantsSnapshot.docs.map((doc) => doc.id);
+    // Get participants using data access layer
+    const participants =
+      await AdminGameParticipationService.getParticipants(gameId);
 
-    // Fetch user data for each participant
-    const participants = await Promise.all(
-      userIds.map(async (userId) => {
-        const userDoc = await adminFirestore
-          .collection("users")
-          .doc(userId)
-          .get();
-
-        if (!userDoc.exists) {
-          return {
-            id: userId,
-            username: "Unknown User",
-          };
-        }
-
-        const userData = userDoc.data();
-        if (!userData) {
-          return {
-            id: userId,
-            username: "Unknown User",
-          };
-        }
-
-        // Convert Firestore data to application model
-        const user = userFromFirestore({
-          ...userData,
-          id: userId,
-        } as UserDocument);
-
-        // Return only the necessary fields
-        return {
-          id: userId,
-          username: user.username,
-        };
-      }),
-    );
-
-    // Sort by username
-    return NextResponse.json(
-      participants.sort((a, b) => a.username.localeCompare(b.username)),
-    );
+    return NextResponse.json({
+      success: true,
+      data: participants,
+    });
   } catch (error) {
     console.error("Error fetching participants:", error);
     return NextResponse.json(
-      { error: "Failed to fetch participants" },
+      {
+        success: false,
+        error: {
+          code: "SERVER_ERROR",
+          message: "Failed to fetch participants",
+          details: error instanceof Error ? error.message : String(error),
+        },
+      },
       { status: 500 },
     );
   }

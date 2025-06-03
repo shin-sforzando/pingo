@@ -1,10 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
+import { adminAuth } from "@/lib/firebase/admin";
+import { AdminUserService } from "@/lib/firebase/admin-collections";
 import type { ApiResponse } from "@/types/common";
 import type { User } from "@/types/schema";
-import type { UserDocument } from "@/types/user";
-import { userFromFirestore } from "@/types/user";
 
 /**
  * Get authenticated user data
@@ -21,7 +20,7 @@ export async function GET(
         {
           success: false,
           error: {
-            code: "unauthorized",
+            code: "UNAUTHORIZED",
             message: "Auth.errors.unauthorized",
           },
         },
@@ -36,7 +35,7 @@ export async function GET(
         {
           success: false,
           error: {
-            code: "unauthorized",
+            code: "UNAUTHORIZED",
             message: "Auth.errors.unauthorized",
           },
         },
@@ -48,16 +47,15 @@ export async function GET(
     const decodedToken = await adminAuth.verifyIdToken(token);
     const userId = decodedToken.uid;
 
-    // Get user data from Firestore
-    const userRef = adminFirestore.collection("users").doc(userId);
-    const userSnapshot = await userRef.get();
+    // Get user data using data access layer
+    const user = await AdminUserService.getUser(userId);
 
-    if (!userSnapshot.exists) {
+    if (!user) {
       return NextResponse.json(
         {
           success: false,
           error: {
-            code: "user_not_found",
+            code: "USER_NOT_FOUND",
             message: "Auth.errors.userNotFound",
           },
         },
@@ -65,13 +63,9 @@ export async function GET(
       );
     }
 
-    // Convert to user model
-    const userDoc = userSnapshot.data() as UserDocument;
-    const user = userFromFirestore(userDoc);
-
     // Debug output
     console.log(
-      `ℹ️ XXX: Auth /me API - User authenticated: ${user.username} (ID: ${user.id})`,
+      `ℹ️ XXX: ~ route.ts ~ Auth /me API - User authenticated: ${user.username} (ID: ${user.id})`,
     );
 
     return NextResponse.json(

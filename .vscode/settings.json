@@ -34,6 +34,7 @@
     "gsutil",
     "hookform",
     "jsdom",
+    "knip",
     "lefthook",
     "linecap",
     "linejoin",

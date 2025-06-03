@@ -194,7 +194,7 @@ describe("User Me API Integration Test", () => {
     // Verify response
     expect(response.status).toBe(401);
     expect(responseData.success).toBe(false);
-    expect(responseData.error?.code).toBe("unauthorized");
+    expect(responseData.error?.code).toBe("UNAUTHORIZED");
   });
 
   it("should return error with invalid token", async () => {

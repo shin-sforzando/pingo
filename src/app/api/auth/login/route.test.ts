@@ -155,7 +155,7 @@ describe("User Login API Integration Test", () => {
     // Verify response
     expect(response.status).toBe(401);
     expect(responseData.success).toBe(false);
-    expect(responseData.error.code).toBe("auth_failed");
+    expect(responseData.error.code).toBe("AUTH_FAILED");
   });
 
   it("should return error with non-existent username", async () => {
@@ -174,6 +174,6 @@ describe("User Login API Integration Test", () => {
     // Verify response
     expect(response.status).toBe(401);
     expect(responseData.success).toBe(false);
-    expect(responseData.error.code).toBe("auth_failed");
+    expect(responseData.error.code).toBe("AUTH_FAILED");
   });
 });

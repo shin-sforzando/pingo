@@ -214,11 +214,69 @@ src/types/
 
 ## API設計
 
+### データアクセス層アーキテクチャ
+
+12個のAPIファイルを直接Firestore操作からデータアクセス層経由に移行しました。
+`game/create`APIは複雑なトランザクション処理のため直接Firestore操作を維持しています。
+
+#### データアクセス層の実装
+
+ファイル: `src/lib/firebase/admin-collections.ts`
+
+データアクセス層は以下のサービス名前空間で構成されています：
+
+- `AdminGameService`: ゲームCRUD操作
+- `AdminGameParticipationService`: 参加者管理
+- `AdminSubmissionService`: 投稿処理
+- `AdminPlayerBoardService`: プレイヤーボード操作
+- `AdminEventService`: イベントログ
+- `AdminGameBoardService`: ゲームボード管理
+- `AdminUserService`: ユーザー操作（認証サポート付き）
+- `AdminBatchService`: 最適化されたバッチ操作
+
+#### Firebase Admin SDKの制約と対応
+
+Firebase Admin SDKでは`.withConverter()`がサポートされていないため、手動での型変換を実装：
+
+```typescript
+// データアクセス層パターン
+export namespace AdminGameService {
+  export async function getGame(gameId: string): Promise<Game | null> {
+    const doc = await adminFirestore.collection("games").doc(gameId).get();
+    if (!doc.exists) return null;
+    return gameFromFirestore(doc.data() as GameDocument);
+  }
+}
+```
+
+#### APIレスポンス形式の統一
+
+全APIで統一されたレスポンス形式を採用：
+
+```typescript
+// 成功レスポンス
+return NextResponse.json({
+  success: true,
+  data: result,
+});
+
+// エラーレスポンス
+return NextResponse.json({
+  success: false,
+  error: {
+    code: "ERROR_CODE",
+    message: "Error message",
+    details: error.message,
+  },
+}, { status: 500 });
+```
+
 ### 認証API
 
 - ユーザー登録: `/api/auth/register`
 - ログイン: `/api/auth/login`
 - ログアウト: `/api/auth/logout`
+- ユーザー情報取得: `/api/auth/me`
 - ユーザー情報更新: `/api/auth/update`
 
 ### ユーザーAPI

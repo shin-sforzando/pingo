@@ -41,6 +41,17 @@ export function BingoBoard({
   className,
   onCellClick,
 }: BingoBoardProps) {
+  // Handle undefined or null cells
+  if (!cells || !Array.isArray(cells)) {
+    return (
+      <div className={cn("grid grid-cols-5 gap-1 md:gap-2", className)}>
+        <div className="col-span-5 text-center text-muted-foreground">
+          No board data available
+        </div>
+      </div>
+    );
+  }
+
   // Ensure we have exactly 25 cells
   const boardCells = cells.slice(0, 25);
 
