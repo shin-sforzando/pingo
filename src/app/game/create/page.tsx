@@ -1,5 +1,6 @@
 "use client";
 
+import { AuthGuard } from "@/components/auth/AuthGuard";
 import { BingoBoard } from "@/components/game/BingoBoard";
 import { type Subject, SubjectList } from "@/components/game/SubjectList";
 import { ShineBorder } from "@/components/magicui/shine-border";
@@ -370,334 +371,342 @@ export default function CreateGamePage() {
   };
 
   return (
-    <div className="container mx-auto space-y-8 py-6">
-      <h1 className="font-bold text-3xl">{t("Game.createNew")}</h1>
-      <p className="text-muted-foreground">{t("Game.createDescription")}</p>
+    <AuthGuard>
+      <div className="container mx-auto space-y-8 py-6">
+        <h1 className="font-bold text-3xl">{t("Game.createNew")}</h1>
+        <p className="text-muted-foreground">{t("Game.createDescription")}</p>
 
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          {/* Basic Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle>{t("Game.details")}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("Game.title")}</FormLabel>
-                    <FormDescription>
-                      {t("Game.titleDescription")}
-                    </FormDescription>
-                    <FormControl>
-                      <Input
-                        placeholder={t("Game.titlePlaceholder")}
-                        {...field}
-                      />
-                    </FormControl>
-                    <TranslatedFormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="theme"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("Game.theme")}</FormLabel>
-                    <FormDescription>
-                      {t("Game.themeDescription")}
-                    </FormDescription>
-                    <FormControl>
-                      <Input
-                        placeholder={t("Game.themePlaceholder")}
-                        {...field}
-                      />
-                    </FormControl>
-                    <TranslatedFormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="space-y-2">
-                <div className="relative">
-                  <Button
-                    type="button"
-                    onClick={generateSubjects}
-                    disabled={isGeneratingSubjects || !title || !theme}
-                    className="w-full"
-                  >
-                    {isGeneratingSubjects
-                      ? t("Game.generatingSubjects")
-                      : t("Game.generateSubjectsWithAI")}
-                  </Button>
-                  {isGeneratingSubjects && (
-                    <ShineBorder borderWidth={2} duration={3} />
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            {/* Basic Information */}
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("Game.details")}</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("Game.title")}</FormLabel>
+                      <FormDescription>
+                        {t("Game.titleDescription")}
+                      </FormDescription>
+                      <FormControl>
+                        <Input
+                          placeholder={t("Game.titlePlaceholder")}
+                          {...field}
+                        />
+                      </FormControl>
+                      <TranslatedFormMessage />
+                    </FormItem>
                   )}
-                </div>
-                {isGeneratingSubjects && (
-                  <div className="animate-pulse text-center text-muted-foreground text-sm">
-                    {t("Game.generatingSubjectsDescription")}
-                  </div>
-                )}
-                {generationError && (
-                  <p className="text-destructive text-sm">{generationError}</p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+                />
 
-          {/* Subjects List */}
-          <Card>
-            <CardHeader>
-              <CardTitle>{t("Game.subjects")}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="text-muted-foreground text-sm">
-                    {subjects.length > 0
-                      ? t("Game.subjectsCount", { count: subjects.length })
-                      : t("Game.noSubjects")}
-                  </div>
-                  {subjects.length > 0 && (
+                <FormField
+                  control={form.control}
+                  name="theme"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("Game.theme")}</FormLabel>
+                      <FormDescription>
+                        {t("Game.themeDescription")}
+                      </FormDescription>
+                      <FormControl>
+                        <Input
+                          placeholder={t("Game.themePlaceholder")}
+                          {...field}
+                        />
+                      </FormControl>
+                      <TranslatedFormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="space-y-2">
+                  <div className="relative">
                     <Button
                       type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setSubjects([]);
-                        setCells([]);
-                      }}
+                      onClick={generateSubjects}
+                      disabled={isGeneratingSubjects || !title || !theme}
+                      className="w-full"
                     >
-                      {t("Game.resetSubjects")}
+                      {isGeneratingSubjects
+                        ? t("Game.generatingSubjects")
+                        : t("Game.generateSubjectsWithAI")}
                     </Button>
+                    {isGeneratingSubjects && (
+                      <ShineBorder borderWidth={2} duration={3} />
+                    )}
+                  </div>
+                  {isGeneratingSubjects && (
+                    <div className="animate-pulse text-center text-muted-foreground text-sm">
+                      {t("Game.generatingSubjectsDescription")}
+                    </div>
+                  )}
+                  {generationError && (
+                    <p className="text-destructive text-sm">
+                      {generationError}
+                    </p>
                   )}
                 </div>
-                <SubjectList
-                  subjects={subjects}
-                  onSubjectsChange={handleSubjectsChange}
-                  maxAdopted={24}
+              </CardContent>
+            </Card>
+
+            {/* Subjects List */}
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("Game.subjects")}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="text-muted-foreground text-sm">
+                      {subjects.length > 0
+                        ? t("Game.subjectsCount", { count: subjects.length })
+                        : t("Game.noSubjects")}
+                    </div>
+                    {subjects.length > 0 && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setSubjects([]);
+                          setCells([]);
+                        }}
+                      >
+                        {t("Game.resetSubjects")}
+                      </Button>
+                    )}
+                  </div>
+                  <SubjectList
+                    subjects={subjects}
+                    onSubjectsChange={handleSubjectsChange}
+                    maxAdopted={24}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Board Preview */}
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("Game.boardPreview")}</CardTitle>
+                <p className="mt-4 text-muted-foreground text-xs">
+                  {t("Game.boardDescription", { 0: 24 })}
+                </p>
+              </CardHeader>
+              <CardContent>
+                <div className="mx-auto max-w-md">
+                  <BingoBoard cells={cells} />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Game Settings */}
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("Game.settings")}</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Expiration Date Setting */}
+                <FormField
+                  control={form.control}
+                  name="expiresAt"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel>{t("Game.expiresAt")}</FormLabel>
+                      <FormDescription>
+                        {t("Game.expiresAtDescription")}
+                      </FormDescription>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "w-full pl-3 text-left font-normal",
+                                !field.value && "text-muted-foreground",
+                              )}
+                            >
+                              {field.value ? (
+                                format(field.value, "PPP")
+                              ) : (
+                                <span>{t("Game.selectDate")}</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={(date) => date < new Date()}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <TranslatedFormMessage />
+                    </FormItem>
+                  )}
                 />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Board Preview */}
-          <Card>
-            <CardHeader>
-              <CardTitle>{t("Game.boardPreview")}</CardTitle>
-              <p className="mt-4 text-muted-foreground text-xs">
-                {t("Game.boardDescription", { 0: 24 })}
-              </p>
-            </CardHeader>
-            <CardContent>
-              <div className="mx-auto max-w-md">
-                <BingoBoard cells={cells} />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Game Settings */}
-          <Card>
-            <CardHeader>
-              <CardTitle>{t("Game.settings")}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Expiration Date Setting */}
-              <FormField
-                control={form.control}
-                name="expiresAt"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>{t("Game.expiresAt")}</FormLabel>
-                    <FormDescription>
-                      {t("Game.expiresAtDescription")}
-                    </FormDescription>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "w-full pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground",
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, "PPP")
-                            ) : (
-                              <span>{t("Game.selectDate")}</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          disabled={(date) => date < new Date()}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    <TranslatedFormMessage />
-                  </FormItem>
-                )}
-              />
-              {/* Public/Private Setting */}
-              <FormField
-                control={form.control}
-                name="isPublic"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-                    <div className="space-y-0.5">
-                      <FormLabel>{t("Game.isPublic")}</FormLabel>
-                      <FormDescription>
-                        {t("Game.isPublicDescription")}
-                      </FormDescription>
-                    </div>
-                    <FormControl>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-
-              {/* Photo Sharing Setting */}
-              <FormField
-                control={form.control}
-                name="isPhotoSharingEnabled"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-                    <div className="space-y-0.5">
-                      <FormLabel>{t("Game.isPhotoSharingEnabled")}</FormLabel>
-                      <FormDescription>
-                        {t("Game.isPhotoSharingEnabledDescription")}
-                      </FormDescription>
-                    </div>
-                    <FormControl>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-
-              {/* Required Bingo Lines Setting */}
-              <FormField
-                control={form.control}
-                name="requiredBingoLines"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("Game.requiredBingoLines")}</FormLabel>
-                    <FormDescription>
-                      {t("Game.requiredBingoLinesDescription")}
-                    </FormDescription>
-                    <FormControl>
-                      <div className="flex items-center space-x-2">
-                        <Input
-                          type="number"
-                          min={1}
-                          max={5}
-                          {...field}
-                          onChange={(e) => {
-                            const value = Number.parseInt(e.target.value, 10);
-                            if (value >= 1 && value <= 5) {
-                              field.onChange(value);
-                            }
-                          }}
-                          className="w-20"
-                        />
-                        <span className="text-muted-foreground">(1-5)</span>
+                {/* Public/Private Setting */}
+                <FormField
+                  control={form.control}
+                  name="isPublic"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                      <div className="space-y-0.5">
+                        <FormLabel>{t("Game.isPublic")}</FormLabel>
+                        <FormDescription>
+                          {t("Game.isPublicDescription")}
+                        </FormDescription>
                       </div>
-                    </FormControl>
-                    <TranslatedFormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Confidence Threshold Setting */}
-              <FormField
-                control={form.control}
-                name="confidenceThreshold"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("Game.confidenceThreshold")}</FormLabel>
-                    <FormDescription>
-                      {t("Game.confidenceThresholdDescription")}
-                    </FormDescription>
-                    <FormControl>
-                      <div className="flex items-center space-x-2">
-                        <Input
-                          type="number"
-                          min={0}
-                          max={1}
-                          step={0.1}
-                          {...field}
-                          onChange={(e) => {
-                            const value = Number.parseFloat(e.target.value);
-                            if (value >= 0 && value <= 1) {
-                              field.onChange(value);
-                            }
-                          }}
-                          className="w-20"
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
                         />
-                        <span className="text-muted-foreground">(0.0-1.0)</span>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                {/* Photo Sharing Setting */}
+                <FormField
+                  control={form.control}
+                  name="isPhotoSharingEnabled"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                      <div className="space-y-0.5">
+                        <FormLabel>{t("Game.isPhotoSharingEnabled")}</FormLabel>
+                        <FormDescription>
+                          {t("Game.isPhotoSharingEnabledDescription")}
+                        </FormDescription>
                       </div>
-                    </FormControl>
-                    <TranslatedFormMessage />
-                  </FormItem>
-                )}
-              />
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
 
-              {/* Notes */}
-              <FormField
-                control={form.control}
-                name="notes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("Game.notes")}</FormLabel>
-                    <FormDescription>
-                      {t("Game.notesDescription")}
-                    </FormDescription>
-                    <FormControl>
-                      <Textarea
-                        placeholder={t("Game.notesPlaceholder")}
-                        {...field}
-                      />
-                    </FormControl>
-                    <TranslatedFormMessage />
-                  </FormItem>
-                )}
-              />
-            </CardContent>
-          </Card>
+                {/* Required Bingo Lines Setting */}
+                <FormField
+                  control={form.control}
+                  name="requiredBingoLines"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("Game.requiredBingoLines")}</FormLabel>
+                      <FormDescription>
+                        {t("Game.requiredBingoLinesDescription")}
+                      </FormDescription>
+                      <FormControl>
+                        <div className="flex items-center space-x-2">
+                          <Input
+                            type="number"
+                            min={1}
+                            max={5}
+                            {...field}
+                            onChange={(e) => {
+                              const value = Number.parseInt(e.target.value, 10);
+                              if (value >= 1 && value <= 5) {
+                                field.onChange(value);
+                              }
+                            }}
+                            className="w-20"
+                          />
+                          <span className="text-muted-foreground">(1-5)</span>
+                        </div>
+                      </FormControl>
+                      <TranslatedFormMessage />
+                    </FormItem>
+                  )}
+                />
 
-          {/* Submit Button */}
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={isSubmitting || !title || !theme || subjects.length < 24}
-          >
-            {isSubmitting ? t("Game.creating") : t("Game.create")}
-          </Button>
+                {/* Confidence Threshold Setting */}
+                <FormField
+                  control={form.control}
+                  name="confidenceThreshold"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("Game.confidenceThreshold")}</FormLabel>
+                      <FormDescription>
+                        {t("Game.confidenceThresholdDescription")}
+                      </FormDescription>
+                      <FormControl>
+                        <div className="flex items-center space-x-2">
+                          <Input
+                            type="number"
+                            min={0}
+                            max={1}
+                            step={0.1}
+                            {...field}
+                            onChange={(e) => {
+                              const value = Number.parseFloat(e.target.value);
+                              if (value >= 0 && value <= 1) {
+                                field.onChange(value);
+                              }
+                            }}
+                            className="w-20"
+                          />
+                          <span className="text-muted-foreground">
+                            (0.0-1.0)
+                          </span>
+                        </div>
+                      </FormControl>
+                      <TranslatedFormMessage />
+                    </FormItem>
+                  )}
+                />
 
-          {submissionError && (
-            <p className="mt-2 text-destructive text-sm">{submissionError}</p>
-          )}
-        </form>
-      </Form>
-    </div>
+                {/* Notes */}
+                <FormField
+                  control={form.control}
+                  name="notes"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("Game.notes")}</FormLabel>
+                      <FormDescription>
+                        {t("Game.notesDescription")}
+                      </FormDescription>
+                      <FormControl>
+                        <Textarea
+                          placeholder={t("Game.notesPlaceholder")}
+                          {...field}
+                        />
+                      </FormControl>
+                      <TranslatedFormMessage />
+                    </FormItem>
+                  )}
+                />
+              </CardContent>
+            </Card>
+
+            {/* Submit Button */}
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={
+                isSubmitting || !title || !theme || subjects.length < 24
+              }
+            >
+              {isSubmitting ? t("Game.creating") : t("Game.create")}
+            </Button>
+
+            {submissionError && (
+              <p className="mt-2 text-destructive text-sm">{submissionError}</p>
+            )}
+          </form>
+        </Form>
+      </div>
+    </AuthGuard>
   );
 }

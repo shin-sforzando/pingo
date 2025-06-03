@@ -14,7 +14,7 @@ import { auth } from "@/lib/firebase/client";
 import type { User } from "@/types/schema";
 
 // Define the auth context type
-interface AuthContextType {
+export interface AuthContextType {
   user: User | null;
   loading: boolean;
   error: Error | null;

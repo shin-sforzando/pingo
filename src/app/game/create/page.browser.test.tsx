@@ -1,3 +1,4 @@
+import { mockAuthGuard } from "@/test/helpers/auth-test-helpers";
 import { page, userEvent } from "@vitest/browser/context";
 import { NextIntlClientProvider } from "next-intl";
 import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
@@ -20,6 +21,9 @@ vi.mock("@/lib/firebase/client", () => ({
     },
   },
 }));
+
+// Mock AuthGuard to bypass authentication in tests
+mockAuthGuard();
 
 afterAll(() => {
   // Restore the original fetch implementation
