@@ -26,7 +26,7 @@ export async function POST(
         {
           success: false,
           error: {
-            code: "validation_error",
+            code: "VALIDATION_ERROR",
             message: "Auth.errors.invalidInput",
             details: validationResult.error.format(),
           },
@@ -44,7 +44,7 @@ export async function POST(
         {
           success: false,
           error: {
-            code: "username_exists",
+            code: "USERNAME_EXISTS",
             message: "Auth.errors.usernameExists",
           },
         },

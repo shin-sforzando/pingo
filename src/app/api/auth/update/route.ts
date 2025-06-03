@@ -41,7 +41,7 @@ export async function PUT(
         {
           success: false,
           error: {
-            code: "validation_error",
+            code: "VALIDATION_ERROR",
             message: "Auth.errors.invalidInput",
             details: validationResult.error.format(),
           },
@@ -53,40 +53,43 @@ export async function PUT(
     const { userId, username, currentPassword, newPassword } =
       validationResult.data;
 
-    // Get user using data access layer
-    const user = await AdminUserService.getUser(userId);
-
-    if (!user) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: "user_not_found",
-            message: "Auth.errors.userNotFound",
-          },
-        },
-        { status: 404 },
-      );
-    }
-
-    // Get user document for password verification if needed
+    // Get user and user document for password verification if needed
+    let user = null;
     let userDocForPassword = null;
+
     if (newPassword) {
-      userDocForPassword = await AdminUserService.getUserDocumentByUsername(
-        user.username,
-      );
+      // If password update is needed, get user document with password hash
+      userDocForPassword = await AdminUserService.getUserDocumentById(userId);
       if (!userDocForPassword) {
         return NextResponse.json(
           {
             success: false,
             error: {
-              code: "user_not_found",
+              code: "USER_NOT_FOUND",
               message: "Auth.errors.userNotFound",
             },
           },
           { status: 404 },
         );
       }
+      // Convert user document to user object for other operations
+      user = await AdminUserService.getUser(userId);
+    } else {
+      // If no password update, just get user object
+      user = await AdminUserService.getUser(userId);
+    }
+
+    if (!user) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "USER_NOT_FOUND",
+            message: "Auth.errors.userNotFound",
+          },
+        },
+        { status: 404 },
+      );
     }
 
     const updateData: Record<string, unknown> = {};
@@ -102,7 +105,7 @@ export async function PUT(
           {
             success: false,
             error: {
-              code: "username_exists",
+              code: "USERNAME_EXISTS",
               message: "Auth.errors.usernameExists",
             },
           },
@@ -126,7 +129,7 @@ export async function PUT(
             {
               success: false,
               error: {
-                code: "invalid_password",
+                code: "INVALID_PASSWORD",
                 message: "Auth.errors.currentPasswordInvalid",
               },
             },
@@ -138,7 +141,7 @@ export async function PUT(
           {
             success: false,
             error: {
-              code: "missing_password",
+              code: "MISSING_PASSWORD",
               message: "Auth.errors.currentPasswordRequired",
             },
           },

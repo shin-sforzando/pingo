@@ -518,6 +518,18 @@ export namespace AdminUserService {
   }
 
   /**
+   * Get a user document by ID for authentication (includes passwordHash)
+   */
+  export async function getUserDocumentById(
+    userId: string,
+  ): Promise<UserDocument | null> {
+    const doc = await adminFirestore.collection("users").doc(userId).get();
+
+    if (!doc.exists) return null;
+    return doc.data() as UserDocument;
+  }
+
+  /**
    * Create a new user
    */
   export async function createUser(

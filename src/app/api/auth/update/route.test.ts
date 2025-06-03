@@ -227,7 +227,7 @@ describe("User Update API Integration Test", () => {
     // Verify response
     expect(response.status).toBe(401);
     expect(responseData.success).toBe(false);
-    expect(responseData.error?.code).toBe("invalid_password");
+    expect(responseData.error?.code).toBe("INVALID_PASSWORD");
   });
 
   it("should succeed even when not authenticated", async () => {

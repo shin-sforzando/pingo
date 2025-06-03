@@ -225,6 +225,6 @@ describe("User Registration API Integration Test", () => {
     // Verify duplicate username error
     expect(response2.status).toBe(400);
     expect(responseData2.success).toBe(false);
-    expect(responseData2.error.code).toBe("username_exists");
+    expect(responseData2.error.code).toBe("USERNAME_EXISTS");
   });
 });

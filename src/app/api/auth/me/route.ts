@@ -20,7 +20,7 @@ export async function GET(
         {
           success: false,
           error: {
-            code: "unauthorized",
+            code: "UNAUTHORIZED",
             message: "Auth.errors.unauthorized",
           },
         },
@@ -35,7 +35,7 @@ export async function GET(
         {
           success: false,
           error: {
-            code: "unauthorized",
+            code: "UNAUTHORIZED",
             message: "Auth.errors.unauthorized",
           },
         },
@@ -55,7 +55,7 @@ export async function GET(
         {
           success: false,
           error: {
-            code: "user_not_found",
+            code: "USER_NOT_FOUND",
             message: "Auth.errors.userNotFound",
           },
         },

@@ -21,7 +21,7 @@ export async function POST(
         {
           success: false,
           error: {
-            code: "invalid_request",
+            code: "INVALID_REQUEST",
             message: "Auth.errors.userIdRequired",
           },
         },
