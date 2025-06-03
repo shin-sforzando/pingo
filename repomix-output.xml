@@ -229,6 +229,14 @@ trim_trailing_whitespace = true
 trim_trailing_whitespace = false
 </file>
 
+<file path=".storybook/decorators.tsx">
+import type React from "react";
+⋮----
+import { AuthContext } from "../src/contexts/AuthContext";
+⋮----
+export const withMockAuthContext = (Story: React.ComponentType) =>
+</file>
+
 <file path=".storybook/main.ts">
 import type { StorybookConfig } from "@storybook/nextjs";
 </file>
@@ -1018,14 +1026,6 @@ export function notificationToFirestore(
 
 </file>
 
-<file path=".storybook/decorators.tsx">
-import type React from "react";
-⋮----
-import { AuthContext } from "../src/contexts/AuthContext";
-⋮----
-export const withMockAuthContext = (Story: React.ComponentType) =>
-</file>
-
 <file path="cors.json">
 [
   {
@@ -1100,33 +1100,6 @@ import createNextIntlPlugin from "next-intl/plugin";
 }
 </file>
 
-<file path="src/app/api/auth/login/route.test.ts">
-import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
-import {
-  cleanupTestUsers,
-  createApiRequest,
-  generateTestUsername,
-} from "@/test/helpers/api-test-helpers";
-import { userToFirestoreForTest } from "@/test/helpers/firebase-test-helpers";
-import type { ApiResponse } from "@/types/common";
-⋮----
-import type { User } from "@/types/schema";
-⋮----
-import bcrypt from "bcrypt";
-import type { NextResponse } from "next/server";
-import { ulid } from "ulid";
-import {
-  afterAll,
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from "vitest";
-import { POST } from "./route";
-</file>
-
 <file path="src/app/api/auth/logout/route.test.ts">
 import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
 import {
@@ -1152,57 +1125,6 @@ import {
   vi,
 } from "vitest";
 import { POST } from "./route";
-</file>
-
-<file path="src/app/api/auth/register/route.test.ts">
-import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
-import {
-  cleanupTestUsers,
-  createApiRequest,
-  generateTestUsername,
-} from "@/test/helpers/api-test-helpers";
-import { userToFirestoreForTest } from "@/test/helpers/firebase-test-helpers";
-import type { ApiResponse } from "@/types/common";
-import type { User } from "@/types/schema";
-⋮----
-import type { NextResponse } from "next/server";
-import {
-  afterAll,
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from "vitest";
-import { POST } from "./route";
-</file>
-
-<file path="src/app/api/auth/update/route.test.ts">
-import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
-import {
-  cleanupTestUsers,
-  createApiRequest,
-  generateTestUsername,
-} from "@/test/helpers/api-test-helpers";
-import { userToFirestoreForTest } from "@/test/helpers/firebase-test-helpers";
-import type { ApiResponse } from "@/types/common";
-⋮----
-import type { User } from "@/types/schema";
-⋮----
-import bcrypt from "bcrypt";
-import type { NextResponse } from "next/server";
-import { ulid } from "ulid";
-import {
-  afterAll,
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from "vitest";
-import { PUT } from "./route";
 </file>
 
 <file path="src/app/api/game/[gameId]/events/route.test.ts">
@@ -1733,168 +1655,6 @@ export function validateGameId(gameId: string | undefined)
 
 </file>
 
-<file path="src/lib/firebase/admin-collections.ts">
-import {
-  type EventDocument,
-  type GameBoardDocument,
-  type GameDocument,
-  type GameParticipationDocument,
-  type PlayerBoardDocument,
-  type SubmissionDocument,
-  eventFromFirestore,
-  eventToFirestore,
-  gameBoardFromFirestore,
-  gameFromFirestore,
-  gameParticipationFromFirestore,
-  gameToFirestore,
-  playerBoardFromFirestore,
-  playerBoardToFirestore,
-  submissionFromFirestore,
-  submissionToFirestore,
-} from "../../types/game";
-import type {
-  Event,
-  Game,
-  GameBoard,
-  GameParticipation,
-  PlayerBoard,
-  Submission,
-  User,
-} from "../../types/schema";
-import {
-  type UserDocument,
-  userFromFirestore,
-  userToFirestore,
-} from "../../types/user";
-import { adminFirestore } from "./admin";
-⋮----
-export async function getGame(gameId: string): Promise<Game | null>
-⋮----
-export async function gameExists(gameId: string): Promise<boolean>
-⋮----
-export async function updateGame(gameId: string, game: Game): Promise<void>
-⋮----
-export async function getParticipant(
-    gameId: string,
-    userId: string,
-): Promise<GameParticipation | null>
-⋮----
-export async function isParticipant(
-    gameId: string,
-    userId: string,
-): Promise<boolean>
-⋮----
-export async function isGameAdmin(
-    gameId: string,
-    userId: string,
-): Promise<boolean>
-⋮----
-export async function getParticipants(
-    gameId: string,
-): Promise<Array<
-⋮----
-export async function getSubmission(
-    gameId: string,
-    submissionId: string,
-): Promise<Submission | null>
-⋮----
-export async function createSubmission(
-    gameId: string,
-    submission: Submission,
-): Promise<void>
-⋮----
-export async function updateSubmission(
-    gameId: string,
-    submissionId: string,
-    submission: Submission,
-): Promise<void>
-⋮----
-export async function getSubmissions(
-    gameId: string,
-    options: {
-      userId?: string;
-      limit?: number;
-      offset?: number;
-    } = {},
-): Promise<Submission[]>
-⋮----
-export async function submissionExists(
-    gameId: string,
-    submissionId: string,
-): Promise<boolean>
-⋮----
-export async function getPlayerBoard(
-    gameId: string,
-    userId: string,
-): Promise<PlayerBoard | null>
-⋮----
-export async function updatePlayerBoard(
-    gameId: string,
-    userId: string,
-    playerBoard: PlayerBoard,
-): Promise<void>
-⋮----
-export async function playerBoardExists(
-    gameId: string,
-    userId: string,
-): Promise<boolean>
-⋮----
-export async function getEvents(
-    gameId: string,
-    options: {
-      eventType?: string;
-      userId?: string;
-      limit?: number;
-      offset?: number;
-    } = {},
-): Promise<Event[]>
-⋮----
-export async function createEvent(
-    gameId: string,
-    event: Event,
-): Promise<void>
-⋮----
-export async function getGameBoard(
-    gameId: string,
-): Promise<GameBoard | null>
-⋮----
-export async function gameBoardExists(gameId: string): Promise<boolean>
-⋮----
-export async function getUser(userId: string): Promise<User | null>
-⋮----
-export async function getUserByUsername(
-    username: string,
-): Promise<User | null>
-⋮----
-export async function getUserDocumentByUsername(
-    username: string,
-): Promise<UserDocument | null>
-⋮----
-export async function createUser(
-    user: User,
-    passwordHash?: string,
-): Promise<void>
-⋮----
-export async function updateUser(userId: string, user: User): Promise<void>
-⋮----
-export async function userExists(userId: string): Promise<boolean>
-⋮----
-export async function isUsernameTaken(username: string): Promise<boolean>
-⋮----
-export async function updateLastLogin(userId: string): Promise<void>
-⋮----
-export async function updateUserPartial(
-    userId: string,
-    updates: Record<string, unknown>,
-): Promise<void>
-⋮----
-export async function getGameSubmissionContext(
-    gameId: string,
-    userId: string,
-    submissionId: string,
-): Promise<
-</file>
-
 <file path="src/lib/firebase/admin.test.ts">
 import { describe, expect, it } from "vitest";
 import { adminAuth, adminFirestore } from "./admin";
@@ -2146,33 +1906,7 @@ export function eventToFirestore(event: Event): EventDocument
 }
 </file>
 
-<file path="src/app/api/auth/login/route.ts">
-import bcrypt from "bcrypt";
-import { type NextRequest, NextResponse } from "next/server";
-⋮----
-import { adminAuth } from "@/lib/firebase/admin";
-import { AdminUserService } from "@/lib/firebase/admin-collections";
-import type { ApiResponse } from "@/types/common";
-import { userLoginSchema } from "@/types/schema";
-import type { User } from "@/types/schema";
-⋮----
-export async function POST(
-  request: NextRequest,
-): Promise<NextResponse<ApiResponse<
-</file>
-
-<file path="src/app/api/auth/logout/route.ts">
-import { type NextRequest, NextResponse } from "next/server";
-⋮----
-import { AdminUserService } from "@/lib/firebase/admin-collections";
-import type { ApiResponse } from "@/types/common";
-⋮----
-export async function POST(
-  request: NextRequest,
-): Promise<NextResponse<ApiResponse<
-</file>
-
-<file path="src/app/api/auth/me/route.test.ts">
+<file path="src/app/api/auth/login/route.test.ts">
 import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
 import {
   cleanupTestUsers,
@@ -2196,23 +1930,58 @@ import {
   it,
   vi,
 } from "vitest";
-import { GET } from "./route";
+import { POST } from "./route";
 </file>
 
-<file path="src/app/api/auth/register/route.ts">
-import bcrypt from "bcrypt";
-import { type NextRequest, NextResponse } from "next/server";
-import { ulid } from "ulid";
-⋮----
-import { adminAuth } from "@/lib/firebase/admin";
-import { AdminUserService } from "@/lib/firebase/admin-collections";
+<file path="src/app/api/auth/register/route.test.ts">
+import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
+import {
+  cleanupTestUsers,
+  createApiRequest,
+  generateTestUsername,
+} from "@/test/helpers/api-test-helpers";
+import { userToFirestoreForTest } from "@/test/helpers/firebase-test-helpers";
 import type { ApiResponse } from "@/types/common";
-import { userCreationSchema } from "@/types/schema";
 import type { User } from "@/types/schema";
 ⋮----
-export async function POST(
-  request: NextRequest,
-): Promise<NextResponse<ApiResponse<
+import type { NextResponse } from "next/server";
+import {
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
+import { POST } from "./route";
+</file>
+
+<file path="src/app/api/auth/update/route.test.ts">
+import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
+import {
+  cleanupTestUsers,
+  createApiRequest,
+  generateTestUsername,
+} from "@/test/helpers/api-test-helpers";
+import { userToFirestoreForTest } from "@/test/helpers/firebase-test-helpers";
+import type { ApiResponse } from "@/types/common";
+⋮----
+import type { User } from "@/types/schema";
+⋮----
+import bcrypt from "bcrypt";
+import type { NextResponse } from "next/server";
+import { ulid } from "ulid";
+import {
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
+import { PUT } from "./route";
 </file>
 
 <file path="src/app/api/game/[gameId]/playerBoard/[userId]/route.test.ts">
@@ -2361,6 +2130,173 @@ import type { ReactElement } from "react";
 const toggleLocale = async (): Promise<void> =>
 </file>
 
+<file path="src/lib/firebase/admin-collections.ts">
+import { dateToTimestamp } from "../../types/firestore";
+import {
+  type EventDocument,
+  type GameBoardDocument,
+  type GameDocument,
+  type GameParticipationDocument,
+  type PlayerBoardDocument,
+  type SubmissionDocument,
+  eventFromFirestore,
+  eventToFirestore,
+  gameBoardFromFirestore,
+  gameFromFirestore,
+  gameParticipationFromFirestore,
+  gameToFirestore,
+  playerBoardFromFirestore,
+  playerBoardToFirestore,
+  submissionFromFirestore,
+  submissionToFirestore,
+} from "../../types/game";
+import type {
+  Event,
+  Game,
+  GameBoard,
+  GameParticipation,
+  PlayerBoard,
+  Submission,
+  User,
+} from "../../types/schema";
+import {
+  type UserDocument,
+  userFromFirestore,
+  userToFirestore,
+} from "../../types/user";
+import { adminFirestore } from "./admin";
+⋮----
+export async function getGame(gameId: string): Promise<Game | null>
+⋮----
+export async function gameExists(gameId: string): Promise<boolean>
+⋮----
+export async function updateGame(gameId: string, game: Game): Promise<void>
+⋮----
+export async function getParticipant(
+    gameId: string,
+    userId: string,
+): Promise<GameParticipation | null>
+⋮----
+export async function isParticipant(
+    gameId: string,
+    userId: string,
+): Promise<boolean>
+⋮----
+export async function isGameAdmin(
+    gameId: string,
+    userId: string,
+): Promise<boolean>
+⋮----
+export async function getParticipants(
+    gameId: string,
+): Promise<Array<
+⋮----
+export async function getSubmission(
+    gameId: string,
+    submissionId: string,
+): Promise<Submission | null>
+⋮----
+export async function createSubmission(
+    gameId: string,
+    submission: Submission,
+): Promise<void>
+⋮----
+export async function updateSubmission(
+    gameId: string,
+    submissionId: string,
+    submission: Submission,
+): Promise<void>
+⋮----
+export async function getSubmissions(
+    gameId: string,
+    options: {
+      userId?: string;
+      limit?: number;
+      offset?: number;
+    } = {},
+): Promise<Submission[]>
+⋮----
+export async function submissionExists(
+    gameId: string,
+    submissionId: string,
+): Promise<boolean>
+⋮----
+export async function getPlayerBoard(
+    gameId: string,
+    userId: string,
+): Promise<PlayerBoard | null>
+⋮----
+export async function updatePlayerBoard(
+    gameId: string,
+    userId: string,
+    playerBoard: PlayerBoard,
+): Promise<void>
+⋮----
+export async function playerBoardExists(
+    gameId: string,
+    userId: string,
+): Promise<boolean>
+⋮----
+export async function getEvents(
+    gameId: string,
+    options: {
+      eventType?: string;
+      userId?: string;
+      limit?: number;
+      offset?: number;
+    } = {},
+): Promise<Event[]>
+⋮----
+export async function createEvent(
+    gameId: string,
+    event: Event,
+): Promise<void>
+⋮----
+export async function getGameBoard(
+    gameId: string,
+): Promise<GameBoard | null>
+⋮----
+export async function gameBoardExists(gameId: string): Promise<boolean>
+⋮----
+export async function getUser(userId: string): Promise<User | null>
+⋮----
+export async function getUserByUsername(
+    username: string,
+): Promise<User | null>
+⋮----
+export async function getUserDocumentByUsername(
+    username: string,
+): Promise<UserDocument | null>
+⋮----
+export async function getUserDocumentById(
+    userId: string,
+): Promise<UserDocument | null>
+⋮----
+export async function createUser(
+    user: User,
+    passwordHash?: string,
+): Promise<void>
+⋮----
+export async function updateUser(userId: string, user: User): Promise<void>
+⋮----
+export async function userExists(userId: string): Promise<boolean>
+⋮----
+export async function isUsernameTaken(username: string): Promise<boolean>
+⋮----
+export async function updateLastLogin(userId: string): Promise<void>
+⋮----
+export async function updateUserPartial(
+    userId: string,
+    updates: Record<string, unknown>,
+): Promise<void>
+⋮----
+export async function getGameSubmissionContext(
+    gameId: string,
+    userId: string,
+    submissionId: string,
+): Promise<
+</file>
+
 <file path="src/test/helpers/api-test-helpers.ts">
 import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
 import { NextRequest } from "next/server";
@@ -2448,15 +2384,71 @@ export function convertTimestampsToDate<T extends Record<string, unknown>>(
 
 </file>
 
-<file path="src/app/api/auth/me/route.ts">
+<file path="src/app/api/auth/login/route.ts">
+import bcrypt from "bcrypt";
 import { type NextRequest, NextResponse } from "next/server";
 ⋮----
 import { adminAuth } from "@/lib/firebase/admin";
 import { AdminUserService } from "@/lib/firebase/admin-collections";
 import type { ApiResponse } from "@/types/common";
+import { userLoginSchema } from "@/types/schema";
 import type { User } from "@/types/schema";
 ⋮----
-export async function GET(
+export async function POST(
+  request: NextRequest,
+): Promise<NextResponse<ApiResponse<
+</file>
+
+<file path="src/app/api/auth/logout/route.ts">
+import { type NextRequest, NextResponse } from "next/server";
+⋮----
+import { AdminUserService } from "@/lib/firebase/admin-collections";
+import type { ApiResponse } from "@/types/common";
+⋮----
+export async function POST(
+  request: NextRequest,
+): Promise<NextResponse<ApiResponse<
+</file>
+
+<file path="src/app/api/auth/me/route.test.ts">
+import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
+import {
+  cleanupTestUsers,
+  createApiRequest,
+  generateTestUsername,
+} from "@/test/helpers/api-test-helpers";
+import { userToFirestoreForTest } from "@/test/helpers/firebase-test-helpers";
+import type { ApiResponse } from "@/types/common";
+⋮----
+import type { User } from "@/types/schema";
+⋮----
+import bcrypt from "bcrypt";
+import type { NextResponse } from "next/server";
+import { ulid } from "ulid";
+import {
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
+import { GET } from "./route";
+</file>
+
+<file path="src/app/api/auth/register/route.ts">
+import bcrypt from "bcrypt";
+import { type NextRequest, NextResponse } from "next/server";
+import { ulid } from "ulid";
+⋮----
+import { adminAuth } from "@/lib/firebase/admin";
+import { AdminUserService } from "@/lib/firebase/admin-collections";
+import type { ApiResponse } from "@/types/common";
+import { userCreationSchema } from "@/types/schema";
+import type { User } from "@/types/schema";
+⋮----
+export async function POST(
   request: NextRequest,
 ): Promise<NextResponse<ApiResponse<
 </file>
@@ -2758,35 +2750,17 @@ import { resolve } from "node:path";
 import { config } from "dotenv";
 </file>
 
-<file path="lefthook.yml">
-pre-commit:
-  commands:
-    hide:
-      run: git secret hide -mF
-      stage_fixed: true
-    check:
-      glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}"
-      run: npm run check -- --no-errors-on-unmatched --colors=off {staged_files}
-      stage_fixed: true
-    test:
-      glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx}"
-      run: npm run test:once -- --no-coverage
-    i18n:
-      glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}"
-      run: npm run check:i18n
-    build:
-      glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx}"
-      run: npm run build
-
-post-checkout:
-  commands:
-    reveal:
-      interactive: true
-      run: git secret reveal -v
-    install:
-      run: npm install --legacy-peer-deps
-    adc:
-      run: gcloud auth application-default login
+<file path="src/app/api/auth/me/route.ts">
+import { type NextRequest, NextResponse } from "next/server";
+⋮----
+import { adminAuth } from "@/lib/firebase/admin";
+import { AdminUserService } from "@/lib/firebase/admin-collections";
+import type { ApiResponse } from "@/types/common";
+import type { User } from "@/types/schema";
+⋮----
+export async function GET(
+  request: NextRequest,
+): Promise<NextResponse<ApiResponse<
 </file>
 
 <file path="src/app/api/game/[gameId]/board/route.ts">
@@ -2967,6 +2941,40 @@ import {
 } from "./image-utils";
 ⋮----
 // Mock document.createElement
+</file>
+
+<file path="lefthook.yml">
+pre-commit:
+  commands:
+    hide:
+      run: git secret hide -mF
+      stage_fixed: true
+    check:
+      glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}"
+      run: npm run check -- --no-errors-on-unmatched --colors=off {staged_files}
+      stage_fixed: true
+    test:
+      glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx}"
+      run: npm run test:once -- --no-coverage
+    i18n:
+      glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}"
+      run: npm run check:i18n
+    build:
+      glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx}"
+      run: npm run build
+    knip:
+      glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx}"
+      run: npm run knip -- --production --no-exit-code
+
+post-checkout:
+  commands:
+    reveal:
+      interactive: true
+      run: git secret reveal -v
+    install:
+      run: npm install --legacy-peer-deps
+    adc:
+      run: gcloud auth application-default login
 </file>
 
 <file path="src/app/api/game/[gameId]/route.ts">
@@ -3967,6 +3975,7 @@ import { getFirestore } from "firebase-admin/firestore";
     "storybook": "storybook dev --port 6006 --no-open",
     "build-storybook": "storybook build",
     "repomix": "npx repomix",
+    "knip": "knip",
     "docker": "npm run docker:build -- --run",
     "docker:build": "npx tsx scripts/docker-build.ts"
   },
@@ -4033,6 +4042,7 @@ import { getFirestore } from "firebase-admin/firestore";
     "@vitest/coverage-istanbul": "^3.2.1",
     "dotenv": "^16.5.0",
     "jsdom": "^26.1.0",
+    "knip": "^5.59.1",
     "lefthook": "^1.11.13",
     "playwright": "^1.52.0",
     "storybook": "^8.6.14",

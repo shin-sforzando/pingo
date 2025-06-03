@@ -2,6 +2,7 @@
  * Admin SDK data access layer with type safety
  * Provides consistent data access patterns for server-side operations
  */
+import { dateToTimestamp } from "../../types/firestore";
 import {
   type EventDocument,
   type GameBoardDocument,
@@ -577,9 +578,10 @@ export namespace AdminUserService {
    */
   export async function updateLastLogin(userId: string): Promise<void> {
     const now = new Date();
+    const timestamp = dateToTimestamp(now);
     await adminFirestore.collection("users").doc(userId).update({
-      lastLoginAt: now,
-      updatedAt: now,
+      lastLoginAt: timestamp,
+      updatedAt: timestamp,
     });
   }
 
