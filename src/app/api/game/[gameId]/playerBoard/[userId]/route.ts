@@ -1,10 +1,10 @@
-import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
-import type { ApiResponse } from "@/types/common";
+import { adminAuth } from "@/lib/firebase/admin";
 import {
-  type PlayerBoardDocument,
-  playerBoardFromFirestore,
-  playerBoardToFirestore,
-} from "@/types/game";
+  AdminGameParticipationService,
+  AdminGameService,
+  AdminPlayerBoardService,
+} from "@/lib/firebase/admin-collections";
+import type { ApiResponse } from "@/types/common";
 import {
   type PlayerBoard,
   cellStateApiSchema,
@@ -61,15 +61,12 @@ export async function GET(
     // Check if user is requesting their own board or is game admin
     if (currentUserId !== userId) {
       // Check if current user is admin of this game
-      const gameParticipationRef = adminFirestore
-        .collection("game_participations")
-        .where("userId", "==", currentUserId)
-        .where("gameId", "==", gameId)
-        .where("role", "in", ["creator", "admin"]);
+      const isAdmin = await AdminGameParticipationService.isGameAdmin(
+        gameId,
+        currentUserId,
+      );
 
-      const participationSnapshot = await gameParticipationRef.get();
-
-      if (participationSnapshot.empty) {
+      if (!isAdmin) {
         return NextResponse.json(
           {
             success: false,
@@ -84,11 +81,9 @@ export async function GET(
       }
     }
 
-    // Verify game exists and user is participant
-    const gameRef = adminFirestore.collection("games").doc(gameId);
-    const gameDoc = await gameRef.get();
-
-    if (!gameDoc.exists) {
+    // Verify game exists
+    const gameExists = await AdminGameService.gameExists(gameId);
+    if (!gameExists) {
       return NextResponse.json(
         {
           success: false,
@@ -102,14 +97,11 @@ export async function GET(
     }
 
     // Check if user is participant in this game
-    const participantRef = adminFirestore
-      .collection("games")
-      .doc(gameId)
-      .collection("participants")
-      .doc(userId);
-
-    const participantDoc = await participantRef.get();
-    if (!participantDoc.exists) {
+    const isParticipant = await AdminGameParticipationService.isParticipant(
+      gameId,
+      userId,
+    );
+    if (!isParticipant) {
       return NextResponse.json(
         {
           success: false,
@@ -123,15 +115,12 @@ export async function GET(
     }
 
     // Get player board
-    const playerBoardRef = adminFirestore
-      .collection("games")
-      .doc(gameId)
-      .collection("playerBoards")
-      .doc(userId);
+    const playerBoard = await AdminPlayerBoardService.getPlayerBoard(
+      gameId,
+      userId,
+    );
 
-    const playerBoardDoc = await playerBoardRef.get();
-
-    if (!playerBoardDoc.exists) {
+    if (!playerBoard) {
       return NextResponse.json(
         {
           success: false,
@@ -143,10 +132,6 @@ export async function GET(
         { status: 404 },
       );
     }
-
-    // Convert Firestore document to PlayerBoard type
-    const playerBoardData = playerBoardDoc.data() as PlayerBoardDocument;
-    const playerBoard = playerBoardFromFirestore(playerBoardData);
 
     return NextResponse.json({
       success: true,
@@ -252,11 +237,9 @@ export async function PUT(
 
     const updateData = validationResult.data;
 
-    // Verify game exists and user is participant
-    const gameRef = adminFirestore.collection("games").doc(gameId);
-    const gameDoc = await gameRef.get();
-
-    if (!gameDoc.exists) {
+    // Verify game exists
+    const gameExists = await AdminGameService.gameExists(gameId);
+    if (!gameExists) {
       return NextResponse.json(
         {
           success: false,
@@ -270,14 +253,11 @@ export async function PUT(
     }
 
     // Check if user is participant in this game
-    const participantRef = adminFirestore
-      .collection("games")
-      .doc(gameId)
-      .collection("participants")
-      .doc(userId);
-
-    const participantDoc = await participantRef.get();
-    if (!participantDoc.exists) {
+    const isParticipant = await AdminGameParticipationService.isParticipant(
+      gameId,
+      userId,
+    );
+    if (!isParticipant) {
       return NextResponse.json(
         {
           success: false,
@@ -291,15 +271,12 @@ export async function PUT(
     }
 
     // Get current player board
-    const playerBoardRef = adminFirestore
-      .collection("games")
-      .doc(gameId)
-      .collection("playerBoards")
-      .doc(userId);
+    const currentPlayerBoard = await AdminPlayerBoardService.getPlayerBoard(
+      gameId,
+      userId,
+    );
 
-    const playerBoardDoc = await playerBoardRef.get();
-
-    if (!playerBoardDoc.exists) {
+    if (!currentPlayerBoard) {
       return NextResponse.json(
         {
           success: false,
@@ -311,10 +288,6 @@ export async function PUT(
         { status: 404 },
       );
     }
-
-    // Get current player board data
-    const currentPlayerBoardData = playerBoardDoc.data() as PlayerBoardDocument;
-    const currentPlayerBoard = playerBoardFromFirestore(currentPlayerBoardData);
 
     // Create updated player board by merging existing and new data
     const updatedPlayerBoard: PlayerBoard = {
@@ -330,9 +303,12 @@ export async function PUT(
         : currentPlayerBoard.completedLines,
     };
 
-    // Convert to Firestore format and update
-    const updatedPlayerBoardDoc = playerBoardToFirestore(updatedPlayerBoard);
-    await playerBoardRef.set(updatedPlayerBoardDoc, { merge: true });
+    // Update player board using data access layer
+    await AdminPlayerBoardService.updatePlayerBoard(
+      gameId,
+      userId,
+      updatedPlayerBoard,
+    );
 
     return NextResponse.json({
       success: true,

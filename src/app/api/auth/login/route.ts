@@ -1,13 +1,11 @@
 import bcrypt from "bcrypt";
 import { type NextRequest, NextResponse } from "next/server";
 
-import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
+import { adminAuth } from "@/lib/firebase/admin";
+import { AdminUserService } from "@/lib/firebase/admin-collections";
 import type { ApiResponse } from "@/types/common";
-import { type TimestampInterface, dateToTimestamp } from "@/types/firestore";
 import { userLoginSchema } from "@/types/schema";
 import type { User } from "@/types/schema";
-import { userFromFirestore } from "@/types/user";
-import type { UserDocument } from "@/types/user";
 
 /**
  * User login API
@@ -38,14 +36,10 @@ export async function POST(
 
     const { username, password } = validationResult.data;
 
-    // Find user by username
-    const usersRef = adminFirestore.collection("users");
-    const usernameQuery = await usersRef
-      .where("username", "==", username)
-      .limit(1)
-      .get();
+    // Find user document by username using data access layer (includes passwordHash)
+    const userDoc = await AdminUserService.getUserDocumentByUsername(username);
 
-    if (usernameQuery.empty) {
+    if (!userDoc) {
       return NextResponse.json(
         {
           success: false,
@@ -57,9 +51,6 @@ export async function POST(
         { status: 401 },
       );
     }
-
-    // Get user document
-    const userDoc = usernameQuery.docs[0].data() as UserDocument;
 
     // Verify password
     const passwordMatch = await bcrypt.compare(password, userDoc.passwordHash);
@@ -76,19 +67,14 @@ export async function POST(
       );
     }
 
-    // Update last login time
-    const now = new Date();
-    await usersRef.doc(userDoc.id).update({
-      lastLoginAt: dateToTimestamp(now),
-      updatedAt: dateToTimestamp(now),
-    });
+    // Update last login time using data access layer
+    await AdminUserService.updateLastLogin(userDoc.id);
 
-    // Update user object with new login time
-    userDoc.lastLoginAt = dateToTimestamp(now) as TimestampInterface;
-    userDoc.updatedAt = dateToTimestamp(now) as TimestampInterface;
-
-    // Convert to user model
-    const user = userFromFirestore(userDoc);
+    // Get updated user data (without passwordHash)
+    const user = await AdminUserService.getUserByUsername(username);
+    if (!user) {
+      throw new Error("User not found after login");
+    }
 
     // Create custom token for authentication
     const customToken = await adminAuth.createCustomToken(userDoc.id);

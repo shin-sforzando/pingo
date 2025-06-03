@@ -1,12 +1,11 @@
 import { validateGameId } from "@/lib/api-utils";
-import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
+import { adminAuth } from "@/lib/firebase/admin";
+import {
+  AdminGameParticipationService,
+  AdminGameService,
+} from "@/lib/firebase/admin-collections";
 import type { ApiResponse } from "@/types/common";
 import { dateToISOString } from "@/types/firestore";
-import {
-  type GameDocument,
-  gameFromFirestore,
-  gameToFirestore,
-} from "@/types/game";
 import type { Game } from "@/types/schema";
 import { gameSchema } from "@/types/schema";
 import type { NextRequest } from "next/server";
@@ -52,30 +51,16 @@ export async function GET(
     const validationError = validateGameId(gameId);
     if (validationError) return validationError;
 
-    const gameDoc = await adminFirestore.collection("games").doc(gameId).get();
+    const game = await AdminGameService.getGame(gameId);
 
-    if (!gameDoc.exists) {
+    if (!game) {
       return NextResponse.json({ error: "Game not found" }, { status: 404 });
     }
 
-    const gameData = gameDoc.data();
-    if (!gameData) {
-      return NextResponse.json(
-        { error: "Game data is empty" },
-        { status: 404 },
-      );
-    }
-
-    // Convert Firestore data to application model using the converter function
-    const convertedGame = gameFromFirestore({
-      ...gameData,
-      id: gameDoc.id,
-    } as GameDocument);
-
-    // Return the converted game data in ApiResponse format
+    // Return the game data in ApiResponse format
     return NextResponse.json({
       success: true,
-      data: convertedGame,
+      data: game,
     });
   } catch (error) {
     console.error("Error fetching game data:", error);
@@ -150,11 +135,10 @@ export async function PUT(
 
     const updateData = validationResult.data;
 
-    // Get current game
-    const gameRef = adminFirestore.collection("games").doc(gameId);
-    const gameDoc = await gameRef.get();
+    // Get current game using data access layer
+    const currentGame = await AdminGameService.getGame(gameId);
 
-    if (!gameDoc.exists) {
+    if (!currentGame) {
       return NextResponse.json(
         {
           success: false,
@@ -167,24 +151,16 @@ export async function PUT(
       );
     }
 
-    // Get current game data
-    const currentGameData = gameDoc.data() as GameDocument;
-    const currentGame = gameFromFirestore(currentGameData);
-
     // Check if user can update this game
     const isCreator = currentGame.creatorId === currentUserId;
     let isAdmin = false;
 
     if (!isCreator) {
       // Check if current user is admin of this game
-      const gameParticipationRef = adminFirestore
-        .collection("game_participations")
-        .where("userId", "==", currentUserId)
-        .where("gameId", "==", gameId)
-        .where("role", "in", ["creator", "admin"]);
-
-      const participationSnapshot = await gameParticipationRef.get();
-      isAdmin = !participationSnapshot.empty;
+      isAdmin = await AdminGameParticipationService.isGameAdmin(
+        gameId,
+        currentUserId,
+      );
     }
 
     if (!isCreator && !isAdmin) {
@@ -227,9 +203,8 @@ export async function PUT(
       updatedAt: now,
     };
 
-    // Convert to Firestore format and update
-    const updatedGameDoc = gameToFirestore(updatedGame);
-    await gameRef.set(updatedGameDoc, { merge: true });
+    // Update game using data access layer
+    await AdminGameService.updateGame(gameId, updatedGame);
 
     console.log(`Updated game: ${gameId} by user: ${currentUserId}`);
 

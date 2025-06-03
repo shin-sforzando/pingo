@@ -1,14 +1,14 @@
-import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
+import { adminAuth } from "@/lib/firebase/admin";
+import {
+  AdminBatchService,
+  AdminGameParticipationService,
+  AdminSubmissionService,
+} from "@/lib/firebase/admin-collections";
 import type { ApiResponse } from "@/types/common";
 import { ProcessingStatus } from "@/types/common";
-import {
-  type SubmissionDocument,
-  submissionFromFirestore,
-  submissionToFirestore,
-} from "@/types/game";
 import { type Submission, submissionSchema } from "@/types/schema";
-import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
 // Schema for updating submission - reuse from schema.ts
 const updateSubmissionSchema = submissionSchema
@@ -67,11 +67,15 @@ export async function GET(
     const decodedToken = await adminAuth.verifyIdToken(token);
     const userId = decodedToken.uid;
 
-    // Verify game exists
-    const gameRef = adminFirestore.collection("games").doc(gameId);
-    const gameDoc = await gameRef.get();
+    // Get game, participant, and submission data in parallel for better performance
+    const { game, isParticipant, submission } =
+      await AdminBatchService.getGameSubmissionContext(
+        gameId,
+        userId,
+        submissionId,
+      );
 
-    if (!gameDoc.exists) {
+    if (!game) {
       return NextResponse.json(
         {
           success: false,
@@ -84,15 +88,7 @@ export async function GET(
       );
     }
 
-    // Check if user is participant in this game
-    const participantRef = adminFirestore
-      .collection("games")
-      .doc(gameId)
-      .collection("participants")
-      .doc(userId);
-
-    const participantDoc = await participantRef.get();
-    if (!participantDoc.exists) {
+    if (!isParticipant) {
       return NextResponse.json(
         {
           success: false,
@@ -105,16 +101,7 @@ export async function GET(
       );
     }
 
-    // Get submission
-    const submissionRef = adminFirestore
-      .collection("games")
-      .doc(gameId)
-      .collection("submissions")
-      .doc(submissionId);
-
-    const submissionDoc = await submissionRef.get();
-
-    if (!submissionDoc.exists) {
+    if (!submission) {
       return NextResponse.json(
         {
           success: false,
@@ -126,10 +113,6 @@ export async function GET(
         { status: 404 },
       );
     }
-
-    // Convert Firestore document to Submission type
-    const submissionData = submissionDoc.data() as SubmissionDocument;
-    const submission = submissionFromFirestore(submissionData);
 
     return NextResponse.json({
       success: true,
@@ -215,11 +198,18 @@ export async function PUT(
 
     const updateData = validationResult.data;
 
-    // Verify game exists
-    const gameRef = adminFirestore.collection("games").doc(gameId);
-    const gameDoc = await gameRef.get();
+    // Get game, participant, and submission data in parallel for better performance
+    const {
+      game,
+      isParticipant,
+      submission: currentSubmission,
+    } = await AdminBatchService.getGameSubmissionContext(
+      gameId,
+      currentUserId,
+      submissionId,
+    );
 
-    if (!gameDoc.exists) {
+    if (!game) {
       return NextResponse.json(
         {
           success: false,
@@ -232,15 +222,7 @@ export async function PUT(
       );
     }
 
-    // Check if user is participant in this game
-    const participantRef = adminFirestore
-      .collection("games")
-      .doc(gameId)
-      .collection("participants")
-      .doc(currentUserId);
-
-    const participantDoc = await participantRef.get();
-    if (!participantDoc.exists) {
+    if (!isParticipant) {
       return NextResponse.json(
         {
           success: false,
@@ -253,16 +235,7 @@ export async function PUT(
       );
     }
 
-    // Get current submission
-    const submissionRef = adminFirestore
-      .collection("games")
-      .doc(gameId)
-      .collection("submissions")
-      .doc(submissionId);
-
-    const submissionDoc = await submissionRef.get();
-
-    if (!submissionDoc.exists) {
+    if (!currentSubmission) {
       return NextResponse.json(
         {
           success: false,
@@ -275,24 +248,16 @@ export async function PUT(
       );
     }
 
-    // Get current submission data
-    const currentSubmissionData = submissionDoc.data() as SubmissionDocument;
-    const currentSubmission = submissionFromFirestore(currentSubmissionData);
-
     // Check if user can update this submission
     const isOwner = currentSubmission.userId === currentUserId;
     let isAdmin = false;
 
     if (!isOwner) {
       // Check if current user is admin of this game
-      const gameParticipationRef = adminFirestore
-        .collection("game_participations")
-        .where("userId", "==", currentUserId)
-        .where("gameId", "==", gameId)
-        .where("role", "in", ["creator", "admin"]);
-
-      const participationSnapshot = await gameParticipationRef.get();
-      isAdmin = !participationSnapshot.empty;
+      isAdmin = await AdminGameParticipationService.isGameAdmin(
+        gameId,
+        currentUserId,
+      );
     }
 
     if (!isOwner && !isAdmin) {
@@ -343,9 +308,12 @@ export async function PUT(
       updatedSubmission.analyzedAt = now;
     }
 
-    // Convert to Firestore format and update
-    const updatedSubmissionDoc = submissionToFirestore(updatedSubmission);
-    await submissionRef.set(updatedSubmissionDoc, { merge: true });
+    // Update submission
+    await AdminSubmissionService.updateSubmission(
+      gameId,
+      submissionId,
+      updatedSubmission,
+    );
 
     console.log(
       `Updated submission: ${submissionId} in game: ${gameId} by user: ${currentUserId}`,

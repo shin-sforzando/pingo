@@ -463,11 +463,11 @@ export default function CreateGamePage() {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="text-muted-foreground text-sm">
-                      {subjects.length > 0
+                      {0 < subjects.length
                         ? t("Game.subjectsCount", { count: subjects.length })
                         : t("Game.noSubjects")}
                     </div>
-                    {subjects.length > 0 && (
+                    {0 < subjects.length && (
                       <Button
                         type="button"
                         variant="outline"
@@ -617,7 +617,7 @@ export default function CreateGamePage() {
                             {...field}
                             onChange={(e) => {
                               const value = Number.parseInt(e.target.value, 10);
-                              if (value >= 1 && value <= 5) {
+                              if (1 <= value && value <= 5) {
                                 field.onChange(value);
                               }
                             }}
@@ -651,7 +651,7 @@ export default function CreateGamePage() {
                             {...field}
                             onChange={(e) => {
                               const value = Number.parseFloat(e.target.value);
-                              if (value >= 0 && value <= 1) {
+                              if (0 <= value && value <= 1) {
                                 field.onChange(value);
                               }
                             }}

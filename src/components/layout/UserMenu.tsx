@@ -60,7 +60,7 @@ export function UserMenu(): ReactElement {
           </DropdownMenuItem>
         </DropdownMenuGroup>
 
-        {user?.participatingGames && user.participatingGames.length > 0 && (
+        {user?.participatingGames && 0 < user.participatingGames.length && (
           <>
             <DropdownMenuSeparator />
             <DropdownMenuLabel>{t("recentGames")}</DropdownMenuLabel>

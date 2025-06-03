@@ -11,6 +11,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { ulid } from "ulid";
 import { z } from "zod";
 import { adminAuth, adminFirestore } from "../../../../lib/firebase/admin";
+import { AdminGameService } from "../../../../lib/firebase/admin-collections";
 import { type ApiResponse, GameStatus, Role } from "../../../../types/common";
 import { convertTimestampsToDate } from "../../../../types/firestore";
 import {
@@ -58,8 +59,7 @@ function generateGameId(isTest = false): string {
  * @returns True if the game ID exists, false otherwise
  */
 async function gameIdExists(gameId: string): Promise<boolean> {
-  const gameDoc = await adminFirestore.collection("games").doc(gameId).get();
-  return gameDoc.exists;
+  return await AdminGameService.gameExists(gameId);
 }
 
 /**

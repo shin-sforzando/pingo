@@ -2,12 +2,9 @@ import bcrypt from "bcrypt";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
-import { adminFirestore } from "@/lib/firebase/admin";
+import { AdminUserService } from "@/lib/firebase/admin-collections";
 import type { ApiResponse } from "@/types/common";
-import { dateToTimestamp } from "@/types/firestore";
 import { type User, userCreationSchema, userSchema } from "@/types/schema";
-import type { UserDocument } from "@/types/user";
-import { userFromFirestore } from "@/types/user";
 
 // Define password update fields
 const passwordUpdateFields = z.object({
@@ -56,11 +53,10 @@ export async function PUT(
     const { userId, username, currentPassword, newPassword } =
       validationResult.data;
 
-    // Get user document
-    const usersRef = adminFirestore.collection("users");
-    const userSnapshot = await usersRef.doc(userId).get();
+    // Get user using data access layer
+    const user = await AdminUserService.getUser(userId);
 
-    if (!userSnapshot.exists) {
+    if (!user) {
       return NextResponse.json(
         {
           success: false,
@@ -73,20 +69,35 @@ export async function PUT(
       );
     }
 
-    const userDoc = userSnapshot.data() as UserDocument;
+    // Get user document for password verification if needed
+    let userDocForPassword = null;
+    if (newPassword) {
+      userDocForPassword = await AdminUserService.getUserDocumentByUsername(
+        user.username,
+      );
+      if (!userDocForPassword) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              code: "user_not_found",
+              message: "Auth.errors.userNotFound",
+            },
+          },
+          { status: 404 },
+        );
+      }
+    }
+
     const updateData: Record<string, unknown> = {};
     const now = new Date();
-    updateData.updatedAt = dateToTimestamp(now);
+    updateData.updatedAt = now;
 
     // Check if username is being updated
-    if (username && username !== userDoc.username) {
-      // Check if the new username is already taken
-      const usernameQuery = await usersRef
-        .where("username", "==", username)
-        .limit(1)
-        .get();
-
-      if (!usernameQuery.empty) {
+    if (username && username !== user.username) {
+      // Check if the new username is already taken using data access layer
+      const isUsernameTaken = await AdminUserService.isUsernameTaken(username);
+      if (isUsernameTaken) {
         return NextResponse.json(
           {
             success: false,
@@ -103,12 +114,12 @@ export async function PUT(
     }
 
     // Check if password is being updated
-    if (newPassword) {
+    if (newPassword && userDocForPassword) {
       // Verify current password if provided
       if (currentPassword) {
         const passwordMatch = await bcrypt.compare(
           currentPassword,
-          userDoc.passwordHash,
+          userDocForPassword.passwordHash,
         );
         if (!passwordMatch) {
           return NextResponse.json(
@@ -143,7 +154,6 @@ export async function PUT(
 
     // If there are no updates other than the updatedAt timestamp, return success with current user data
     if (Object.keys(updateData).length === 1 && updateData.updatedAt) {
-      const user = userFromFirestore(userDoc);
       return NextResponse.json(
         {
           success: true,
@@ -155,19 +165,20 @@ export async function PUT(
       );
     }
 
-    // Update user document
-    await usersRef.doc(userId).update(updateData);
+    // Update user document using data access layer
+    await AdminUserService.updateUserPartial(userId, updateData);
 
-    // Get updated user document
-    const updatedUserSnapshot = await usersRef.doc(userId).get();
-    const updatedUserDoc = updatedUserSnapshot.data() as UserDocument;
-    const user = userFromFirestore(updatedUserDoc);
+    // Get updated user data
+    const updatedUser = await AdminUserService.getUser(userId);
+    if (!updatedUser) {
+      throw new Error("User not found after update");
+    }
 
     return NextResponse.json(
       {
         success: true,
         data: {
-          user,
+          user: updatedUser,
         },
       },
       { status: 200 },

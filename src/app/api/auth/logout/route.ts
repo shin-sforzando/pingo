@@ -1,8 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-import { adminFirestore } from "@/lib/firebase/admin";
+import { AdminUserService } from "@/lib/firebase/admin-collections";
 import type { ApiResponse } from "@/types/common";
-import { dateToTimestamp } from "@/types/firestore";
 
 /**
  * User logout API
@@ -30,13 +29,11 @@ export async function POST(
       );
     }
 
-    // Update user's last activity timestamp
-    const now = new Date();
-    const usersRef = adminFirestore.collection("users");
-
+    // Update user's last activity timestamp using data access layer
     try {
-      await usersRef.doc(userId).update({
-        updatedAt: dateToTimestamp(now),
+      const now = new Date();
+      await AdminUserService.updateUserPartial(userId, {
+        updatedAt: now,
       });
     } catch (error) {
       console.error(`Failed to update user ${userId} timestamp:`, error);

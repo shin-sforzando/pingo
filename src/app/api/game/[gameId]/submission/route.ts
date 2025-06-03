@@ -1,7 +1,11 @@
-import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
+import { adminAuth } from "@/lib/firebase/admin";
+import {
+  AdminGameParticipationService,
+  AdminGameService,
+  AdminSubmissionService,
+} from "@/lib/firebase/admin-collections";
 import type { ApiResponse } from "@/types/common";
 import { ProcessingStatus } from "@/types/common";
-import { submissionToFirestore } from "@/types/game";
 import { type Submission, submissionSchema } from "@/types/schema";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
@@ -77,11 +81,9 @@ export async function POST(
 
     const { imageUrl, memo } = validationResult.data;
 
-    // Verify game exists
-    const gameRef = adminFirestore.collection("games").doc(gameId);
-    const gameDoc = await gameRef.get();
-
-    if (!gameDoc.exists) {
+    // Check if game exists and user is participant
+    const gameExists = await AdminGameService.gameExists(gameId);
+    if (!gameExists) {
       return NextResponse.json(
         {
           success: false,
@@ -94,15 +96,12 @@ export async function POST(
       );
     }
 
-    // Check if user is participant in this game
-    const participantRef = adminFirestore
-      .collection("games")
-      .doc(gameId)
-      .collection("participants")
-      .doc(userId);
+    const isParticipant = await AdminGameParticipationService.isParticipant(
+      gameId,
+      userId,
+    );
 
-    const participantDoc = await participantRef.get();
-    if (!participantDoc.exists) {
+    if (!isParticipant) {
       return NextResponse.json(
         {
           success: false,
@@ -136,15 +135,8 @@ export async function POST(
       memo,
     };
 
-    // Save submission to Firestore
-    const submissionRef = adminFirestore
-      .collection("games")
-      .doc(gameId)
-      .collection("submissions")
-      .doc(submissionId);
-
-    const submissionDoc = submissionToFirestore(submission);
-    await submissionRef.set(submissionDoc);
+    // Save submission to Firestore using Admin service
+    await AdminSubmissionService.createSubmission(gameId, submission);
 
     console.log(
       `Created submission: ${submissionId} for game: ${gameId} by user: ${userId}`,
@@ -214,11 +206,9 @@ export async function GET(
     const decodedToken = await adminAuth.verifyIdToken(token);
     const userId = decodedToken.uid;
 
-    // Verify game exists
-    const gameRef = adminFirestore.collection("games").doc(gameId);
-    const gameDoc = await gameRef.get();
-
-    if (!gameDoc.exists) {
+    // Check if game exists and user is participant
+    const gameExists = await AdminGameService.gameExists(gameId);
+    if (!gameExists) {
       return NextResponse.json(
         {
           success: false,
@@ -231,15 +221,12 @@ export async function GET(
       );
     }
 
-    // Check if user is participant in this game
-    const participantRef = adminFirestore
-      .collection("games")
-      .doc(gameId)
-      .collection("participants")
-      .doc(userId);
+    const isParticipant = await AdminGameParticipationService.isParticipant(
+      gameId,
+      userId,
+    );
 
-    const participantDoc = await participantRef.get();
-    if (!participantDoc.exists) {
+    if (!isParticipant) {
       return NextResponse.json(
         {
           success: false,
@@ -264,59 +251,12 @@ export async function GET(
       Number.parseInt(url.searchParams.get("offset") || "0", 10),
     );
 
-    // Build query
-    let query = adminFirestore
-      .collection("games")
-      .doc(gameId)
-      .collection("submissions")
-      .orderBy("submittedAt", "desc");
-
-    // Filter by user if specified
-    if (userIdFilter) {
-      query = query.where("userId", "==", userIdFilter);
-    }
-
-    // Apply pagination
-    if (0 < offset) {
-      const offsetSnapshot = await query.limit(offset).get();
-      if (offsetSnapshot.empty) {
-        return NextResponse.json({
-          success: true,
-          data: [],
-        });
-      }
-      const lastDoc = offsetSnapshot.docs[offsetSnapshot.docs.length - 1];
-      query = query.startAfter(lastDoc);
-    }
-
-    query = query.limit(limit);
-
-    // Execute query
-    const submissionsSnapshot = await query.get();
-
-    // Convert to Submission objects
-    const submissions: Submission[] = [];
-    for (const doc of submissionsSnapshot.docs) {
-      const submissionData = doc.data();
-      // Convert Firestore document to Submission type
-      const submission: Submission = {
-        id: submissionData.id,
-        userId: submissionData.userId,
-        imageUrl: submissionData.imageUrl,
-        submittedAt: submissionData.submittedAt.toDate(),
-        analyzedAt: submissionData.analyzedAt?.toDate() || null,
-        critique: submissionData.critique,
-        matchedCellId: submissionData.matchedCellId,
-        confidence: submissionData.confidence,
-        processingStatus: submissionData.processingStatus,
-        acceptanceStatus: submissionData.acceptanceStatus,
-        errorMessage: submissionData.errorMessage,
-        createdAt: submissionData.createdAt.toDate(),
-        updatedAt: submissionData.updatedAt?.toDate() || null,
-        memo: submissionData.memo,
-      };
-      submissions.push(submission);
-    }
+    // Get submissions using Admin service
+    const submissions = await AdminSubmissionService.getSubmissions(gameId, {
+      userId: userIdFilter || undefined,
+      limit,
+      offset,
+    });
 
     return NextResponse.json({
       success: true,

@@ -27,18 +27,18 @@ if (!apps.length) {
         }),
       });
       console.log(
-        "ℹ️ XXX: ~ Firebase Admin initialized with Secret Manager credentials",
+        "ℹ️ XXX: ~ admin.ts ~ Firebase Admin initialized with Secret Manager credentials",
       );
     }
     // For local development, use the service account file
     else if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
       try {
         console.log(
-          "ℹ️ XXX: ~ Attempting to initialize Firebase Admin with GOOGLE_APPLICATION_CREDENTIALS",
+          "ℹ️ XXX: ~ admin.ts ~ Attempting to initialize Firebase Admin with GOOGLE_APPLICATION_CREDENTIALS",
         );
         initializeApp();
         console.log(
-          "ℹ️ XXX: ~ Firebase Admin initialized with GOOGLE_APPLICATION_CREDENTIALS",
+          "ℹ️ XXX: ~ admin.ts ~ Firebase Admin initialized with GOOGLE_APPLICATION_CREDENTIALS",
         );
       } catch (initError) {
         console.error(
