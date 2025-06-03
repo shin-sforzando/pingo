@@ -1,7 +1,7 @@
-import type { ProcessedImage } from "@/lib/image-utils";
 import type {
   ImageSubmissionData,
   ImageSubmissionResult,
+  ProcessedImage,
 } from "@/types/schema";
 
 /**

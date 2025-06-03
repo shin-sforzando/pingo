@@ -51,6 +51,7 @@
     "notes": "Notes",
     "notesPlaceholder": "Enter any additional notes...",
     "notesDescription": "Optional notes for players",
+    "loading": "Loading game...",
     "Share": {
       "title": "Game Share",
       "gameNotFound": "Game not found",

@@ -2,8 +2,7 @@
 
 import { ImageUpload } from "@/components/game/ImageUpload";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { ProcessedImage } from "@/lib/image-utils";
-import type { ImageSubmissionResult } from "@/types/schema";
+import type { ImageSubmissionResult, ProcessedImage } from "@/types/schema";
 import { useState } from "react";
 
 /**

@@ -22,7 +22,10 @@ export async function GET(
       .get();
 
     if (participantsSnapshot.empty) {
-      return NextResponse.json([]);
+      return NextResponse.json({
+        success: true,
+        data: [],
+      });
     }
 
     // Get all participant user IDs
@@ -65,10 +68,11 @@ export async function GET(
       }),
     );
 
-    // Sort by username
-    return NextResponse.json(
-      participants.sort((a, b) => a.username.localeCompare(b.username)),
-    );
+    // Sort by username and return in ApiResponse format
+    return NextResponse.json({
+      success: true,
+      data: participants.sort((a, b) => a.username.localeCompare(b.username)),
+    });
   } catch (error) {
     console.error("Error fetching participants:", error);
     return NextResponse.json(

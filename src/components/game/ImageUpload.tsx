@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import {
-  type ProcessedImage,
   createImagePreviewUrl,
   isValidFileSize,
   isValidImageFile,
@@ -13,7 +12,11 @@ import {
 } from "@/lib/image-utils";
 import { cn } from "@/lib/utils";
 import { submitImage } from "@/services/image-upload";
-import type { ImageSubmissionResult, ImageUploadProps } from "@/types/schema";
+import type {
+  ImageSubmissionResult,
+  ImageUploadProps,
+  ProcessedImage,
+} from "@/types/schema";
 import { Image as ImageIcon, Loader2, Upload, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useRef, useState } from "react";

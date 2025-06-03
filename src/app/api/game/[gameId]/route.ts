@@ -72,8 +72,11 @@ export async function GET(
       id: gameDoc.id,
     } as GameDocument);
 
-    // Return the converted game data
-    return NextResponse.json(convertedGame);
+    // Return the converted game data in ApiResponse format
+    return NextResponse.json({
+      success: true,
+      data: convertedGame,
+    });
   } catch (error) {
     console.error("Error fetching game data:", error);
     return NextResponse.json(

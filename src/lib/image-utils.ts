@@ -4,56 +4,10 @@
  * Supports HEIC/HEIF to JPEG conversion using heic2any
  */
 
+import type { ImageProcessingOptions, ProcessedImage } from "@/types/schema";
+
 // Dynamic import for heic2any to avoid SSR issues
 let heic2any: typeof import("heic2any").default | null = null;
-
-export interface ImageProcessingOptions {
-  /**
-   * Maximum dimension for the longer side of the image
-   */
-  maxLongSide: number;
-  /**
-   * JPEG quality (0.0 to 1.0)
-   */
-  quality: number;
-  /**
-   * Output format
-   */
-  format: "image/jpeg";
-}
-
-export interface ProcessedImage {
-  /**
-   * Processed image as Blob
-   */
-  blob: Blob;
-  /**
-   * Original file name
-   */
-  originalName: string;
-  /**
-   * Original file size in bytes
-   */
-  originalSize: number;
-  /**
-   * Processed file size in bytes
-   */
-  processedSize: number;
-  /**
-   * Original dimensions
-   */
-  originalDimensions: {
-    width: number;
-    height: number;
-  };
-  /**
-   * Processed dimensions
-   */
-  processedDimensions: {
-    width: number;
-    height: number;
-  };
-}
 
 /**
  * Default image processing options

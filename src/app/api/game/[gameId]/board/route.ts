@@ -40,8 +40,11 @@ export async function GET(
       boardData as GameBoardDocument,
     );
 
-    // Return the converted board data
-    return NextResponse.json(convertedBoard);
+    // Return the converted board data in ApiResponse format
+    return NextResponse.json({
+      success: true,
+      data: convertedBoard,
+    });
   } catch (error) {
     console.error("Error fetching game board:", error);
     return NextResponse.json(
