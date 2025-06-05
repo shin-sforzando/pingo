@@ -74,6 +74,19 @@
       "archived": "アーカイブ",
       "lines": "列"
     },
+    "SubmissionResult": {
+      "title": "画像判定結果",
+      "status": {
+        "accepted": "承認",
+        "no_match": "マッチなし",
+        "inappropriate_content": "不適切なコンテンツ"
+      },
+      "confidence": "確信度: {confidence}% (閾値: {threshold}%)",
+      "matchedCell": "マッチしたセル:",
+      "analysis": "AI分析結果:",
+      "confidenceLabel": "確信度",
+      "thresholdNote": "閾値: {threshold}%以上で承認"
+    },
     "errors": {
       "titleRequired": "タイトルを入力してください",
       "titleTooLong": "タイトルは50文字以内で入力してください",
@@ -189,5 +202,43 @@
       "fileTooLarge": "ファイルサイズが大きすぎます。20MB未満の画像を選択してください。",
       "processingFailed": "画像の処理に失敗しました"
     }
+  },
+  "SubmissionResult": {
+    "title": "画像判定結果",
+    "status": {
+      "accepted": "承認",
+      "no_match": "不一致",
+      "inappropriate_content": "不適切なコンテンツ"
+    },
+    "confidence": "確信度: {confidence}% (閾値: {threshold}%)",
+    "matchedCell": "マッチしたセル:",
+    "analysis": "AI分析:",
+    "confidenceLabel": "確信度",
+    "thresholdNote": "閾値: {threshold}%以上で承認"
+  },
+  "GameInfo": {
+    "title": "ゲーム情報",
+    "status": "ステータス",
+    "expirationDate": "有効期限",
+    "requiredBingoLines": "必要ビンゴ列数",
+    "confidenceThreshold": "確信度閾値",
+    "publicGame": "公開ゲーム",
+    "photoSharing": "写真共有",
+    "notes": "備考",
+    "yes": "はい",
+    "no": "いいえ",
+    "lines": "列"
+  },
+  "ParticipantsList": {
+    "title": "参加者一覧",
+    "role": {
+      "creator": "作成者",
+      "admin": "管理者",
+      "participant": "参加者"
+    },
+    "joinedAt": "参加日時",
+    "completedLines": "完了ライン数",
+    "you": "（あなた）",
+    "noParticipants": "参加者がいません"
   }
 }
