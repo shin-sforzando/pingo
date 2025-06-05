@@ -380,6 +380,33 @@ import { defineConfig, devices } from "@playwright/test";
 </svg>
 </file>
 
+<file path="src/app/api/auth/logout/route.test.ts">
+import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
+import {
+  cleanupTestUsers,
+  createApiRequest,
+  generateTestUsername,
+} from "@/test/helpers/api-test-helpers";
+import { userToFirestoreForTest } from "@/test/helpers/firebase-test-helpers";
+import type { ApiResponse } from "@/types/common";
+⋮----
+import type { User } from "@/types/schema";
+⋮----
+import bcrypt from "bcrypt";
+import type { NextResponse } from "next/server";
+import { ulid } from "ulid";
+import {
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
+import { POST } from "./route";
+</file>
+
 <file path="src/app/layout.tsx">
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
@@ -832,6 +859,11 @@ import { getUserLocale } from "@/services/locale";
 import { getRequestConfig } from "next-intl/server";
 </file>
 
+<file path="src/lib/firebase/admin.test.ts">
+import { describe, expect, it } from "vitest";
+import { adminAuth, adminFirestore } from "./admin";
+</file>
+
 <file path="src/lib/firebase/client.ts">
 import { getApp, getApps, initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
@@ -854,6 +886,40 @@ export async function getUserLocale()
 export async function setUserLocale(locale: Locale)
 ⋮----
 export async function clearUserLocale()
+</file>
+
+<file path="src/test/helpers/api-test-helpers.ts">
+import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
+import { NextRequest } from "next/server";
+⋮----
+export const generateTestUsername = (prefix = TEST_PREFIX) =>
+⋮----
+export const createApiRequest = (
+  path: string,
+  method = "POST",
+  body?: Record<string, unknown>,
+  headers?: Record<string, string>,
+) =>
+⋮----
+export const cleanupTestUsers = async (userIds: string[]) =>
+</file>
+
+<file path="src/test/helpers/firebase-test-helpers.ts">
+import type { TimestampInterface } from "@/types/firestore";
+import type { User } from "@/types/schema";
+import type { UserDocument } from "@/types/user";
+import { Timestamp } from "firebase-admin/firestore";
+⋮----
+export function dateToAdminTimestampForTest(
+  date: Date | null | undefined,
+): TimestampInterface | null
+⋮----
+export function userToFirestoreForTest(
+  user: User,
+  passwordHash = "",
+): UserDocument
+⋮----
+// Create base document without optional fields
 </file>
 
 <file path="src/types/common.ts">
@@ -1100,7 +1166,7 @@ import createNextIntlPlugin from "next-intl/plugin";
 }
 </file>
 
-<file path="src/app/api/auth/logout/route.test.ts">
+<file path="src/app/api/auth/login/route.test.ts">
 import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
 import {
   cleanupTestUsers,
@@ -1125,6 +1191,57 @@ import {
   vi,
 } from "vitest";
 import { POST } from "./route";
+</file>
+
+<file path="src/app/api/auth/register/route.test.ts">
+import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
+import {
+  cleanupTestUsers,
+  createApiRequest,
+  generateTestUsername,
+} from "@/test/helpers/api-test-helpers";
+import { userToFirestoreForTest } from "@/test/helpers/firebase-test-helpers";
+import type { ApiResponse } from "@/types/common";
+import type { User } from "@/types/schema";
+⋮----
+import type { NextResponse } from "next/server";
+import {
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
+import { POST } from "./route";
+</file>
+
+<file path="src/app/api/auth/update/route.test.ts">
+import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
+import {
+  cleanupTestUsers,
+  createApiRequest,
+  generateTestUsername,
+} from "@/test/helpers/api-test-helpers";
+import { userToFirestoreForTest } from "@/test/helpers/firebase-test-helpers";
+import type { ApiResponse } from "@/types/common";
+⋮----
+import type { User } from "@/types/schema";
+⋮----
+import bcrypt from "bcrypt";
+import type { NextResponse } from "next/server";
+import { ulid } from "ulid";
+import {
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
+import { PUT } from "./route";
 </file>
 
 <file path="src/app/api/game/[gameId]/events/route.test.ts">
@@ -1655,11 +1772,6 @@ export function validateGameId(gameId: string | undefined)
 
 </file>
 
-<file path="src/lib/firebase/admin.test.ts">
-import { describe, expect, it } from "vitest";
-import { adminAuth, adminFirestore } from "./admin";
-</file>
-
 <file path="src/lib/utils.ts">
 import { type ClassValue, clsx } from "clsx";
 import { format, formatRelative } from "date-fns";
@@ -1708,24 +1820,6 @@ export function mockAuthenticatedUser(
 export function mockUnauthenticatedUser(): AuthContextType
 ⋮----
 export function mockLoadingAuthState(): AuthContextType
-</file>
-
-<file path="src/test/helpers/firebase-test-helpers.ts">
-import type { TimestampInterface } from "@/types/firestore";
-import type { User } from "@/types/schema";
-import type { UserDocument } from "@/types/user";
-import { Timestamp } from "firebase-admin/firestore";
-⋮----
-export function dateToAdminTimestampForTest(
-  date: Date | null | undefined,
-): TimestampInterface | null
-⋮----
-export function userToFirestoreForTest(
-  user: User,
-  passwordHash = "",
-): UserDocument
-⋮----
-// Create base document without optional fields
 </file>
 
 <file path="src/test/helpers/game-test-helpers.ts">
@@ -1906,7 +2000,12 @@ export function eventToFirestore(event: Event): EventDocument
 }
 </file>
 
-<file path="src/app/api/auth/login/route.test.ts">
+<file path="vitest.setup.ts">
+import { resolve } from "node:path";
+import { config } from "dotenv";
+</file>
+
+<file path="src/app/api/auth/me/route.test.ts">
 import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
 import {
   cleanupTestUsers,
@@ -1930,58 +2029,7 @@ import {
   it,
   vi,
 } from "vitest";
-import { POST } from "./route";
-</file>
-
-<file path="src/app/api/auth/register/route.test.ts">
-import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
-import {
-  cleanupTestUsers,
-  createApiRequest,
-  generateTestUsername,
-} from "@/test/helpers/api-test-helpers";
-import { userToFirestoreForTest } from "@/test/helpers/firebase-test-helpers";
-import type { ApiResponse } from "@/types/common";
-import type { User } from "@/types/schema";
-⋮----
-import type { NextResponse } from "next/server";
-import {
-  afterAll,
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from "vitest";
-import { POST } from "./route";
-</file>
-
-<file path="src/app/api/auth/update/route.test.ts">
-import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
-import {
-  cleanupTestUsers,
-  createApiRequest,
-  generateTestUsername,
-} from "@/test/helpers/api-test-helpers";
-import { userToFirestoreForTest } from "@/test/helpers/firebase-test-helpers";
-import type { ApiResponse } from "@/types/common";
-⋮----
-import type { User } from "@/types/schema";
-⋮----
-import bcrypt from "bcrypt";
-import type { NextResponse } from "next/server";
-import { ulid } from "ulid";
-import {
-  afterAll,
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from "vitest";
-import { PUT } from "./route";
+import { GET } from "./route";
 </file>
 
 <file path="src/app/api/game/[gameId]/playerBoard/[userId]/route.test.ts">
@@ -2130,189 +2178,6 @@ import type { ReactElement } from "react";
 const toggleLocale = async (): Promise<void> =>
 </file>
 
-<file path="src/lib/firebase/admin-collections.ts">
-import { dateToTimestamp } from "../../types/firestore";
-import {
-  type EventDocument,
-  type GameBoardDocument,
-  type GameDocument,
-  type GameParticipationDocument,
-  type PlayerBoardDocument,
-  type SubmissionDocument,
-  eventFromFirestore,
-  eventToFirestore,
-  gameBoardFromFirestore,
-  gameFromFirestore,
-  gameParticipationFromFirestore,
-  gameToFirestore,
-  playerBoardFromFirestore,
-  playerBoardToFirestore,
-  submissionFromFirestore,
-  submissionToFirestore,
-} from "../../types/game";
-import type {
-  Event,
-  Game,
-  GameBoard,
-  GameParticipation,
-  PlayerBoard,
-  Submission,
-  User,
-} from "../../types/schema";
-import {
-  type UserDocument,
-  userFromFirestore,
-  userToFirestore,
-} from "../../types/user";
-import { adminFirestore } from "./admin";
-⋮----
-export async function getGame(gameId: string): Promise<Game | null>
-⋮----
-export async function gameExists(gameId: string): Promise<boolean>
-⋮----
-export async function updateGame(gameId: string, game: Game): Promise<void>
-⋮----
-export async function getParticipant(
-    gameId: string,
-    userId: string,
-): Promise<GameParticipation | null>
-⋮----
-export async function isParticipant(
-    gameId: string,
-    userId: string,
-): Promise<boolean>
-⋮----
-export async function isGameAdmin(
-    gameId: string,
-    userId: string,
-): Promise<boolean>
-⋮----
-export async function getParticipants(
-    gameId: string,
-): Promise<Array<
-⋮----
-export async function getSubmission(
-    gameId: string,
-    submissionId: string,
-): Promise<Submission | null>
-⋮----
-export async function createSubmission(
-    gameId: string,
-    submission: Submission,
-): Promise<void>
-⋮----
-export async function updateSubmission(
-    gameId: string,
-    submissionId: string,
-    submission: Submission,
-): Promise<void>
-⋮----
-export async function getSubmissions(
-    gameId: string,
-    options: {
-      userId?: string;
-      limit?: number;
-      offset?: number;
-    } = {},
-): Promise<Submission[]>
-⋮----
-export async function submissionExists(
-    gameId: string,
-    submissionId: string,
-): Promise<boolean>
-⋮----
-export async function getPlayerBoard(
-    gameId: string,
-    userId: string,
-): Promise<PlayerBoard | null>
-⋮----
-export async function updatePlayerBoard(
-    gameId: string,
-    userId: string,
-    playerBoard: PlayerBoard,
-): Promise<void>
-⋮----
-export async function playerBoardExists(
-    gameId: string,
-    userId: string,
-): Promise<boolean>
-⋮----
-export async function getEvents(
-    gameId: string,
-    options: {
-      eventType?: string;
-      userId?: string;
-      limit?: number;
-      offset?: number;
-    } = {},
-): Promise<Event[]>
-⋮----
-export async function createEvent(
-    gameId: string,
-    event: Event,
-): Promise<void>
-⋮----
-export async function getGameBoard(
-    gameId: string,
-): Promise<GameBoard | null>
-⋮----
-export async function gameBoardExists(gameId: string): Promise<boolean>
-⋮----
-export async function getUser(userId: string): Promise<User | null>
-⋮----
-export async function getUserByUsername(
-    username: string,
-): Promise<User | null>
-⋮----
-export async function getUserDocumentByUsername(
-    username: string,
-): Promise<UserDocument | null>
-⋮----
-export async function getUserDocumentById(
-    userId: string,
-): Promise<UserDocument | null>
-⋮----
-export async function createUser(
-    user: User,
-    passwordHash?: string,
-): Promise<void>
-⋮----
-export async function updateUser(userId: string, user: User): Promise<void>
-⋮----
-export async function userExists(userId: string): Promise<boolean>
-⋮----
-export async function isUsernameTaken(username: string): Promise<boolean>
-⋮----
-export async function updateLastLogin(userId: string): Promise<void>
-⋮----
-export async function updateUserPartial(
-    userId: string,
-    updates: Record<string, unknown>,
-): Promise<void>
-⋮----
-export async function getGameSubmissionContext(
-    gameId: string,
-    userId: string,
-    submissionId: string,
-): Promise<
-</file>
-
-<file path="src/test/helpers/api-test-helpers.ts">
-import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
-import { NextRequest } from "next/server";
-⋮----
-export const generateTestUsername = (prefix = TEST_PREFIX) =>
-⋮----
-export const createApiRequest = (
-  path: string,
-  method = "POST",
-  body?: Record<string, unknown>,
-  headers?: Record<string, string>,
-) =>
-⋮----
-export const cleanupTestUsers = async (userIds: string[]) =>
-</file>
-
 <file path="src/types/firestore.ts">
 import { Timestamp as AdminTimestamp } from "firebase-admin/firestore";
 import { Timestamp as ClientTimestamp } from "firebase/firestore";
@@ -2408,33 +2273,6 @@ import type { ApiResponse } from "@/types/common";
 export async function POST(
   request: NextRequest,
 ): Promise<NextResponse<ApiResponse<
-</file>
-
-<file path="src/app/api/auth/me/route.test.ts">
-import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
-import {
-  cleanupTestUsers,
-  createApiRequest,
-  generateTestUsername,
-} from "@/test/helpers/api-test-helpers";
-import { userToFirestoreForTest } from "@/test/helpers/firebase-test-helpers";
-import type { ApiResponse } from "@/types/common";
-⋮----
-import type { User } from "@/types/schema";
-⋮----
-import bcrypt from "bcrypt";
-import type { NextResponse } from "next/server";
-import { ulid } from "ulid";
-import {
-  afterAll,
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from "vitest";
-import { GET } from "./route";
 </file>
 
 <file path="src/app/api/auth/register/route.ts">
@@ -2715,6 +2553,173 @@ export function useAuth()
 export function AuthProvider(
 </file>
 
+<file path="src/lib/firebase/admin-collections.ts">
+import { dateToTimestamp } from "../../types/firestore";
+import {
+  type EventDocument,
+  type GameBoardDocument,
+  type GameDocument,
+  type GameParticipationDocument,
+  type PlayerBoardDocument,
+  type SubmissionDocument,
+  eventFromFirestore,
+  eventToFirestore,
+  gameBoardFromFirestore,
+  gameFromFirestore,
+  gameParticipationFromFirestore,
+  gameToFirestore,
+  playerBoardFromFirestore,
+  playerBoardToFirestore,
+  submissionFromFirestore,
+  submissionToFirestore,
+} from "../../types/game";
+import type {
+  Event,
+  Game,
+  GameBoard,
+  GameParticipation,
+  PlayerBoard,
+  Submission,
+  User,
+} from "../../types/schema";
+import {
+  type UserDocument,
+  userFromFirestore,
+  userToFirestore,
+} from "../../types/user";
+import { adminFirestore } from "./admin";
+⋮----
+export async function getGame(gameId: string): Promise<Game | null>
+⋮----
+export async function gameExists(gameId: string): Promise<boolean>
+⋮----
+export async function updateGame(gameId: string, game: Game): Promise<void>
+⋮----
+export async function getParticipant(
+    gameId: string,
+    userId: string,
+): Promise<GameParticipation | null>
+⋮----
+export async function isParticipant(
+    gameId: string,
+    userId: string,
+): Promise<boolean>
+⋮----
+export async function isGameAdmin(
+    gameId: string,
+    userId: string,
+): Promise<boolean>
+⋮----
+export async function getParticipants(
+    gameId: string,
+): Promise<Array<
+⋮----
+export async function getSubmission(
+    gameId: string,
+    submissionId: string,
+): Promise<Submission | null>
+⋮----
+export async function createSubmission(
+    gameId: string,
+    submission: Submission,
+): Promise<void>
+⋮----
+export async function updateSubmission(
+    gameId: string,
+    submissionId: string,
+    submission: Submission,
+): Promise<void>
+⋮----
+export async function getSubmissions(
+    gameId: string,
+    options: {
+      userId?: string;
+      limit?: number;
+      offset?: number;
+    } = {},
+): Promise<Submission[]>
+⋮----
+export async function submissionExists(
+    gameId: string,
+    submissionId: string,
+): Promise<boolean>
+⋮----
+export async function getPlayerBoard(
+    gameId: string,
+    userId: string,
+): Promise<PlayerBoard | null>
+⋮----
+export async function updatePlayerBoard(
+    gameId: string,
+    userId: string,
+    playerBoard: PlayerBoard,
+): Promise<void>
+⋮----
+export async function playerBoardExists(
+    gameId: string,
+    userId: string,
+): Promise<boolean>
+⋮----
+export async function getEvents(
+    gameId: string,
+    options: {
+      eventType?: string;
+      userId?: string;
+      limit?: number;
+      offset?: number;
+    } = {},
+): Promise<Event[]>
+⋮----
+export async function createEvent(
+    gameId: string,
+    event: Event,
+): Promise<void>
+⋮----
+export async function getGameBoard(
+    gameId: string,
+): Promise<GameBoard | null>
+⋮----
+export async function gameBoardExists(gameId: string): Promise<boolean>
+⋮----
+export async function getUser(userId: string): Promise<User | null>
+⋮----
+export async function getUserByUsername(
+    username: string,
+): Promise<User | null>
+⋮----
+export async function getUserDocumentByUsername(
+    username: string,
+): Promise<UserDocument | null>
+⋮----
+export async function getUserDocumentById(
+    userId: string,
+): Promise<UserDocument | null>
+⋮----
+export async function createUser(
+    user: User,
+    passwordHash?: string,
+): Promise<void>
+⋮----
+export async function updateUser(userId: string, user: User): Promise<void>
+⋮----
+export async function userExists(userId: string): Promise<boolean>
+⋮----
+export async function isUsernameTaken(username: string): Promise<boolean>
+⋮----
+export async function updateLastLogin(userId: string): Promise<void>
+⋮----
+export async function updateUserPartial(
+    userId: string,
+    updates: Record<string, unknown>,
+): Promise<void>
+⋮----
+export async function getGameSubmissionContext(
+    gameId: string,
+    userId: string,
+    submissionId: string,
+): Promise<
+</file>
+
 <file path="src/services/game.ts">
 import type { ApiResponse } from "@/types/common";
 import type { Game, GameBoard } from "@/types/schema";
@@ -2745,9 +2750,27 @@ export async function submitImage(
 ): Promise<ImageSubmissionResult>
 </file>
 
-<file path="vitest.setup.ts">
-import { resolve } from "node:path";
-import { config } from "dotenv";
+<file path="vitest.config.mts">
+import react from "@vitejs/plugin-react";
+import tsconfigPaths from "vite-tsconfig-paths";
+import { coverageConfigDefaults, defineConfig } from "vitest/config";
+⋮----
+envDir: ".", // Load .env files from root directory
+⋮----
+setupFiles: ["./vitest.setup.ts"], // Add setup file
+testTimeout: 10000, // Increase timeout for Firebase operations
+⋮----
+setupFiles: ["./vitest.browser.setup.ts"], // Add browser setup file
+⋮----
+"next.config.ts", // Exclude Next.js config
+"playwright.config.ts", // Exclude Playwright config
+"postcss.config.mjs", // Exclude PostCSS config
+"scripts/**/*.ts", // Exclude scripts
+"src/components/ui/*.tsx", // Exclude shadcn/ui components
+"src/components/magicui/*.tsx", // Exclude Magic UI components
+"src/i18n/*.ts", // Exclude i18n config
+"**/*.stories.{ts,tsx}", // Exclude Storybook stories
+"**/stories/example/*.tsx", // Exclude example stories
 </file>
 
 <file path="src/app/api/auth/me/route.ts">
@@ -3268,29 +3291,6 @@ export type Submission = z.infer<typeof submissionSchema>;
 export type Event = z.infer<typeof eventSchema>;
 export type ImageSubmissionData = z.infer<typeof imageSubmissionDataSchema>;
 export type ImageSubmissionResult = z.infer<typeof imageSubmissionResultSchema>;
-</file>
-
-<file path="vitest.config.mts">
-import react from "@vitejs/plugin-react";
-import tsconfigPaths from "vite-tsconfig-paths";
-import { coverageConfigDefaults, defineConfig } from "vitest/config";
-⋮----
-envDir: ".", // Load .env files from root directory
-⋮----
-setupFiles: ["./vitest.setup.ts"], // Add setup file
-testTimeout: 10000, // Increase timeout for Firebase operations
-⋮----
-setupFiles: ["./vitest.browser.setup.ts"], // Add browser setup file
-⋮----
-"next.config.ts", // Exclude Next.js config
-"playwright.config.ts", // Exclude Playwright config
-"postcss.config.mjs", // Exclude PostCSS config
-"scripts/**/*.ts", // Exclude scripts
-"src/components/ui/*.tsx", // Exclude shadcn/ui components
-"src/components/magicui/*.tsx", // Exclude Magic UI components
-"src/i18n/*.ts", // Exclude i18n config
-"**/*.stories.{ts,tsx}", // Exclude Storybook stories
-"**/stories/example/*.tsx", // Exclude example stories
 </file>
 
 <file path="scripts/docker-build.ts">
@@ -3983,7 +3983,7 @@ import { getFirestore } from "firebase-admin/firestore";
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
-    "@google/genai": "^1.3.0",
+    "@google/genai": "^1.4.0",
     "@hookform/resolvers": "^5.0.1",
     "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-dialog": "^1.1.14",
@@ -4001,7 +4001,7 @@ import { getFirestore } from "firebase-admin/firestore";
     "firebase": "^11.8.1",
     "firebase-admin": "^13.4.0",
     "heic2any": "^0.0.4",
-    "lucide-react": "^0.511.0",
+    "lucide-react": "^0.513.0",
     "motion": "^12.16.0",
     "next": "15.3.3",
     "next-intl": "^4.1.0",
@@ -4014,7 +4014,7 @@ import { getFirestore } from "firebase-admin/firestore";
     "ulid": "^3.0.0",
     "uuid": "^11.1.0",
     "vaul": "^1.1.2",
-    "zod": "^3.25.49"
+    "zod": "^3.25.51"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
@@ -4042,14 +4042,14 @@ import { getFirestore } from "firebase-admin/firestore";
     "@vitest/coverage-istanbul": "^3.2.1",
     "dotenv": "^16.5.0",
     "jsdom": "^26.1.0",
-    "knip": "^5.59.1",
+    "knip": "^5.60.1",
     "lefthook": "^1.11.13",
     "playwright": "^1.52.0",
     "storybook": "^8.6.14",
     "storybook-next-intl": "^1.2.6",
     "tailwindcss": "^4",
     "tsx": "^4.19.4",
-    "tw-animate-css": "^1.3.3",
+    "tw-animate-css": "^1.3.4",
     "typescript": "^5",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.2.1",
