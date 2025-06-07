@@ -329,6 +329,16 @@ export const imageSubmissionResultSchema = z.object({
   reason: z.string().optional(),
 });
 
+/**
+ * Image analysis result schema
+ */
+export const analysisResultSchema = z.object({
+  matchedCellId: z.string().nullable(),
+  confidence: z.number().min(0).max(1),
+  critique: z.string(),
+  acceptanceStatus: z.nativeEnum(AcceptanceStatus),
+});
+
 // Export types derived from schemas
 export type User = z.infer<typeof userSchema>;
 export type UserCreationData = z.infer<typeof userCreationSchema>;
@@ -346,3 +356,4 @@ export type Submission = z.infer<typeof submissionSchema>;
 export type Event = z.infer<typeof eventSchema>;
 export type ImageSubmissionData = z.infer<typeof imageSubmissionDataSchema>;
 export type ImageSubmissionResult = z.infer<typeof imageSubmissionResultSchema>;
+export type AnalysisResult = z.infer<typeof analysisResultSchema>;
