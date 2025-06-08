@@ -33,6 +33,7 @@ const baseGame: Game = {
   isPhotoSharingEnabled: true,
   requiredBingoLines: 3,
   confidenceThreshold: 0.7,
+  maxSubmissionsPerUser: 30,
   notes: "Take photos of various nature subjects to complete your bingo card!",
   status: GameStatus.ACTIVE,
 };

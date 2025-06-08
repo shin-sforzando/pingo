@@ -1,4 +1,9 @@
-import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
+import { adminAuth } from "@/lib/firebase/admin";
+import {
+  AdminGameParticipationService,
+  AdminGameService,
+  AdminSubmissionService,
+} from "@/lib/firebase/admin-collections";
 import {
   cleanupTestUsers,
   createApiRequest,
@@ -8,9 +13,8 @@ import {
   generateTestGameTitle,
 } from "@/test/helpers/game-test-helpers";
 import type { ApiResponse } from "@/types/common";
-import { GameStatus, ProcessingStatus, Role } from "@/types/common";
-import { submissionToFirestore } from "@/types/game";
-import type { Submission } from "@/types/schema";
+import { GameStatus, ProcessingStatus } from "@/types/common";
+import type { Game, Submission } from "@/types/schema";
 import type { DecodedIdToken } from "firebase-admin/auth";
 import type { NextResponse } from "next/server";
 import { ulid } from "ulid";
@@ -32,6 +36,22 @@ vi.mock("@/lib/firebase/admin", () => ({
   },
   adminFirestore: {
     collection: vi.fn(),
+  },
+}));
+
+// Mock Admin Services
+vi.mock("@/lib/firebase/admin-collections", () => ({
+  AdminGameService: {
+    getGame: vi.fn(),
+    gameExists: vi.fn(),
+  },
+  AdminGameParticipationService: {
+    isParticipant: vi.fn(),
+    getSubmissionCount: vi.fn(),
+  },
+  AdminSubmissionService: {
+    createSubmission: vi.fn(),
+    getSubmissions: vi.fn(),
   },
 }));
 
@@ -86,53 +106,31 @@ describe("/api/game/[gameId]/submission", () => {
       const mockDecodedToken = { uid: mockUserId } as DecodedIdToken;
       vi.mocked(adminAuth.verifyIdToken).mockResolvedValue(mockDecodedToken);
 
-      const mockGameDoc = {
-        exists: true,
-        data: () => ({
-          id: mockGameId,
-          title: generateTestGameTitle(),
-          status: GameStatus.ACTIVE,
-        }),
+      const mockGame: Game = {
+        id: mockGameId,
+        title: generateTestGameTitle(),
+        theme: "Test Theme",
+        status: GameStatus.ACTIVE,
+        creatorId: mockUserId,
+        createdAt: new Date(),
+        updatedAt: null,
+        expiresAt: new Date(Date.now() + 86400000), // 1 day from now
+        isPublic: true,
+        isPhotoSharingEnabled: true,
+        requiredBingoLines: 1,
+        confidenceThreshold: 0.7,
+        maxSubmissionsPerUser: 10,
+        notes: undefined,
       };
 
-      const mockParticipantDoc = {
-        exists: true,
-        data: () => ({
-          userId: mockUserId,
-          role: Role.PARTICIPANT,
-        }),
-      };
-
-      const mockSet = vi.fn().mockResolvedValue(undefined);
-
-      (
-        vi.mocked(adminFirestore.collection) as ReturnType<typeof vi.fn>
-      ).mockImplementation((path: string) => {
-        if (path === "games") {
-          return {
-            doc: () => ({
-              get: () => Promise.resolve(mockGameDoc),
-              collection: (subPath: string) => {
-                if (subPath === "participants") {
-                  return {
-                    doc: () => ({
-                      get: () => Promise.resolve(mockParticipantDoc),
-                    }),
-                  };
-                }
-                if (subPath === "submissions") {
-                  return {
-                    doc: () => ({
-                      set: mockSet,
-                    }),
-                  };
-                }
-              },
-            }),
-          };
-        }
-        return {};
-      });
+      vi.mocked(AdminGameService.getGame).mockResolvedValue(mockGame);
+      vi.mocked(AdminGameParticipationService.isParticipant).mockResolvedValue(
+        true,
+      );
+      vi.mocked(
+        AdminGameParticipationService.getSubmissionCount,
+      ).mockResolvedValue(0);
+      vi.mocked(AdminSubmissionService.createSubmission).mockResolvedValue();
 
       const submissionData = {
         imageUrl: "https://example.com/test-image.jpg",
@@ -161,7 +159,10 @@ describe("/api/game/[gameId]/submission", () => {
       expect(responseData.data?.processingStatus).toBe(
         ProcessingStatus.UPLOADED,
       );
-      expect(mockSet).toHaveBeenCalledWith(expect.any(Object));
+      expect(AdminSubmissionService.createSubmission).toHaveBeenCalledWith(
+        mockGameId,
+        expect.any(Object),
+      );
     });
 
     it("should return 401 for missing authorization", async () => {
@@ -216,22 +217,7 @@ describe("/api/game/[gameId]/submission", () => {
       const mockDecodedToken = { uid: mockUserId } as DecodedIdToken;
       vi.mocked(adminAuth.verifyIdToken).mockResolvedValue(mockDecodedToken);
 
-      const mockGameDoc = {
-        exists: false,
-      };
-
-      (
-        vi.mocked(adminFirestore.collection) as ReturnType<typeof vi.fn>
-      ).mockImplementation((path: string) => {
-        if (path === "games") {
-          return {
-            doc: () => ({
-              get: () => Promise.resolve(mockGameDoc),
-            }),
-          };
-        }
-        return {};
-      });
+      vi.mocked(AdminGameService.getGame).mockResolvedValue(null);
 
       const submissionData = {
         imageUrl: "https://example.com/test-image.jpg",
@@ -259,40 +245,27 @@ describe("/api/game/[gameId]/submission", () => {
       const mockDecodedToken = { uid: mockUserId } as DecodedIdToken;
       vi.mocked(adminAuth.verifyIdToken).mockResolvedValue(mockDecodedToken);
 
-      const mockGameDoc = {
-        exists: true,
-        data: () => ({
-          id: mockGameId,
-          title: generateTestGameTitle(),
-          status: GameStatus.ACTIVE,
-        }),
+      const mockGame: Game = {
+        id: mockGameId,
+        title: generateTestGameTitle(),
+        theme: "Test Theme",
+        status: GameStatus.ACTIVE,
+        creatorId: mockUserId,
+        createdAt: new Date(),
+        updatedAt: null,
+        expiresAt: new Date(Date.now() + 86400000),
+        isPublic: true,
+        isPhotoSharingEnabled: true,
+        requiredBingoLines: 1,
+        confidenceThreshold: 0.7,
+        maxSubmissionsPerUser: 10,
+        notes: undefined,
       };
 
-      const mockParticipantDoc = {
-        exists: false,
-      };
-
-      (
-        vi.mocked(adminFirestore.collection) as ReturnType<typeof vi.fn>
-      ).mockImplementation((path: string) => {
-        if (path === "games") {
-          return {
-            doc: () => ({
-              get: () => Promise.resolve(mockGameDoc),
-              collection: (subPath: string) => {
-                if (subPath === "participants") {
-                  return {
-                    doc: () => ({
-                      get: () => Promise.resolve(mockParticipantDoc),
-                    }),
-                  };
-                }
-              },
-            }),
-          };
-        }
-        return {};
-      });
+      vi.mocked(AdminGameService.getGame).mockResolvedValue(mockGame);
+      vi.mocked(AdminGameParticipationService.isParticipant).mockResolvedValue(
+        false,
+      );
 
       const submissionData = {
         imageUrl: "https://example.com/test-image.jpg",
@@ -322,64 +295,13 @@ describe("/api/game/[gameId]/submission", () => {
       const mockDecodedToken = { uid: mockUserId } as DecodedIdToken;
       vi.mocked(adminAuth.verifyIdToken).mockResolvedValue(mockDecodedToken);
 
-      const mockGameDoc = {
-        exists: true,
-        data: () => ({
-          id: mockGameId,
-          title: generateTestGameTitle(),
-          status: GameStatus.ACTIVE,
-        }),
-      };
-
-      const mockParticipantDoc = {
-        exists: true,
-        data: () => ({
-          userId: mockUserId,
-          role: Role.PARTICIPANT,
-        }),
-      };
-
-      const mockSubmissionDoc = submissionToFirestore(mockSubmission);
-      const mockSubmissionsSnapshot = {
-        docs: [
-          {
-            data: () => mockSubmissionDoc,
-          },
-        ],
-      };
-
-      const mockQuery = {
-        orderBy: vi.fn().mockReturnThis(),
-        where: vi.fn().mockReturnThis(),
-        limit: vi.fn().mockReturnThis(),
-        startAfter: vi.fn().mockReturnThis(),
-        get: vi.fn().mockResolvedValue(mockSubmissionsSnapshot),
-      };
-
-      (
-        vi.mocked(adminFirestore.collection) as ReturnType<typeof vi.fn>
-      ).mockImplementation((path: string) => {
-        if (path === "games") {
-          return {
-            doc: () => ({
-              get: () => Promise.resolve(mockGameDoc),
-              collection: (subPath: string) => {
-                if (subPath === "participants") {
-                  return {
-                    doc: () => ({
-                      get: () => Promise.resolve(mockParticipantDoc),
-                    }),
-                  };
-                }
-                if (subPath === "submissions") {
-                  return mockQuery;
-                }
-              },
-            }),
-          };
-        }
-        return {};
-      });
+      vi.mocked(AdminGameService.gameExists).mockResolvedValue(true);
+      vi.mocked(AdminGameParticipationService.isParticipant).mockResolvedValue(
+        true,
+      );
+      vi.mocked(AdminSubmissionService.getSubmissions).mockResolvedValue([
+        mockSubmission,
+      ]);
 
       const request = createApiRequest(
         `/api/game/${mockGameId}/submission`,
@@ -423,22 +345,7 @@ describe("/api/game/[gameId]/submission", () => {
       const mockDecodedToken = { uid: mockUserId } as DecodedIdToken;
       vi.mocked(adminAuth.verifyIdToken).mockResolvedValue(mockDecodedToken);
 
-      const mockGameDoc = {
-        exists: false,
-      };
-
-      (
-        vi.mocked(adminFirestore.collection) as ReturnType<typeof vi.fn>
-      ).mockImplementation((path: string) => {
-        if (path === "games") {
-          return {
-            doc: () => ({
-              get: () => Promise.resolve(mockGameDoc),
-            }),
-          };
-        }
-        return {};
-      });
+      vi.mocked(AdminGameService.gameExists).mockResolvedValue(false);
 
       const request = createApiRequest(
         `/api/game/${mockGameId}/submission`,

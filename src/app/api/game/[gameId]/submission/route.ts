@@ -81,9 +81,9 @@ export async function POST(
 
     const { imageUrl, memo } = validationResult.data;
 
-    // Check if game exists and user is participant
-    const gameExists = await AdminGameService.gameExists(gameId);
-    if (!gameExists) {
+    // Check if game exists and get game data
+    const game = await AdminGameService.getGame(gameId);
+    if (!game) {
       return NextResponse.json(
         {
           success: false,
@@ -111,6 +111,23 @@ export async function POST(
           },
         },
         { status: 403 },
+      );
+    }
+
+    // Check submission limit
+    const currentSubmissionCount =
+      await AdminGameParticipationService.getSubmissionCount(gameId, userId);
+
+    if (currentSubmissionCount >= game.maxSubmissionsPerUser) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "SUBMISSION_LIMIT_EXCEEDED",
+            message: `Maximum ${game.maxSubmissionsPerUser} submissions allowed`,
+          },
+        },
+        { status: 429 },
       );
     }
 

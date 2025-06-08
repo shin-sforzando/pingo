@@ -177,6 +177,23 @@ export namespace AdminGameParticipationService {
     // Sort by username
     return participants.sort((a, b) => a.username.localeCompare(b.username));
   }
+
+  /**
+   * Get current submission count for a user in a game
+   */
+  export async function getSubmissionCount(
+    gameId: string,
+    userId: string,
+  ): Promise<number> {
+    const snapshot = await adminFirestore
+      .collection("games")
+      .doc(gameId)
+      .collection("submissions")
+      .where("userId", "==", userId)
+      .get();
+
+    return snapshot.size;
+  }
 }
 
 /**

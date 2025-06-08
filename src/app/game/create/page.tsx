@@ -69,6 +69,7 @@ export default function CreateGamePage() {
       isPhotoSharingEnabled: true,
       requiredBingoLines: 1,
       confidenceThreshold: 0.5,
+      maxSubmissionsPerUser: 30,
       notes: "",
     },
   });
@@ -660,6 +661,39 @@ export default function CreateGamePage() {
                           <span className="text-muted-foreground">
                             (0.0-1.0)
                           </span>
+                        </div>
+                      </FormControl>
+                      <TranslatedFormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Max Submissions Per User Setting */}
+                <FormField
+                  control={form.control}
+                  name="maxSubmissionsPerUser"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("Game.maxSubmissionsPerUser")}</FormLabel>
+                      <FormDescription>
+                        {t("Game.maxSubmissionsPerUserDescription")}
+                      </FormDescription>
+                      <FormControl>
+                        <div className="flex items-center space-x-2">
+                          <Input
+                            type="number"
+                            min={1}
+                            max={100}
+                            {...field}
+                            onChange={(e) => {
+                              const value = Number.parseInt(e.target.value, 10);
+                              if (1 <= value && value <= 100) {
+                                field.onChange(value);
+                              }
+                            }}
+                            className="w-20"
+                          />
+                          <span className="text-muted-foreground">(1-100)</span>
                         </div>
                       </FormControl>
                       <TranslatedFormMessage />

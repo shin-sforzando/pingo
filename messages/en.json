@@ -47,7 +47,9 @@
     "requiredBingoLines": "Required Bingo Lines",
     "requiredBingoLinesDescription": "Number of lines needed to win",
     "confidenceThreshold": "Confidence Threshold",
-    "confidenceThresholdDescription": "Minimum AI confidence level to accept a photo",
+    "confidenceThresholdDescription": "Minimum AI confidence level to accept photos",
+    "maxSubmissionsPerUser": "Max Submissions Per User",
+    "maxSubmissionsPerUserDescription": "Maximum number of images each user can submit",
     "notes": "Notes",
     "notesPlaceholder": "Enter any additional notes...",
     "notesDescription": "Optional notes for players",
@@ -99,7 +101,8 @@
       "titleAndThemeRequired": "Title and theme are required",
       "validationFailed": "Failed to validate subjects",
       "titleOrThemeRequired": "Title or theme is required",
-      "notEnoughValidSubjects": "Not enough valid subjects. Please try again."
+      "notEnoughValidSubjects": "Not enough valid subjects. Please try again.",
+      "submissionLimitExceeded": "Submission limit exceeded"
     }
   },
   "Common": {

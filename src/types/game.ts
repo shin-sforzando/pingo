@@ -26,17 +26,18 @@ import type {
  * Game document as stored in Firestore
  */
 export interface GameDocument {
-  id: string; // 6 characters alphanumeric (uppercase only in production)
+  id: string;
   title: string;
   theme: string;
-  creatorId: string; // User ID of the creator
+  creatorId: string;
   createdAt: TimestampInterface;
   updatedAt?: TimestampInterface | null;
   expiresAt: TimestampInterface;
   isPublic: boolean;
   isPhotoSharingEnabled: boolean;
-  requiredBingoLines: number; // 1-5
-  confidenceThreshold: number; // 0-1, default 0.5
+  requiredBingoLines: number;
+  confidenceThreshold: number;
+  maxSubmissionsPerUser: number;
   notes?: string;
   status: GameStatus;
 }
@@ -152,6 +153,7 @@ export function gameFromFirestore(doc: GameDocument): Game {
     isPhotoSharingEnabled: doc.isPhotoSharingEnabled,
     requiredBingoLines: doc.requiredBingoLines,
     confidenceThreshold: doc.confidenceThreshold,
+    maxSubmissionsPerUser: doc.maxSubmissionsPerUser,
     notes: doc.notes,
     status: doc.status,
   };
@@ -175,6 +177,7 @@ export function gameToFirestore(game: Game): GameDocument {
     isPhotoSharingEnabled: game.isPhotoSharingEnabled,
     requiredBingoLines: game.requiredBingoLines,
     confidenceThreshold: game.confidenceThreshold,
+    maxSubmissionsPerUser: game.maxSubmissionsPerUser,
     notes: game.notes,
     status: game.status,
   };

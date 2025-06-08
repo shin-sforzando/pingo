@@ -48,6 +48,8 @@
     "requiredBingoLinesDescription": "勝利に必要な列数",
     "confidenceThreshold": "確信度閾値",
     "confidenceThresholdDescription": "写真を受け入れるためのAI確信度の最小値",
+    "maxSubmissionsPerUser": "ユーザーあたりの最大投稿回数",
+    "maxSubmissionsPerUserDescription": "各ユーザーが投稿できる画像の最大回数",
     "notes": "備考",
     "notesPlaceholder": "追加の備考を入力...",
     "notesDescription": "プレイヤーへのオプションのメモ",
@@ -99,7 +101,8 @@
       "titleAndThemeRequired": "タイトルとテーマを入力してください",
       "validationFailed": "被写体候補の検証に失敗しました",
       "titleOrThemeRequired": "タイトルまたはテーマを入力してください",
-      "notEnoughValidSubjects": "有効な被写体候補が不足しています。もう一度お試しください。"
+      "notEnoughValidSubjects": "有効な被写体候補が不足しています。もう一度お試しください。",
+      "submissionLimitExceeded": "投稿回数の上限に達しました"
     }
   },
   "Common": {

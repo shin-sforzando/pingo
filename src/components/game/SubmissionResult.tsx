@@ -51,7 +51,7 @@ export function SubmissionResult({
   confidenceThreshold,
   className,
 }: SubmissionResultProps) {
-  const t = useTranslations("SubmissionResult");
+  const t = useTranslations("Game.SubmissionResult");
 
   // Determine status icon and color based on acceptance status
   const getStatusConfig = () => {

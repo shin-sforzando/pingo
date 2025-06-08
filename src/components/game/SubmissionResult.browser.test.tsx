@@ -30,11 +30,13 @@ describe("SubmissionResult", () => {
       renderWithIntl(<SubmissionResult {...defaultProps} />, "ja");
 
       await expect
-        .element(page.getByText(jaMessages.SubmissionResult.title))
+        .element(page.getByText(jaMessages.Game.SubmissionResult.title))
         .toBeVisible();
       await expect
         .element(
-          page.getByText(jaMessages.SubmissionResult.status.accepted).first(),
+          page
+            .getByText(jaMessages.Game.SubmissionResult.status.accepted)
+            .first(),
         )
         .toBeVisible();
       await expect
@@ -45,7 +47,7 @@ describe("SubmissionResult", () => {
     it("displays confidence percentage correctly", async () => {
       renderWithIntl(<SubmissionResult {...defaultProps} />, "ja");
 
-      const expectedText = jaMessages.SubmissionResult.confidence
+      const expectedText = jaMessages.Game.SubmissionResult.confidence
         .replace("{confidence}", "85")
         .replace("{threshold}", "70");
       await expect.element(page.getByText(expectedText)).toBeVisible();
@@ -62,7 +64,7 @@ describe("SubmissionResult", () => {
       );
 
       await expect
-        .element(page.getByText(jaMessages.SubmissionResult.matchedCell))
+        .element(page.getByText(jaMessages.Game.SubmissionResult.matchedCell))
         .toBeVisible();
       await expect.element(page.getByText("りんご")).toBeVisible();
     });
@@ -78,7 +80,7 @@ describe("SubmissionResult", () => {
       );
 
       await expect
-        .element(page.getByText(jaMessages.SubmissionResult.matchedCell))
+        .element(page.getByText(jaMessages.Game.SubmissionResult.matchedCell))
         .not.toBeInTheDocument();
       await expect.element(page.getByText("りんご")).not.toBeInTheDocument();
     });
@@ -93,7 +95,9 @@ describe("SubmissionResult", () => {
       );
 
       await expect
-        .element(page.getByText(jaMessages.SubmissionResult.status.no_match))
+        .element(
+          page.getByText(jaMessages.Game.SubmissionResult.status.no_match),
+        )
         .toBeVisible();
     });
 
@@ -109,7 +113,7 @@ describe("SubmissionResult", () => {
       await expect
         .element(
           page.getByText(
-            jaMessages.SubmissionResult.status.inappropriate_content,
+            jaMessages.Game.SubmissionResult.status.inappropriate_content,
           ),
         )
         .toBeVisible();
@@ -121,10 +125,11 @@ describe("SubmissionResult", () => {
         "ja",
       );
 
-      const expectedText = jaMessages.SubmissionResult.thresholdNote.replace(
-        "{threshold}",
-        "80",
-      );
+      const expectedText =
+        jaMessages.Game.SubmissionResult.thresholdNote.replace(
+          "{threshold}",
+          "80",
+        );
       await expect.element(page.getByText(expectedText)).toBeVisible();
     });
   });
@@ -134,10 +139,12 @@ describe("SubmissionResult", () => {
       renderWithIntl(<SubmissionResult {...defaultProps} />, "en");
 
       await expect
-        .element(page.getByText(enMessages.SubmissionResult.title))
+        .element(page.getByText(enMessages.Game.SubmissionResult.title))
         .toBeVisible();
       await expect
-        .element(page.getByText(enMessages.SubmissionResult.status.accepted))
+        .element(
+          page.getByText(enMessages.Game.SubmissionResult.status.accepted),
+        )
         .toBeVisible();
       await expect
         .element(page.getByText("Test critique message"))
@@ -147,7 +154,7 @@ describe("SubmissionResult", () => {
     it("displays confidence percentage correctly", async () => {
       renderWithIntl(<SubmissionResult {...defaultProps} />, "en");
 
-      const expectedText = enMessages.SubmissionResult.confidence
+      const expectedText = enMessages.Game.SubmissionResult.confidence
         .replace("{confidence}", "85")
         .replace("{threshold}", "70");
       await expect.element(page.getByText(expectedText)).toBeVisible();
@@ -164,7 +171,7 @@ describe("SubmissionResult", () => {
       );
 
       await expect
-        .element(page.getByText(enMessages.SubmissionResult.matchedCell))
+        .element(page.getByText(enMessages.Game.SubmissionResult.matchedCell))
         .toBeVisible();
       await expect.element(page.getByText("Apple")).toBeVisible();
     });
@@ -180,7 +187,7 @@ describe("SubmissionResult", () => {
       );
 
       await expect
-        .element(page.getByText(enMessages.SubmissionResult.matchedCell))
+        .element(page.getByText(enMessages.Game.SubmissionResult.matchedCell))
         .not.toBeInTheDocument();
       await expect.element(page.getByText("Apple")).not.toBeInTheDocument();
     });
@@ -195,7 +202,9 @@ describe("SubmissionResult", () => {
       );
 
       await expect
-        .element(page.getByText(enMessages.SubmissionResult.status.no_match))
+        .element(
+          page.getByText(enMessages.Game.SubmissionResult.status.no_match),
+        )
         .toBeVisible();
     });
 
@@ -211,7 +220,7 @@ describe("SubmissionResult", () => {
       await expect
         .element(
           page.getByText(
-            enMessages.SubmissionResult.status.inappropriate_content,
+            enMessages.Game.SubmissionResult.status.inappropriate_content,
           ),
         )
         .toBeVisible();
@@ -223,10 +232,11 @@ describe("SubmissionResult", () => {
         "en",
       );
 
-      const expectedText = enMessages.SubmissionResult.thresholdNote.replace(
-        "{threshold}",
-        "80",
-      );
+      const expectedText =
+        enMessages.Game.SubmissionResult.thresholdNote.replace(
+          "{threshold}",
+          "80",
+        );
       await expect.element(page.getByText(expectedText)).toBeVisible();
     });
   });
@@ -249,7 +259,7 @@ describe("SubmissionResult", () => {
         "en",
       );
 
-      const expectedText = enMessages.SubmissionResult.confidence
+      const expectedText = enMessages.Game.SubmissionResult.confidence
         .replace("{confidence}", "0")
         .replace("{threshold}", "70");
       await expect.element(page.getByText(expectedText)).toBeVisible();
@@ -261,7 +271,7 @@ describe("SubmissionResult", () => {
         "en",
       );
 
-      const expectedText = enMessages.SubmissionResult.confidence
+      const expectedText = enMessages.Game.SubmissionResult.confidence
         .replace("{confidence}", "100")
         .replace("{threshold}", "70");
       await expect.element(page.getByText(expectedText)).toBeVisible();
@@ -273,7 +283,7 @@ describe("SubmissionResult", () => {
         "en",
       );
 
-      const expectedText = enMessages.SubmissionResult.confidence
+      const expectedText = enMessages.Game.SubmissionResult.confidence
         .replace("{confidence}", "86")
         .replace("{threshold}", "70");
       await expect.element(page.getByText(expectedText)).toBeVisible();

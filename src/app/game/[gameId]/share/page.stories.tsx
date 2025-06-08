@@ -40,6 +40,7 @@ const mockGame: Game = {
   isPhotoSharingEnabled: true,
   requiredBingoLines: 3,
   confidenceThreshold: 0.7,
+  maxSubmissionsPerUser: 30,
   status: GameStatus.ACTIVE,
   notes: "これは夏休みの宿題ビンゴです。",
 };

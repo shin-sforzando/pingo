@@ -175,6 +175,7 @@ export const gameSchema = baseSchema.extend({
   isPhotoSharingEnabled: z.boolean().default(true),
   requiredBingoLines: z.number().int().min(1).max(5).default(1),
   confidenceThreshold: z.number().min(0).max(1).default(0.5),
+  maxSubmissionsPerUser: z.number().int().min(1).max(100).default(30),
   notes: z.string().optional(),
   status: z.nativeEnum(GameStatus).default(GameStatus.ACTIVE),
 });
@@ -198,6 +199,7 @@ export const gameCreationSchema = z.object({
   isPhotoSharingEnabled: z.boolean().default(true),
   requiredBingoLines: z.number().int().min(1).max(5).default(1),
   confidenceThreshold: z.number().min(0).max(1).default(0.5),
+  maxSubmissionsPerUser: z.number().int().min(1).max(100).default(30),
   notes: z.string().optional(),
 });
 
