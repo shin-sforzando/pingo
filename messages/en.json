@@ -203,19 +203,6 @@
       "processingFailed": "Failed to process image"
     }
   },
-  "SubmissionResult": {
-    "title": "Image Analysis Result",
-    "status": {
-      "accepted": "Accepted",
-      "no_match": "No Match",
-      "inappropriate_content": "Inappropriate Content"
-    },
-    "confidence": "Confidence: {confidence}% (Threshold: {threshold}%)",
-    "matchedCell": "Matched Cell:",
-    "analysis": "AI Analysis:",
-    "confidenceLabel": "Confidence",
-    "thresholdNote": "Threshold: {threshold}% or higher for acceptance"
-  },
   "GameInfo": {
     "title": "Game Information",
     "status": "Status",

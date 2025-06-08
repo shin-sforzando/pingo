@@ -48,14 +48,10 @@ The content is organized as follows:
 .storybook/main.ts
 .storybook/next-intl.ts
 .storybook/preview.ts
-biome.json
 cloudbuild.yaml
 components.json
 cors.json
 Dockerfile
-lefthook.yml
-messages/en.json
-messages/ja.json
 middleware.ts
 next.config.ts
 package.json
@@ -261,64 +257,6 @@ import type { Preview } from "@storybook/react";
 import { withMockAuthContext } from "./decorators";
 ⋮----
 import nextIntl from "./next-intl";
-</file>
-
-<file path="biome.json">
-{
-  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
-  "vcs": {
-    "enabled": true,
-    "clientKind": "git",
-    "useIgnoreFile": true
-  },
-  "files": {
-    "ignoreUnknown": true,
-    "ignore": [
-      ".github",
-      ".next",
-      ".vscode",
-      "node_modules",
-      "package-lock.json"
-    ]
-  },
-  "formatter": {
-    "enabled": true,
-    "indentStyle": "space",
-    "useEditorconfig": true
-  },
-  "organizeImports": {
-    "enabled": true
-  },
-  "linter": {
-    "enabled": true,
-    "rules": {
-      "recommended": true,
-      "correctness": {
-        "noUnusedVariables": "error",
-        "noUnusedImports": "error"
-      },
-      "nursery": {
-        "useSortedClasses": {
-          "level": "warn",
-          "options": {
-            "functions": ["clsx", "cva", "tw"]
-          }
-        }
-      }
-    }
-  },
-  "javascript": {
-    "formatter": {
-      "lineWidth": 80,
-      "quoteStyle": "double"
-    }
-  },
-  "css": {
-    "formatter": {
-      "enabled": true
-    }
-  }
-}
 </file>
 
 <file path="components.json">
@@ -3204,40 +3142,6 @@ import {
 // Mock document.createElement
 </file>
 
-<file path="lefthook.yml">
-pre-commit:
-  commands:
-    hide:
-      run: git secret hide -mF
-      stage_fixed: true
-    check:
-      glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}"
-      run: npm run check -- --no-errors-on-unmatched --colors=off {staged_files}
-      stage_fixed: true
-    test:
-      glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx}"
-      run: npm run test:once -- --no-coverage
-    i18n:
-      glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}"
-      run: npm run check:i18n
-    build:
-      glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx}"
-      run: npm run build
-    knip:
-      glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx}"
-      run: npm run knip -- --production --no-exit-code
-
-post-checkout:
-  commands:
-    reveal:
-      interactive: true
-      run: git secret reveal -v
-    install:
-      run: npm install --legacy-peer-deps
-    adc:
-      run: gcloud auth application-default login
-</file>
-
 <file path="src/app/api/game/[gameId]/route.ts">
 import { validateGameId } from "@/lib/api-utils";
 import { adminAuth } from "@/lib/firebase/admin";
@@ -3798,607 +3702,6 @@ import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
 </file>
 
-<file path="messages/en.json">
-{
-  "HomePage": {
-    "title": "Pingo",
-    "welcome": "Welcome",
-    "editFile": "Get started by editing src/app/page.tsx.",
-    "saveChanges": "Save and see your changes instantly.",
-    "joinGame": "Join Game",
-    "createGame": "Create Game",
-    "howToPlay": "How to Play",
-    "howToPlayDescription": "Pingo is a bingo game where AI judges based on photos."
-  },
-  "Game": {
-    "createNew": "Create New Game",
-    "details": "Game Details",
-    "createDescription": "Enter a title for your bingo game and add subjects for the bingo cells.",
-    "title": "Game Title",
-    "titlePlaceholder": "Enter game title...",
-    "titleDescription": "Enter a title for your game (up to 50 characters)",
-    "theme": "Theme",
-    "themePlaceholder": "Enter game theme...",
-    "themeDescription": "Enter a theme for your game (up to 50 characters)",
-    "subjects": "Subjects",
-    "creating": "Creating...",
-    "create": "Create Game",
-    "generateSubjectsWithAI": "Generate Subjects with AI",
-    "generatingSubjects": "Generating...",
-    "generatingSubjectsDescription": "This may take a few seconds...",
-    "validating": "Validating...",
-    "someSubjectsFiltered": "Some subjects were filtered due to inappropriate content.",
-    "editBingoCells": "Edit Bingo Cells ({0} / {1})",
-    "addNewSubject": "Add New Subject",
-    "subjectPlaceholder": "Enter subject...",
-    "subjectsUsageDescription": "The first {0} subjects will be used in the bingo board. Drag and drop to reorder.",
-    "resetSubjects": "Reset Subjects",
-    "subjectsCount": "{count} subjects",
-    "noSubjects": "No subjects added yet",
-    "boardPreview": "Board Preview (5x5)",
-    "boardDescription": "Only the first {0} subjects will be used in the bingo board. The center cell is always FREE.",
-    "settings": "Game Settings",
-    "expiresAt": "Expiration Date",
-    "expiresAtDescription": "When the game will expire",
-    "selectDate": "Select a date",
-    "isPublic": "Public Game",
-    "isPublicDescription": "Make this game visible to everyone",
-    "isPhotoSharingEnabled": "Photo Sharing",
-    "isPhotoSharingEnabledDescription": "Allow players to see each other's photos",
-    "requiredBingoLines": "Required Bingo Lines",
-    "requiredBingoLinesDescription": "Number of lines needed to win",
-    "confidenceThreshold": "Confidence Threshold",
-    "confidenceThresholdDescription": "Minimum AI confidence level to accept a photo",
-    "notes": "Notes",
-    "notesPlaceholder": "Enter any additional notes...",
-    "notesDescription": "Optional notes for players",
-    "loading": "Loading game...",
-    "Share": {
-      "title": "Game Share",
-      "gameNotFound": "Game not found",
-      "gameNotFoundDesc": "The game you are looking for does not exist or has been deleted",
-      "bingoBoard": "Bingo Board",
-      "participants": "Participants",
-      "joinGame": "Join this game",
-      "notes": "Notes",
-      "status": "Status",
-      "expirationDate": "Expiration Date",
-      "requiredBingoLines": "Required Bingo Lines",
-      "confidenceThreshold": "Confidence Threshold",
-      "public": "Public",
-      "private": "Private",
-      "photoSharing": "Photo Sharing",
-      "on": "ON",
-      "off": "OFF",
-      "active": "Active",
-      "ended": "Ended",
-      "archived": "Archived",
-      "lines": "lines"
-    },
-    "SubmissionResult": {
-      "title": "Image Analysis Result",
-      "status": {
-        "accepted": "Accepted",
-        "no_match": "No Match",
-        "inappropriate_content": "Inappropriate Content"
-      },
-      "confidence": "Confidence: {confidence}% (Threshold: {threshold}%)",
-      "matchedCell": "Matched Cell:",
-      "analysis": "AI Analysis:",
-      "confidenceLabel": "Confidence",
-      "thresholdNote": "Threshold: {threshold}% or higher for acceptance"
-    },
-    "errors": {
-      "titleRequired": "Title is required",
-      "titleTooLong": "Title must be at most 50 characters",
-      "themeRequired": "Theme is required",
-      "themeTooLong": "Theme must be at most 50 characters",
-      "subjectsRequired": "At least one subject is required",
-      "creationFailed": "Failed to create game",
-      "expiresAtInvalid": "Expiration date must be in the future",
-      "generationFailed": "Failed to generate subjects",
-      "titleAndThemeRequired": "Title and theme are required",
-      "validationFailed": "Failed to validate subjects",
-      "titleOrThemeRequired": "Title or theme is required",
-      "notEnoughValidSubjects": "Not enough valid subjects. Please try again."
-    }
-  },
-  "Common": {
-    "appName": "Pingo",
-    "description": "Bingo game where AI judges based on photos",
-    "language": "English",
-    "toLanguage": "日本語",
-    "close": "Close",
-    "cancel": "Cancel"
-  },
-  "Header": {
-    "notifications": "Notifications",
-    "notificationsDescription": "Show your latest notifications",
-    "profileSettings": "Profile",
-    "profile": "Profile",
-    "recentGames": "Recent Games",
-    "noNotifications": "No notifications",
-    "logout": "Logout",
-    "loggedInAs": "Logged in as:"
-  },
-  "Footer": {
-    "copyright": "© {year} Pingo",
-    "termsOfService": "Terms of Service"
-  },
-  "Notification": {
-    "system_notification": "System notification",
-    "account_registered": "Account registered",
-    "login": "Logged in",
-    "logout": "Logged out",
-    "game_invitation": "You have been invited to a game",
-    "game_started": "Game has started",
-    "game_ended": "Game has ended",
-    "player_achieved_bingo": "You achieved bingo",
-    "player_completed_game": "You completed the game",
-    "someone_achieved_bingo": "Another player achieved bingo",
-    "someone_completed_game": "Another player completed the game",
-    "new_submission": "New photo submitted",
-    "submission_accepted": "Photo accepted",
-    "submission_rejected": "Photo rejected"
-  },
-  "Auth": {
-    "register": "Register",
-    "registering": "Registering...",
-    "login": "Login",
-    "loggingIn": "Logging in...",
-    "logout": "Logout",
-    "username": "Username",
-    "usernamePlaceholder": "Enter your username",
-    "usernameDescription": "Must be 3-20 characters",
-    "password": "Password",
-    "passwordPlaceholder": "Enter your password",
-    "passwordDescription": "Must be at least 8 characters with letters and numbers",
-    "confirmPassword": "Confirm Password",
-    "confirmPasswordPlaceholder": "Confirm your password",
-    "cancel": "Cancel",
-    "alreadyHaveAccount": "Already have an account?",
-    "dontHaveAccount": "Don't have an account?",
-    "termsOfServiceNotice": "Please read our <terms>Terms of Service</terms> before registering.",
-    "errors": {
-      "usernameRequired": "Username is required",
-      "usernameTooShort": "Username must be at least 3 characters",
-      "usernameTooLong": "Username must be at most 20 characters",
-      "usernameInvalid": "Username contains invalid characters",
-      "passwordRequired": "Password is required",
-      "passwordTooShort": "Password must be at least 8 characters",
-      "passwordInvalid": "Password must contain letters and numbers",
-      "passwordMismatch": "Passwords do not match",
-      "invalidCredentials": "Invalid username or password",
-      "usernameTaken": "This username is already taken",
-      "registrationFailed": "Registration failed",
-      "loginFailed": "Login failed",
-      "logoutFailed": "Logout failed",
-      "updateFailed": "Profile update failed",
-      "notAuthenticated": "Not authenticated",
-      "unexpectedError": "An unexpected error occurred",
-      "missingToken": "Missing authentication token",
-      "usernamePasswordRequired": "Username and password are required",
-      "failedToCheckUsername": "Failed to check username availability",
-      "passwordHashNotFound": "Authentication failed: Password hash not found",
-      "invalidInput": "Invalid input data",
-      "serverError": "Server error occurred",
-      "usernameExists": "This username already exists",
-      "userIdRequired": "User ID is required",
-      "userNotFound": "User not found",
-      "currentPasswordInvalid": "Current password is invalid",
-      "currentPasswordRequired": "Current password is required",
-      "unauthorized": "Unauthorized access"
-    }
-  },
-  "imageUpload": {
-    "dropZone": {
-      "title": "Drop an image here or click to select",
-      "description": "Supports JPEG, PNG, HEIC, and WebP files up to 20MB"
-    },
-    "processing": "Processing image...",
-    "uploading": "Uploading...",
-    "uploadButton": "Upload Image",
-    "errors": {
-      "unsupportedFileType": "Unsupported file type. Please select a JPEG, PNG, HEIC, or WebP image.",
-      "fileTooLarge": "File size too large. Please select an image smaller than 20MB.",
-      "processingFailed": "Failed to process image"
-    }
-  },
-  "SubmissionResult": {
-    "title": "Image Analysis Result",
-    "status": {
-      "accepted": "Accepted",
-      "no_match": "No Match",
-      "inappropriate_content": "Inappropriate Content"
-    },
-    "confidence": "Confidence: {confidence}% (Threshold: {threshold}%)",
-    "matchedCell": "Matched Cell:",
-    "analysis": "AI Analysis:",
-    "confidenceLabel": "Confidence",
-    "thresholdNote": "Threshold: {threshold}% or higher for acceptance"
-  },
-  "GameInfo": {
-    "title": "Game Information",
-    "status": "Status",
-    "expirationDate": "Expiration Date",
-    "requiredBingoLines": "Required Bingo Lines",
-    "confidenceThreshold": "Confidence Threshold",
-    "publicGame": "Public Game",
-    "photoSharing": "Photo Sharing",
-    "notes": "Notes",
-    "yes": "Yes",
-    "no": "No",
-    "lines": "lines"
-  },
-  "ParticipantsList": {
-    "title": "Participants",
-    "role": {
-      "creator": "Creator",
-      "admin": "Admin",
-      "participant": "Participant"
-    },
-    "joinedAt": "Joined At",
-    "completedLines": "Completed Lines",
-    "you": "(You)",
-    "noParticipants": "No participants yet"
-  }
-}
-</file>
-
-<file path="messages/ja.json">
-{
-  "HomePage": {
-    "title": "Pingo",
-    "welcome": "ようこそ",
-    "editFile": "src/app/page.tsxを編集して始めましょう。",
-    "saveChanges": "保存して変更をすぐに確認できます。",
-    "joinGame": "ゲームに参加",
-    "createGame": "ゲームを作成",
-    "howToPlay": "遊び方",
-    "howToPlayDescription": "Pingoは、AIが写真に基づいて判定するビンゴゲームです。"
-  },
-  "Game": {
-    "createNew": "新規ゲーム作成",
-    "details": "ゲーム詳細",
-    "createDescription": "ビンゴゲームのタイトルを設定し、被写体候補を追加してください。",
-    "title": "ゲームタイトル",
-    "titlePlaceholder": "タイトルを入力...",
-    "titleDescription": "ゲームのタイトルを50文字以内で入力してください",
-    "theme": "テーマ",
-    "themePlaceholder": "テーマを入力...",
-    "themeDescription": "ゲームのテーマを50文字以内で入力してください",
-    "subjects": "被写体候補",
-    "creating": "作成中...",
-    "create": "ゲームを作成",
-    "generateSubjectsWithAI": "AIで被写体候補を生成",
-    "generatingSubjects": "生成中...",
-    "generatingSubjectsDescription": "数秒かかる場合があります...",
-    "validating": "検証中...",
-    "someSubjectsFiltered": "不適切なコンテンツが含まれる被写体候補がフィルタリングされました。",
-    "editBingoCells": "ビンゴセルを編集 ({0} / {1})",
-    "addNewSubject": "新しい被写体を追加",
-    "subjectPlaceholder": "被写体を入力...",
-    "subjectsUsageDescription": "最初の{0}個の被写体がビンゴボードに使用されます。ドラッグ＆ドロップで並べ替えができます。",
-    "resetSubjects": "被写体候補をリセット",
-    "subjectsCount": "{count}個の被写体候補",
-    "noSubjects": "被写体候補がまだありません",
-    "boardPreview": "ボードプレビュー (5x5)",
-    "boardDescription": "最初の{0}個の被写体のみがビンゴボードに使用されます。中央のセルは常に「FREE」です。",
-    "settings": "ゲーム設定",
-    "expiresAt": "有効期限",
-    "expiresAtDescription": "ゲームの有効期限",
-    "selectDate": "日付を選択",
-    "isPublic": "公開設定",
-    "isPublicDescription": "このゲームを全員に公開する",
-    "isPhotoSharingEnabled": "写真共有",
-    "isPhotoSharingEnabledDescription": "プレイヤー同士で写真を共有できるようにする",
-    "requiredBingoLines": "必要なビンゴ列数",
-    "requiredBingoLinesDescription": "勝利に必要な列数",
-    "confidenceThreshold": "確信度閾値",
-    "confidenceThresholdDescription": "写真を受け入れるためのAI確信度の最小値",
-    "notes": "備考",
-    "notesPlaceholder": "追加の備考を入力...",
-    "notesDescription": "プレイヤーへのオプションのメモ",
-    "loading": "ゲームを読み込み中...",
-    "Share": {
-      "title": "ゲーム共有",
-      "gameNotFound": "ゲームが見つかりません",
-      "gameNotFoundDesc": "探しているゲームは存在しないか、削除された可能性があります",
-      "bingoBoard": "ビンゴボード",
-      "participants": "参加者",
-      "joinGame": "このゲームに参加する",
-      "notes": "備考",
-      "status": "ステータス",
-      "expirationDate": "有効期限",
-      "requiredBingoLines": "必要なビンゴ列数",
-      "confidenceThreshold": "確信度閾値",
-      "public": "公開",
-      "private": "非公開",
-      "photoSharing": "写真共有",
-      "on": "オン",
-      "off": "オフ",
-      "active": "アクティブ",
-      "ended": "終了",
-      "archived": "アーカイブ",
-      "lines": "列"
-    },
-    "SubmissionResult": {
-      "title": "画像判定結果",
-      "status": {
-        "accepted": "承認",
-        "no_match": "マッチなし",
-        "inappropriate_content": "不適切なコンテンツ"
-      },
-      "confidence": "確信度: {confidence}% (閾値: {threshold}%)",
-      "matchedCell": "マッチしたセル:",
-      "analysis": "AI分析結果:",
-      "confidenceLabel": "確信度",
-      "thresholdNote": "閾値: {threshold}%以上で承認"
-    },
-    "errors": {
-      "titleRequired": "タイトルを入力してください",
-      "titleTooLong": "タイトルは50文字以内で入力してください",
-      "themeRequired": "テーマを入力してください",
-      "themeTooLong": "テーマは50文字以内で入力してください",
-      "subjectsRequired": "被写体候補を1つ以上追加してください",
-      "creationFailed": "ゲームの作成に失敗しました",
-      "expiresAtInvalid": "有効期限は現在より後の日時を指定してください",
-      "generationFailed": "被写体候補の生成に失敗しました",
-      "titleAndThemeRequired": "タイトルとテーマを入力してください",
-      "validationFailed": "被写体候補の検証に失敗しました",
-      "titleOrThemeRequired": "タイトルまたはテーマを入力してください",
-      "notEnoughValidSubjects": "有効な被写体候補が不足しています。もう一度お試しください。"
-    }
-  },
-  "Common": {
-    "appName": "Pingo",
-    "description": "AIが写真に基づいて判定するビンゴゲーム",
-    "language": "日本語",
-    "toLanguage": "English",
-    "close": "閉じる",
-    "cancel": "キャンセル"
-  },
-  "Header": {
-    "notifications": "通知",
-    "notificationsDescription": "最新の通知を表示します",
-    "profileSettings": "プロフィール",
-    "profile": "プロフィール",
-    "recentGames": "最近のゲーム",
-    "noNotifications": "通知はありません",
-    "logout": "ログアウト",
-    "loggedInAs": "ログイン中："
-  },
-  "Footer": {
-    "copyright": "© {year} Pingo",
-    "termsOfService": "サービス利用規約"
-  },
-  "Notification": {
-    "system_notification": "システム通知",
-    "account_registered": "アカウントが登録されました",
-    "login": "ログインしました",
-    "logout": "ログアウトしました",
-    "game_invitation": "ゲームに招待されました",
-    "game_started": "ゲームが開始されました",
-    "game_ended": "ゲームが終了しました",
-    "player_achieved_bingo": "ビンゴを達成しました",
-    "player_completed_game": "ゲームを完了しました",
-    "someone_achieved_bingo": "他のプレイヤーがビンゴを達成しました",
-    "someone_completed_game": "他のプレイヤーがゲームを完了しました",
-    "new_submission": "新しい写真が提出されました",
-    "submission_accepted": "写真が承認されました",
-    "submission_rejected": "写真が拒否されました"
-  },
-  "Auth": {
-    "register": "新規登録",
-    "registering": "登録中...",
-    "login": "ログイン",
-    "loggingIn": "ログイン中...",
-    "logout": "ログアウト",
-    "username": "ユーザーネーム",
-    "usernamePlaceholder": "ユーザーネームを入力",
-    "usernameDescription": "3〜20文字で入力してください",
-    "password": "パスワード",
-    "passwordPlaceholder": "パスワードを入力",
-    "passwordDescription": "8文字以上で、英字と数字を含めてください",
-    "confirmPassword": "パスワード（確認）",
-    "confirmPasswordPlaceholder": "パスワードを再入力",
-    "cancel": "キャンセル",
-    "alreadyHaveAccount": "すでにアカウントをお持ちですか？",
-    "dontHaveAccount": "アカウントをお持ちでないですか？",
-    "termsOfServiceNotice": "アカウントの登録に際し、<terms>利用規約</terms>をご一読ください。",
-    "errors": {
-      "usernameRequired": "ユーザーネームを入力してください",
-      "usernameTooShort": "ユーザーネームは3文字以上で入力してください",
-      "usernameTooLong": "ユーザーネームは20文字以下で入力してください",
-      "usernameInvalid": "ユーザーネームに使用できない文字が含まれています",
-      "passwordRequired": "パスワードを入力してください",
-      "passwordTooShort": "パスワードは8文字以上で入力してください",
-      "passwordInvalid": "パスワードは英字と数字を含める必要があります",
-      "passwordMismatch": "パスワードが一致しません",
-      "invalidCredentials": "ユーザーネームまたはパスワードが正しくありません",
-      "usernameTaken": "このユーザーネームは既に使用されています",
-      "registrationFailed": "登録に失敗しました",
-      "loginFailed": "ログインに失敗しました",
-      "logoutFailed": "ログアウトに失敗しました",
-      "updateFailed": "プロフィールの更新に失敗しました",
-      "notAuthenticated": "認証されていません",
-      "unexpectedError": "予期しないエラーが発生しました",
-      "missingToken": "認証トークンがありません",
-      "usernamePasswordRequired": "ユーザーネームとパスワードを入力してください",
-      "failedToCheckUsername": "ユーザーネームの確認に失敗しました",
-      "passwordHashNotFound": "認証に失敗しました：パスワードハッシュが見つかりません",
-      "invalidInput": "入力内容が無効です",
-      "serverError": "サーバーエラーが発生しました",
-      "usernameExists": "このユーザーネームは既に使用されています",
-      "userIdRequired": "ユーザーIDが必要です",
-      "userNotFound": "ユーザーが見つかりません",
-      "currentPasswordInvalid": "現在のパスワードが正しくありません",
-      "currentPasswordRequired": "現在のパスワードを入力してください",
-      "unauthorized": "認証されていません"
-    }
-  },
-  "imageUpload": {
-    "dropZone": {
-      "title": "画像をここにドロップするか、クリックして選択",
-      "description": "JPEG、PNG、HEIC、WebPファイル（最大20MB）をサポート"
-    },
-    "processing": "画像を処理中...",
-    "uploading": "アップロード中...",
-    "uploadButton": "画像をアップロード",
-    "errors": {
-      "unsupportedFileType": "サポートされていないファイル形式です。JPEG、PNG、HEIC、またはWebP画像を選択してください。",
-      "fileTooLarge": "ファイルサイズが大きすぎます。20MB未満の画像を選択してください。",
-      "processingFailed": "画像の処理に失敗しました"
-    }
-  },
-  "SubmissionResult": {
-    "title": "画像判定結果",
-    "status": {
-      "accepted": "承認",
-      "no_match": "不一致",
-      "inappropriate_content": "不適切なコンテンツ"
-    },
-    "confidence": "確信度: {confidence}% (閾値: {threshold}%)",
-    "matchedCell": "マッチしたセル:",
-    "analysis": "AI分析:",
-    "confidenceLabel": "確信度",
-    "thresholdNote": "閾値: {threshold}%以上で承認"
-  },
-  "GameInfo": {
-    "title": "ゲーム情報",
-    "status": "ステータス",
-    "expirationDate": "有効期限",
-    "requiredBingoLines": "必要ビンゴ列数",
-    "confidenceThreshold": "確信度閾値",
-    "publicGame": "公開ゲーム",
-    "photoSharing": "写真共有",
-    "notes": "備考",
-    "yes": "はい",
-    "no": "いいえ",
-    "lines": "列"
-  },
-  "ParticipantsList": {
-    "title": "参加者一覧",
-    "role": {
-      "creator": "作成者",
-      "admin": "管理者",
-      "participant": "参加者"
-    },
-    "joinedAt": "参加日時",
-    "completedLines": "完了ライン数",
-    "you": "（あなた）",
-    "noParticipants": "参加者がいません"
-  }
-}
-</file>
-
-<file path="package.json">
-{
-  "name": "pingo",
-  "version": "0.1.0",
-  "private": true,
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/shin-sforzando/pingo.git"
-  },
-  "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build",
-    "start": "next start",
-    "check": "biome check --write --unsafe --verbose",
-    "check:i18n": "i18n-check --source ja --locales messages && i18n-check --source en --locales messages",
-    "test": "vitest",
-    "test:watch": "vitest",
-    "test:once": "vitest run",
-    "test:e2e": "playwright test",
-    "test:e2e:debug": "playwright test --headed --debug",
-    "test:e2e:mobile": "playwright test --project=\"Mobile Safari\"",
-    "storybook": "storybook dev --port 6006 --no-open",
-    "build-storybook": "storybook build",
-    "repomix": "npx repomix",
-    "knip": "knip",
-    "docker": "npm run docker:build -- --run",
-    "docker:build": "npx tsx scripts/docker-build.ts"
-  },
-  "dependencies": {
-    "@dnd-kit/core": "^6.3.1",
-    "@dnd-kit/sortable": "^10.0.0",
-    "@dnd-kit/utilities": "^3.2.2",
-    "@google/genai": "^1.4.0",
-    "@hookform/resolvers": "^5.0.1",
-    "@radix-ui/react-avatar": "^1.1.10",
-    "@radix-ui/react-dialog": "^1.1.14",
-    "@radix-ui/react-dropdown-menu": "^2.1.15",
-    "@radix-ui/react-label": "^2.1.7",
-    "@radix-ui/react-popover": "^1.1.14",
-    "@radix-ui/react-separator": "^1.1.7",
-    "@radix-ui/react-slot": "^1.2.3",
-    "@radix-ui/react-switch": "^1.2.5",
-    "@radix-ui/react-tabs": "^1.1.12",
-    "bcrypt": "^6.0.0",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
-    "date-fns": "^4.1.0",
-    "firebase": "^11.8.1",
-    "firebase-admin": "^13.4.0",
-    "heic2any": "^0.0.4",
-    "lucide-react": "^0.513.0",
-    "motion": "^12.16.0",
-    "next": "15.3.3",
-    "next-intl": "^4.1.0",
-    "qrcode.react": "^4.2.0",
-    "react": "^19.1.0",
-    "react-day-picker": "^8.10.1",
-    "react-dom": "^19.1.0",
-    "react-hook-form": "^7.57.0",
-    "tailwind-merge": "^3.3.0",
-    "ulid": "^3.0.0",
-    "uuid": "^11.1.0",
-    "vaul": "^1.1.2",
-    "zod": "^3.25.51"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "1.9.4",
-    "@faker-js/faker": "^9.8.0",
-    "@lingual/i18n-check": "^0.8.4",
-    "@playwright/test": "^1.52.0",
-    "@storybook/addon-a11y": "^8.6.14",
-    "@storybook/addon-essentials": "^8.6.14",
-    "@storybook/addon-interactions": "^8.6.14",
-    "@storybook/addon-onboarding": "^8.6.14",
-    "@storybook/blocks": "^8.6.14",
-    "@storybook/nextjs": "^8.6.14",
-    "@storybook/react": "^8.6.14",
-    "@storybook/test": "^8.6.14",
-    "@tailwindcss/postcss": "^4",
-    "@testing-library/dom": "^10.4.0",
-    "@testing-library/react": "^16.3.0",
-    "@types/bcrypt": "^5.0.2",
-    "@types/node": "^22",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "@types/uuid": "^10.0.0",
-    "@vitejs/plugin-react": "^4.5.1",
-    "@vitest/browser": "^3.2.1",
-    "@vitest/coverage-istanbul": "^3.2.1",
-    "dotenv": "^16.5.0",
-    "jsdom": "^26.1.0",
-    "knip": "^5.60.1",
-    "lefthook": "^1.11.13",
-    "playwright": "^1.52.0",
-    "storybook": "^8.6.14",
-    "storybook-next-intl": "^1.2.6",
-    "tailwindcss": "^4",
-    "tsx": "^4.19.4",
-    "tw-animate-css": "^1.3.4",
-    "typescript": "^5",
-    "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^3.2.1",
-    "vitest-browser-react": "^0.2.0"
-  }
-}
-</file>
-
 <file path="Dockerfile">
 # ---------------- Build Stage ----------------
 FROM node:lts-slim AS base
@@ -4495,6 +3798,113 @@ EXPOSE 8080
 # Command to run the application
 # Uses the Node.js server included in the standalone output
 CMD ["node", "server.js"]
+</file>
+
+<file path="package.json">
+{
+  "name": "pingo",
+  "version": "0.1.0",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shin-sforzando/pingo.git"
+  },
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "check": "biome check --write --unsafe --verbose",
+    "check:i18n": "i18n-check --source ja --locales messages && i18n-check --source en --locales messages",
+    "test": "vitest",
+    "test:watch": "vitest",
+    "test:once": "vitest run",
+    "test:e2e": "playwright test",
+    "test:e2e:debug": "playwright test --headed --debug",
+    "test:e2e:mobile": "playwright test --project=\"Mobile Safari\"",
+    "storybook": "storybook dev --port 6006 --no-open",
+    "build-storybook": "storybook build",
+    "docker": "npm run docker:build -- --run",
+    "docker:build": "npx tsx scripts/docker-build.ts",
+    "ncu": "npx npm-check-updates",
+    "knip": "npx knip",
+    "repomix": "npx repomix"
+  },
+  "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
+    "@google/genai": "^1.4.0",
+    "@hookform/resolvers": "^5.0.1",
+    "@radix-ui/react-avatar": "^1.1.10",
+    "@radix-ui/react-dialog": "^1.1.14",
+    "@radix-ui/react-dropdown-menu": "^2.1.15",
+    "@radix-ui/react-label": "^2.1.7",
+    "@radix-ui/react-popover": "^1.1.14",
+    "@radix-ui/react-separator": "^1.1.7",
+    "@radix-ui/react-slot": "^1.2.3",
+    "@radix-ui/react-switch": "^1.2.5",
+    "@radix-ui/react-tabs": "^1.1.12",
+    "bcrypt": "^6.0.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
+    "firebase": "^11.9.0",
+    "firebase-admin": "^13.4.0",
+    "heic2any": "^0.0.4",
+    "lucide-react": "^0.513.0",
+    "motion": "^12.16.0",
+    "next": "15.3.3",
+    "next-intl": "^4.1.0",
+    "qrcode.react": "^4.2.0",
+    "react": "^19.1.0",
+    "react-day-picker": "^8.10.1",
+    "react-dom": "^19.1.0",
+    "react-hook-form": "^7.57.0",
+    "tailwind-merge": "^3.3.0",
+    "ulid": "^3.0.0",
+    "uuid": "^11.1.0",
+    "vaul": "^1.1.2",
+    "zod": "^3.25.56"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.9.4",
+    "@faker-js/faker": "^9.8.0",
+    "@lingual/i18n-check": "^0.8.4",
+    "@playwright/test": "^1.52.0",
+    "@storybook/addon-a11y": "^8.6.14",
+    "@storybook/addon-essentials": "^8.6.14",
+    "@storybook/addon-interactions": "^8.6.14",
+    "@storybook/addon-onboarding": "^8.6.14",
+    "@storybook/blocks": "^8.6.14",
+    "@storybook/nextjs": "^8.6.14",
+    "@storybook/react": "^8.6.14",
+    "@storybook/test": "^8.6.14",
+    "@tailwindcss/postcss": "^4",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/react": "^16.3.0",
+    "@types/bcrypt": "^5.0.2",
+    "@types/node": "^22",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@types/uuid": "^10.0.0",
+    "@vitejs/plugin-react": "^4.5.1",
+    "@vitest/browser": "^3.2.2",
+    "@vitest/coverage-istanbul": "^3.2.2",
+    "dotenv": "^16.5.0",
+    "jsdom": "^26.1.0",
+    "lefthook": "^1.11.13",
+    "playwright": "^1.52.0",
+    "storybook": "^8.6.14",
+    "storybook-next-intl": "^1.2.6",
+    "tailwindcss": "^4",
+    "tsx": "^4.19.4",
+    "tw-animate-css": "^1.3.4",
+    "typescript": "^5",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^3.2.2",
+    "vitest-browser-react": "^0.2.0"
+  }
+}
 </file>
 
 </files>

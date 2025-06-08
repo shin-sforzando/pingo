@@ -12,10 +12,13 @@
 .repomixignore
 .vscode/
 *.secret
+biome.json
 cline_docs/
 coverage/
 knip.json
+lefthook*.yml
 LICENSE.md
+messages/
 node_modules/
 package-lock.json
 README.md

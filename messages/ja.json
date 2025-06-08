@@ -203,19 +203,6 @@
       "processingFailed": "画像の処理に失敗しました"
     }
   },
-  "SubmissionResult": {
-    "title": "画像判定結果",
-    "status": {
-      "accepted": "承認",
-      "no_match": "不一致",
-      "inappropriate_content": "不適切なコンテンツ"
-    },
-    "confidence": "確信度: {confidence}% (閾値: {threshold}%)",
-    "matchedCell": "マッチしたセル:",
-    "analysis": "AI分析:",
-    "confidenceLabel": "確信度",
-    "thresholdNote": "閾値: {threshold}%以上で承認"
-  },
   "GameInfo": {
     "title": "ゲーム情報",
     "status": "ステータス",
