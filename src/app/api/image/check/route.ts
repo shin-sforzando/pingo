@@ -171,9 +171,60 @@ If the image is appropriate, provide a brief description of what the image shows
       });
     }
 
-    // Step 2: If appropriate, analyze for bingo cell matches
-    const cellSubjects = gameBoard.cells
-      .filter((cell) => !cell.isFree)
+    // Step 2: Get player board to check which cells are still closed
+    let playerBoard = await AdminPlayerBoardService.getPlayerBoard(
+      gameId,
+      userId,
+    );
+
+    if (!playerBoard) {
+      // Create new player board if it doesn't exist
+      playerBoard = {
+        userId,
+        cellStates: {},
+        completedLines: [],
+      };
+    }
+
+    // Filter cells to only include those that are not yet opened
+    const closedCells = gameBoard.cells.filter((cell) => {
+      if (cell.isFree) return false; // Skip FREE cells
+      const cellState = playerBoard.cellStates[cell.id];
+      return !cellState?.isOpen; // Include only cells that are not opened
+    });
+
+    // If no closed cells remain, return early
+    if (closedCells.length === 0) {
+      submission = {
+        id: submissionId,
+        userId,
+        imageUrl,
+        submittedAt: now,
+        analyzedAt: now,
+        critique:
+          "All available cells have already been opened. No more matches possible.",
+        matchedCellId: null,
+        confidence: null,
+        processingStatus: ProcessingStatus.ANALYZED,
+        acceptanceStatus: AcceptanceStatus.NO_MATCH,
+        errorMessage: null,
+        createdAt: now,
+        updatedAt: null,
+      };
+
+      await AdminSubmissionService.createSubmission(gameId, submission);
+
+      return NextResponse.json({
+        appropriate: true,
+        confidence: null,
+        matchedCellId: null,
+        acceptanceStatus: AcceptanceStatus.NO_MATCH,
+        critique: submission.critique,
+      });
+    }
+
+    // Step 3: Analyze for bingo cell matches (only closed cells)
+    const cellSubjects = closedCells
       .map((cell) => `"${cell.subject}" (ID: ${cell.id})`)
       .join(", ");
 
@@ -255,25 +306,10 @@ Be strict in your matching - only match if you're confident the image clearly sh
 
     await AdminSubmissionService.createSubmission(gameId, submission);
 
-    // Step 3: If accepted, update player board
+    // Step 4: If accepted, update player board
     if (isAccepted && analysisResponse.matchedCellId) {
       try {
-        // Get current player board
-        let playerBoard = await AdminPlayerBoardService.getPlayerBoard(
-          gameId,
-          userId,
-        );
-
-        if (!playerBoard) {
-          // Create new player board if it doesn't exist
-          playerBoard = {
-            userId,
-            cellStates: {},
-            completedLines: [],
-          };
-        }
-
-        // Update cell state if not already open
+        // Update cell state if not already open (double-check to prevent race conditions)
         if (!playerBoard.cellStates[analysisResponse.matchedCellId]?.isOpen) {
           playerBoard.cellStates[analysisResponse.matchedCellId] = {
             isOpen: true,

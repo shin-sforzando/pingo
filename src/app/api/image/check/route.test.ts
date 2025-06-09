@@ -2,6 +2,7 @@ import { adminAuth } from "@/lib/firebase/admin";
 import {
   AdminGameBoardService,
   AdminGameService,
+  AdminPlayerBoardService,
   AdminSubmissionService,
 } from "@/lib/firebase/admin-collections";
 import { GameStatus } from "@/types/common";
@@ -319,6 +320,244 @@ describe("/api/image/check", () => {
 
       expect(response.status).toBe(500);
       expect(data.error).toBe("Internal server error");
+    });
+  });
+
+  describe("Closed cells only analysis", () => {
+    beforeEach(() => {
+      mockVerifyIdToken.mockResolvedValue({
+        uid: "test-user-id",
+      } as DecodedIdToken);
+
+      // Mock Admin Services
+      vi.mocked(AdminGameService.getGame).mockResolvedValue({
+        id: "TEST01",
+        title: "Test Game",
+        theme: "Test Theme",
+        creatorId: faker.string.ulid(),
+        confidenceThreshold: 0.7,
+        maxSubmissionsPerUser: 30,
+        requiredBingoLines: 1,
+        isPublic: false,
+        isPhotoSharingEnabled: true,
+        status: GameStatus.ACTIVE,
+        createdAt: new Date(),
+        updatedAt: null,
+        expiresAt: new Date(Date.now() + 86400000),
+      });
+
+      vi.mocked(AdminGameBoardService.getGameBoard).mockResolvedValue({
+        cells: [
+          {
+            id: "cell-1",
+            position: { x: 0, y: 0 },
+            subject: "Coffee Cup",
+            isFree: false,
+          },
+          {
+            id: "cell-2",
+            position: { x: 1, y: 0 },
+            subject: "Red Car",
+            isFree: false,
+          },
+          {
+            id: "cell-3",
+            position: { x: 2, y: 2 },
+            subject: "FREE",
+            isFree: true,
+          },
+        ],
+      });
+
+      vi.mocked(AdminSubmissionService.createSubmission).mockResolvedValue();
+
+      // Mock successful fetch
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        arrayBuffer: vi.fn().mockResolvedValue(new ArrayBuffer(8)),
+        headers: {
+          get: vi.fn().mockReturnValue("image/jpeg"),
+        },
+      } as unknown as Response);
+
+      // Mock appropriateness check to pass
+      mockGenerateContent.mockResolvedValue({
+        text: JSON.stringify({
+          ok: "This image shows a white coffee cup on a wooden desk.",
+        }),
+      });
+    });
+
+    it("should only analyze closed cells and exclude already opened cells", async () => {
+      // Mock player board with one cell already open
+      vi.mocked(AdminPlayerBoardService.getPlayerBoard).mockResolvedValue({
+        userId: "test-user-id",
+        cellStates: {
+          "cell-1": {
+            isOpen: true,
+            openedAt: new Date(),
+            openedBySubmissionId: "previous-submission",
+          },
+        },
+        completedLines: [],
+      });
+
+      // Mock analysis response
+      mockGenerateContent
+        .mockResolvedValueOnce({
+          text: JSON.stringify({
+            ok: "This image shows a red car parked on the street.",
+          }),
+        })
+        .mockResolvedValueOnce({
+          text: JSON.stringify({
+            description: "A red car parked on the street",
+            matchedCellId: "cell-2",
+            confidence: 0.85,
+            reasoning:
+              "The image clearly shows a red car which matches the cell subject.",
+          }),
+        });
+
+      const request = createMockRequest(
+        {
+          gameId: "TEST01",
+          imageUrl: "https://storage.googleapis.com/test-bucket/red-car.jpg",
+          submissionId: faker.string.ulid(),
+        },
+        "Bearer valid-token",
+      );
+
+      await POST(request);
+
+      // Verify that only closed cells (cell-2) are included in the analysis prompt
+      const analysisCall = mockGenerateContent.mock.calls.find((call) =>
+        call[0].contents.some(
+          (content: string) =>
+            typeof content === "string" &&
+            content.includes("analyzing an image for a bingo game"),
+        ),
+      );
+
+      expect(analysisCall).toBeDefined();
+      if (!analysisCall) return; // Type guard for TypeScript
+
+      const analysisPrompt = analysisCall[0].contents.find(
+        (content: string) =>
+          typeof content === "string" &&
+          content.includes("analyzing an image for a bingo game"),
+      );
+
+      // Should include only the closed cell (Red Car)
+      expect(analysisPrompt).toContain('"Red Car" (ID: cell-2)');
+      // Should NOT include the opened cell (Coffee Cup)
+      expect(analysisPrompt).not.toContain('"Coffee Cup" (ID: cell-1)');
+      // Should NOT include FREE cells
+      expect(analysisPrompt).not.toContain('"FREE"');
+    });
+
+    it("should return no_match when all non-free cells are already open", async () => {
+      // Mock player board with all non-free cells open
+      vi.mocked(AdminPlayerBoardService.getPlayerBoard).mockResolvedValue({
+        userId: "test-user-id",
+        cellStates: {
+          "cell-1": {
+            isOpen: true,
+            openedAt: new Date(),
+            openedBySubmissionId: "submission-1",
+          },
+          "cell-2": {
+            isOpen: true,
+            openedAt: new Date(),
+            openedBySubmissionId: "submission-2",
+          },
+        },
+        completedLines: [],
+      });
+
+      const request = createMockRequest(
+        {
+          gameId: "TEST01",
+          imageUrl: "https://storage.googleapis.com/test-bucket/coffee-cup.jpg",
+          submissionId: faker.string.ulid(),
+        },
+        "Bearer valid-token",
+      );
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.appropriate).toBe(true);
+      expect(data.acceptanceStatus).toBe("no_match");
+      expect(data.critique).toBe(
+        "All available cells have already been opened. No more matches possible.",
+      );
+
+      // Verify that AI analysis is not called when all cells are open
+      expect(mockGenerateContent).toHaveBeenCalledTimes(1); // Only appropriateness check
+    });
+
+    it("should analyze all cells when no player board exists (new player)", async () => {
+      // Mock no existing player board
+      vi.mocked(AdminPlayerBoardService.getPlayerBoard).mockResolvedValue(null);
+
+      // Mock analysis response
+      mockGenerateContent
+        .mockResolvedValueOnce({
+          text: JSON.stringify({
+            ok: "This image shows a white coffee cup on a wooden desk.",
+          }),
+        })
+        .mockResolvedValueOnce({
+          text: JSON.stringify({
+            description: "A white coffee cup on a wooden desk",
+            matchedCellId: "cell-1",
+            confidence: 0.85,
+            reasoning:
+              "The image clearly shows a coffee cup which matches the cell subject.",
+          }),
+        });
+
+      const request = createMockRequest(
+        {
+          gameId: "TEST01",
+          imageUrl: "https://storage.googleapis.com/test-bucket/coffee-cup.jpg",
+          submissionId: faker.string.ulid(),
+        },
+        "Bearer valid-token",
+      );
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.appropriate).toBe(true);
+      expect(data.acceptanceStatus).toBe("accepted");
+
+      // Verify that all non-free cells are analyzed when no player board exists
+      const analysisCall = mockGenerateContent.mock.calls.find((call) =>
+        call[0].contents.some(
+          (content: string) =>
+            typeof content === "string" &&
+            content.includes("analyzing an image for a bingo game"),
+        ),
+      );
+
+      expect(analysisCall).toBeDefined();
+      if (!analysisCall) return; // Type guard for TypeScript
+
+      const analysisPrompt = analysisCall[0].contents.find(
+        (content: string) =>
+          typeof content === "string" &&
+          content.includes("analyzing an image for a bingo game"),
+      );
+
+      // Should include both non-free cells
+      expect(analysisPrompt).toContain('"Coffee Cup" (ID: cell-1)');
+      expect(analysisPrompt).toContain('"Red Car" (ID: cell-2)');
+      // Should NOT include FREE cells
+      expect(analysisPrompt).not.toContain('"FREE"');
     });
   });
 

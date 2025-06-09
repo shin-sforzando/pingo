@@ -123,7 +123,7 @@ export function ParticipantsList({
               const RoleIcon = roleBadge.icon;
               const isCurrentUser = participant.id === currentUserId;
               const isTopPerformer =
-                index === 0 && participant.completedLines > 0;
+                index === 0 && 0 < participant.completedLines;
 
               return (
                 <div
