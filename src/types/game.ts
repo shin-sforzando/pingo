@@ -385,7 +385,7 @@ export function submissionFromFirestore(doc: SubmissionDocument): Submission {
 export function submissionToFirestore(
   submission: Submission,
 ): SubmissionDocument {
-  return {
+  const doc: SubmissionDocument = {
     id: submission.id,
     userId: submission.userId,
     imageUrl: submission.imageUrl,
@@ -403,8 +403,14 @@ export function submissionToFirestore(
     updatedAt: submission.updatedAt
       ? (dateToTimestamp(submission.updatedAt) as TimestampInterface)
       : null,
-    memo: submission.memo,
   };
+
+  // Only include memo if it's not undefined
+  if (submission.memo !== undefined) {
+    doc.memo = submission.memo;
+  }
+
+  return doc;
 }
 
 /**

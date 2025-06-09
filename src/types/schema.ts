@@ -329,6 +329,10 @@ export const imageSubmissionResultSchema = z.object({
   imageUrl: z.string().url(),
   appropriate: z.boolean(),
   reason: z.string().optional(),
+  confidence: z.number().min(0).max(1).optional(),
+  matchedCellId: z.string().nullable().optional(),
+  acceptanceStatus: z.nativeEnum(AcceptanceStatus).optional(),
+  critique: z.string().optional(),
 });
 
 /**

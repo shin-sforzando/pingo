@@ -1,11 +1,21 @@
 import { adminAuth } from "@/lib/firebase/admin";
+import {
+  AdminGameBoardService,
+  AdminGameService,
+  AdminPlayerBoardService,
+  AdminSubmissionService,
+} from "@/lib/firebase/admin-collections";
+import { AcceptanceStatus, ProcessingStatus } from "@/types/common";
+import type { Submission } from "@/types/schema";
 import { GoogleGenAI, Type } from "@google/genai";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 // Request schema
 const checkImageSchema = z.object({
+  gameId: z.string(),
   imageUrl: z.string().url("Valid image URL is required"),
+  submissionId: z.string(),
 });
 
 // Define response schema for structured output
@@ -30,7 +40,7 @@ const genAI = new GoogleGenAI({
 });
 
 /**
- * Check if image content is appropriate for public viewing
+ * Check image content with Gemini AI and create submission record
  * POST /api/image/check
  */
 export async function POST(request: NextRequest) {
@@ -45,18 +55,35 @@ export async function POST(request: NextRequest) {
     }
 
     const idToken = authHeader.split("Bearer ")[1];
-    await adminAuth.verifyIdToken(idToken);
+    const decodedToken = await adminAuth.verifyIdToken(idToken);
+    const userId = decodedToken.uid;
 
     // Parse request body
     const body = await request.json();
     const validatedData = checkImageSchema.parse(body);
-    const { imageUrl } = validatedData;
+    const { gameId, imageUrl, submissionId } = validatedData;
 
-    // Get the generative model
+    // Get game and game board
+    const [game, gameBoard] = await Promise.all([
+      AdminGameService.getGame(gameId),
+      AdminGameBoardService.getGameBoard(gameId),
+    ]);
+
+    if (!game) {
+      return NextResponse.json({ error: "Game not found" }, { status: 404 });
+    }
+
+    if (!gameBoard) {
+      return NextResponse.json(
+        { error: "Game board not found" },
+        { status: 404 },
+      );
+    }
+
+    // Step 1: Check if image content is appropriate
     const model = genAI.models.generateContent;
 
-    // Prepare the prompt for content checking
-    const prompt = `Please check if the given image is safe to show to the general public.
+    const appropriatenessPrompt = `Please check if the given image is safe to show to the general public.
 
 If the image contains inappropriate content (sexual expressions, violence, harmful elements, adult themes, or anything not suitable for all ages), respond with an error message explaining the reason.
 
@@ -74,11 +101,11 @@ If the image is appropriate, provide a brief description of what the image shows
     const imageBuffer = await imageResponse.arrayBuffer();
     const imageBase64 = Buffer.from(imageBuffer).toString("base64");
 
-    // Prepare the content for Gemini using structured output
-    const result = await model({
+    // Check appropriateness
+    const appropriatenessResult = await model({
       model: "gemini-2.0-flash-001",
       contents: [
-        prompt,
+        appropriatenessPrompt,
         {
           inlineData: {
             data: imageBase64,
@@ -92,47 +119,189 @@ If the image is appropriate, provide a brief description of what the image shows
       },
     });
 
-    const text = result.text || "";
+    const appropriatenessText = appropriatenessResult.text || "";
+    let appropriatenessResponse: { error?: string; ok?: string };
 
-    if (!text) {
-      return NextResponse.json(
-        { error: "Empty response from AI" },
-        { status: 500 },
-      );
-    }
-
-    // Parse the JSON response
-    let parsedResponse: { error?: string; ok?: string };
     try {
-      // With structured output, we should get clean JSON
-      parsedResponse = JSON.parse(text) as { error?: string; ok?: string };
+      appropriatenessResponse = JSON.parse(appropriatenessText) as {
+        error?: string;
+        ok?: string;
+      };
     } catch {
-      console.error("Failed to parse Gemini response:", text);
+      console.error(
+        "Failed to parse Gemini appropriateness response:",
+        appropriatenessText,
+      );
       return NextResponse.json(
         { error: "Invalid response from AI service" },
         { status: 500 },
       );
     }
 
-    // Check if the response indicates inappropriate content
-    if (parsedResponse.error) {
-      return NextResponse.json(
+    const now = new Date();
+    let submission: Submission;
+
+    // If inappropriate content detected
+    if (appropriatenessResponse.error) {
+      submission = {
+        id: submissionId,
+        userId,
+        imageUrl,
+        submittedAt: now,
+        analyzedAt: now,
+        critique: appropriatenessResponse.error,
+        matchedCellId: null,
+        confidence: null,
+        processingStatus: ProcessingStatus.ANALYZED,
+        acceptanceStatus: AcceptanceStatus.INAPPROPRIATE_CONTENT,
+        errorMessage: null,
+        createdAt: now,
+        updatedAt: null,
+      };
+
+      await AdminSubmissionService.createSubmission(gameId, submission);
+
+      return NextResponse.json({
+        appropriate: false,
+        reason: appropriatenessResponse.error,
+        confidence: null,
+        matchedCellId: null,
+        acceptanceStatus: AcceptanceStatus.INAPPROPRIATE_CONTENT,
+        critique: appropriatenessResponse.error,
+      });
+    }
+
+    // Step 2: If appropriate, analyze for bingo cell matches
+    const cellSubjects = gameBoard.cells
+      .filter((cell) => !cell.isFree)
+      .map((cell) => `"${cell.subject}" (ID: ${cell.id})`)
+      .join(", ");
+
+    const analysisPrompt = `You are analyzing an image for a bingo game. Here are the available bingo cell subjects:
+${cellSubjects}
+
+Please analyze the image and determine:
+1. What objects, scenes, or concepts are visible in the image
+2. Which bingo cell subject (if any) best matches what you see
+3. Your confidence level (0.0 to 1.0) in the match
+
+Respond with a JSON object containing:
+- "description": A detailed description of what you see in the image
+- "matchedCellId": The ID of the matching cell (or null if no good match)
+- "confidence": Your confidence level (0.0 to 1.0)
+- "reasoning": Explanation of why you chose this match or why no match was found
+
+Be strict in your matching - only match if you're confident the image clearly shows the subject.`;
+
+    const analysisResult = await model({
+      model: "gemini-2.0-flash-001",
+      contents: [
+        analysisPrompt,
         {
-          appropriate: false,
-          reason: parsedResponse.error,
+          inlineData: {
+            data: imageBase64,
+            mimeType: imageResponse.headers.get("content-type") || "image/jpeg",
+          },
         },
-        { status: 200 },
+      ],
+      config: {
+        responseMimeType: "application/json",
+      },
+    });
+
+    const analysisText = analysisResult.text || "";
+    let analysisResponse: {
+      description: string;
+      matchedCellId: string | null;
+      confidence: number;
+      reasoning: string;
+    };
+
+    try {
+      analysisResponse = JSON.parse(analysisText);
+    } catch {
+      console.error("Failed to parse Gemini analysis response:", analysisText);
+      return NextResponse.json(
+        { error: "Invalid analysis response from AI service" },
+        { status: 500 },
       );
     }
 
-    // Content is appropriate
-    return NextResponse.json(
-      {
-        appropriate: true,
-        description: parsedResponse.ok || "Image content is appropriate",
-      },
-      { status: 200 },
-    );
+    // Determine acceptance status based on confidence threshold
+    const isAccepted =
+      analysisResponse.matchedCellId &&
+      analysisResponse.confidence >= game.confidenceThreshold;
+
+    const acceptanceStatus = isAccepted
+      ? AcceptanceStatus.ACCEPTED
+      : AcceptanceStatus.NO_MATCH;
+
+    // Create submission record
+    submission = {
+      id: submissionId,
+      userId,
+      imageUrl,
+      submittedAt: now,
+      analyzedAt: now,
+      critique: `${analysisResponse.description}\n\n${analysisResponse.reasoning}`,
+      matchedCellId: analysisResponse.matchedCellId,
+      confidence: analysisResponse.confidence,
+      processingStatus: ProcessingStatus.ANALYZED,
+      acceptanceStatus,
+      errorMessage: null,
+      createdAt: now,
+      updatedAt: null,
+    };
+
+    await AdminSubmissionService.createSubmission(gameId, submission);
+
+    // Step 3: If accepted, update player board
+    if (isAccepted && analysisResponse.matchedCellId) {
+      try {
+        // Get current player board
+        let playerBoard = await AdminPlayerBoardService.getPlayerBoard(
+          gameId,
+          userId,
+        );
+
+        if (!playerBoard) {
+          // Create new player board if it doesn't exist
+          playerBoard = {
+            userId,
+            cellStates: {},
+            completedLines: [],
+          };
+        }
+
+        // Update cell state if not already open
+        if (!playerBoard.cellStates[analysisResponse.matchedCellId]?.isOpen) {
+          playerBoard.cellStates[analysisResponse.matchedCellId] = {
+            isOpen: true,
+            openedAt: now,
+            openedBySubmissionId: submissionId,
+          };
+
+          // Check for completed lines (simplified - you may want to implement full bingo logic)
+          // For now, just save the updated board
+          await AdminPlayerBoardService.updatePlayerBoard(
+            gameId,
+            userId,
+            playerBoard,
+          );
+        }
+      } catch (error) {
+        console.error("Failed to update player board:", error);
+        // Don't fail the entire request if board update fails
+      }
+    }
+
+    return NextResponse.json({
+      appropriate: true,
+      confidence: analysisResponse.confidence,
+      matchedCellId: analysisResponse.matchedCellId,
+      acceptanceStatus,
+      critique: submission.critique,
+    });
   } catch (error) {
     console.error("Error checking image content:", error);
 

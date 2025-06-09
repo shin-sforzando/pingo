@@ -62,7 +62,7 @@ export async function submitImage(
     "pingo-456817-images";
   const publicUrl = `https://storage.googleapis.com/${bucketName}/${filePath}`;
 
-  // Step 3: Check image content with Gemini API
+  // Step 3: Check image content with Gemini API and create submission
   const checkResponse = await fetch("/api/image/check", {
     method: "POST",
     headers: {
@@ -70,7 +70,9 @@ export async function submitImage(
       Authorization: `Bearer ${authToken}`,
     },
     body: JSON.stringify({
+      gameId: submissionData.gameId,
       imageUrl: publicUrl,
+      submissionId,
     }),
   });
 
@@ -86,5 +88,9 @@ export async function submitImage(
     imageUrl: publicUrl,
     appropriate: checkResult.appropriate,
     reason: checkResult.reason,
+    confidence: checkResult.confidence,
+    matchedCellId: checkResult.matchedCellId,
+    acceptanceStatus: checkResult.acceptanceStatus,
+    critique: checkResult.critique,
   };
 }

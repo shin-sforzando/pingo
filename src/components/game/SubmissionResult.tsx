@@ -33,6 +33,10 @@ export interface SubmissionResultProps {
    */
   confidenceThreshold: number;
   /**
+   * Image URL to display
+   */
+  imageUrl?: string;
+  /**
    * Optional CSS class name
    */
   className?: string;
@@ -49,6 +53,7 @@ export function SubmissionResult({
   // matchedCellId,
   matchedCellSubject,
   confidenceThreshold,
+  imageUrl,
   className,
 }: SubmissionResultProps) {
   const t = useTranslations("Game.SubmissionResult");
@@ -118,6 +123,21 @@ export function SubmissionResult({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Image Preview */}
+        {imageUrl && (
+          <div className="flex justify-center">
+            <img
+              src={imageUrl}
+              alt="Submitted content for analysis"
+              className="h-24 w-24 rounded-lg object-cover shadow-sm"
+              loading="lazy"
+              onError={(e) => {
+                e.currentTarget.style.display = "none";
+              }}
+            />
+          </div>
+        )}
+
         {/* Status Badge */}
         <div className="flex items-center gap-2">
           <Badge

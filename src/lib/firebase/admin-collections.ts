@@ -264,38 +264,34 @@ export namespace AdminSubmissionService {
   ): Promise<Submission[]> {
     const { userId, limit = 50, offset = 0 } = options;
 
-    // Build query
-    let query = adminFirestore
+    // Build query - avoid complex composite index requirements
+    const collection = adminFirestore
       .collection("games")
       .doc(gameId)
-      .collection("submissions")
-      .orderBy("submittedAt", "desc");
+      .collection("submissions");
 
-    // Filter by user if specified
-    if (userId) {
-      query = query.where("userId", "==", userId);
-    }
-
-    // Apply pagination
-    if (0 < offset) {
-      const offsetSnapshot = await query.limit(offset).get();
-      if (offsetSnapshot.empty) {
-        return [];
-      }
-      const lastDoc = offsetSnapshot.docs[offsetSnapshot.docs.length - 1];
-      query = query.startAfter(lastDoc);
-    }
-
-    query = query.limit(limit);
-
-    // Execute query
-    const snapshot = await query.get();
+    // If filtering by user, use simple where clause without orderBy to avoid index requirement
+    const snapshot = userId
+      ? await collection.where("userId", "==", userId).limit(limit).get()
+      : await collection.orderBy("submittedAt", "desc").limit(limit).get();
 
     // Convert to Submission objects
     const submissions: Submission[] = [];
     for (const doc of snapshot.docs) {
       const submissionData = doc.data() as SubmissionDocument;
       submissions.push(submissionFromFirestore(submissionData));
+    }
+
+    // If filtering by user, sort in memory since we can't use orderBy with where clause
+    if (userId) {
+      submissions.sort(
+        (a, b) => b.submittedAt.getTime() - a.submittedAt.getTime(),
+      );
+    }
+
+    // Apply offset in memory for user-filtered queries
+    if (userId && 0 < offset) {
+      return submissions.slice(offset, offset + limit);
     }
 
     return submissions;
