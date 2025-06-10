@@ -99,9 +99,9 @@ export interface GameParticipationDocument {
   joinedAt: TimestampInterface;
   createdAt: TimestampInterface;
   updatedAt?: TimestampInterface | null;
-  completedLines: number; // Number of completed lines
-  lastCompletedAt: TimestampInterface | null;
-  submissionCount: number; // Number of submissions, max 30
+  completedLines?: number; // Number of completed lines (optional for backward compatibility)
+  lastCompletedAt?: TimestampInterface | null;
+  submissionCount?: number; // Number of submissions, max 30 (optional for backward compatibility)
 }
 
 /**
@@ -328,9 +328,9 @@ export function gameParticipationFromFirestore(
     joinedAt: timestampToDate(doc.joinedAt) as Date,
     createdAt: timestampToDate(doc.createdAt) as Date,
     updatedAt: timestampToDate(doc.updatedAt),
-    completedLines: doc.completedLines,
+    completedLines: doc.completedLines ?? 0, // Default to 0 if not set
     lastCompletedAt: timestampToDate(doc.lastCompletedAt),
-    submissionCount: doc.submissionCount,
+    submissionCount: doc.submissionCount ?? 0, // Default to 0 if not set
   };
 }
 

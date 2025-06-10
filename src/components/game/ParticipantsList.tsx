@@ -64,6 +64,7 @@ export function ParticipantsList({
   className,
 }: ParticipantsListProps) {
   const t = useTranslations("Game.Share");
+  const tParticipants = useTranslations("ParticipantsList");
 
   // Sort participants by completed lines (descending), then by submission count
   const sortedParticipants = [...participants].sort((a, b) => {
@@ -79,7 +80,7 @@ export function ParticipantsList({
     if (!role) {
       return {
         icon: null,
-        label: "Participant",
+        label: tParticipants("role.participant"),
         variant: "outline" as const,
         color: "bg-gray-100 text-gray-800",
       };
@@ -88,21 +89,21 @@ export function ParticipantsList({
       case Role.CREATOR:
         return {
           icon: Crown,
-          label: "Creator",
+          label: tParticipants("role.creator"),
           variant: "default" as const,
           color: "bg-yellow-100 text-yellow-800",
         };
       case Role.ADMIN:
         return {
           icon: Crown,
-          label: "Admin",
+          label: tParticipants("role.admin"),
           variant: "secondary" as const,
           color: "bg-blue-100 text-blue-800",
         };
       case Role.PARTICIPANT:
         return {
           icon: null,
-          label: "Participant",
+          label: tParticipants("role.participant"),
           variant: "outline" as const,
           color: "bg-gray-100 text-gray-800",
         };
@@ -127,7 +128,7 @@ export function ParticipantsList({
       <CardContent>
         {participants.length === 0 ? (
           <p className="text-center text-muted-foreground text-sm">
-            No participants yet
+            {tParticipants("noParticipants")}
           </p>
         ) : (
           <div className="space-y-3">
@@ -163,7 +164,6 @@ export function ParticipantsList({
                         }`}
                       >
                         {participant.username}
-                        {isCurrentUser && " (You)"}
                       </p>
                       {isTopPerformer && (
                         <Trophy className="h-4 w-4 text-yellow-500" />
@@ -183,7 +183,8 @@ export function ParticipantsList({
                           </Badge>
                         )}
                       <span className="text-muted-foreground text-xs">
-                        {participant.submissionCount} submissions
+                        {participant.submissionCount}{" "}
+                        {tParticipants("submissions")}
                       </span>
                     </div>
                   </div>
@@ -191,11 +192,12 @@ export function ParticipantsList({
                   {/* Completion Status */}
                   <div className="text-right">
                     <p className="font-medium text-sm">
-                      {participant.completedLines} lines
+                      {participant.completedLines} {tParticipants("lines")}
                     </p>
                     {participant.lastCompletedAt && (
                       <p className="text-muted-foreground text-xs">
-                        Last: {formatRelativeDate(participant.lastCompletedAt)}
+                        {tParticipants("last")}:{" "}
+                        {formatRelativeDate(participant.lastCompletedAt)}
                       </p>
                     )}
                   </div>

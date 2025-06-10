@@ -232,7 +232,9 @@
     },
     "joinedAt": "参加日時",
     "completedLines": "完了ライン数",
-    "you": "（あなた）",
-    "noParticipants": "参加者がいません"
+    "noParticipants": "参加者がいません",
+    "submissions": "投稿",
+    "lines": "列",
+    "last": "最終"
   }
 }

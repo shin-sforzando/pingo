@@ -232,7 +232,9 @@
     },
     "joinedAt": "Joined At",
     "completedLines": "Completed Lines",
-    "you": "(You)",
-    "noParticipants": "No participants yet"
+    "noParticipants": "No participants yet",
+    "submissions": "submissions",
+    "lines": "lines",
+    "last": "Last"
   }
 }
