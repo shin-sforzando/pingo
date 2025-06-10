@@ -26,17 +26,18 @@ import type {
  * Game document as stored in Firestore
  */
 export interface GameDocument {
-  id: string; // 6 characters alphanumeric (uppercase only in production)
+  id: string;
   title: string;
   theme: string;
-  creatorId: string; // User ID of the creator
+  creatorId: string;
   createdAt: TimestampInterface;
   updatedAt?: TimestampInterface | null;
   expiresAt: TimestampInterface;
   isPublic: boolean;
   isPhotoSharingEnabled: boolean;
-  requiredBingoLines: number; // 1-5
-  confidenceThreshold: number; // 0-1, default 0.5
+  requiredBingoLines: number;
+  confidenceThreshold: number;
+  maxSubmissionsPerUser: number;
   notes?: string;
   status: GameStatus;
 }
@@ -98,9 +99,9 @@ export interface GameParticipationDocument {
   joinedAt: TimestampInterface;
   createdAt: TimestampInterface;
   updatedAt?: TimestampInterface | null;
-  completedLines: number; // Number of completed lines
-  lastCompletedAt: TimestampInterface | null;
-  submissionCount: number; // Number of submissions, max 30
+  completedLines?: number; // Number of completed lines (optional for backward compatibility)
+  lastCompletedAt?: TimestampInterface | null;
+  submissionCount?: number; // Number of submissions, max 30 (optional for backward compatibility)
 }
 
 /**
@@ -152,6 +153,7 @@ export function gameFromFirestore(doc: GameDocument): Game {
     isPhotoSharingEnabled: doc.isPhotoSharingEnabled,
     requiredBingoLines: doc.requiredBingoLines,
     confidenceThreshold: doc.confidenceThreshold,
+    maxSubmissionsPerUser: doc.maxSubmissionsPerUser,
     notes: doc.notes,
     status: doc.status,
   };
@@ -175,6 +177,7 @@ export function gameToFirestore(game: Game): GameDocument {
     isPhotoSharingEnabled: game.isPhotoSharingEnabled,
     requiredBingoLines: game.requiredBingoLines,
     confidenceThreshold: game.confidenceThreshold,
+    maxSubmissionsPerUser: game.maxSubmissionsPerUser,
     notes: game.notes,
     status: game.status,
   };
@@ -325,9 +328,9 @@ export function gameParticipationFromFirestore(
     joinedAt: timestampToDate(doc.joinedAt) as Date,
     createdAt: timestampToDate(doc.createdAt) as Date,
     updatedAt: timestampToDate(doc.updatedAt),
-    completedLines: doc.completedLines,
+    completedLines: doc.completedLines ?? 0, // Default to 0 if not set
     lastCompletedAt: timestampToDate(doc.lastCompletedAt),
-    submissionCount: doc.submissionCount,
+    submissionCount: doc.submissionCount ?? 0, // Default to 0 if not set
   };
 }
 
@@ -382,7 +385,7 @@ export function submissionFromFirestore(doc: SubmissionDocument): Submission {
 export function submissionToFirestore(
   submission: Submission,
 ): SubmissionDocument {
-  return {
+  const doc: SubmissionDocument = {
     id: submission.id,
     userId: submission.userId,
     imageUrl: submission.imageUrl,
@@ -400,8 +403,14 @@ export function submissionToFirestore(
     updatedAt: submission.updatedAt
       ? (dateToTimestamp(submission.updatedAt) as TimestampInterface)
       : null,
-    memo: submission.memo,
   };
+
+  // Only include memo if it's not undefined
+  if (submission.memo !== undefined) {
+    doc.memo = submission.memo;
+  }
+
+  return doc;
 }
 
 /**

@@ -175,6 +175,7 @@ export const gameSchema = baseSchema.extend({
   isPhotoSharingEnabled: z.boolean().default(true),
   requiredBingoLines: z.number().int().min(1).max(5).default(1),
   confidenceThreshold: z.number().min(0).max(1).default(0.5),
+  maxSubmissionsPerUser: z.number().int().min(1).max(100).default(30),
   notes: z.string().optional(),
   status: z.nativeEnum(GameStatus).default(GameStatus.ACTIVE),
 });
@@ -198,6 +199,7 @@ export const gameCreationSchema = z.object({
   isPhotoSharingEnabled: z.boolean().default(true),
   requiredBingoLines: z.number().int().min(1).max(5).default(1),
   confidenceThreshold: z.number().min(0).max(1).default(0.5),
+  maxSubmissionsPerUser: z.number().int().min(1).max(100).default(30),
   notes: z.string().optional(),
 });
 
@@ -327,6 +329,20 @@ export const imageSubmissionResultSchema = z.object({
   imageUrl: z.string().url(),
   appropriate: z.boolean(),
   reason: z.string().optional(),
+  confidence: z.number().min(0).max(1).optional(),
+  matchedCellId: z.string().nullable().optional(),
+  acceptanceStatus: z.nativeEnum(AcceptanceStatus).optional(),
+  critique: z.string().optional(),
+});
+
+/**
+ * Image analysis result schema
+ */
+export const analysisResultSchema = z.object({
+  matchedCellId: z.string().nullable(),
+  confidence: z.number().min(0).max(1),
+  critique: z.string(),
+  acceptanceStatus: z.nativeEnum(AcceptanceStatus),
 });
 
 // Export types derived from schemas
@@ -346,3 +362,4 @@ export type Submission = z.infer<typeof submissionSchema>;
 export type Event = z.infer<typeof eventSchema>;
 export type ImageSubmissionData = z.infer<typeof imageSubmissionDataSchema>;
 export type ImageSubmissionResult = z.infer<typeof imageSubmissionResultSchema>;
+export type AnalysisResult = z.infer<typeof analysisResultSchema>;

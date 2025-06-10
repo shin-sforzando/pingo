@@ -130,52 +130,75 @@ export namespace AdminGameParticipationService {
   }
 
   /**
-   * Get all participants for a game
+   * Get all participants for a game with their statistics
    */
-  export async function getParticipants(
-    gameId: string,
-  ): Promise<Array<{ id: string; username: string }>> {
-    const participantsSnapshot = await adminFirestore
-      .collection(`games/${gameId}/participants`)
+  export async function getParticipants(gameId: string): Promise<
+    Array<{
+      id: string;
+      username: string;
+      completedLines: number;
+      submissionCount: number;
+    }>
+  > {
+    // Get participants from game_participations collection to include statistics
+    const participationsSnapshot = await adminFirestore
+      .collection("game_participations")
+      .where("gameId", "==", gameId)
       .get();
 
-    if (participantsSnapshot.empty) {
+    if (participationsSnapshot.empty) {
       return [];
     }
 
-    // Get all participant user IDs
-    const userIds = participantsSnapshot.docs.map((doc) => doc.id);
-
-    // Fetch user data for each participant
+    // Fetch user data and combine with participation statistics
     const participants = await Promise.all(
-      userIds.map(async (userId) => {
+      participationsSnapshot.docs.map(async (doc) => {
+        const participationData = doc.data() as GameParticipationDocument;
+        const participation = gameParticipationFromFirestore(participationData);
+
         const userDoc = await adminFirestore
           .collection("users")
-          .doc(userId)
+          .doc(participation.userId)
           .get();
 
-        if (!userDoc.exists || !userDoc.data()) {
-          return {
-            id: userId,
-            username: "Unknown User",
-          };
+        let username = "Unknown User";
+        if (userDoc.exists && userDoc.data()) {
+          const userData = userDoc.data() as UserDocument;
+          const user = userFromFirestore({
+            ...userData,
+            id: participation.userId,
+          });
+          username = user.username;
         }
 
-        const userData = userDoc.data() as UserDocument;
-        const user = userFromFirestore({
-          ...userData,
-          id: userId,
-        });
-
         return {
-          id: userId,
-          username: user.username,
+          id: participation.userId,
+          username,
+          completedLines: participation.completedLines,
+          submissionCount: participation.submissionCount,
         };
       }),
     );
 
     // Sort by username
     return participants.sort((a, b) => a.username.localeCompare(b.username));
+  }
+
+  /**
+   * Get current submission count for a user in a game
+   */
+  export async function getSubmissionCount(
+    gameId: string,
+    userId: string,
+  ): Promise<number> {
+    const snapshot = await adminFirestore
+      .collection("games")
+      .doc(gameId)
+      .collection("submissions")
+      .where("userId", "==", userId)
+      .get();
+
+    return snapshot.size;
   }
 }
 
@@ -247,16 +270,20 @@ export namespace AdminSubmissionService {
   ): Promise<Submission[]> {
     const { userId, limit = 50, offset = 0 } = options;
 
-    // Build query
-    let query = adminFirestore
+    // Build query - avoid complex composite index requirements
+    const collection = adminFirestore
       .collection("games")
       .doc(gameId)
-      .collection("submissions")
-      .orderBy("submittedAt", "desc");
+      .collection("submissions");
 
-    // Filter by user if specified
+    // Build query with proper ordering (now possible with composite index)
+    let query = collection.orderBy("submittedAt", "desc");
+
+    // Filter by user if specified (uses composite index: userId ASC, submittedAt DESC)
     if (userId) {
-      query = query.where("userId", "==", userId);
+      query = collection
+        .where("userId", "==", userId)
+        .orderBy("submittedAt", "desc");
     }
 
     // Apply pagination
@@ -269,10 +296,7 @@ export namespace AdminSubmissionService {
       query = query.startAfter(lastDoc);
     }
 
-    query = query.limit(limit);
-
-    // Execute query
-    const snapshot = await query.get();
+    const snapshot = await query.limit(limit).get();
 
     // Convert to Submission objects
     const submissions: Submission[] = [];
@@ -638,5 +662,182 @@ export namespace AdminBatchService {
         ? submissionFromFirestore(submissionDoc.data() as SubmissionDocument)
         : null,
     };
+  }
+}
+
+/**
+ * Transaction operations for atomic data consistency
+ */
+export namespace AdminTransactionService {
+  /**
+   * Atomically create submission and update player board
+   * Ensures data consistency between submission creation and board updates
+   */
+  export async function createSubmissionAndUpdateBoard(
+    gameId: string,
+    submission: Submission,
+    playerBoard: PlayerBoard,
+    userId: string,
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      await adminFirestore.runTransaction(async (transaction) => {
+        const submissionRef = adminFirestore
+          .collection("games")
+          .doc(gameId)
+          .collection("submissions")
+          .doc(submission.id);
+
+        const playerBoardRef = adminFirestore
+          .collection("games")
+          .doc(gameId)
+          .collection("playerBoards")
+          .doc(userId);
+
+        const participationRef = adminFirestore
+          .collection("game_participations")
+          .doc(`${gameId}_${userId}`);
+
+        // IMPORTANT: All reads must be executed before any writes in Firestore transactions
+        const [existingSubmission, currentPlayerBoardDoc, participationDoc] =
+          await Promise.all([
+            transaction.get(submissionRef),
+            transaction.get(playerBoardRef),
+            transaction.get(participationRef),
+          ]);
+
+        // Check if submission already exists to prevent duplicates
+        if (existingSubmission.exists) {
+          throw new Error("Submission already exists");
+        }
+
+        // Get current player board state to check for race conditions
+        let currentPlayerBoard: PlayerBoard;
+        if (currentPlayerBoardDoc.exists) {
+          currentPlayerBoard = playerBoardFromFirestore(
+            currentPlayerBoardDoc.data() as PlayerBoardDocument,
+          );
+        } else {
+          // Create new player board if it doesn't exist
+          currentPlayerBoard = {
+            userId,
+            cellStates: {},
+            completedLines: [],
+          };
+        }
+
+        // Check if the cell is already open (race condition protection)
+        if (
+          submission.matchedCellId &&
+          currentPlayerBoard.cellStates[submission.matchedCellId]?.isOpen
+        ) {
+          throw new Error("Cell is already open");
+        }
+
+        // Now perform all writes
+        // Create submission
+        const submissionData = submissionToFirestore(submission);
+        transaction.set(submissionRef, submissionData);
+
+        // Update player board if submission is accepted and has a matched cell
+        let updatedPlayerBoard = playerBoard;
+        if (
+          submission.acceptanceStatus === "accepted" &&
+          submission.matchedCellId
+        ) {
+          updatedPlayerBoard = { ...playerBoard };
+          const playerBoardData = playerBoardToFirestore(updatedPlayerBoard);
+          transaction.set(playerBoardRef, playerBoardData, { merge: true });
+        }
+
+        // Update submission count and completed lines in game_participations
+        if (participationDoc.exists) {
+          const currentData = participationDoc.data();
+
+          // Update completed lines count if board update includes new completed lines
+          if (
+            submission.acceptanceStatus === "accepted" &&
+            submission.matchedCellId
+          ) {
+            transaction.update(participationRef, {
+              submissionCount: (currentData?.submissionCount || 0) + 1,
+              completedLines: updatedPlayerBoard.completedLines.length,
+              lastCompletedAt:
+                0 < updatedPlayerBoard.completedLines.length
+                  ? dateToTimestamp(new Date())
+                  : currentData?.lastCompletedAt || null,
+              updatedAt: dateToTimestamp(new Date()),
+            });
+          } else {
+            transaction.update(participationRef, {
+              submissionCount: (currentData?.submissionCount || 0) + 1,
+              updatedAt: dateToTimestamp(new Date()),
+            });
+          }
+        }
+      });
+
+      return { success: true };
+    } catch (error) {
+      console.error("Transaction failed:", error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
+    }
+  }
+
+  /**
+   * Create submission only (for cases where board update is not needed)
+   */
+  export async function createSubmissionOnly(
+    gameId: string,
+    submission: Submission,
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      await adminFirestore.runTransaction(async (transaction) => {
+        const submissionRef = adminFirestore
+          .collection("games")
+          .doc(gameId)
+          .collection("submissions")
+          .doc(submission.id);
+
+        const participationRef = adminFirestore
+          .collection("game_participations")
+          .doc(`${gameId}_${submission.userId}`);
+
+        // IMPORTANT: All reads must be executed before any writes in Firestore transactions
+        const [existingSubmission, participationDoc] = await Promise.all([
+          transaction.get(submissionRef),
+          transaction.get(participationRef),
+        ]);
+
+        // Check if submission already exists to prevent duplicates
+        if (existingSubmission.exists) {
+          throw new Error("Submission already exists");
+        }
+
+        // Now perform all writes
+        // Create submission
+        const submissionData = submissionToFirestore(submission);
+        transaction.set(submissionRef, submissionData);
+
+        // Update submission count in game_participations
+        if (participationDoc.exists) {
+          const currentData = participationDoc.data();
+          transaction.update(participationRef, {
+            submissionCount: (currentData?.submissionCount || 0) + 1,
+            updatedAt: dateToTimestamp(new Date()),
+          });
+        }
+      });
+
+      return { success: true };
+    } catch (error) {
+      console.error("Transaction failed:", error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
+    }
   }
 }

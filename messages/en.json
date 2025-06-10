@@ -19,6 +19,10 @@
     "theme": "Theme",
     "themePlaceholder": "Enter game theme...",
     "themeDescription": "Enter a theme for your game (up to 50 characters)",
+    "gameNotFound": "Game not found",
+    "yourBoard": "Your Bingo Board",
+    "uploadImage": "Upload Image",
+    "latestResult": "Latest Result",
     "subjects": "Subjects",
     "creating": "Creating...",
     "create": "Create Game",
@@ -47,7 +51,9 @@
     "requiredBingoLines": "Required Bingo Lines",
     "requiredBingoLinesDescription": "Number of lines needed to win",
     "confidenceThreshold": "Confidence Threshold",
-    "confidenceThresholdDescription": "Minimum AI confidence level to accept a photo",
+    "confidenceThresholdDescription": "Minimum AI confidence level to accept photos",
+    "maxSubmissionsPerUser": "Max Submissions Per User",
+    "maxSubmissionsPerUserDescription": "Maximum number of images each user can submit",
     "notes": "Notes",
     "notesPlaceholder": "Enter any additional notes...",
     "notesDescription": "Optional notes for players",
@@ -74,6 +80,19 @@
       "archived": "Archived",
       "lines": "lines"
     },
+    "SubmissionResult": {
+      "title": "Image Analysis Result",
+      "status": {
+        "accepted": "Accepted",
+        "no_match": "No Match",
+        "inappropriate_content": "Inappropriate Content"
+      },
+      "confidence": "Confidence: {confidence}% (Threshold: {threshold}%)",
+      "matchedCell": "Matched Cell:",
+      "analysis": "AI Analysis:",
+      "confidenceLabel": "Confidence",
+      "thresholdNote": "Threshold: {threshold}% or higher for acceptance"
+    },
     "errors": {
       "titleRequired": "Title is required",
       "titleTooLong": "Title must be at most 50 characters",
@@ -86,7 +105,8 @@
       "titleAndThemeRequired": "Title and theme are required",
       "validationFailed": "Failed to validate subjects",
       "titleOrThemeRequired": "Title or theme is required",
-      "notEnoughValidSubjects": "Not enough valid subjects. Please try again."
+      "notEnoughValidSubjects": "Not enough valid subjects. Please try again.",
+      "submissionLimitExceeded": "Submission limit exceeded"
     }
   },
   "Common": {
@@ -189,5 +209,32 @@
       "fileTooLarge": "File size too large. Please select an image smaller than 20MB.",
       "processingFailed": "Failed to process image"
     }
+  },
+  "GameInfo": {
+    "title": "Game Information",
+    "status": "Status",
+    "expirationDate": "Expiration Date",
+    "requiredBingoLines": "Required Bingo Lines",
+    "confidenceThreshold": "Confidence Threshold",
+    "publicGame": "Public Game",
+    "photoSharing": "Photo Sharing",
+    "notes": "Notes",
+    "yes": "Yes",
+    "no": "No",
+    "lines": "lines"
+  },
+  "ParticipantsList": {
+    "title": "Participants",
+    "role": {
+      "creator": "Creator",
+      "admin": "Admin",
+      "participant": "Participant"
+    },
+    "joinedAt": "Joined At",
+    "completedLines": "Completed Lines",
+    "noParticipants": "No participants yet",
+    "submissions": "submissions",
+    "lines": "lines",
+    "last": "Last"
   }
 }

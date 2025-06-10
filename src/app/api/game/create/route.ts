@@ -187,6 +187,7 @@ export async function POST(
         isPhotoSharingEnabled: gameData.isPhotoSharingEnabled,
         requiredBingoLines: gameData.requiredBingoLines,
         confidenceThreshold: gameData.confidenceThreshold,
+        maxSubmissionsPerUser: gameData.maxSubmissionsPerUser,
         notes: gameData.notes,
         status: GameStatus.ACTIVE,
       };

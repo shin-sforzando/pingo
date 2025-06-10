@@ -19,6 +19,10 @@
     "theme": "テーマ",
     "themePlaceholder": "テーマを入力...",
     "themeDescription": "ゲームのテーマを50文字以内で入力してください",
+    "gameNotFound": "ゲームが見つかりません",
+    "yourBoard": "あなたのビンゴボード",
+    "uploadImage": "画像をアップロード",
+    "latestResult": "最新の判定結果",
     "subjects": "被写体候補",
     "creating": "作成中...",
     "create": "ゲームを作成",
@@ -48,6 +52,8 @@
     "requiredBingoLinesDescription": "勝利に必要な列数",
     "confidenceThreshold": "確信度閾値",
     "confidenceThresholdDescription": "写真を受け入れるためのAI確信度の最小値",
+    "maxSubmissionsPerUser": "ユーザーあたりの最大投稿回数",
+    "maxSubmissionsPerUserDescription": "各ユーザーが投稿できる画像の最大回数",
     "notes": "備考",
     "notesPlaceholder": "追加の備考を入力...",
     "notesDescription": "プレイヤーへのオプションのメモ",
@@ -74,6 +80,19 @@
       "archived": "アーカイブ",
       "lines": "列"
     },
+    "SubmissionResult": {
+      "title": "画像判定結果",
+      "status": {
+        "accepted": "承認",
+        "no_match": "マッチなし",
+        "inappropriate_content": "不適切なコンテンツ"
+      },
+      "confidence": "確信度: {confidence}% (閾値: {threshold}%)",
+      "matchedCell": "マッチしたセル:",
+      "analysis": "AI分析結果:",
+      "confidenceLabel": "確信度",
+      "thresholdNote": "閾値: {threshold}%以上で承認"
+    },
     "errors": {
       "titleRequired": "タイトルを入力してください",
       "titleTooLong": "タイトルは50文字以内で入力してください",
@@ -86,7 +105,8 @@
       "titleAndThemeRequired": "タイトルとテーマを入力してください",
       "validationFailed": "被写体候補の検証に失敗しました",
       "titleOrThemeRequired": "タイトルまたはテーマを入力してください",
-      "notEnoughValidSubjects": "有効な被写体候補が不足しています。もう一度お試しください。"
+      "notEnoughValidSubjects": "有効な被写体候補が不足しています。もう一度お試しください。",
+      "submissionLimitExceeded": "投稿回数の上限に達しました"
     }
   },
   "Common": {
@@ -189,5 +209,32 @@
       "fileTooLarge": "ファイルサイズが大きすぎます。20MB未満の画像を選択してください。",
       "processingFailed": "画像の処理に失敗しました"
     }
+  },
+  "GameInfo": {
+    "title": "ゲーム情報",
+    "status": "ステータス",
+    "expirationDate": "有効期限",
+    "requiredBingoLines": "必要ビンゴ列数",
+    "confidenceThreshold": "確信度閾値",
+    "publicGame": "公開ゲーム",
+    "photoSharing": "写真共有",
+    "notes": "備考",
+    "yes": "はい",
+    "no": "いいえ",
+    "lines": "列"
+  },
+  "ParticipantsList": {
+    "title": "参加者一覧",
+    "role": {
+      "creator": "作成者",
+      "admin": "管理者",
+      "participant": "参加者"
+    },
+    "joinedAt": "参加日時",
+    "completedLines": "完了ライン数",
+    "noParticipants": "参加者がいません",
+    "submissions": "投稿",
+    "lines": "列",
+    "last": "最終"
   }
 }

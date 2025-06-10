@@ -257,6 +257,9 @@ export function ImageUpload({
         authToken,
       );
 
+      // Clear preview after successful upload
+      handleRemove();
+
       onUploadComplete?.(true, result);
     } catch (error) {
       const errorMessage =
@@ -270,6 +273,7 @@ export function ImageUpload({
     gameId,
     onUploadStart,
     onUploadComplete,
+    handleRemove,
   ]);
 
   const isInteractive = !disabled && !isUploading;
