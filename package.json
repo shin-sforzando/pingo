@@ -63,7 +63,7 @@
     "ulid": "^3.0.1",
     "uuid": "^11.1.0",
     "vaul": "^1.1.2",
-    "zod": "^3.25.56"
+    "zod": "^3.25.57"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
@@ -86,7 +86,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/uuid": "^10.0.0",
-    "@vitejs/plugin-react": "^4.5.1",
+    "@vitejs/plugin-react": "^4.5.2",
     "@vitest/browser": "^3.2.3",
     "@vitest/coverage-istanbul": "^3.2.3",
     "dotenv": "^16.5.0",

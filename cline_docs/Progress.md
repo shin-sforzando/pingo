@@ -6,9 +6,29 @@ Pingoプロジェクトは現在、機能実装段階に入っています。基
 
 > [!NOTE]
 > 詳細な要件や設計の情報については、 `./cline_docs/TechnicalSpecification.md` を参照してください。
-> 過去の開発履歴については、 `./cline_docs/Archived_20250514.md` および `./cline_docs/Archived_20250610.md` を参照してください。
+> 過去の開発履歴については、 `./cline_docs/Archived_yyyymmdd.md` を参照してください。
 
-## 最近の変更（2025年6月10日）
+## 最近の変更
+
+### ビンゴライン検出と参加者統計更新機能の完全実装
+
+- ビンゴライン検出機能の実装
+  - `detectCompletedLines`関数を追加：5x5グリッドで行、列、対角線の完成を検出
+  - 画像受け入れ時に自動的にビンゴライン検出を実行
+  - 新しく完成したラインのみを`playerBoard.completedLines`に追加
+- 参加者統計の自動更新
+  - `submissionCount`：新しいサブミッション作成時に自動インクリメント
+  - `completedLines`：ビンゴライン完成時に自動更新
+  - `lastCompletedAt`：新しいライン完成時にタイムスタンプを更新
+- Firestoreトランザクション処理の修正
+  - "Firestore transactions require all reads to be executed before all writes"エラーを解決
+  - すべての読み取り操作を`Promise.all()`でまとめて実行し、その後に書き込み操作を実行
+- 複合インデックスの最適化
+  - `submissions`コレクション用の複合インデックス（`userId` + `submittedAt`）を作成
+- 参加者一覧の表示問題解決
+  - `getParticipants`メソッドを`game_participations`コレクションから統計情報付きで取得するように変更
+  - 参加者APIのレスポンス型に`completedLines`と`submissionCount`を追加
+  - `ParticipantsList`コンポーネントのインターフェースを更新し、TypeScriptエラーを修正
 
 ### ゲームメイン画面の完全実装完了
 
@@ -131,21 +151,23 @@ Pingoプロジェクトは現在、機能実装段階に入っています。基
 - [shadcn/uiのCalendarコンポーネントおよびreact-day-pickerのアップグレード](https://ui.shadcn.com/docs/components/calendar#upgrade-guide)
 - OPEN時、BINGO時の演出の追加
   - OPEN時はMagic UIのConfetti、BINGO時はConfettiのFireworks
-  - BINGO列が強調表示されていないバグ
 
 改善が必要な領域:
 
 - テスト品質（自動テスト、エラーケース）
   - テストデータでULIDであるべき場所が適当な値になっている
   - `faker.string.ulid()` を活用せよ
-- エラーハンドリング（ユーザーフレンドリーなメッセージ）
-- パフォーマンス（処理時間、メモリ使用量）
-  - Firestoreの複合インデックスを利用したパフォーマンス改善
-- セキュリティ（レート制限、ファイル検証）
-- ユーザビリティ（進行状況表示、キャンセル機能）
+- セキュリティ
+  - 投稿回数制限が正しく機能しているか
+- ユーザビリティ
   - ゲームのメイン画面にアクセスした際、画面を読み込むローディングとユーザのデータを読み込むローディングが行われている
   - 画像投稿時の待ち時間が長いので、適切なローディング表示を行う
 - 国際化（エラーメッセージの多言語対応）
-- 参加者一覧のビンゴ列数が反映されていない
-- 参加者一覧のBadgeが正しく表示されていない
 - ゲームメイン画面のStorybookストーリーが存在しない
+
+解決済みの問題:
+
+- ✅ BINGO列が強調表示されていないバグ → ビンゴライン検出機能の実装により解決
+- ✅ 参加者一覧のビンゴ列数が反映されていない → `game_participations`コレクションからの統計情報取得により解決
+- ✅ 参加者一覧のBadgeが正しく表示されていない → `ParticipantsList`コンポーネントの型定義更新により解決
+- ✅ Firestoreの複合インデックスを利用したパフォーマンス改善 → `submissions`コレクション用の複合インデックス作成により解決

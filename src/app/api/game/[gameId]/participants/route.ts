@@ -8,7 +8,18 @@ import { NextResponse } from "next/server";
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ gameId: string }> },
-): Promise<NextResponse<ApiResponse<Array<{ id: string; username: string }>>>> {
+): Promise<
+  NextResponse<
+    ApiResponse<
+      Array<{
+        id: string;
+        username: string;
+        completedLines: number;
+        submissionCount: number;
+      }>
+    >
+  >
+> {
   try {
     const { gameId } = await params;
 

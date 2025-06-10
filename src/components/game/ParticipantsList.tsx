@@ -18,19 +18,23 @@ export interface Participant {
    */
   username: string;
   /**
-   * User role in the game
+   * User role in the game (optional for backward compatibility)
    */
-  role: Role;
+  role?: Role;
   /**
-   * When the user joined the game
+   * When the user joined the game (optional for backward compatibility)
    */
-  joinedAt: Date;
+  joinedAt?: Date;
   /**
    * Number of completed bingo lines
    */
   completedLines: number;
   /**
-   * When the user last completed a line (if any)
+   * Number of submissions made
+   */
+  submissionCount: number;
+  /**
+   * When the user last completed a line (optional for backward compatibility)
    */
   lastCompletedAt?: Date | null;
 }
@@ -61,16 +65,25 @@ export function ParticipantsList({
 }: ParticipantsListProps) {
   const t = useTranslations("Game.Share");
 
-  // Sort participants by completed lines (descending), then by join date
+  // Sort participants by completed lines (descending), then by submission count
   const sortedParticipants = [...participants].sort((a, b) => {
     if (a.completedLines !== b.completedLines) {
       return b.completedLines - a.completedLines;
     }
-    return a.joinedAt.getTime() - b.joinedAt.getTime();
+    // If completed lines are equal, sort by submission count
+    return b.submissionCount - a.submissionCount;
   });
 
   // Get role badge configuration
-  const getRoleBadge = (role: Role) => {
+  const getRoleBadge = (role?: Role) => {
+    if (!role) {
+      return {
+        icon: null,
+        label: "Participant",
+        variant: "outline" as const,
+        color: "bg-gray-100 text-gray-800",
+      };
+    }
     switch (role) {
       case Role.CREATOR:
         return {
@@ -157,19 +170,20 @@ export function ParticipantsList({
                       )}
                     </div>
 
-                    {/* Role and Join Date */}
+                    {/* Role and Submission Count */}
                     <div className="mt-1 flex items-center gap-2">
-                      {participant.role !== Role.PARTICIPANT && (
-                        <Badge
-                          variant={roleBadge.variant}
-                          className={`${roleBadge.color} text-xs`}
-                        >
-                          {RoleIcon && <RoleIcon className="mr-1 h-3 w-3" />}
-                          {roleBadge.label}
-                        </Badge>
-                      )}
+                      {participant.role &&
+                        participant.role !== Role.PARTICIPANT && (
+                          <Badge
+                            variant={roleBadge.variant}
+                            className={`${roleBadge.color} text-xs`}
+                          >
+                            {RoleIcon && <RoleIcon className="mr-1 h-3 w-3" />}
+                            {roleBadge.label}
+                          </Badge>
+                        )}
                       <span className="text-muted-foreground text-xs">
-                        Joined {formatRelativeDate(participant.joinedAt)}
+                        {participant.submissionCount} submissions
                       </span>
                     </div>
                   </div>

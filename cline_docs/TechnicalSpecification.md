@@ -424,6 +424,27 @@ Ensure reasons clearly explain which criteria were not met.
   - 他のプレイヤーの画像: `acceptanceStatus == "accepted"`
 - セル画像一覧取得: `/api/game/[gameId]/cells/[cellId]/images` (特定のセルに対する画像)
 
+#### ビンゴライン検出機能
+
+画像受け入れ時に自動的にビンゴライン（行、列、対角線）の完成を検出する機能を実装：
+
+技術実装:
+
+- `detectCompletedLines`関数：5x5グリッドで行、列、対角線の完成を検出
+- セル開放時に自動実行され、新しく完成したラインのみを`playerBoard.completedLines`に追加
+- 重複検出を防ぐため、既存の完成ラインとの比較を実装
+
+データ更新:
+
+- プレイヤーボード：`completedLines`配列に新しく完成したラインを追加
+- 参加者統計：`game_participations`コレクションの`completedLines`数と`lastCompletedAt`を自動更新
+- トランザクション処理：サブミッション作成、プレイヤーボード更新、参加者統計更新をアトミックに実行
+
+Firestoreトランザクション最適化:
+
+- すべての読み取り操作を`Promise.all()`で並列実行後、書き込み操作を順次実行
+- "Firestore transactions require all reads to be executed before all writes"制約に対応
+
 #### 画像のチェックプロンプト（構造化出力対応）
 
 技術的実装:

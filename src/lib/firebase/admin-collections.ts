@@ -130,46 +130,52 @@ export namespace AdminGameParticipationService {
   }
 
   /**
-   * Get all participants for a game
+   * Get all participants for a game with their statistics
    */
-  export async function getParticipants(
-    gameId: string,
-  ): Promise<Array<{ id: string; username: string }>> {
-    const participantsSnapshot = await adminFirestore
-      .collection(`games/${gameId}/participants`)
+  export async function getParticipants(gameId: string): Promise<
+    Array<{
+      id: string;
+      username: string;
+      completedLines: number;
+      submissionCount: number;
+    }>
+  > {
+    // Get participants from game_participations collection to include statistics
+    const participationsSnapshot = await adminFirestore
+      .collection("game_participations")
+      .where("gameId", "==", gameId)
       .get();
 
-    if (participantsSnapshot.empty) {
+    if (participationsSnapshot.empty) {
       return [];
     }
 
-    // Get all participant user IDs
-    const userIds = participantsSnapshot.docs.map((doc) => doc.id);
-
-    // Fetch user data for each participant
+    // Fetch user data and combine with participation statistics
     const participants = await Promise.all(
-      userIds.map(async (userId) => {
+      participationsSnapshot.docs.map(async (doc) => {
+        const participationData = doc.data() as GameParticipationDocument;
+        const participation = gameParticipationFromFirestore(participationData);
+
         const userDoc = await adminFirestore
           .collection("users")
-          .doc(userId)
+          .doc(participation.userId)
           .get();
 
-        if (!userDoc.exists || !userDoc.data()) {
-          return {
-            id: userId,
-            username: "Unknown User",
-          };
+        let username = "Unknown User";
+        if (userDoc.exists && userDoc.data()) {
+          const userData = userDoc.data() as UserDocument;
+          const user = userFromFirestore({
+            ...userData,
+            id: participation.userId,
+          });
+          username = user.username;
         }
 
-        const userData = userDoc.data() as UserDocument;
-        const user = userFromFirestore({
-          ...userData,
-          id: userId,
-        });
-
         return {
-          id: userId,
-          username: user.username,
+          id: participation.userId,
+          username,
+          completedLines: participation.completedLines,
+          submissionCount: participation.submissionCount,
         };
       }),
     );
@@ -687,16 +693,25 @@ export namespace AdminTransactionService {
           .collection("playerBoards")
           .doc(userId);
 
+        const participationRef = adminFirestore
+          .collection("game_participations")
+          .doc(`${gameId}_${userId}`);
+
+        // IMPORTANT: All reads must be executed before any writes in Firestore transactions
+        const [existingSubmission, currentPlayerBoardDoc, participationDoc] =
+          await Promise.all([
+            transaction.get(submissionRef),
+            transaction.get(playerBoardRef),
+            transaction.get(participationRef),
+          ]);
+
         // Check if submission already exists to prevent duplicates
-        const existingSubmission = await transaction.get(submissionRef);
         if (existingSubmission.exists) {
           throw new Error("Submission already exists");
         }
 
         // Get current player board state to check for race conditions
-        const currentPlayerBoardDoc = await transaction.get(playerBoardRef);
         let currentPlayerBoard: PlayerBoard;
-
         if (currentPlayerBoardDoc.exists) {
           currentPlayerBoard = playerBoardFromFirestore(
             currentPlayerBoardDoc.data() as PlayerBoardDocument,
@@ -718,18 +733,46 @@ export namespace AdminTransactionService {
           throw new Error("Cell is already open");
         }
 
+        // Now perform all writes
         // Create submission
         const submissionData = submissionToFirestore(submission);
         transaction.set(submissionRef, submissionData);
 
         // Update player board if submission is accepted and has a matched cell
+        let updatedPlayerBoard = playerBoard;
         if (
           submission.acceptanceStatus === "accepted" &&
           submission.matchedCellId
         ) {
-          const updatedPlayerBoard = { ...playerBoard };
+          updatedPlayerBoard = { ...playerBoard };
           const playerBoardData = playerBoardToFirestore(updatedPlayerBoard);
           transaction.set(playerBoardRef, playerBoardData, { merge: true });
+        }
+
+        // Update submission count and completed lines in game_participations
+        if (participationDoc.exists) {
+          const currentData = participationDoc.data();
+
+          // Update completed lines count if board update includes new completed lines
+          if (
+            submission.acceptanceStatus === "accepted" &&
+            submission.matchedCellId
+          ) {
+            transaction.update(participationRef, {
+              submissionCount: (currentData?.submissionCount || 0) + 1,
+              completedLines: updatedPlayerBoard.completedLines.length,
+              lastCompletedAt:
+                0 < updatedPlayerBoard.completedLines.length
+                  ? dateToTimestamp(new Date())
+                  : currentData?.lastCompletedAt || null,
+              updatedAt: dateToTimestamp(new Date()),
+            });
+          } else {
+            transaction.update(participationRef, {
+              submissionCount: (currentData?.submissionCount || 0) + 1,
+              updatedAt: dateToTimestamp(new Date()),
+            });
+          }
         }
       });
 
@@ -758,15 +801,34 @@ export namespace AdminTransactionService {
           .collection("submissions")
           .doc(submission.id);
 
+        const participationRef = adminFirestore
+          .collection("game_participations")
+          .doc(`${gameId}_${submission.userId}`);
+
+        // IMPORTANT: All reads must be executed before any writes in Firestore transactions
+        const [existingSubmission, participationDoc] = await Promise.all([
+          transaction.get(submissionRef),
+          transaction.get(participationRef),
+        ]);
+
         // Check if submission already exists to prevent duplicates
-        const existingSubmission = await transaction.get(submissionRef);
         if (existingSubmission.exists) {
           throw new Error("Submission already exists");
         }
 
+        // Now perform all writes
         // Create submission
         const submissionData = submissionToFirestore(submission);
         transaction.set(submissionRef, submissionData);
+
+        // Update submission count in game_participations
+        if (participationDoc.exists) {
+          const currentData = participationDoc.data();
+          transaction.update(participationRef, {
+            submissionCount: (currentData?.submissionCount || 0) + 1,
+            updatedAt: dateToTimestamp(new Date()),
+          });
+        }
       });
 
       return { success: true };
