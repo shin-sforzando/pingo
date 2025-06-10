@@ -29,6 +29,6 @@ post-checkout:
       interactive: true
       run: git secret reveal -v
     install:
-      run: npm install --legacy-peer-deps
+      run: npm install
     adc:
       run: gcloud auth application-default login

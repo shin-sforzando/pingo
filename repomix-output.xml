@@ -166,7 +166,6 @@ src/components/ui/Button.stories.tsx
 src/components/ui/button.tsx
 src/components/ui/Calendar.stories.tsx
 src/components/ui/calendar.tsx
-src/components/ui/calendar.tsx.backup
 src/components/ui/Card.stories.tsx
 src/components/ui/card.tsx
 src/components/ui/drawer.tsx
@@ -596,93 +595,6 @@ import { Slot } from "@radix-ui/react-slot";
 import { type VariantProps, cva } from "class-variance-authority";
 ⋮----
 import { cn } from "@/lib/utils";
-</file>
-
-<file path="src/components/ui/Calendar.stories.tsx">
-import type { Meta, StoryObj } from "@storybook/react";
-import { Calendar } from "./calendar";
-⋮----
-type Story = StoryObj<typeof meta>;
-⋮----
-render: () => <Calendar disabled=
-</file>
-
-<file path="src/components/ui/calendar.tsx.backup">
-"use client";
-
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import type * as React from "react";
-import { DayPicker } from "react-day-picker";
-
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-
-function Calendar({
-  className,
-  classNames,
-  showOutsideDays = true,
-  ...props
-}: React.ComponentProps<typeof DayPicker>) {
-  return (
-    <DayPicker
-      showOutsideDays={showOutsideDays}
-      className={cn("p-3", className)}
-      classNames={{
-        months: "flex flex-col sm:flex-row gap-2",
-        month: "flex flex-col gap-4",
-        caption: "flex justify-center pt-1 relative items-center w-full",
-        caption_label: "text-sm font-medium",
-        nav: "flex items-center gap-1",
-        nav_button: cn(
-          buttonVariants({ variant: "outline" }),
-          "size-7 bg-transparent p-0 opacity-50 hover:opacity-100",
-        ),
-        nav_button_previous: "absolute left-1",
-        nav_button_next: "absolute right-1",
-        table: "w-full border-collapse space-x-1",
-        head_row: "flex",
-        head_cell:
-          "text-muted-foreground rounded-md w-8 font-normal text-[0.8rem]",
-        row: "flex w-full mt-2",
-        cell: cn(
-          "relative p-0 text-center text-sm focus-within:relative focus-within:z-20 [&:has([aria-selected])]:bg-accent [&:has([aria-selected].day-range-end)]:rounded-r-md",
-          props.mode === "range"
-            ? "[&:has(>.day-range-end)]:rounded-r-md [&:has(>.day-range-start)]:rounded-l-md first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md"
-            : "[&:has([aria-selected])]:rounded-md",
-        ),
-        day: cn(
-          buttonVariants({ variant: "ghost" }),
-          "size-8 p-0 font-normal aria-selected:opacity-100",
-        ),
-        day_range_start:
-          "day-range-start aria-selected:bg-primary aria-selected:text-primary-foreground",
-        day_range_end:
-          "day-range-end aria-selected:bg-primary aria-selected:text-primary-foreground",
-        day_selected:
-          "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
-        day_today: "bg-accent text-accent-foreground",
-        day_outside:
-          "day-outside text-muted-foreground aria-selected:text-muted-foreground",
-        day_disabled: "text-muted-foreground opacity-50",
-        day_range_middle:
-          "aria-selected:bg-accent aria-selected:text-accent-foreground",
-        day_hidden: "invisible",
-        ...classNames,
-      }}
-      components={{
-        IconLeft: ({ className, ...props }) => (
-          <ChevronLeft className={cn("size-4", className)} {...props} />
-        ),
-        IconRight: ({ className, ...props }) => (
-          <ChevronRight className={cn("size-4", className)} {...props} />
-        ),
-      }}
-      {...props}
-    />
-  );
-}
-
-export { Calendar };
 </file>
 
 <file path="src/components/ui/Card.stories.tsx">
@@ -1901,49 +1813,13 @@ className={cn(badgeVariants({ variant }), className)}
   );
 </file>
 
-<file path="src/components/ui/calendar.tsx">
-import {
-  ChevronDownIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-} from "lucide-react";
+<file path="src/components/ui/Calendar.stories.tsx">
+import type { Meta, StoryObj } from "@storybook/react";
+import { Calendar } from "./calendar";
 ⋮----
-import {
-  type DayButton,
-  DayPicker,
-  getDefaultClassNames,
-} from "react-day-picker";
+type Story = StoryObj<typeof meta>;
 ⋮----
-import { Button, buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-⋮----
-className={cn(className)}
-              {...props}
-            />
-          );
-⋮----
-className={cn("size-4", className)}
-                {...props}
-              />
-            );
-⋮----
-function CalendarDayButton({
-  className,
-  day,
-  modifiers,
-  ...props
-}: React.ComponentProps<typeof DayButton>)
-⋮----
-data-day=
-⋮----
-className={cn(
-        "flex aspect-square size-auto w-full min-w-(--cell-size) flex-col gap-1 font-normal leading-none data-[range-end=true]:rounded-md data-[range-middle=true]:rounded-none data-[range-start=true]:rounded-md data-[range-end=true]:rounded-r-md data-[range-start=true]:rounded-l-md data-[range-end=true]:bg-primary data-[range-middle=true]:bg-accent data-[range-start=true]:bg-primary data-[selected-single=true]:bg-primary data-[range-end=true]:text-primary-foreground data-[range-middle=true]:text-accent-foreground data-[range-start=true]:text-primary-foreground data-[selected-single=true]:text-primary-foreground group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:border-ring group-data-[focused=true]/day:ring-[3px] group-data-[focused=true]/day:ring-ring/50 dark:hover:text-accent-foreground [&>span]:text-xs [&>span]:opacity-70",
-        defaultClassNames.day,
-        className,
-      )}
-      {...props}
-    />
-  );
+render: () => <Calendar disabled=
 </file>
 
 <file path="src/components/ui/dropdown-menu.tsx">
@@ -2360,6 +2236,51 @@ import { useRouter } from "next/navigation";
 import type { ReactElement } from "react";
 ⋮----
 const toggleLocale = async (): Promise<void> =>
+</file>
+
+<file path="src/components/ui/calendar.tsx">
+import {
+  ChevronDownIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+} from "lucide-react";
+⋮----
+import {
+  type DayButton,
+  DayPicker,
+  getDefaultClassNames,
+} from "react-day-picker";
+⋮----
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+⋮----
+className={cn(className)}
+              {...props}
+            />
+          );
+⋮----
+className={cn("size-4", className)}
+                {...props}
+              />
+            );
+⋮----
+function CalendarDayButton({
+  className,
+  day,
+  modifiers,
+  ...props
+}: React.ComponentProps<typeof DayButton>)
+⋮----
+data-day=
+⋮----
+className={cn(
+        "flex aspect-square size-auto w-full min-w-(--cell-size) flex-col gap-1 font-normal leading-none data-[range-end=true]:rounded-md data-[range-middle=true]:rounded-none data-[range-start=true]:rounded-md data-[range-end=true]:rounded-r-md data-[range-start=true]:rounded-l-md data-[range-end=true]:bg-primary data-[range-middle=true]:bg-accent data-[range-start=true]:bg-primary data-[selected-single=true]:bg-primary data-[range-end=true]:text-primary-foreground data-[range-middle=true]:text-accent-foreground data-[range-start=true]:text-primary-foreground data-[selected-single=true]:text-primary-foreground group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:border-ring group-data-[focused=true]/day:ring-[3px] group-data-[focused=true]/day:ring-ring/50 dark:hover:text-accent-foreground [&>span]:text-xs [&>span]:opacity-70",
+        defaultClassNames.day,
+        className,
+      )}
+      {...props}
+    />
+  );
 </file>
 
 <file path="src/types/firestore.ts">
@@ -4019,8 +3940,7 @@ COPY package*.json ./
 
 # Install dependencies
 # Use --frozen-lockfile to ensure reproducibility
-# Use --legacy-peer-deps to avoid peer dependency issues with shadcn/ui
-RUN npm ci --legacy-peer-deps
+RUN npm ci
 
 # Copy the rest of the application code
 # Use .dockerignore to exclude unnecessary files
@@ -4127,10 +4047,10 @@ CMD ["node", "server.js"]
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
-    "firebase": "^11.9.0",
+    "firebase": "^11.9.1",
     "firebase-admin": "^13.4.0",
     "heic2any": "^0.0.4",
-    "lucide-react": "^0.513.0",
+    "lucide-react": "^0.514.0",
     "motion": "^12.16.0",
     "next": "15.3.3",
     "next-intl": "^4.1.0",
@@ -4149,7 +4069,7 @@ CMD ["node", "server.js"]
     "@biomejs/biome": "1.9.4",
     "@faker-js/faker": "^9.8.0",
     "@lingual/i18n-check": "^0.8.4",
-    "@playwright/test": "^1.52.0",
+    "@playwright/test": "^1.53.0",
     "@storybook/addon-a11y": "^8.6.14",
     "@storybook/addon-essentials": "^8.6.14",
     "@storybook/addon-interactions": "^8.6.14",
@@ -4172,7 +4092,7 @@ CMD ["node", "server.js"]
     "dotenv": "^16.5.0",
     "jsdom": "^26.1.0",
     "lefthook": "^1.11.13",
-    "playwright": "^1.52.0",
+    "playwright": "^1.53.0",
     "storybook": "^8.6.14",
     "storybook-next-intl": "^1.2.6",
     "tailwindcss": "^4",

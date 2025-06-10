@@ -37,8 +37,7 @@ COPY package*.json ./
 
 # Install dependencies
 # Use --frozen-lockfile to ensure reproducibility
-# Use --legacy-peer-deps to avoid peer dependency issues with shadcn/ui
-RUN npm ci --legacy-peer-deps
+RUN npm ci
 
 # Copy the rest of the application code
 # Use .dockerignore to exclude unnecessary files

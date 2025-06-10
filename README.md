@@ -63,7 +63,7 @@ cd pingo
 git secret reveal
 
 # Install dependencies
-npm install --legacy-peer-deps
+npm install
 ```
 
 > [!NOTE]
