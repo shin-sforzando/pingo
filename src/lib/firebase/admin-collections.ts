@@ -270,28 +270,33 @@ export namespace AdminSubmissionService {
       .doc(gameId)
       .collection("submissions");
 
-    // If filtering by user, use simple where clause without orderBy to avoid index requirement
-    const snapshot = userId
-      ? await collection.where("userId", "==", userId).limit(limit).get()
-      : await collection.orderBy("submittedAt", "desc").limit(limit).get();
+    // Build query with proper ordering (now possible with composite index)
+    let query = collection.orderBy("submittedAt", "desc");
+
+    // Filter by user if specified (uses composite index: userId ASC, submittedAt DESC)
+    if (userId) {
+      query = collection
+        .where("userId", "==", userId)
+        .orderBy("submittedAt", "desc");
+    }
+
+    // Apply pagination
+    if (0 < offset) {
+      const offsetSnapshot = await query.limit(offset).get();
+      if (offsetSnapshot.empty) {
+        return [];
+      }
+      const lastDoc = offsetSnapshot.docs[offsetSnapshot.docs.length - 1];
+      query = query.startAfter(lastDoc);
+    }
+
+    const snapshot = await query.limit(limit).get();
 
     // Convert to Submission objects
     const submissions: Submission[] = [];
     for (const doc of snapshot.docs) {
       const submissionData = doc.data() as SubmissionDocument;
       submissions.push(submissionFromFirestore(submissionData));
-    }
-
-    // If filtering by user, sort in memory since we can't use orderBy with where clause
-    if (userId) {
-      submissions.sort(
-        (a, b) => b.submittedAt.getTime() - a.submittedAt.getTime(),
-      );
-    }
-
-    // Apply offset in memory for user-filtered queries
-    if (userId && 0 < offset) {
-      return submissions.slice(offset, offset + limit);
     }
 
     return submissions;
@@ -651,5 +656,126 @@ export namespace AdminBatchService {
         ? submissionFromFirestore(submissionDoc.data() as SubmissionDocument)
         : null,
     };
+  }
+}
+
+/**
+ * Transaction operations for atomic data consistency
+ */
+export namespace AdminTransactionService {
+  /**
+   * Atomically create submission and update player board
+   * Ensures data consistency between submission creation and board updates
+   */
+  export async function createSubmissionAndUpdateBoard(
+    gameId: string,
+    submission: Submission,
+    playerBoard: PlayerBoard,
+    userId: string,
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      await adminFirestore.runTransaction(async (transaction) => {
+        const submissionRef = adminFirestore
+          .collection("games")
+          .doc(gameId)
+          .collection("submissions")
+          .doc(submission.id);
+
+        const playerBoardRef = adminFirestore
+          .collection("games")
+          .doc(gameId)
+          .collection("playerBoards")
+          .doc(userId);
+
+        // Check if submission already exists to prevent duplicates
+        const existingSubmission = await transaction.get(submissionRef);
+        if (existingSubmission.exists) {
+          throw new Error("Submission already exists");
+        }
+
+        // Get current player board state to check for race conditions
+        const currentPlayerBoardDoc = await transaction.get(playerBoardRef);
+        let currentPlayerBoard: PlayerBoard;
+
+        if (currentPlayerBoardDoc.exists) {
+          currentPlayerBoard = playerBoardFromFirestore(
+            currentPlayerBoardDoc.data() as PlayerBoardDocument,
+          );
+        } else {
+          // Create new player board if it doesn't exist
+          currentPlayerBoard = {
+            userId,
+            cellStates: {},
+            completedLines: [],
+          };
+        }
+
+        // Check if the cell is already open (race condition protection)
+        if (
+          submission.matchedCellId &&
+          currentPlayerBoard.cellStates[submission.matchedCellId]?.isOpen
+        ) {
+          throw new Error("Cell is already open");
+        }
+
+        // Create submission
+        const submissionData = submissionToFirestore(submission);
+        transaction.set(submissionRef, submissionData);
+
+        // Update player board if submission is accepted and has a matched cell
+        if (
+          submission.acceptanceStatus === "accepted" &&
+          submission.matchedCellId
+        ) {
+          const updatedPlayerBoard = { ...playerBoard };
+          const playerBoardData = playerBoardToFirestore(updatedPlayerBoard);
+          transaction.set(playerBoardRef, playerBoardData, { merge: true });
+        }
+      });
+
+      return { success: true };
+    } catch (error) {
+      console.error("Transaction failed:", error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
+    }
+  }
+
+  /**
+   * Create submission only (for cases where board update is not needed)
+   */
+  export async function createSubmissionOnly(
+    gameId: string,
+    submission: Submission,
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      await adminFirestore.runTransaction(async (transaction) => {
+        const submissionRef = adminFirestore
+          .collection("games")
+          .doc(gameId)
+          .collection("submissions")
+          .doc(submission.id);
+
+        // Check if submission already exists to prevent duplicates
+        const existingSubmission = await transaction.get(submissionRef);
+        if (existingSubmission.exists) {
+          throw new Error("Submission already exists");
+        }
+
+        // Create submission
+        const submissionData = submissionToFirestore(submission);
+        transaction.set(submissionRef, submissionData);
+      });
+
+      return { success: true };
+    } catch (error) {
+      console.error("Transaction failed:", error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
+    }
   }
 }

@@ -3,7 +3,7 @@ import {
   AdminGameBoardService,
   AdminGameService,
   AdminPlayerBoardService,
-  AdminSubmissionService,
+  AdminTransactionService,
 } from "@/lib/firebase/admin-collections";
 import { AcceptanceStatus, ProcessingStatus } from "@/types/common";
 import type { Submission } from "@/types/schema";
@@ -159,7 +159,19 @@ If the image is appropriate, provide a brief description of what the image shows
         updatedAt: null,
       };
 
-      await AdminSubmissionService.createSubmission(gameId, submission);
+      const transactionResult =
+        await AdminTransactionService.createSubmissionOnly(gameId, submission);
+
+      if (!transactionResult.success) {
+        console.error("Failed to create submission:", transactionResult.error);
+        return NextResponse.json(
+          {
+            error: "Failed to create submission",
+            details: transactionResult.error,
+          },
+          { status: 500 },
+        );
+      }
 
       return NextResponse.json({
         appropriate: false,
@@ -212,7 +224,19 @@ If the image is appropriate, provide a brief description of what the image shows
         updatedAt: null,
       };
 
-      await AdminSubmissionService.createSubmission(gameId, submission);
+      const transactionResult =
+        await AdminTransactionService.createSubmissionOnly(gameId, submission);
+
+      if (!transactionResult.success) {
+        console.error("Failed to create submission:", transactionResult.error);
+        return NextResponse.json(
+          {
+            error: "Failed to create submission",
+            details: transactionResult.error,
+          },
+          { status: 500 },
+        );
+      }
 
       return NextResponse.json({
         appropriate: true,
@@ -304,30 +328,78 @@ Be strict in your matching - only match if you're confident the image clearly sh
       updatedAt: null,
     };
 
-    await AdminSubmissionService.createSubmission(gameId, submission);
-
-    // Step 4: If accepted, update player board
+    // Step 4: Use transaction to atomically create submission and update player board
     if (isAccepted && analysisResponse.matchedCellId) {
-      try {
-        // Update cell state if not already open (double-check to prevent race conditions)
-        if (!playerBoard.cellStates[analysisResponse.matchedCellId]?.isOpen) {
-          playerBoard.cellStates[analysisResponse.matchedCellId] = {
-            isOpen: true,
-            openedAt: now,
-            openedBySubmissionId: submissionId,
-          };
+      // Update cell state if not already open (double-check to prevent race conditions)
+      if (!playerBoard.cellStates[analysisResponse.matchedCellId]?.isOpen) {
+        playerBoard.cellStates[analysisResponse.matchedCellId] = {
+          isOpen: true,
+          openedAt: now,
+          openedBySubmissionId: submissionId,
+        };
 
-          // Check for completed lines (simplified - you may want to implement full bingo logic)
-          // For now, just save the updated board
-          await AdminPlayerBoardService.updatePlayerBoard(
+        // Use transaction to ensure atomicity between submission creation and board update
+        const transactionResult =
+          await AdminTransactionService.createSubmissionAndUpdateBoard(
             gameId,
-            userId,
+            submission,
             playerBoard,
+            userId,
+          );
+
+        if (!transactionResult.success) {
+          console.error("Transaction failed:", transactionResult.error);
+
+          // Return error response to client indicating partial failure
+          return NextResponse.json(
+            {
+              error: "Failed to process submission completely",
+              details: transactionResult.error,
+              appropriate: true,
+              confidence: analysisResponse.confidence,
+              matchedCellId: analysisResponse.matchedCellId,
+              acceptanceStatus: AcceptanceStatus.NO_MATCH, // Downgrade to NO_MATCH due to processing failure
+              critique: `Processing failed: ${transactionResult.error}. ${submission.critique}`,
+            },
+            { status: 500 },
           );
         }
-      } catch (error) {
-        console.error("Failed to update player board:", error);
-        // Don't fail the entire request if board update fails
+      } else {
+        // Cell is already open, just create submission without board update
+        const transactionResult =
+          await AdminTransactionService.createSubmissionOnly(
+            gameId,
+            submission,
+          );
+
+        if (!transactionResult.success) {
+          console.error(
+            "Failed to create submission:",
+            transactionResult.error,
+          );
+          return NextResponse.json(
+            {
+              error: "Failed to create submission",
+              details: transactionResult.error,
+            },
+            { status: 500 },
+          );
+        }
+      }
+    } else {
+      // Not accepted or no matched cell, just create submission
+      const transactionResult =
+        await AdminTransactionService.createSubmissionOnly(gameId, submission);
+
+      if (!transactionResult.success) {
+        console.error("Failed to create submission:", transactionResult.error);
+        return NextResponse.json(
+          {
+            error: "Failed to create submission",
+            details: transactionResult.error,
+          },
+          { status: 500 },
+        );
       }
     }
 

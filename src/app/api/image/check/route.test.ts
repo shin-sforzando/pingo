@@ -4,6 +4,7 @@ import {
   AdminGameService,
   AdminPlayerBoardService,
   AdminSubmissionService,
+  AdminTransactionService,
 } from "@/lib/firebase/admin-collections";
 import { GameStatus } from "@/types/common";
 import { faker } from "@faker-js/faker";
@@ -33,6 +34,10 @@ vi.mock("@/lib/firebase/admin-collections", () => ({
   },
   AdminSubmissionService: {
     createSubmission: vi.fn(),
+  },
+  AdminTransactionService: {
+    createSubmissionOnly: vi.fn(),
+    createSubmissionAndUpdateBoard: vi.fn(),
   },
 }));
 
@@ -186,6 +191,14 @@ describe("/api/image/check", () => {
       });
 
       vi.mocked(AdminSubmissionService.createSubmission).mockResolvedValue();
+
+      // Mock AdminTransactionService methods
+      vi.mocked(AdminTransactionService.createSubmissionOnly).mockResolvedValue(
+        { success: true },
+      );
+      vi.mocked(
+        AdminTransactionService.createSubmissionAndUpdateBoard,
+      ).mockResolvedValue({ success: true });
 
       // Mock successful fetch
       global.fetch = vi.fn().mockResolvedValue({

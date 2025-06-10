@@ -1573,62 +1573,6 @@ type Story = StoryObj<typeof meta>;
 const generateParticipant = (role: Role, completedLines = 0) => (
 </file>
 
-<file path="src/components/game/ParticipantsList.tsx">
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatRelativeDate } from "@/lib/utils";
-import { Role } from "@/types/common";
-import { Crown, Trophy, Users } from "lucide-react";
-import { useTranslations } from "next-intl";
-⋮----
-export interface Participant {
-
-
-
-  id: string;
-
-
-
-  username: string;
-
-
-
-  role: Role;
-
-
-
-  joinedAt: Date;
-
-
-
-  completedLines: number;
-
-
-
-  lastCompletedAt?: Date | null;
-}
-⋮----
-export interface ParticipantsListProps {
-
-
-
-  participants: Participant[];
-
-
-
-  currentUserId?: string;
-
-
-
-  className?: string;
-}
-⋮----
-const getRoleBadge = (role: Role) =>
-⋮----
-Last:
-</file>
-
 <file path="src/components/game/SubmissionResult.stories.tsx">
 import type { Meta, StoryObj } from "@storybook/react";
 import { SubmissionResult } from "./SubmissionResult";
@@ -2140,6 +2084,62 @@ import { ImageUpload } from "./ImageUpload";
 type Story = StoryObj<typeof meta>;
 </file>
 
+<file path="src/components/game/ParticipantsList.tsx">
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatRelativeDate } from "@/lib/utils";
+import { Role } from "@/types/common";
+import { Crown, Trophy, Users } from "lucide-react";
+import { useTranslations } from "next-intl";
+⋮----
+export interface Participant {
+
+
+
+  id: string;
+
+
+
+  username: string;
+
+
+
+  role: Role;
+
+
+
+  joinedAt: Date;
+
+
+
+  completedLines: number;
+
+
+
+  lastCompletedAt?: Date | null;
+}
+⋮----
+export interface ParticipantsListProps {
+
+
+
+  participants: Participant[];
+
+
+
+  currentUserId?: string;
+
+
+
+  className?: string;
+}
+⋮----
+const getRoleBadge = (role: Role) =>
+⋮----
+Last:
+</file>
+
 <file path="src/components/game/QRCodeCard.stories.tsx">
 import type { Meta, StoryObj } from "@storybook/react";
 import { QRCodeCard } from "./QRCodeCard";
@@ -2360,27 +2360,6 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ gameId: string }> },
 ): Promise<NextResponse<ApiResponse<Event>>>
-</file>
-
-<file path="src/app/api/image/check/route.test.ts">
-import { adminAuth } from "@/lib/firebase/admin";
-import {
-  AdminGameBoardService,
-  AdminGameService,
-  AdminPlayerBoardService,
-  AdminSubmissionService,
-} from "@/lib/firebase/admin-collections";
-import { GameStatus } from "@/types/common";
-import { faker } from "@faker-js/faker";
-import type { DecodedIdToken } from "firebase-admin/auth";
-import type { NextRequest } from "next/server";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { POST } from "./route";
-⋮----
-const createMockRequest = (
-    body: unknown,
-    authHeader?: string,
-): NextRequest =>
 </file>
 
 <file path="src/app/api/image/upload/route.ts">
@@ -2825,6 +2804,89 @@ setupFiles: ["./vitest.browser.setup.ts"], // Add browser setup file
 "**/stories/example/*.tsx", // Exclude example stories
 </file>
 
+<file path="cloudbuild.yaml">
+steps:
+
+  - name: gcr.io/cloud-builders/docker
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        docker build \
+          --no-cache \
+          -t $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA \
+          . \
+          -f Dockerfile \
+          --build-arg FIREBASE_PROJECT_ID="$$FIREBASE_PROJECT_ID" \
+          --build-arg FIREBASE_CLIENT_EMAIL="$$FIREBASE_CLIENT_EMAIL" \
+          --build-arg FIREBASE_PRIVATE_KEY="$$FIREBASE_PRIVATE_KEY" \
+          --build-arg GEMINI_API_KEY="$$GEMINI_API_KEY"
+    secretEnv:
+      [
+        "FIREBASE_PROJECT_ID",
+        "FIREBASE_CLIENT_EMAIL",
+        "FIREBASE_PRIVATE_KEY",
+        "GEMINI_API_KEY",
+      ]
+    id: Build
+
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - >-
+        $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
+    id: Push
+
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk:slim"
+    args:
+      - run
+      - services
+      - update
+      - $_SERVICE_NAME
+      - "--platform=managed"
+      - >-
+        --image=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
+      - >-
+        --labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID,gcb-trigger-id=$_TRIGGER_ID
+      - "--region=$_DEPLOY_REGION"
+      - "--quiet"
+    id: Deploy
+    entrypoint: gcloud
+
+images:
+  - >-
+    $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
+
+options:
+  substitutionOption: ALLOW_LOOSE
+  logging: CLOUD_LOGGING_ONLY
+
+substitutions:
+  _AR_PROJECT_ID: pingo-456817
+  _PLATFORM: managed
+  _SERVICE_NAME: pingo
+  _TRIGGER_ID: ffafef4b-1470-4a85-9178-2f0b0adea3eb
+  _DEPLOY_REGION: asia-northeast1
+  _AR_HOSTNAME: asia-northeast1-docker.pkg.dev
+  _AR_REPOSITORY: cloud-run-source-deploy
+
+tags:
+  - gcp-cloud-build-deploy-cloud-run
+  - gcp-cloud-build-deploy-cloud-run-managed
+  - pingo
+
+availableSecrets:
+  secretManager:
+    - versionName: projects/pingo-456817/secrets/FIREBASE_PROJECT_ID/versions/latest
+      env: "FIREBASE_PROJECT_ID"
+    - versionName: projects/pingo-456817/secrets/FIREBASE_CLIENT_EMAIL/versions/latest
+      env: "FIREBASE_CLIENT_EMAIL"
+    - versionName: projects/pingo-456817/secrets/FIREBASE_PRIVATE_KEY/versions/latest
+      env: "FIREBASE_PRIVATE_KEY"
+    - versionName: projects/pingo-456817/secrets/GEMINI_API_KEY/versions/latest
+      env: "GEMINI_API_KEY"
+</file>
+
 <file path="src/app/api/auth/me/route.ts">
 import { type NextRequest, NextResponse } from "next/server";
 ⋮----
@@ -2919,21 +2981,26 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { GET } from "./route";
 </file>
 
-<file path="src/app/api/image/check/route.ts">
+<file path="src/app/api/image/check/route.test.ts">
 import { adminAuth } from "@/lib/firebase/admin";
 import {
   AdminGameBoardService,
   AdminGameService,
   AdminPlayerBoardService,
   AdminSubmissionService,
+  AdminTransactionService,
 } from "@/lib/firebase/admin-collections";
-import { AcceptanceStatus, ProcessingStatus } from "@/types/common";
-import type { Submission } from "@/types/schema";
-import { GoogleGenAI, Type } from "@google/genai";
-import { type NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
+import { GameStatus } from "@/types/common";
+import { faker } from "@faker-js/faker";
+import type { DecodedIdToken } from "firebase-admin/auth";
+import type { NextRequest } from "next/server";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { POST } from "./route";
 ⋮----
-export async function POST(request: NextRequest)
+const createMockRequest = (
+    body: unknown,
+    authHeader?: string,
+): NextRequest =>
 </file>
 
 <file path="src/app/api/image/getUploadUrl/route.ts">
@@ -3038,89 +3105,6 @@ export async function submitImage(
 ): Promise<ImageSubmissionResult>
 </file>
 
-<file path="cloudbuild.yaml">
-steps:
-
-  - name: gcr.io/cloud-builders/docker
-    entrypoint: "bash"
-    args:
-      - "-c"
-      - |
-        docker build \
-          --no-cache \
-          -t $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA \
-          . \
-          -f Dockerfile \
-          --build-arg FIREBASE_PROJECT_ID="$$FIREBASE_PROJECT_ID" \
-          --build-arg FIREBASE_CLIENT_EMAIL="$$FIREBASE_CLIENT_EMAIL" \
-          --build-arg FIREBASE_PRIVATE_KEY="$$FIREBASE_PRIVATE_KEY" \
-          --build-arg GEMINI_API_KEY="$$GEMINI_API_KEY"
-    secretEnv:
-      [
-        "FIREBASE_PROJECT_ID",
-        "FIREBASE_CLIENT_EMAIL",
-        "FIREBASE_PRIVATE_KEY",
-        "GEMINI_API_KEY",
-      ]
-    id: Build
-
-  - name: gcr.io/cloud-builders/docker
-    args:
-      - push
-      - >-
-        $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
-    id: Push
-
-  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk:slim"
-    args:
-      - run
-      - services
-      - update
-      - $_SERVICE_NAME
-      - "--platform=managed"
-      - >-
-        --image=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
-      - >-
-        --labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID,gcb-trigger-id=$_TRIGGER_ID
-      - "--region=$_DEPLOY_REGION"
-      - "--quiet"
-    id: Deploy
-    entrypoint: gcloud
-
-images:
-  - >-
-    $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
-
-options:
-  substitutionOption: ALLOW_LOOSE
-  logging: CLOUD_LOGGING_ONLY
-
-substitutions:
-  _AR_PROJECT_ID: pingo-456817
-  _PLATFORM: managed
-  _SERVICE_NAME: pingo
-  _TRIGGER_ID: ffafef4b-1470-4a85-9178-2f0b0adea3eb
-  _DEPLOY_REGION: asia-northeast1
-  _AR_HOSTNAME: asia-northeast1-docker.pkg.dev
-  _AR_REPOSITORY: cloud-run-source-deploy
-
-tags:
-  - gcp-cloud-build-deploy-cloud-run
-  - gcp-cloud-build-deploy-cloud-run-managed
-  - pingo
-
-availableSecrets:
-  secretManager:
-    - versionName: projects/pingo-456817/secrets/FIREBASE_PROJECT_ID/versions/latest
-      env: "FIREBASE_PROJECT_ID"
-    - versionName: projects/pingo-456817/secrets/FIREBASE_CLIENT_EMAIL/versions/latest
-      env: "FIREBASE_CLIENT_EMAIL"
-    - versionName: projects/pingo-456817/secrets/FIREBASE_PRIVATE_KEY/versions/latest
-      env: "FIREBASE_PRIVATE_KEY"
-    - versionName: projects/pingo-456817/secrets/GEMINI_API_KEY/versions/latest
-      env: "GEMINI_API_KEY"
-</file>
-
 <file path="src/app/api/game/[gameId]/route.ts">
 import { validateGameId } from "@/lib/api-utils";
 import { adminAuth } from "@/lib/firebase/admin";
@@ -3177,6 +3161,23 @@ import { dateToISOString } from "@/types/firestore";
 import { NextResponse } from "next/server";
 ⋮----
 export async function GET()
+</file>
+
+<file path="src/app/api/image/check/route.ts">
+import { adminAuth } from "@/lib/firebase/admin";
+import {
+  AdminGameBoardService,
+  AdminGameService,
+  AdminPlayerBoardService,
+  AdminTransactionService,
+} from "@/lib/firebase/admin-collections";
+import { AcceptanceStatus, ProcessingStatus } from "@/types/common";
+import type { Submission } from "@/types/schema";
+import { GoogleGenAI, Type } from "@google/genai";
+import { type NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+⋮----
+export async function POST(request: NextRequest)
 </file>
 
 <file path="src/components/game/SubjectItem.tsx">
@@ -3400,6 +3401,18 @@ export async function getGameSubmissionContext(
     gameId: string,
     userId: string,
     submissionId: string,
+): Promise<
+⋮----
+export async function createSubmissionAndUpdateBoard(
+    gameId: string,
+    submission: Submission,
+    playerBoard: PlayerBoard,
+    userId: string,
+): Promise<
+⋮----
+export async function createSubmissionOnly(
+    gameId: string,
+    submission: Submission,
 ): Promise<
 </file>
 

@@ -404,6 +404,12 @@ export default function GamePage() {
   // Get latest submission for result display
   const latestSubmission = 0 < submissions.length ? submissions[0] : null;
 
+  // Get matched cell subject for display
+  const matchedCellSubject = latestSubmission?.matchedCellId
+    ? gameBoard?.find((cell) => cell.id === latestSubmission.matchedCellId)
+        ?.subject
+    : null;
+
   // Convert player board cell states to bingo board format
   const rawCellStates = playerBoard?.cellStates || {};
   const cellStates: Record<string, BingoCellState> = {};
@@ -528,6 +534,7 @@ export default function GamePage() {
                   latestSubmission.acceptanceStatus || AcceptanceStatus.NO_MATCH
                 }
                 matchedCellId={latestSubmission.matchedCellId}
+                matchedCellSubject={matchedCellSubject}
                 confidenceThreshold={game.confidenceThreshold}
                 imageUrl={latestSubmission.imageUrl}
               />
