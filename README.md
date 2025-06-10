@@ -41,6 +41,7 @@ Pingo: Bingo game where AI judges based on photos
   - [React](https://ja.react.dev) (v19.1.0)
   - [next-intl](https://next-intl.dev)
   - [@google/genai](https://googleapis.github.io/js-genai/release_docs/index.html) (v1.4.0)
+  - Firebase
 - [Storybook](https://storybook.js.org) (v8.6.14)
 - [shadcn/ui](https://ui.shadcn.com)
 
@@ -63,7 +64,7 @@ cd pingo
 git secret reveal
 
 # Install dependencies
-npm install --legacy-peer-deps
+npm install
 ```
 
 > [!NOTE]

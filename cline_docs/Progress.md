@@ -135,19 +135,11 @@ Pingoプロジェクトは現在、機能実装段階に入っています。基
 - Storybook 9系へのアップグレード
 - コンポーネント内にロジックが記述されすぎてファイルが長大になっている
 - Firestoreの複合インデックスを活用しきれていない
-
-#### 画像投稿機能の改善方針
-
-最優先で修正すべき点:
-
-- critiqueの二か国語対応
-  - `critiqueJa` と `critiqueEn` を返すようにして、現在のLocaleに合わせて表示切替
-- [shadcn/uiのCalendarコンポーネントおよびreact-day-pickerのアップグレード](https://ui.shadcn.com/docs/components/calendar#upgrade-guide)
 - OPEN時、BINGO時の演出の追加
   - OPEN時はMagic UIのConfetti、BINGO時はConfettiのFireworks
-
-改善が必要な領域:
-
+- シェア画面の参加者一覧をParticipantsListに差し替える
+- critiqueの二か国語対応
+  - `critiqueJa` と `critiqueEn` を返すようにして、現在のLocaleに合わせて表示切替
 - テスト品質（自動テスト、エラーケース）
   - テストデータでULIDであるべき場所が適当な値になっている
   - `faker.string.ulid()` を活用せよ
@@ -158,4 +150,4 @@ Pingoプロジェクトは現在、機能実装段階に入っています。基
   - ゲームのメイン画面にアクセスした際、画面を読み込むローディングとユーザのデータを読み込むローディングが行われている
   - 画像投稿時の待ち時間が長いので、適切なローディング表示を行う
 - 国際化（エラーメッセージの多言語対応）
-- ゲームメイン画面のStorybookストーリーが存在しない
+- Storybookストーリーが存在しない画面がある
