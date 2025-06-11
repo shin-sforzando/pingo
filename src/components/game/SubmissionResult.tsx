@@ -182,7 +182,7 @@ export function SubmissionResult({
             <div
               className={cn(
                 "h-2 rounded-full transition-all",
-                confidence >= confidenceThreshold
+                confidenceThreshold <= confidence
                   ? "bg-green-500"
                   : "bg-red-500",
               )}

@@ -18,7 +18,9 @@ export const cleanupTestGames = async (gameIds: string[]) => {
     try {
       // Delete game document
       await adminFirestore.collection("games").doc(gameId).delete();
-      console.log(`Deleted test game from Firestore: ${gameId}`);
+      console.log(
+        `ℹ️ XXX: ~ game-test-helpers.ts ~ Deleted test game from Firestore: ${gameId}`,
+      );
 
       // Delete game board
       const boardDocs = await adminFirestore
@@ -62,7 +64,9 @@ export const cleanupTestGames = async (gameIds: string[]) => {
         await doc.ref.delete();
       }
 
-      console.log(`Deleted all related collections for game: ${gameId}`);
+      console.log(
+        `ℹ️ XXX: ~ game-test-helpers.ts ~ Deleted all related collections for game: ${gameId}`,
+      );
     } catch (error) {
       console.error(`Failed to delete test game ${gameId}:`, error);
     }

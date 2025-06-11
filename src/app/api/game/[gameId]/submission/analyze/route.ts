@@ -280,15 +280,21 @@ export async function POST(
 ): Promise<NextResponse<ApiResponse<AnalysisResult>>> {
   try {
     const { gameId } = await params;
+    console.log("ℹ️ XXX: ~ analyze/route.ts ~ POST called", { gameId });
 
     // Authenticate user
     const authResult = await authenticateUser(request);
     if (authResult instanceof NextResponse) return authResult;
     const userId = authResult;
+    console.log("ℹ️ XXX: ~ analyze/route.ts ~ User authenticated", { userId });
 
     // Parse request body
     const body = await request.json();
     const { submissionId, imageUrl } = analyzeRequestSchema.parse(body);
+    console.log("ℹ️ XXX: ~ analyze/route.ts ~ Request parsed", {
+      submissionId,
+      imageUrl,
+    });
 
     // Verify user is game participant
     const participantCheck = await verifyGameParticipant(gameId, userId);
@@ -311,8 +317,18 @@ export async function POST(
 
     // Get available cells for analysis
     const availableCells = await getAvailableCells(gameId, userId);
+    console.log("ℹ️ XXX: ~ analyze/route.ts ~ Available cells", {
+      count: availableCells.length,
+      cells: availableCells.map((cell) => ({
+        id: cell.id,
+        subject: cell.subject,
+      })),
+    });
 
     if (availableCells.length === 0) {
+      console.log(
+        "ℹ️ XXX: ~ analyze/route.ts ~ No available cells - all opened",
+      );
       // No cells available - all are already open
       const analysis: AnalysisResult = {
         matchedCellId: null,
@@ -368,22 +384,51 @@ export async function POST(
     // Validate response with Zod
     const analysis = analysisResultSchema.parse(analysisData);
 
+    console.log("ℹ️ XXX: ~ analyze/route.ts ~ Analysis completed", {
+      analysis,
+      confidenceThreshold: game.confidenceThreshold,
+      meetsThreshold: game.confidenceThreshold <= analysis.confidence,
+    });
+
     // Check confidence threshold and update cell state if accepted
     if (
       analysis.matchedCellId &&
-      analysis.confidence >= game.confidenceThreshold &&
+      game.confidenceThreshold <= analysis.confidence &&
       analysis.acceptanceStatus === AcceptanceStatus.ACCEPTED
     ) {
+      console.log("ℹ️ XXX: ~ analyze/route.ts ~ Updating cell state", {
+        cellId: analysis.matchedCellId,
+        confidence: analysis.confidence,
+        threshold: game.confidenceThreshold,
+      });
       await updateCellState(
         gameId,
         userId,
         analysis.matchedCellId,
         submissionId,
       );
+      console.log(
+        "ℹ️ XXX: ~ analyze/route.ts ~ Cell state updated successfully",
+      );
+    } else {
+      console.log("ℹ️ XXX: ~ analyze/route.ts ~ Cell state not updated", {
+        reason: !analysis.matchedCellId
+          ? "no match"
+          : analysis.confidence < game.confidenceThreshold
+            ? "low confidence"
+            : "not accepted",
+        matchedCellId: analysis.matchedCellId,
+        confidence: analysis.confidence,
+        threshold: game.confidenceThreshold,
+        acceptanceStatus: analysis.acceptanceStatus,
+      });
     }
 
     // Update submission with analysis results
     await updateSubmissionAnalysis(gameId, submissionId, analysis);
+    console.log(
+      "ℹ️ XXX: ~ analyze/route.ts ~ Submission updated with analysis results",
+    );
 
     return NextResponse.json({
       success: true,

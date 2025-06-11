@@ -60,6 +60,7 @@ describe("/api/game/[gameId] PUT", () => {
       isPhotoSharingEnabled: true,
       requiredBingoLines: 1,
       confidenceThreshold: 0.5,
+      maxSubmissionsPerUser: 30,
       notes: "Test notes",
       status: GameStatus.ACTIVE,
     };

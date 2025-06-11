@@ -29,7 +29,7 @@ const generateParticipant = (role: Role, completedLines = 0) => ({
   role,
   joinedAt: faker.date.recent({ days: 7 }),
   completedLines,
-  lastCompletedAt: completedLines > 0 ? faker.date.recent({ days: 1 }) : null,
+  lastCompletedAt: 0 < completedLines ? faker.date.recent({ days: 1 }) : null,
 });
 
 const sampleParticipants = [
