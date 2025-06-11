@@ -371,7 +371,7 @@ export async function POST(
     // Check confidence threshold and update cell state if accepted
     if (
       analysis.matchedCellId &&
-      analysis.confidence >= game.confidenceThreshold &&
+      game.confidenceThreshold <= analysis.confidence &&
       analysis.acceptanceStatus === AcceptanceStatus.ACCEPTED
     ) {
       await updateCellState(

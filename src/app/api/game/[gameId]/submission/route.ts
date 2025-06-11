@@ -118,7 +118,7 @@ export async function POST(
     const currentSubmissionCount =
       await AdminGameParticipationService.getSubmissionCount(gameId, userId);
 
-    if (currentSubmissionCount >= game.maxSubmissionsPerUser) {
+    if (game.maxSubmissionsPerUser <= currentSubmissionCount) {
       return NextResponse.json(
         {
           success: false,

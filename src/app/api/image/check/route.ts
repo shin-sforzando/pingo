@@ -375,7 +375,7 @@ Be strict in your matching - only match if you're confident the image clearly sh
     // Determine acceptance status based on confidence threshold
     const isAccepted =
       analysisResponse.matchedCellId &&
-      analysisResponse.confidence >= game.confidenceThreshold;
+      game.confidenceThreshold <= analysisResponse.confidence;
 
     const acceptanceStatus = isAccepted
       ? AcceptanceStatus.ACCEPTED
