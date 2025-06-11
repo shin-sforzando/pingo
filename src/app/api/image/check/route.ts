@@ -23,6 +23,19 @@ const checkImageSchema = z.object({
   submissionId: z.string(),
 });
 
+// Common response interface for consistent API responses
+interface ImageCheckResponse {
+  appropriate: boolean;
+  confidence: number | null;
+  matchedCellId: string | null;
+  acceptanceStatus: AcceptanceStatus;
+  critique: string | null;
+  newlyCompletedLines: number;
+  totalCompletedLines: number;
+  requiredBingoLines: number;
+  reason?: string; // For inappropriate content
+}
+
 // Define response schema for structured output
 const responseSchema = {
   type: Type.OBJECT,
@@ -221,6 +234,21 @@ If the image is appropriate, provide a brief description of what the image shows
     const now = new Date();
     let submission: Submission;
 
+    // Step 2: Get player board to check which cells are still closed
+    let playerBoard = await AdminPlayerBoardService.getPlayerBoard(
+      gameId,
+      userId,
+    );
+
+    if (!playerBoard) {
+      // Create new player board if it doesn't exist
+      playerBoard = {
+        userId,
+        cellStates: {},
+        completedLines: [],
+      };
+    }
+
     // If inappropriate content detected
     if (appropriatenessResponse.error) {
       submission = {
@@ -253,29 +281,19 @@ If the image is appropriate, provide a brief description of what the image shows
         );
       }
 
-      return NextResponse.json({
+      const response: ImageCheckResponse = {
         appropriate: false,
-        reason: appropriatenessResponse.error,
         confidence: null,
         matchedCellId: null,
         acceptanceStatus: AcceptanceStatus.INAPPROPRIATE_CONTENT,
         critique: appropriatenessResponse.error,
-      });
-    }
-
-    // Step 2: Get player board to check which cells are still closed
-    let playerBoard = await AdminPlayerBoardService.getPlayerBoard(
-      gameId,
-      userId,
-    );
-
-    if (!playerBoard) {
-      // Create new player board if it doesn't exist
-      playerBoard = {
-        userId,
-        cellStates: {},
-        completedLines: [],
+        newlyCompletedLines: 0,
+        totalCompletedLines: playerBoard.completedLines.length,
+        requiredBingoLines: game.requiredBingoLines,
+        reason: appropriatenessResponse.error,
       };
+
+      return NextResponse.json(response);
     }
 
     // Filter cells to only include those that are not yet opened
@@ -318,13 +336,18 @@ If the image is appropriate, provide a brief description of what the image shows
         );
       }
 
-      return NextResponse.json({
+      const response: ImageCheckResponse = {
         appropriate: true,
         confidence: null,
         matchedCellId: null,
         acceptanceStatus: AcceptanceStatus.NO_MATCH,
         critique: submission.critique,
-      });
+        newlyCompletedLines: 0,
+        totalCompletedLines: playerBoard.completedLines.length,
+        requiredBingoLines: game.requiredBingoLines,
+      };
+
+      return NextResponse.json(response);
     }
 
     // Step 3: Analyze for bingo cell matches (only closed cells)
@@ -406,13 +429,14 @@ Be strict in your matching - only match if you're confident the image clearly sh
       errorMessage: null,
       createdAt: now,
       updatedAt: null,
-    };
+    } as Submission;
 
     // Step 4: Use transaction to atomically create submission and update player board
     if (isAccepted && analysisResponse.matchedCellId) {
+      const matchedCellId = analysisResponse.matchedCellId; // Type narrowing
       // Update cell state if not already open (double-check to prevent race conditions)
-      if (!playerBoard.cellStates[analysisResponse.matchedCellId]?.isOpen) {
-        playerBoard.cellStates[analysisResponse.matchedCellId] = {
+      if (!playerBoard.cellStates[matchedCellId]?.isOpen) {
+        playerBoard.cellStates[matchedCellId] = {
           isOpen: true,
           openedAt: now,
           openedBySubmissionId: submissionId,
@@ -421,7 +445,7 @@ Be strict in your matching - only match if you're confident the image clearly sh
         console.log(
           "ℹ️ XXX: ~ image/check/route.ts ~ Cell opened, detecting lines",
           {
-            openedCellId: analysisResponse.matchedCellId,
+            openedCellId: matchedCellId,
             previousCompletedLines: playerBoard.completedLines.length,
           },
         );
@@ -486,27 +510,30 @@ Be strict in your matching - only match if you're confident the image clearly sh
           console.error("Transaction failed:", transactionResult.error);
 
           // Return error response to client indicating partial failure
+          const errorResponse: ImageCheckResponse = {
+            appropriate: true,
+            confidence: analysisResponse.confidence,
+            matchedCellId: analysisResponse.matchedCellId,
+            acceptanceStatus: AcceptanceStatus.NO_MATCH, // Downgrade to NO_MATCH due to processing failure
+            critique: `Processing failed: ${transactionResult.error}. ${submission.critique}`,
+            newlyCompletedLines: 0,
+            totalCompletedLines:
+              playerBoard.completedLines.length - freshlyCompletedLines.length,
+            requiredBingoLines: game.requiredBingoLines,
+          };
+
           return NextResponse.json(
             {
               error: "Failed to process submission completely",
               details: transactionResult.error,
-              appropriate: true,
-              confidence: analysisResponse.confidence,
-              matchedCellId: analysisResponse.matchedCellId,
-              acceptanceStatus: AcceptanceStatus.NO_MATCH, // Downgrade to NO_MATCH due to processing failure
-              critique: `Processing failed: ${transactionResult.error}. ${submission.critique}`,
-              newlyCompletedLines: 0,
-              totalCompletedLines:
-                playerBoard.completedLines.length -
-                freshlyCompletedLines.length,
-              requiredBingoLines: game.requiredBingoLines,
+              ...errorResponse,
             },
             { status: 500 },
           );
         }
 
         // Return success response with confetti trigger information
-        return NextResponse.json({
+        const successResponse: ImageCheckResponse = {
           appropriate: true,
           confidence: analysisResponse.confidence,
           matchedCellId: analysisResponse.matchedCellId,
@@ -515,7 +542,9 @@ Be strict in your matching - only match if you're confident the image clearly sh
           newlyCompletedLines: freshlyCompletedLines.length,
           totalCompletedLines: playerBoard.completedLines.length,
           requiredBingoLines: game.requiredBingoLines,
-        });
+        };
+
+        return NextResponse.json(successResponse);
       }
       // Cell is already open, just create submission without board update
       const transactionResult =
@@ -548,13 +577,18 @@ Be strict in your matching - only match if you're confident the image clearly sh
       }
     }
 
-    return NextResponse.json({
+    const finalResponse: ImageCheckResponse = {
       appropriate: true,
       confidence: analysisResponse.confidence,
       matchedCellId: analysisResponse.matchedCellId,
       acceptanceStatus,
       critique: submission.critique,
-    });
+      newlyCompletedLines: 0,
+      totalCompletedLines: playerBoard.completedLines.length,
+      requiredBingoLines: game.requiredBingoLines,
+    };
+
+    return NextResponse.json(finalResponse);
   } catch (error) {
     console.error("Error checking image content:", error);
 

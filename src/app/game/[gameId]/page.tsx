@@ -59,7 +59,6 @@ export default function GamePage() {
       refreshSubmissions,
       setIsUploading,
       confettiRef,
-      requiredBingoLines: game?.requiredBingoLines,
     });
 
   // Transform data for UI components

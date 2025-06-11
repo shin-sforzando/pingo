@@ -14,6 +14,7 @@ export function ErrorDisplay({ error, className }: ErrorDisplayProps) {
 
   return (
     <div
+      role="alert"
       className={cn(
         "rounded-md border border-destructive/20 bg-destructive/10 p-3 text-destructive text-sm",
         className,

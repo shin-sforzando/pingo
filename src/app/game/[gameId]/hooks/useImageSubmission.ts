@@ -1,6 +1,6 @@
 import type { ConfettiRef } from "@/components/magicui/confetti";
 import type { ImageSubmissionResult } from "@/types/schema";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 type UploadCompleteHandler = (
   success: boolean,
@@ -13,7 +13,6 @@ interface UseImageSubmissionProps {
   refreshSubmissions: () => Promise<void>;
   setIsUploading: (isUploading: boolean) => void;
   confettiRef?: React.RefObject<ConfettiRef>;
-  requiredBingoLines?: number;
 }
 
 /**
@@ -25,15 +24,21 @@ export function useImageSubmission({
   refreshSubmissions,
   setIsUploading,
   confettiRef,
-  requiredBingoLines,
 }: UseImageSubmissionProps) {
   const [submissionError, setSubmissionError] = useState<string | null>(null);
+  const fireworksIntervalRef = useRef<number | null>(null);
 
   /**
    * Triggers spectacular fireworks confetti for game completion
    */
   const triggerFireworksConfetti = useCallback(() => {
     console.log("ℹ️ XXX: ~ useImageSubmission.ts ~ Starting fireworks confetti");
+
+    // Clear any existing fireworks interval to prevent multiple concurrent animations
+    if (fireworksIntervalRef.current) {
+      clearInterval(fireworksIntervalRef.current);
+      fireworksIntervalRef.current = null;
+    }
 
     const duration = 3000;
     const animationEnd = Date.now() + duration;
@@ -49,7 +54,7 @@ export function useImageSubmission({
       Math.random() * (max - min) + min;
 
     let intervalCount = 0;
-    const interval = window.setInterval(() => {
+    fireworksIntervalRef.current = window.setInterval(() => {
       const timeLeft = animationEnd - Date.now();
       intervalCount++;
 
@@ -57,7 +62,11 @@ export function useImageSubmission({
         console.log("ℹ️ XXX: ~ useImageSubmission.ts ~ Fireworks completed", {
           totalIntervals: intervalCount,
         });
-        return clearInterval(interval);
+        if (fireworksIntervalRef.current) {
+          clearInterval(fireworksIntervalRef.current);
+          fireworksIntervalRef.current = null;
+        }
+        return;
       }
 
       const particleCount = 50 * (timeLeft / duration);
@@ -105,19 +114,18 @@ export function useImageSubmission({
         console.log(
           "ℹ️ XXX: ~ useImageSubmission.ts ~ Checking confetti conditions",
           {
-            hasNewlyCompletedLines: !!result.newlyCompletedLines,
             newlyCompletedLines: result.newlyCompletedLines,
             totalCompletedLines: result.totalCompletedLines,
-            requiredBingoLines,
+            requiredBingoLines: result.requiredBingoLines,
             resultKeys: Object.keys(result),
           },
         );
 
-        if (result.newlyCompletedLines && result.newlyCompletedLines > 0) {
+        if (result.newlyCompletedLines > 0) {
           console.log("ℹ️ XXX: ~ useImageSubmission.ts ~ Triggering confetti", {
             newlyCompletedLines: result.newlyCompletedLines,
             totalCompletedLines: result.totalCompletedLines,
-            requiredBingoLines,
+            requiredBingoLines: result.requiredBingoLines,
           });
 
           // Trigger basic confetti for line completion
@@ -129,11 +137,7 @@ export function useImageSubmission({
           });
 
           // Trigger fireworks if game is completed
-          if (
-            requiredBingoLines &&
-            result.totalCompletedLines &&
-            requiredBingoLines <= result.totalCompletedLines
-          ) {
+          if (result.requiredBingoLines <= result.totalCompletedLines) {
             console.log(
               "ℹ️ XXX: ~ useImageSubmission.ts ~ Game completed! Triggering fireworks",
             );
@@ -156,7 +160,6 @@ export function useImageSubmission({
       refreshSubmissions,
       setIsUploading,
       confettiRef,
-      requiredBingoLines,
       triggerFireworksConfetti,
     ],
   );
@@ -170,6 +173,16 @@ export function useImageSubmission({
     setIsUploading(true);
     setSubmissionError(null);
   }, [setIsUploading]);
+
+  // Cleanup fireworks interval on unmount
+  useEffect(() => {
+    return () => {
+      if (fireworksIntervalRef.current) {
+        clearInterval(fireworksIntervalRef.current);
+        fireworksIntervalRef.current = null;
+      }
+    };
+  }, []);
 
   return {
     submissionError,
