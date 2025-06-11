@@ -8,7 +8,7 @@ describe("Firebase Admin Initialization", () => {
 
     if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
       console.log(
-        "Using GOOGLE_APPLICATION_CREDENTIALS:",
+        "ℹ️ XXX: ~ admin.test.ts ~ Using GOOGLE_APPLICATION_CREDENTIALS:",
         process.env.GOOGLE_APPLICATION_CREDENTIALS,
       );
     } else if (
@@ -16,7 +16,9 @@ describe("Firebase Admin Initialization", () => {
       process.env.FIREBASE_CLIENT_EMAIL &&
       process.env.FIREBASE_PRIVATE_KEY
     ) {
-      console.log("Using Firebase credentials from environment variables");
+      console.log(
+        "ℹ️ XXX: ~ admin.test.ts ~ Using Firebase credentials from environment variables",
+      );
     } else {
       console.warn("No Firebase credentials found in environment");
     }

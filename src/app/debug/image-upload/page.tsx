@@ -18,7 +18,7 @@ export default function ImageUploadDebugPage() {
     setIsUploading(true);
     setUploadError(null);
     setUploadResult(null);
-    console.log("Upload started");
+    console.log("ℹ️ XXX: ~ page.tsx ~ Upload started");
   };
 
   const handleUploadComplete = (
@@ -27,7 +27,11 @@ export default function ImageUploadDebugPage() {
     error?: string,
   ) => {
     setIsUploading(false);
-    console.log("Upload completed:", { success, result, error });
+    console.log("ℹ️ XXX: ~ page.tsx ~ Upload completed:", {
+      success,
+      result,
+      error,
+    });
 
     if (success && result) {
       setUploadResult(result);
@@ -39,7 +43,7 @@ export default function ImageUploadDebugPage() {
   };
 
   const handleImageProcessed = (processedImage: ProcessedImage) => {
-    console.log("Image processed:", processedImage);
+    console.log("ℹ️ XXX: ~ page.tsx ~ Image processed:", processedImage);
   };
 
   return (

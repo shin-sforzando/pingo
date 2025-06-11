@@ -51,7 +51,9 @@ export const cleanupTestUsers = async (userIds: string[]) => {
       try {
         await adminAuth.getUser(uid);
         await adminAuth.deleteUser(uid);
-        console.log(`Deleted test user from Auth: ${uid}`);
+        console.log(
+          `ℹ️ XXX: ~ api-test-helpers.ts ~ Deleted test user from Auth: ${uid}`,
+        );
       } catch (error) {
         // User might not exist in Auth if test failed before creation
         console.error(`Failed to delete test user from Auth ${uid}:`, error);
@@ -59,7 +61,9 @@ export const cleanupTestUsers = async (userIds: string[]) => {
 
       // Delete from Firestore
       await adminFirestore.collection("users").doc(uid).delete();
-      console.log(`Deleted test user from Firestore: ${uid}`);
+      console.log(
+        `ℹ️ XXX: ~ api-test-helpers.ts ~ Deleted test user from Firestore: ${uid}`,
+      );
     } catch (error) {
       console.error(`Failed to delete test user from Firestore ${uid}:`, error);
     }

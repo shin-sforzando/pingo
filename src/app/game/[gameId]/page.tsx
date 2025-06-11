@@ -6,15 +6,15 @@ import { GameInfo } from "@/components/game/GameInfo";
 import { ImageUpload } from "@/components/game/ImageUpload";
 import { ParticipantsList } from "@/components/game/ParticipantsList";
 import { SubmissionResult } from "@/components/game/SubmissionResult";
-import { Confetti } from "@/components/magicui/confetti";
+import { Confetti, type ConfettiRef } from "@/components/magicui/confetti";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { AcceptanceStatus } from "@/types/common";
 import { useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
+import { useRef } from "react";
 import { ErrorDisplay } from "./components/ErrorDisplay";
 import { GameHeader } from "./components/GameHeader";
-import { useConfettiEffects } from "./hooks/useConfettiEffects";
 import { useGameData } from "./hooks/useGameData";
 import { useImageSubmission } from "./hooks/useImageSubmission";
 import {
@@ -49,19 +49,18 @@ export default function GamePage() {
     setIsUploading,
   } = useGameData(gameId);
 
+  // Confetti ref for celebrations
+  const confettiRef = useRef<ConfettiRef>(null);
+
   // Image submission workflow
   const { submissionError, handleUploadComplete, handleUploadStart } =
     useImageSubmission({
       refreshParticipants,
       refreshSubmissions,
       setIsUploading,
+      confettiRef,
+      requiredBingoLines: game?.requiredBingoLines,
     });
-
-  // Confetti effects for celebrations
-  const confettiRef = useConfettiEffects({
-    completedLines: playerBoard?.completedLines || [],
-    requiredBingoLines: game?.requiredBingoLines || 1,
-  });
 
   // Transform data for UI components
   const latestSubmission = getLatestSubmission(submissions);

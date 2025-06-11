@@ -45,31 +45,70 @@ const ConfettiComponent = forwardRef<ConfettiRef, Props>((props, ref) => {
     ...rest
   } = props;
   const instanceRef = useRef<ConfettiInstance | null>(null);
+  const globalOptionsRef = useRef(globalOptions);
+  globalOptionsRef.current = globalOptions;
 
-  const canvasRef = useCallback(
-    (node: HTMLCanvasElement) => {
-      if (node !== null) {
-        if (instanceRef.current) return;
-        instanceRef.current = confetti.create(node, {
-          ...globalOptions,
-          resize: true,
-        });
-      } else {
-        if (instanceRef.current) {
-          instanceRef.current.reset();
-          instanceRef.current = null;
-        }
+  const canvasRef = useCallback((node: HTMLCanvasElement) => {
+    console.log("ℹ️ XXX: ~ confetti.tsx ~ canvasRef callback", {
+      nodeExists: !!node,
+      instanceExists: !!instanceRef.current,
+    });
+
+    if (node !== null) {
+      if (instanceRef.current) {
+        console.log(
+          "ℹ️ XXX: ~ confetti.tsx ~ Instance already exists, skipping creation",
+        );
+        return;
       }
-    },
-    [globalOptions],
-  );
+
+      console.log("ℹ️ XXX: ~ confetti.tsx ~ Creating confetti instance");
+
+      // Set canvas size to full viewport
+      node.width = window.innerWidth;
+      node.height = window.innerHeight;
+
+      instanceRef.current = confetti.create(node, {
+        resize: true,
+        useWorker: true,
+        ...globalOptionsRef.current,
+      });
+      console.log("ℹ️ XXX: ~ confetti.tsx ~ Confetti instance created", {
+        instanceExists: !!instanceRef.current,
+      });
+    } else {
+      console.log("ℹ️ XXX: ~ confetti.tsx ~ Node is null, cleaning up instance");
+      if (instanceRef.current) {
+        instanceRef.current.reset();
+        instanceRef.current = null;
+        console.log("ℹ️ XXX: ~ confetti.tsx ~ Instance cleaned up");
+      }
+    }
+  }, []);
 
   const fire = useCallback(
     async (opts = {}) => {
+      console.log("ℹ️ XXX: ~ confetti.tsx ~ fire() called", {
+        instanceExists: !!instanceRef.current,
+        options,
+        opts,
+        mergedOptions: { ...options, ...opts },
+      });
+
       try {
-        await instanceRef.current?.({ ...options, ...opts });
+        if (!instanceRef.current) {
+          console.warn(
+            "ℹ️ XXX: ~ confetti.tsx ~ No confetti instance available",
+          );
+          return;
+        }
+
+        const result = await instanceRef.current({ ...options, ...opts });
+        console.log("ℹ️ XXX: ~ confetti.tsx ~ Confetti fired successfully", {
+          result,
+        });
       } catch (error) {
-        console.error("Confetti error:", error);
+        console.error("ℹ️ XXX: ~ confetti.tsx ~ Confetti error:", error);
       }
     },
     [options],
@@ -85,12 +124,21 @@ const ConfettiComponent = forwardRef<ConfettiRef, Props>((props, ref) => {
   useImperativeHandle(ref, () => api, [api]);
 
   useEffect(() => {
+    console.log("ℹ️ XXX: ~ confetti.tsx ~ useEffect for auto-fire", {
+      manualstart,
+      shouldAutoFire: !manualstart,
+    });
+
     if (!manualstart) {
+      console.log("ℹ️ XXX: ~ confetti.tsx ~ Auto-firing confetti");
       (async () => {
         try {
           await fire();
         } catch (error) {
-          console.error("Confetti effect error:", error);
+          console.error(
+            "ℹ️ XXX: ~ confetti.tsx ~ Confetti effect error:",
+            error,
+          );
         }
       })();
     }

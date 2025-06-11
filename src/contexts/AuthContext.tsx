@@ -50,9 +50,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Debug output for auth state
   useEffect(() => {
-    console.log("Auth state:", { isLoggedIn: !!user, loading });
+    console.log("ℹ️ XXX: ~ AuthContext.tsx ~ Auth state:", {
+      isLoggedIn: !!user,
+      loading,
+    });
     if (user) {
-      console.log("User info:", { id: user.id, username: user.username });
+      console.log("ℹ️ XXX: ~ AuthContext.tsx ~ User info:", {
+        id: user.id,
+        username: user.username,
+      });
     }
   }, [user, loading]);
 

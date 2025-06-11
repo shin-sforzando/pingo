@@ -18,7 +18,7 @@ export default function Home() {
 
   // Handle successful login/registration
   const handleAuthSuccess = () => {
-    console.log("Authentication successful");
+    console.log("ℹ️ XXX: ~ page.tsx ~ Authentication successful");
   };
 
   // Handle auth error

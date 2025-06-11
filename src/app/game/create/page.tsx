@@ -82,7 +82,7 @@ export default function CreateGamePage() {
    * Generate subjects using AI based on title and theme
    */
   const generateSubjects = async () => {
-    console.log("generateSubjects called");
+    console.log("ℹ️ XXX: ~ page.tsx ~ generateSubjects called");
     const { title, theme } = form.getValues();
 
     // Validate title and theme
@@ -95,7 +95,7 @@ export default function CreateGamePage() {
     setGenerationError(null);
 
     try {
-      console.log("Calling /api/subjects/generate");
+      console.log("ℹ️ XXX: ~ page.tsx ~ Calling /api/subjects/generate");
       const response = await fetch("/api/subjects/generate", {
         method: "POST",
         headers: {
@@ -114,7 +114,7 @@ export default function CreateGamePage() {
       }
 
       const data = await response.json();
-      console.log("Generate API response:", data);
+      console.log("ℹ️ XXX: ~ page.tsx ~ Generate API response:", data);
 
       if (data.error) {
         throw new Error(data.error);
@@ -134,7 +134,7 @@ export default function CreateGamePage() {
       );
 
       console.log(
-        `Filtered ${data.candidates.length - uniqueNewCandidates.length} duplicates`,
+        `ℹ️ XXX: ~ page.tsx ~ Filtered ${data.candidates.length - uniqueNewCandidates.length} duplicates`,
       );
 
       // Create subject objects for the new unique candidates
@@ -232,7 +232,7 @@ export default function CreateGamePage() {
    * Handle form submission
    */
   const onSubmit: SubmitHandler<GameCreateFormValues> = async (data) => {
-    console.log("onSubmit called");
+    console.log("ℹ️ XXX: ~ page.tsx ~ onSubmit called");
     // Validate that we have enough subjects
     if (subjects.length < 24) {
       setSubmissionError(t("Game.errors.notEnoughValidSubjects"));
@@ -248,7 +248,9 @@ export default function CreateGamePage() {
       const boardSubjectTexts = boardSubjects.map((subject) => subject.text);
 
       // Validate only the subjects that will be used in the bingo board
-      console.log("Calling /api/subjects/check for the first 24 subjects");
+      console.log(
+        "ℹ️ XXX: ~ page.tsx ~ /api/subjects/check for the first 24 subjects",
+      );
       const checkResponse = await fetch("/api/subjects/check", {
         method: "POST",
         headers: {
@@ -260,7 +262,7 @@ export default function CreateGamePage() {
       });
 
       const checkData = await checkResponse.json();
-      console.log("Check API response:", checkData);
+      console.log("ℹ️ XXX: ~ page.tsx ~ Check API response:", checkData);
 
       if (!checkResponse.ok) {
         throw new Error(checkData.error || t("Game.errors.validationFailed"));
@@ -325,7 +327,7 @@ export default function CreateGamePage() {
       };
 
       // Send request to API
-      console.log("Calling /api/game/create");
+      console.log("ℹ️ XXX: ~ page.tsx ~ Calling /api/game/create");
 
       // Get the ID token from Firebase Authentication
       const idToken = await auth.currentUser?.getIdToken();

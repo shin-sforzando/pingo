@@ -206,7 +206,9 @@ export async function PUT(
     // Update game using data access layer
     await AdminGameService.updateGame(gameId, updatedGame);
 
-    console.log(`Updated game: ${gameId} by user: ${currentUserId}`);
+    console.log(
+      `ℹ️ XXX: ~ route.ts ~ Updated game: ${gameId} by user: ${currentUserId}`,
+    );
 
     // Convert Date objects to ISO strings for JSON serialization
     const serializedGame = {

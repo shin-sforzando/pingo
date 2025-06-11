@@ -316,7 +316,7 @@ export async function PUT(
     );
 
     console.log(
-      `Updated submission: ${submissionId} in game: ${gameId} by user: ${currentUserId}`,
+      `ℹ️ XXX: ~ route.ts ~ Updated submission: ${submissionId} in game: ${gameId} by user: ${currentUserId}`,
     );
 
     return NextResponse.json({

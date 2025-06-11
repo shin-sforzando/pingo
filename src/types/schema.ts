@@ -333,6 +333,9 @@ export const imageSubmissionResultSchema = z.object({
   matchedCellId: z.string().nullable().optional(),
   acceptanceStatus: z.nativeEnum(AcceptanceStatus).optional(),
   critique: z.string().optional(),
+  newlyCompletedLines: z.number().int().min(0).optional(),
+  totalCompletedLines: z.number().int().min(0).optional(),
+  requiredBingoLines: z.number().int().min(1).max(5).optional(),
 });
 
 /**

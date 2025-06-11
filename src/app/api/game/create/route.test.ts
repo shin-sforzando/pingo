@@ -77,7 +77,9 @@ describe("Game Creation API Integration Test", () => {
       isTestUser: true,
     });
 
-    console.log(`Created test user: ${testUserId} (${testUsername})`);
+    console.log(
+      `ℹ️ XXX: ~ route.test.ts ~ Created test user: ${testUserId} (${testUsername})`,
+    );
   });
 
   // Cleanup after all tests
@@ -138,7 +140,9 @@ describe("Game Creation API Integration Test", () => {
     const gameId = responseData.data?.gameId;
     if (gameId) {
       testGameIds.push(gameId);
-      console.log(`Created test game: ${gameId} (${testTitle})`);
+      console.log(
+        `ℹ️ XXX: ~ route.test.ts ~ Created test game: ${gameId} (${testTitle})`,
+      );
     } else {
       expect.fail("Game ID should be defined");
     }

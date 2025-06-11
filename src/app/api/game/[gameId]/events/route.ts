@@ -236,7 +236,7 @@ export async function POST(
     await AdminEventService.createEvent(gameId, event);
 
     console.log(
-      `Created event: ${eventId} for game: ${gameId} by user: ${userId}`,
+      `ℹ️ XXX: ~ route.ts ~ Created event: ${eventId} for game: ${gameId} by user: ${userId}`,
     );
 
     return NextResponse.json({

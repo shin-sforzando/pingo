@@ -115,6 +115,8 @@ function detectCompletedLines(
  */
 export async function POST(request: NextRequest) {
   try {
+    console.log("ℹ️ XXX: ~ image/check/route.ts ~ POST called");
+
     // Verify authentication
     const authHeader = request.headers.get("authorization");
     if (!authHeader?.startsWith("Bearer ")) {
@@ -127,11 +129,19 @@ export async function POST(request: NextRequest) {
     const idToken = authHeader.split("Bearer ")[1];
     const decodedToken = await adminAuth.verifyIdToken(idToken);
     const userId = decodedToken.uid;
+    console.log("ℹ️ XXX: ~ image/check/route.ts ~ User authenticated", {
+      userId,
+    });
 
     // Parse request body
     const body = await request.json();
     const validatedData = checkImageSchema.parse(body);
     const { gameId, imageUrl, submissionId } = validatedData;
+    console.log("ℹ️ XXX: ~ image/check/route.ts ~ Request parsed", {
+      gameId,
+      submissionId,
+      imageUrl,
+    });
 
     // Get game and game board
     const [game, gameBoard] = await Promise.all([
@@ -408,8 +418,26 @@ Be strict in your matching - only match if you're confident the image clearly sh
           openedBySubmissionId: submissionId,
         };
 
+        console.log(
+          "ℹ️ XXX: ~ image/check/route.ts ~ Cell opened, detecting lines",
+          {
+            openedCellId: analysisResponse.matchedCellId,
+            previousCompletedLines: playerBoard.completedLines.length,
+          },
+        );
+
         // Detect completed bingo lines after opening the cell
         const newCompletedLines = detectCompletedLines(gameBoard, playerBoard);
+        console.log(
+          "ℹ️ XXX: ~ image/check/route.ts ~ Line detection completed",
+          {
+            totalDetectedLines: newCompletedLines.length,
+            detectedLines: newCompletedLines.map((line) => ({
+              type: line.type,
+              index: line.index,
+            })),
+          },
+        );
 
         // Only add newly completed lines (not already in playerBoard.completedLines)
         const existingLineKeys = new Set(
@@ -422,11 +450,28 @@ Be strict in your matching - only match if you're confident the image clearly sh
           (line) => !existingLineKeys.has(`${line.type}-${line.index}`),
         );
 
+        console.log("ℹ️ XXX: ~ image/check/route.ts ~ Newly completed lines", {
+          existingLinesCount: playerBoard.completedLines.length,
+          freshlyCompletedCount: freshlyCompletedLines.length,
+          freshlyCompletedLines: freshlyCompletedLines.map((line) => ({
+            type: line.type,
+            index: line.index,
+          })),
+        });
+
         // Add newly completed lines to player board
         playerBoard.completedLines = [
           ...playerBoard.completedLines,
           ...freshlyCompletedLines,
         ];
+
+        console.log("ℹ️ XXX: ~ image/check/route.ts ~ Updated player board", {
+          totalCompletedLines: playerBoard.completedLines.length,
+          allCompletedLines: playerBoard.completedLines.map((line) => ({
+            type: line.type,
+            index: line.index,
+          })),
+        });
 
         // Use transaction to ensure atomicity between submission creation and board update
         const transactionResult =
@@ -450,31 +495,41 @@ Be strict in your matching - only match if you're confident the image clearly sh
               matchedCellId: analysisResponse.matchedCellId,
               acceptanceStatus: AcceptanceStatus.NO_MATCH, // Downgrade to NO_MATCH due to processing failure
               critique: `Processing failed: ${transactionResult.error}. ${submission.critique}`,
+              newlyCompletedLines: 0,
+              totalCompletedLines:
+                playerBoard.completedLines.length -
+                freshlyCompletedLines.length,
+              requiredBingoLines: game.requiredBingoLines,
             },
             { status: 500 },
           );
         }
-      } else {
-        // Cell is already open, just create submission without board update
-        const transactionResult =
-          await AdminTransactionService.createSubmissionOnly(
-            gameId,
-            submission,
-          );
 
-        if (!transactionResult.success) {
-          console.error(
-            "Failed to create submission:",
-            transactionResult.error,
-          );
-          return NextResponse.json(
-            {
-              error: "Failed to create submission",
-              details: transactionResult.error,
-            },
-            { status: 500 },
-          );
-        }
+        // Return success response with confetti trigger information
+        return NextResponse.json({
+          appropriate: true,
+          confidence: analysisResponse.confidence,
+          matchedCellId: analysisResponse.matchedCellId,
+          acceptanceStatus,
+          critique: submission.critique,
+          newlyCompletedLines: freshlyCompletedLines.length,
+          totalCompletedLines: playerBoard.completedLines.length,
+          requiredBingoLines: game.requiredBingoLines,
+        });
+      }
+      // Cell is already open, just create submission without board update
+      const transactionResult =
+        await AdminTransactionService.createSubmissionOnly(gameId, submission);
+
+      if (!transactionResult.success) {
+        console.error("Failed to create submission:", transactionResult.error);
+        return NextResponse.json(
+          {
+            error: "Failed to create submission",
+            details: transactionResult.error,
+          },
+          { status: 500 },
+        );
       }
     } else {
       // Not accepted or no matched cell, just create submission

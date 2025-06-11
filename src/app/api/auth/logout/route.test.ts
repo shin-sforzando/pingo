@@ -68,7 +68,7 @@ describe("User Logout API Integration Test", () => {
     const userDoc = userToFirestoreForTest(user, passwordHash);
     await adminFirestore.collection("users").doc(userId).set(userDoc);
     console.log(
-      `Created test user for logout API test: ${userId} (${testUsername})`,
+      `ℹ️ XXX: ~ route.test.ts ~ Created test user for logout API test: ${userId} (${testUsername})`,
     );
 
     // Create user in Firebase Auth
@@ -77,11 +77,15 @@ describe("User Logout API Integration Test", () => {
         uid: userId,
         displayName: testUsername,
       });
-      console.log(`Created user in Firebase Auth: ${userId}`);
+      console.log(
+        `ℹ️ XXX: ~ route.test.ts ~ Created user in Firebase Auth: ${userId}`,
+      );
 
       // Create custom token for authentication
       customToken = await adminAuth.createCustomToken(userId);
-      console.log(`Created custom token for user: ${userId}`);
+      console.log(
+        `ℹ️ XXX: ~ route.test.ts ~ Created custom token for user: ${userId}`,
+      );
     } catch (error) {
       console.error(`Failed to create user in Firebase Auth: ${error}`);
       throw error;

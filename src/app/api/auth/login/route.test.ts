@@ -67,7 +67,7 @@ describe("User Login API Integration Test", () => {
     const userDoc = userToFirestoreForTest(user, passwordHash);
     await adminFirestore.collection("users").doc(userId).set(userDoc);
     console.log(
-      `Created test user for login test: ${userId} (${testUsername})`,
+      `ℹ️ XXX: ~ route.test.ts ~ Created test user for login test: ${userId} (${testUsername})`,
     );
 
     // Create user in Firebase Auth
@@ -76,7 +76,9 @@ describe("User Login API Integration Test", () => {
         uid: userId,
         displayName: testUsername,
       });
-      console.log(`Created user in Firebase Auth: ${userId}`);
+      console.log(
+        `ℹ️ XXX: ~ route.test.ts ~ Created user in Firebase Auth: ${userId}`,
+      );
     } catch (error) {
       console.error(`Failed to create user in Firebase Auth: ${error}`);
       throw error;

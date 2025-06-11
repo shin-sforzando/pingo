@@ -101,11 +101,8 @@ src/app/api/subjects/generate/route.ts
 src/app/debug/image-upload/page.tsx
 src/app/game/[gameId]/components/ErrorDisplay.tsx
 src/app/game/[gameId]/components/GameHeader.tsx
-src/app/game/[gameId]/hooks/useConfettiEffects.test.ts
-src/app/game/[gameId]/hooks/useConfettiEffects.ts
 src/app/game/[gameId]/hooks/useGameData.ts
 src/app/game/[gameId]/hooks/useImageSubmission.ts
-src/app/game/[gameId]/hooks/usePrevious.ts
 src/app/game/[gameId]/page.tsx
 src/app/game/[gameId]/share/page.stories.tsx
 src/app/game/[gameId]/share/page.tsx
@@ -365,132 +362,6 @@ import {
 import { POST } from "./route";
 </file>
 
-<file path="src/app/game/[gameId]/components/ErrorDisplay.tsx">
-import { cn } from "@/lib/utils";
-⋮----
-interface ErrorDisplayProps {
-  error: string | null;
-  className?: string;
-}
-⋮----
-export function ErrorDisplay(
-⋮----
-className=
-</file>
-
-<file path="src/app/game/[gameId]/components/GameHeader.tsx">
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import type { Game } from "@/types/schema";
-import { useTranslations } from "next-intl";
-⋮----
-interface GameHeaderProps {
-  game: Game | null;
-  className?: string;
-}
-</file>
-
-<file path="src/app/game/[gameId]/hooks/useConfettiEffects.test.ts">
-import { LineType } from "@/types/common";
-import type { CompletedLine } from "@/types/schema";
-import { renderHook } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { useConfettiEffects } from "./useConfettiEffects";
-⋮----
-import { usePrevious } from "./usePrevious";
-</file>
-
-<file path="src/app/game/[gameId]/hooks/useConfettiEffects.ts">
-import type { ConfettiRef } from "@/components/magicui/confetti";
-import type { CompletedLine } from "@/types/schema";
-import { useEffect, useRef } from "react";
-import { usePrevious } from "./usePrevious";
-⋮----
-interface UseConfettiEffectsProps {
-  completedLines: CompletedLine[];
-  requiredBingoLines: number;
-}
-⋮----
-export function useConfettiEffects({
-  completedLines,
-  requiredBingoLines,
-}: UseConfettiEffectsProps)
-⋮----
-const triggerFireworksConfetti = () =>
-⋮----
-const randomInRange = (min: number, max: number)
-</file>
-
-<file path="src/app/game/[gameId]/hooks/useGameData.ts">
-import type { Participant } from "@/components/game/ParticipantsList";
-import { useAuth } from "@/contexts/AuthContext";
-import type { Cell, Game, PlayerBoard, Submission } from "@/types/schema";
-import { useCallback, useEffect, useState } from "react";
-⋮----
-interface GameDataState {
-  game: Game | null;
-  gameBoard: Cell[] | null;
-  playerBoard: PlayerBoard | null;
-  participants: Participant[];
-  submissions: Submission[];
-  isLoading: boolean;
-  error: string | null;
-  isUploading: boolean;
-}
-⋮----
-export function useGameData(gameId: string)
-⋮----
-const setupRealtimeListener = async () =>
-</file>
-
-<file path="src/app/game/[gameId]/hooks/useImageSubmission.ts">
-import type { ImageSubmissionResult } from "@/types/schema";
-import { useCallback, useState } from "react";
-⋮----
-type UploadCompleteHandler = (
-  success: boolean,
-  result?: ImageSubmissionResult,
-  error?: string,
-) => void;
-⋮----
-interface UseImageSubmissionProps {
-  refreshParticipants: () => Promise<void>;
-  refreshSubmissions: () => Promise<void>;
-  setIsUploading: (isUploading: boolean) => void;
-}
-⋮----
-export function useImageSubmission({
-  refreshParticipants,
-  refreshSubmissions,
-  setIsUploading,
-}: UseImageSubmissionProps)
-</file>
-
-<file path="src/app/game/[gameId]/hooks/usePrevious.ts">
-import { useEffect, useRef } from "react";
-⋮----
-export function usePrevious<T>(value: T): T | undefined
-</file>
-
-<file path="src/app/game/[gameId]/utils/gameDataTransforms.ts">
-import type { BingoCellState } from "@/components/game/BingoCell";
-import type { CellState, CompletedLine } from "@/types/schema";
-⋮----
-export function convertCellStatesToBingoFormat(
-  rawCellStates: Record<string, CellState>,
-): Record<string, BingoCellState>
-⋮----
-export function convertCompletedLinesToIndices(
-  completedLines: CompletedLine[],
-): number[][]
-⋮----
-export function getLatestSubmission<T>(submissions: T[]): T | null
-⋮----
-export function findMatchedCellSubject(
-  cellId: string | null | undefined,
-  gameBoard: Array<{ id: string; subject: string }> | null,
-): string | null
-</file>
-
 <file path="src/app/layout.tsx">
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
@@ -697,72 +568,6 @@ import { AnimatedGridPattern } from "./animated-grid-pattern";
 type Story = StoryObj<typeof AnimatedGridPattern>;
 </file>
 
-<file path="src/components/magicui/Confetti.stories.tsx">
-import { Button } from "@/components/ui/button";
-import type { Meta, StoryObj } from "@storybook/react";
-import { useRef } from "react";
-import { Confetti, type ConfettiRef } from "./confetti";
-⋮----
-type Story = StoryObj<typeof meta>;
-⋮----
-const handleBasicConfetti = () =>
-⋮----
-const handleFireworksConfetti = () =>
-⋮----
-const randomInRange = (min: number, max: number)
-⋮----
-const confettiRef = useRef<ConfettiRef>(null);
-</file>
-
-<file path="src/components/magicui/confetti.tsx">
-import type {
-  GlobalOptions as ConfettiGlobalOptions,
-  CreateTypes as ConfettiInstance,
-  Options as ConfettiOptions,
-} from "canvas-confetti";
-import confetti from "canvas-confetti";
-import type { ReactNode } from "react";
-import type React from "react";
-import {
-  createContext,
-  forwardRef,
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useMemo,
-  useRef,
-} from "react";
-⋮----
-import { Button, type ButtonProps } from "@/components/ui/button";
-⋮----
-type Api = {
-  fire: (options?: ConfettiOptions) => void;
-};
-⋮----
-type Props = React.ComponentPropsWithRef<"canvas"> & {
-  options?: ConfettiOptions;
-  globalOptions?: ConfettiGlobalOptions;
-  manualstart?: boolean;
-  children?: ReactNode;
-};
-⋮----
-export type ConfettiRef = Api | null;
-⋮----
-interface ConfettiButtonProps extends ButtonProps {
-  options?: ConfettiOptions &
-    ConfettiGlobalOptions & { canvas?: HTMLCanvasElement };
-  children?: React.ReactNode;
-}
-⋮----
-const ConfettiButtonComponent = ({
-  options,
-  children,
-  ...props
-}: ConfettiButtonProps) =>
-⋮----
-const handleClick = async (event: React.MouseEvent<HTMLButtonElement>) =>
-</file>
-
 <file path="src/components/ui/avatar.tsx">
 import { cn } from "@/lib/utils";
 ⋮----
@@ -790,13 +595,6 @@ import {
 } from "lucide-react";
 ⋮----
 type Story = StoryObj<typeof Button>;
-</file>
-
-<file path="src/components/ui/button.tsx">
-import { Slot } from "@radix-ui/react-slot";
-import { type VariantProps, cva } from "class-variance-authority";
-⋮----
-import { cn } from "@/lib/utils";
 </file>
 
 <file path="src/components/ui/Card.stories.tsx">
@@ -1585,61 +1383,6 @@ import {
 import { GET, PUT } from "./route";
 </file>
 
-<file path="src/app/api/game/[gameId]/submission/analyze/route.ts">
-import { adminAuth } from "@/lib/firebase/admin";
-import {
-  AdminGameBoardService,
-  AdminGameParticipationService,
-  AdminGameService,
-  AdminPlayerBoardService,
-  AdminSubmissionService,
-} from "@/lib/firebase/admin-collections";
-import type { ApiResponse } from "@/types/common";
-import { AcceptanceStatus, ProcessingStatus } from "@/types/common";
-import type { AnalysisResult, Cell } from "@/types/schema";
-import { analysisResultSchema } from "@/types/schema";
-import { GoogleGenAI, Type } from "@google/genai";
-import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
-import { z } from "zod";
-⋮----
-async function authenticateUser(
-  request: NextRequest,
-): Promise<string | NextResponse<ApiResponse<never>>>
-⋮----
-async function verifyGameParticipant(
-  gameId: string,
-  userId: string,
-): Promise<NextResponse<ApiResponse<never>> | null>
-⋮----
-async function getAvailableCells(
-  gameId: string,
-  userId: string,
-): Promise<Cell[]>
-⋮----
-function getAnalysisPrompt(availableCells: Cell[], gameTheme: string): string
-⋮----
-async function fetchImageAsBase64(imageUrl: string): Promise<string>
-⋮----
-async function updateCellState(
-  gameId: string,
-  userId: string,
-  cellId: string,
-  submissionId: string,
-): Promise<void>
-⋮----
-async function updateSubmissionAnalysis(
-  gameId: string,
-  submissionId: string,
-  analysis: AnalysisResult,
-): Promise<void>
-⋮----
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ gameId: string }> },
-): Promise<NextResponse<ApiResponse<AnalysisResult>>>
-</file>
-
 <file path="src/app/api/game/create/route.test.ts">
 import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
 import {
@@ -1689,6 +1432,102 @@ interface CheckIssue {
   subject: string;
   reason: string;
 }
+</file>
+
+<file path="src/app/game/[gameId]/components/ErrorDisplay.tsx">
+import { cn } from "@/lib/utils";
+⋮----
+interface ErrorDisplayProps {
+  error: string | null;
+  className?: string;
+}
+⋮----
+export function ErrorDisplay(
+⋮----
+className=
+</file>
+
+<file path="src/app/game/[gameId]/components/GameHeader.tsx">
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import type { Game } from "@/types/schema";
+import { useTranslations } from "next-intl";
+⋮----
+interface GameHeaderProps {
+  game: Game | null;
+  className?: string;
+}
+</file>
+
+<file path="src/app/game/[gameId]/hooks/useGameData.ts">
+import type { Participant } from "@/components/game/ParticipantsList";
+import { useAuth } from "@/contexts/AuthContext";
+import type { Cell, Game, PlayerBoard, Submission } from "@/types/schema";
+import { useCallback, useEffect, useState } from "react";
+⋮----
+interface GameDataState {
+  game: Game | null;
+  gameBoard: Cell[] | null;
+  playerBoard: PlayerBoard | null;
+  participants: Participant[];
+  submissions: Submission[];
+  isLoading: boolean;
+  error: string | null;
+  isUploading: boolean;
+}
+⋮----
+export function useGameData(gameId: string)
+⋮----
+const setupRealtimeListener = async () =>
+</file>
+
+<file path="src/app/game/[gameId]/hooks/useImageSubmission.ts">
+import type { ConfettiRef } from "@/components/magicui/confetti";
+import type { ImageSubmissionResult } from "@/types/schema";
+import { useCallback, useState } from "react";
+⋮----
+type UploadCompleteHandler = (
+  success: boolean,
+  result?: ImageSubmissionResult,
+  error?: string,
+) => void;
+⋮----
+interface UseImageSubmissionProps {
+  refreshParticipants: () => Promise<void>;
+  refreshSubmissions: () => Promise<void>;
+  setIsUploading: (isUploading: boolean) => void;
+  confettiRef?: React.RefObject<ConfettiRef>;
+  requiredBingoLines?: number;
+}
+⋮----
+export function useImageSubmission({
+  refreshParticipants,
+  refreshSubmissions,
+  setIsUploading,
+  confettiRef,
+  requiredBingoLines,
+}: UseImageSubmissionProps)
+⋮----
+const randomInRange = (min: number, max: number)
+</file>
+
+<file path="src/app/game/[gameId]/utils/gameDataTransforms.ts">
+import type { BingoCellState } from "@/components/game/BingoCell";
+import type { CellState, CompletedLine } from "@/types/schema";
+⋮----
+export function convertCellStatesToBingoFormat(
+  rawCellStates: Record<string, CellState>,
+): Record<string, BingoCellState>
+⋮----
+export function convertCompletedLinesToIndices(
+  completedLines: CompletedLine[],
+): number[][]
+⋮----
+export function getLatestSubmission<T>(submissions: T[]): T | null
+⋮----
+export function findMatchedCellSubject(
+  cellId: string | null | undefined,
+  gameBoard: Array<{ id: string; subject: string }> | null,
+): string | null
 </file>
 
 <file path="src/app/loading.stories.tsx">
@@ -1811,17 +1650,6 @@ export interface InfoCardProps {
 export function InfoCard(
 </file>
 
-<file path="src/components/game/ParticipantsList.stories.tsx">
-import { Role } from "@/types/common";
-import { faker } from "@faker-js/faker";
-import type { Meta, StoryObj } from "@storybook/react";
-import { ParticipantsList } from "./ParticipantsList";
-⋮----
-type Story = StoryObj<typeof meta>;
-⋮----
-const generateParticipant = (role: Role, completedLines = 0) => (
-</file>
-
 <file path="src/components/game/SubmissionResult.stories.tsx">
 import type { Meta, StoryObj } from "@storybook/react";
 import { SubmissionResult } from "./SubmissionResult";
@@ -1928,6 +1756,72 @@ import { UserMenu } from "./UserMenu";
 type Story = StoryObj<typeof meta>;
 </file>
 
+<file path="src/components/magicui/Confetti.stories.tsx">
+import { Button } from "@/components/ui/button";
+import type { Meta, StoryObj } from "@storybook/react";
+import { useRef } from "react";
+import { Confetti, type ConfettiRef } from "./confetti";
+⋮----
+type Story = StoryObj<typeof meta>;
+⋮----
+const handleBasicConfetti = () =>
+⋮----
+const handleFireworksConfetti = () =>
+⋮----
+const randomInRange = (min: number, max: number)
+⋮----
+const confettiRef = useRef<ConfettiRef>(null);
+</file>
+
+<file path="src/components/magicui/confetti.tsx">
+import type {
+  GlobalOptions as ConfettiGlobalOptions,
+  CreateTypes as ConfettiInstance,
+  Options as ConfettiOptions,
+} from "canvas-confetti";
+import confetti from "canvas-confetti";
+import type { ReactNode } from "react";
+import type React from "react";
+import {
+  createContext,
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+} from "react";
+⋮----
+import { Button } from "@/components/ui/button";
+⋮----
+type Api = {
+  fire: (options?: ConfettiOptions) => void;
+};
+⋮----
+type Props = React.ComponentPropsWithRef<"canvas"> & {
+  options?: ConfettiOptions;
+  globalOptions?: ConfettiGlobalOptions;
+  manualstart?: boolean;
+  children?: ReactNode;
+};
+⋮----
+export type ConfettiRef = Api | null;
+⋮----
+interface ConfettiButtonProps extends React.ComponentProps<typeof Button> {
+  options?: ConfettiOptions &
+    ConfettiGlobalOptions & { canvas?: HTMLCanvasElement };
+  children?: React.ReactNode;
+}
+⋮----
+const ConfettiButtonComponent = ({
+  options,
+  children,
+  ...props
+}: ConfettiButtonProps) =>
+⋮----
+const handleClick = async (event: React.MouseEvent<HTMLButtonElement>) =>
+</file>
+
 <file path="src/components/magicui/hyper-text.stories.tsx">
 import type { Meta, StoryObj } from "@storybook/react";
 import { HyperText } from "./hyper-text";
@@ -2019,6 +1913,13 @@ className={cn(badgeVariants({ variant }), className)}
       {...props}
     />
   );
+</file>
+
+<file path="src/components/ui/button.tsx">
+import { Slot } from "@radix-ui/react-slot";
+import { type VariantProps, cva } from "class-variance-authority";
+⋮----
+import { cn } from "@/lib/utils";
 </file>
 
 <file path="src/components/ui/Calendar.stories.tsx">
@@ -2227,6 +2128,61 @@ import {
 import { GET, PUT } from "./route";
 </file>
 
+<file path="src/app/api/game/[gameId]/submission/analyze/route.ts">
+import { adminAuth } from "@/lib/firebase/admin";
+import {
+  AdminGameBoardService,
+  AdminGameParticipationService,
+  AdminGameService,
+  AdminPlayerBoardService,
+  AdminSubmissionService,
+} from "@/lib/firebase/admin-collections";
+import type { ApiResponse } from "@/types/common";
+import { AcceptanceStatus, ProcessingStatus } from "@/types/common";
+import type { AnalysisResult, Cell } from "@/types/schema";
+import { analysisResultSchema } from "@/types/schema";
+import { GoogleGenAI, Type } from "@google/genai";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import { z } from "zod";
+⋮----
+async function authenticateUser(
+  request: NextRequest,
+): Promise<string | NextResponse<ApiResponse<never>>>
+⋮----
+async function verifyGameParticipant(
+  gameId: string,
+  userId: string,
+): Promise<NextResponse<ApiResponse<never>> | null>
+⋮----
+async function getAvailableCells(
+  gameId: string,
+  userId: string,
+): Promise<Cell[]>
+⋮----
+function getAnalysisPrompt(availableCells: Cell[], gameTheme: string): string
+⋮----
+async function fetchImageAsBase64(imageUrl: string): Promise<string>
+⋮----
+async function updateCellState(
+  gameId: string,
+  userId: string,
+  cellId: string,
+  submissionId: string,
+): Promise<void>
+⋮----
+async function updateSubmissionAnalysis(
+  gameId: string,
+  submissionId: string,
+  analysis: AnalysisResult,
+): Promise<void>
+⋮----
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ gameId: string }> },
+): Promise<NextResponse<ApiResponse<AnalysisResult>>>
+</file>
+
 <file path="src/app/api/game/[gameId]/submission/route.test.ts">
 import { adminAuth } from "@/lib/firebase/admin";
 import {
@@ -2271,38 +2227,6 @@ export async function GET()
 import { createApiRequest } from "@/test/helpers/api-test-helpers";
 import { beforeAll, describe, expect, it } from "vitest";
 import { POST } from "./route";
-</file>
-
-<file path="src/app/game/[gameId]/page.tsx">
-import { AuthGuard } from "@/components/auth/AuthGuard";
-import { BingoBoard } from "@/components/game/BingoBoard";
-import { GameInfo } from "@/components/game/GameInfo";
-import { ImageUpload } from "@/components/game/ImageUpload";
-import { ParticipantsList } from "@/components/game/ParticipantsList";
-import { SubmissionResult } from "@/components/game/SubmissionResult";
-import { Confetti } from "@/components/magicui/confetti";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useAuth } from "@/contexts/AuthContext";
-import { AcceptanceStatus } from "@/types/common";
-import { useTranslations } from "next-intl";
-import { useParams } from "next/navigation";
-import { ErrorDisplay } from "./components/ErrorDisplay";
-import { GameHeader } from "./components/GameHeader";
-import { useConfettiEffects } from "./hooks/useConfettiEffects";
-import { useGameData } from "./hooks/useGameData";
-import { useImageSubmission } from "./hooks/useImageSubmission";
-import {
-  convertCellStatesToBingoFormat,
-  convertCompletedLinesToIndices,
-  findMatchedCellSubject,
-  getLatestSubmission,
-} from "./utils/gameDataTransforms";
-⋮----
-<ErrorDisplay error=
-⋮----
-{/* Game information */}
-⋮----
-{/* Participants list */}
 </file>
 
 <file path="src/components/game/BingoCell.stories.tsx">
@@ -2362,6 +2286,17 @@ import { fn } from "@storybook/test";
 import { ImageUpload } from "./ImageUpload";
 ⋮----
 type Story = StoryObj<typeof meta>;
+</file>
+
+<file path="src/components/game/ParticipantsList.stories.tsx">
+import { Role } from "@/types/common";
+import { faker } from "@faker-js/faker";
+import type { Meta, StoryObj } from "@storybook/react";
+import { ParticipantsList } from "./ParticipantsList";
+⋮----
+type Story = StoryObj<typeof meta>;
+⋮----
+const generateParticipant = (role: Role, completedLines = 0) => (
 </file>
 
 <file path="src/components/game/QRCodeCard.stories.tsx">
@@ -2665,6 +2600,38 @@ const getPromptTemplate = (params: CheckSubjectsRequest) =>
 export async function POST(request: NextRequest)
 </file>
 
+<file path="src/app/game/[gameId]/page.tsx">
+import { AuthGuard } from "@/components/auth/AuthGuard";
+import { BingoBoard } from "@/components/game/BingoBoard";
+import { GameInfo } from "@/components/game/GameInfo";
+import { ImageUpload } from "@/components/game/ImageUpload";
+import { ParticipantsList } from "@/components/game/ParticipantsList";
+import { SubmissionResult } from "@/components/game/SubmissionResult";
+import { Confetti, type ConfettiRef } from "@/components/magicui/confetti";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth } from "@/contexts/AuthContext";
+import { AcceptanceStatus } from "@/types/common";
+import { useTranslations } from "next-intl";
+import { useParams } from "next/navigation";
+import { useRef } from "react";
+import { ErrorDisplay } from "./components/ErrorDisplay";
+import { GameHeader } from "./components/GameHeader";
+import { useGameData } from "./hooks/useGameData";
+import { useImageSubmission } from "./hooks/useImageSubmission";
+import {
+  convertCellStatesToBingoFormat,
+  convertCompletedLinesToIndices,
+  findMatchedCellSubject,
+  getLatestSubmission,
+} from "./utils/gameDataTransforms";
+⋮----
+<ErrorDisplay error=
+⋮----
+{/* Game information */}
+⋮----
+{/* Participants list */}
+</file>
+
 <file path="src/app/globals.css">
 :root {
 ⋮----
@@ -2788,56 +2755,6 @@ const generateSampleSubjects = (
 ): Subject[] =>
 ⋮----
 const renderWithState = (args: React.ComponentProps<typeof SubjectList>) =>
-</file>
-
-<file path="src/components/game/SubmissionResult.tsx">
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
-import type { AcceptanceStatus } from "@/types/common";
-import { AlertTriangle, CheckCircle, XCircle } from "lucide-react";
-import { useTranslations } from "next-intl";
-⋮----
-export interface SubmissionResultProps {
-
-
-
-  confidence: number;
-
-
-
-  critique: string;
-
-
-
-  acceptanceStatus: AcceptanceStatus;
-
-
-
-  matchedCellId?: string | null;
-
-
-
-  matchedCellSubject?: string | null;
-
-
-
-  confidenceThreshold: number;
-
-
-
-  imageUrl?: string;
-
-
-
-  className?: string;
-}
-⋮----
-const getStatusConfig = () =>
-⋮----
-<StatusIcon className=
-⋮----
-onError=
 </file>
 
 <file path="src/contexts/AuthContext.tsx">
@@ -3119,6 +3036,56 @@ export interface ParticipantsListProps {
 const getRoleBadge = (role?: Role) =>
 </file>
 
+<file path="src/components/game/SubmissionResult.tsx">
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+import type { AcceptanceStatus } from "@/types/common";
+import { AlertTriangle, CheckCircle, XCircle } from "lucide-react";
+import { useTranslations } from "next-intl";
+⋮----
+export interface SubmissionResultProps {
+
+
+
+  confidence: number;
+
+
+
+  critique: string;
+
+
+
+  acceptanceStatus: AcceptanceStatus;
+
+
+
+  matchedCellId?: string | null;
+
+
+
+  matchedCellSubject?: string | null;
+
+
+
+  confidenceThreshold: number;
+
+
+
+  imageUrl?: string;
+
+
+
+  className?: string;
+}
+⋮----
+const getStatusConfig = () =>
+⋮----
+<StatusIcon className=
+⋮----
+onError=
+</file>
+
 <file path="src/lib/image-utils.test.ts">
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
@@ -3362,31 +3329,6 @@ export async function PUT(
 ): Promise<NextResponse<ApiResponse<Game>>>
 </file>
 
-<file path="src/app/api/game/[gameId]/submission/route.ts">
-import { adminAuth } from "@/lib/firebase/admin";
-import {
-  AdminGameParticipationService,
-  AdminGameService,
-  AdminSubmissionService,
-} from "@/lib/firebase/admin-collections";
-import type { ApiResponse } from "@/types/common";
-import { ProcessingStatus } from "@/types/common";
-import { type Submission, submissionSchema } from "@/types/schema";
-import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
-import { ulid } from "ulid";
-⋮----
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ gameId: string }> },
-): Promise<NextResponse<ApiResponse<Submission>>>
-⋮----
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ gameId: string }> },
-): Promise<NextResponse<ApiResponse<Submission[]>>>
-</file>
-
 <file path="src/app/api/image/check/route.test.ts">
 import { adminAuth } from "@/lib/firebase/admin";
 import {
@@ -3517,6 +3459,31 @@ async function extractFirebaseCredentials(
 function parseArguments(args: string[]):
 ⋮----
 async function main(): Promise<void>
+</file>
+
+<file path="src/app/api/game/[gameId]/submission/route.ts">
+import { adminAuth } from "@/lib/firebase/admin";
+import {
+  AdminGameParticipationService,
+  AdminGameService,
+  AdminSubmissionService,
+} from "@/lib/firebase/admin-collections";
+import type { ApiResponse } from "@/types/common";
+import { ProcessingStatus } from "@/types/common";
+import { type Submission, submissionSchema } from "@/types/schema";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import { ulid } from "ulid";
+⋮----
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ gameId: string }> },
+): Promise<NextResponse<ApiResponse<Submission>>>
+⋮----
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ gameId: string }> },
+): Promise<NextResponse<ApiResponse<Submission[]>>>
 </file>
 
 <file path="src/app/api/game/create/route.ts">
@@ -3695,33 +3662,6 @@ const handleAddSubject = () =>
 const handleDragEnd = (event: DragEndEvent) =>
 ⋮----
 // Dynamic import DndContextWrapper with SSR disabled
-</file>
-
-<file path="src/app/api/image/check/route.ts">
-import { adminAuth } from "@/lib/firebase/admin";
-import {
-  AdminGameBoardService,
-  AdminGameService,
-  AdminPlayerBoardService,
-  AdminTransactionService,
-} from "@/lib/firebase/admin-collections";
-import { AcceptanceStatus, LineType, ProcessingStatus } from "@/types/common";
-import type {
-  Cell,
-  CompletedLine,
-  PlayerBoard,
-  Submission,
-} from "@/types/schema";
-import { GoogleGenAI, Type } from "@google/genai";
-import { type NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
-⋮----
-function detectCompletedLines(
-  gameBoard: { cells: Cell[] },
-  playerBoard: PlayerBoard,
-): CompletedLine[]
-⋮----
-export async function POST(request: NextRequest)
 </file>
 
 <file path="src/lib/firebase/admin-collections.ts">
@@ -4013,6 +3953,33 @@ EXPOSE 8080
 # Command to run the application
 # Uses the Node.js server included in the standalone output
 CMD ["node", "server.js"]
+</file>
+
+<file path="src/app/api/image/check/route.ts">
+import { adminAuth } from "@/lib/firebase/admin";
+import {
+  AdminGameBoardService,
+  AdminGameService,
+  AdminPlayerBoardService,
+  AdminTransactionService,
+} from "@/lib/firebase/admin-collections";
+import { AcceptanceStatus, LineType, ProcessingStatus } from "@/types/common";
+import type {
+  Cell,
+  CompletedLine,
+  PlayerBoard,
+  Submission,
+} from "@/types/schema";
+import { GoogleGenAI, Type } from "@google/genai";
+import { type NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+⋮----
+function detectCompletedLines(
+  gameBoard: { cells: Cell[] },
+  playerBoard: PlayerBoard,
+): CompletedLine[]
+⋮----
+export async function POST(request: NextRequest)
 </file>
 
 <file path="src/app/game/create/page.tsx">

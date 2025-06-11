@@ -90,7 +90,9 @@ describe("User Registration API Integration Test", () => {
     const userId = responseData.data?.user.id;
     if (userId) {
       testUserIds.push(userId);
-      console.log(`Created test user: ${userId} (${testUsername})`);
+      console.log(
+        `ℹ️ XXX: ~ route.test.ts ~ Created test user: ${userId} (${testUsername})`,
+      );
     }
 
     // Verify data in Firestore
@@ -116,7 +118,9 @@ describe("User Registration API Integration Test", () => {
       } catch (error) {
         console.log("ℹ️ XXX: ~ route.test.ts ~ it ~ error:", error);
         // If user doesn't exist, create it
-        console.log(`Creating user in Firebase Auth: ${userId}`);
+        console.log(
+          `ℹ️ XXX: ~ route.test.ts ~ Creating user in Firebase Auth: ${userId}`,
+        );
         await adminAuth.createUser({
           uid: userId,
           displayName: testUsername,
@@ -167,10 +171,7 @@ describe("User Registration API Integration Test", () => {
         );
       }
     } catch (error) {
-      console.error(
-        "ℹ️ XXX: ~ route.test.ts ~ it ~ API execution error:",
-        error,
-      );
+      console.error("API execution error:", error);
       throw error;
     }
     expect(response1.status).toBe(201);
@@ -180,7 +181,7 @@ describe("User Registration API Integration Test", () => {
     if (userId) {
       testUserIds.push(userId);
       console.log(
-        `Created test user for duplicate test: ${userId} (${testUsername})`,
+        `ℹ️ XXX: ~ route.test.ts ~ Created test user for duplicate test: ${userId} (${testUsername})`,
       );
 
       // Create user in Firebase Auth for the first test user
@@ -192,7 +193,9 @@ describe("User Registration API Integration Test", () => {
         } catch (error) {
           console.log("ℹ️ XXX: ~ route.test.ts ~ it ~ error:", error);
           // If user doesn't exist, create it
-          console.log(`Creating user in Firebase Auth: ${userId}`);
+          console.log(
+            `ℹ️ XXX: ~ route.test.ts ~ Creating user in Firebase Auth: ${userId}`,
+          );
           await adminAuth.createUser({
             uid: userId,
             displayName: testUsername,

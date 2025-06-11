@@ -30,10 +30,16 @@ export async function submitImage(
   const { signedUrl, filePath, submissionId } = await uploadUrlResponse.json();
 
   // Step 2: Upload image to Google Cloud Storage
-  console.log("Uploading to signed URL:", signedUrl);
-  console.log("Content-Type:", "image/jpeg");
-  console.log("Blob size:", processedImage.blob.size);
-  console.log("Blob type:", processedImage.blob.type);
+  console.log("ℹ️ XXX: ~ image-upload.ts ~ Uploading to signed URL:", signedUrl);
+  console.log("ℹ️ XXX: ~ image-upload.ts ~ Content-Type:", "image/jpeg");
+  console.log(
+    "ℹ️ XXX: ~ image-upload.ts ~ Blob size:",
+    processedImage.blob.size,
+  );
+  console.log(
+    "ℹ️ XXX: ~ image-upload.ts ~ Blob type:",
+    processedImage.blob.type,
+  );
 
   const uploadResponse = await fetch(signedUrl, {
     method: "PUT",
@@ -92,5 +98,8 @@ export async function submitImage(
     matchedCellId: checkResult.matchedCellId,
     acceptanceStatus: checkResult.acceptanceStatus,
     critique: checkResult.critique,
+    newlyCompletedLines: checkResult.newlyCompletedLines,
+    totalCompletedLines: checkResult.totalCompletedLines,
+    requiredBingoLines: checkResult.requiredBingoLines,
   };
 }

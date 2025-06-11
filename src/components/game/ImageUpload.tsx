@@ -223,13 +223,22 @@ export function ImageUpload({
 
   // Handle upload
   const handleUpload = useCallback(async () => {
+    console.log("ℹ️ XXX: ~ ImageUpload.tsx ~ handleUpload called", {
+      hasPreview: !!preview,
+      hasProcessedImage: !!preview?.processedImage,
+      isUploading,
+      hasUser: !!user,
+    });
+
     if (!preview?.processedImage || isUploading) return;
 
     if (!user) {
+      console.log("ℹ️ XXX: ~ ImageUpload.tsx ~ Upload failed - no user");
       onUploadComplete?.(false, undefined, "Authentication required");
       return;
     }
 
+    console.log("ℹ️ XXX: ~ ImageUpload.tsx ~ Starting upload");
     onUploadStart?.();
 
     try {
@@ -250,12 +259,18 @@ export function ImageUpload({
         processedDimensions: preview.processedImage.processedDimensions,
       };
 
+      console.log("ℹ️ XXX: ~ ImageUpload.tsx ~ Submitting image", {
+        submissionData,
+      });
+
       // Submit image
       const result: ImageSubmissionResult = await submitImage(
         preview.processedImage,
         submissionData,
         authToken,
       );
+
+      console.log("ℹ️ XXX: ~ ImageUpload.tsx ~ Upload successful", { result });
 
       // Clear preview after successful upload
       handleRemove();
@@ -264,10 +279,14 @@ export function ImageUpload({
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Upload failed";
+      console.log("ℹ️ XXX: ~ ImageUpload.tsx ~ Upload failed", {
+        error,
+        errorMessage,
+      });
       onUploadComplete?.(false, undefined, errorMessage);
     }
   }, [
-    preview?.processedImage,
+    preview,
     isUploading,
     user,
     gameId,

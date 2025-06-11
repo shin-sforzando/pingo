@@ -156,7 +156,7 @@ export async function POST(
     await AdminSubmissionService.createSubmission(gameId, submission);
 
     console.log(
-      `Created submission: ${submissionId} for game: ${gameId} by user: ${userId}`,
+      `ℹ️ XXX: ~ route.ts ~ Created submission: ${submissionId} for game: ${gameId} by user: ${userId}`,
     );
 
     return NextResponse.json({
