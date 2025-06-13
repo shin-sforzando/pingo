@@ -13,7 +13,8 @@ steps:
           --build-arg FIREBASE_PROJECT_ID="$$FIREBASE_PROJECT_ID" \
           --build-arg FIREBASE_CLIENT_EMAIL="$$FIREBASE_CLIENT_EMAIL" \
           --build-arg FIREBASE_PRIVATE_KEY="$$FIREBASE_PRIVATE_KEY" \
-          --build-arg GEMINI_API_KEY="$$GEMINI_API_KEY"
+          --build-arg GEMINI_API_KEY="$$GEMINI_API_KEY" \
+          --build-arg GOOGLE_CLOUD_STORAGE_BUCKET="pingo-456817-images"
     secretEnv:
       [
         "FIREBASE_PROJECT_ID",
