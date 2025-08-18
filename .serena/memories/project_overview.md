@@ -1,14 +1,16 @@
 # Pingoプロジェクト概要
 
 ## プロジェクト基本情報
+
 - **プロジェクト名**: Pingo
 - **概要**: AIによる画像判定を用いたビンゴゲームアプリケーション
 - **プラットフォーム**: macOS (Darwin)
-- **リポジトリ**: https://github.com/shin-sforzando/pingo
+- **リポジトリ**: <https://github.com/shin-sforzando/pingo>
 
 ## 技術スタック
 
 ### フロントエンド
+
 - Next.js 15.3.3 (App Router)
 - React 19.1.0
 - TypeScript 5
@@ -17,6 +19,7 @@
 - next-intl (多言語対応)
 
 ### バックエンド・インフラ
+
 - Node.js 22
 - Firebase (Authentication, Firestore)
 - Google Cloud Storage
@@ -25,6 +28,7 @@
 - Google Cloud Run (デプロイ)
 
 ### 開発ツール
+
 - Biome 1.9.4 (フォーマッター・リンター)
 - Vitest (単体テスト)
 - Playwright (E2Eテスト)
@@ -33,7 +37,8 @@
 - git-secret (機密情報管理)
 
 ## プロジェクト構造
-```
+
+```plain
 /
 ├── src/
 │   ├── app/          # Next.js App Router
@@ -53,6 +58,7 @@
 ```
 
 ## 主な機能
+
 - 5x5のビンゴゲーム（中央はFree）
 - 各マスには被写体候補が表示される
 - プレイヤーは写真を撮影してアップロード
@@ -62,6 +68,7 @@
 - リアルタイム更新
 
 ## 環境変数
+
 - `.env`: 公開可能な環境変数（Firebase設定など）
 - `.env.local`: 機密環境変数（APIキー、認証情報）
   - GOOGLE_CLOUD_PROJECT_ID

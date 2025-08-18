@@ -6,6 +6,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Pingoは、AIによる画像判定を用いたビンゴゲームアプリケーションです。プレイヤーが撮影した写真をGoogle Gemini APIで判定し、ビンゴマスを開けていく新しい形のエンターテイメントツールです。
 
+## 開発ガイドライン
+
+- 英語で考えても良いが、ユーザとの応答は必ず **日本語で対応** せよ
+- **不確かな情報は必ず確認してから回答** せよ（特に日付、バージョン情報、コマンド名など）
+  - Claude Codeの知識は2年ほど古い
+  - ユーザから提示されたURLは必ず参照せよ
+  - Playwright, Context 7, Serena等のMCPを積極的に活用せよ
+- Pythonコードは[Googleスタイル](https://google.github.io/styleguide/pyguide.html)に準拠せよ
+- **作業前に必ずGitブランチを作成** せよ
+  - Issue番号がある場合: `{0埋め3桁のIssue番号}_機能名` 形式でブランチを作成
+  - 例: Issue #19の場合は `019_iam_logging` のようなブランチ名
+  - mainブランチで直接作業することは厳禁
+
 ## 開発コマンド
 
 ### 基本コマンド
