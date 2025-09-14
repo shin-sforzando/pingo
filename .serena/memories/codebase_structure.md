@@ -2,7 +2,7 @@
 
 ## Directory Structure
 
-```
+```plain
 pingo/
 ├── src/
 │   ├── app/                    # Next.js App Router pages
@@ -32,27 +32,31 @@ pingo/
 ## Key Architecture Patterns
 
 ### App Router Structure (Next.js 15)
+
 - **Server Components**: Default for static content
 - **Client Components**: For interactivity (marked with 'use client')
 - **API Routes**: RESTful endpoints in `/app/api/`
 - **Middleware**: Authentication & routing logic
 
 ### Component Architecture
+
 - **UI Components**: Reusable shadcn/ui + Magic UI
 - **Feature Components**: Game, Auth, Layout specific
-- **Each component has**: 
+- **Each component has**:
   - TypeScript interface
   - Storybook story
   - Unit/integration tests
   - Proper internationalization
 
 ### Data Flow
-```
+
+```plain
 Client → API Routes → Services → Firebase/Firestore
        ↖ Real-time ← Firestore Listeners ← Client
 ```
 
 ### Type System (src/types/)
+
 - `common.ts`: Shared enums & utility types
 - `schema.ts`: Zod schemas for validation
 - `game.ts`, `user.ts`: Domain-specific types
@@ -60,6 +64,7 @@ Client → API Routes → Services → Firebase/Firestore
 - `index.ts`: Centralized exports
 
 ### State Management
+
 - **React Context**: Global state (auth, game)
 - **useState/useReducer**: Local component state
 - **Firestore Listeners**: Real-time data updates
@@ -68,18 +73,21 @@ Client → API Routes → Services → Firebase/Firestore
 ## Critical Components
 
 ### Game Flow Components
+
 - `ImageUpload.tsx`: Photo upload with HEIC support
 - `BingoBoard.tsx`: Interactive bingo grid
 - `BingoCell.tsx`: Individual cell with open/closed states
 - `SubmissionResult.tsx`: AI analysis results display
 
 ### Authentication & Layout
+
 - `AuthGuard.tsx`: Route protection wrapper
 - `Header.tsx`: Navigation with auth state
 - `UserMenu.tsx`: User profile dropdown
 - `NotificationIcon.tsx` + `NotificationDrawer.tsx`: Real-time notifications
 
 ### Services Layer (src/services/)
+
 - Database access via Firebase Admin SDK
 - Image upload to Google Cloud Storage
 - AI integration with Google Gemini
@@ -88,6 +96,7 @@ Client → API Routes → Services → Firebase/Firestore
 ## Data Models
 
 ### Key Collections (Firestore)
+
 - `users/`: User profiles & authentication
 - `games/`: Game metadata & settings
 - `game_participations/`: User-game relationships
@@ -95,6 +104,7 @@ Client → API Routes → Services → Firebase/Firestore
 - `games/{id}/submissions/`: Photo submissions & AI analysis
 
 ### ID Conventions
+
 - **ULID**: All internal IDs (users, submissions, etc.)
 - **6-char Game IDs**: User-facing game codes (e.g., "ABCDEF")
 - **Timestamps**: Firestore Timestamp with proper conversion utilities
@@ -102,18 +112,21 @@ Client → API Routes → Services → Firebase/Firestore
 ## Critical Files to Understand
 
 ### Configuration
+
 - `biome.json`: Linting & formatting rules
 - `tsconfig.json`: TypeScript configuration
 - `next.config.ts`: Next.js build configuration
 - `vitest.config.mts`: Test configuration
 
 ### Entry Points
+
 - `src/app/layout.tsx`: Root layout with providers
 - `src/app/page.tsx`: Home page
 - `src/middleware.ts`: Authentication middleware
 - `src/lib/firebase/`: Firebase configuration & utilities
 
 ## Development Patterns
+
 - **Mobile-first design**: Tailwind responsive classes
 - **Component composition**: Reusable UI building blocks
 - **Error boundaries**: Proper error handling

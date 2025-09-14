@@ -3,6 +3,7 @@
 ## Current Development Status
 
 ### ✅ Completed Features
+
 - **Game Creation**: Full flow with AI-generated subjects via Gemini
 - **Image Upload**: HEIC support, resize/compression, GCS integration
 - **Game Main Screen**: Bingo board, real-time updates, AI analysis
@@ -15,7 +16,9 @@
 ### ❌ Critical Missing Features
 
 #### 1. Game Join Functionality (URGENT - Completely Missing)
+
 **Status**: Referenced in UI but pages/APIs don't exist
+
 - `/game/join` page returns 404 error
 - No join API endpoints implemented
 - QR code scanning not implemented
@@ -23,14 +26,17 @@
 - **Impact**: Users cannot join existing games (core feature broken)
 
 #### 2. Insufficient Test Coverage (HIGH PRIORITY)
+
 **Current**: 28 test files exist, but critical components untested
+
 - `src/components/game/ImageUpload.tsx` (no tests)
-- `src/services/image-upload.ts` (no tests) 
+- `src/services/image-upload.ts` (no tests)
 - `src/app/api/image/upload/route.ts` (no tests)
 - `src/app/api/game/[gameId]/submission/analyze/route.ts` (no tests)
 - **Impact**: Production reliability at risk
 
 #### 3. Security & Production Hardening (HIGH PRIORITY)
+
 - No rate limiting on API endpoints
 - Debug logs present in production code
 - API key security review needed
@@ -40,18 +46,21 @@
 ## Next Sprint Priorities
 
 ### Sprint 1: Game Join Implementation
+
 1. Create `/game/join` page with QR scanning
 2. Implement join API endpoints
 3. Add public games list functionality
 4. Test end-to-end join flow
 
 ### Sprint 2: Test Coverage & Quality
+
 1. Add comprehensive tests for ImageUpload component
 2. Test image upload service & API routes
 3. Add integration tests for game join flow
 4. Achieve >70% test coverage target
 
 ### Sprint 3: Production Readiness
+
 1. Implement API rate limiting
 2. Security audit & improvements
 3. Remove debug logging
@@ -61,14 +70,16 @@
 ## Development Context Notes
 
 ### Working Environment
+
 - **Target Users**: Mobile-first (smartphone primary)
 - **Content Policy**: Family-friendly, all-ages appropriate
 - **Languages**: Japanese primary, English secondary
 - **AI Integration**: Google Gemini for image analysis & subject generation
 
 ### Technical Constraints
+
 - **Mobile Compatibility**: iOS Safari must work perfectly
-- **Performance Targets**: 
+- **Performance Targets**:
   - Image analysis: <3s (max 5s)
   - Page load: <2s
   - Max 50 players per game
@@ -76,6 +87,7 @@
 - **Data Limits**: Max 30 image submissions per player per game
 
 ### Development Workflow Reminders
+
 - Never work directly on `main` branch
 - Always run `npm run test:once` before committing
 - All components need Storybook stories

@@ -1,11 +1,13 @@
 # Pingo Project Overview
 
 ## Purpose
+
 Pingo is an AI-powered photo bingo game where players take photos and AI judges whether they match the bingo subjects. Players create or join games, upload photos, and AI (Google Gemini) analyzes them to determine if they match the bingo board subjects.
 
 ## Tech Stack
 
 ### Frontend
+
 - **Framework**: Next.js 15 (App Router) + React 19 + TypeScript 5
 - **UI Library**: shadcn/ui + Radix UI components + Magic UI animations
 - **Styling**: Tailwind CSS 4
@@ -15,6 +17,7 @@ Pingo is an AI-powered photo bingo game where players take photos and AI judges 
 - **AI Integration**: @google/genai (Google Gemini API)
 
 ### Backend & Services
+
 - **Runtime**: Node.js 22
 - **Database**: Firebase Firestore (real-time listeners)
 - **Storage**: Google Cloud Storage (signed URLs for direct upload)
@@ -23,6 +26,7 @@ Pingo is an AI-powered photo bingo game where players take photos and AI judges 
 - **Deployment**: Docker → Google Cloud Run
 
 ### Development Tools
+
 - **Code Quality**: Biome.js (linter + formatter)
 - **Testing**: Vitest + @vitest/browser + Testing Library + Playwright
 - **Component Development**: Storybook 8
@@ -30,6 +34,7 @@ Pingo is an AI-powered photo bingo game where players take photos and AI judges 
 - **CI/CD**: Google Cloud Build (deploy), GitHub Actions (test/lint)
 
 ## Architecture
+
 - App Router with server-side AI processing
 - Real-time updates via Firestore listeners
 - Direct GCS uploads with signed URLs for images
@@ -38,6 +43,7 @@ Pingo is an AI-powered photo bingo game where players take photos and AI judges 
 - Family-friendly content (all ages appropriate)
 
 ## Key Features
+
 - Game creation with AI-generated subjects
 - Photo upload and AI analysis
 - Real-time bingo progress tracking

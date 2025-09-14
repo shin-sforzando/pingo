@@ -1,6 +1,7 @@
 # Pingo Coding Conventions & Style Guide
 
 ## Core Development Rules
+
 1. **Ask questions first** - If instructions are unclear, confirm before implementation
 2. **All comments in English** - Explain "why", not "what"
 3. **Type safety is critical** - Use TypeScript rigorously, no `any` types
@@ -12,12 +13,14 @@
 ## Code Style (Biome Configuration)
 
 ### Formatting
+
 - **Indentation**: Spaces (configured via .editorconfig)
 - **Quotes**: Double quotes for JavaScript/TypeScript
 - **Import organization**: Automatic with Biome
 - **Line endings**: Auto-detected via .editorconfig
 
 ### Linting Rules (Strict)
+
 - `noExplicitAny`: ERROR - No any types allowed
 - `noNonNullAssertion`: ERROR - Avoid ! operator
 - `noUnusedImports`: ERROR - Clean up unused imports
@@ -27,12 +30,14 @@
 ## TypeScript Conventions
 
 ### Configuration
+
 - **Target**: ES2017
 - **Strict mode**: Enabled
 - **Path mapping**: `@/*` → `./src/*`
 - **JSX**: preserve (Next.js handles compilation)
 
 ### Type Definitions
+
 - Use Zod schemas for validation + TypeScript types
 - ULID for all IDs except 6-character game IDs
 - Firestore document interfaces separate from business logic types
@@ -41,7 +46,8 @@
 ## Component Conventions
 
 ### File Structure
-```
+
+```plain
 src/components/
 ├── ui/           # shadcn/ui components
 ├── magicui/      # Magic UI animations
@@ -51,6 +57,7 @@ src/components/
 ```
 
 ### Naming Patterns
+
 - **Components**: PascalCase (e.g., `ImageUpload.tsx`)
 - **Functions**: camelCase with descriptive prefixes
   - Event handlers: `handle` prefix (e.g., `handleClick`)
@@ -59,6 +66,7 @@ src/components/
 - **Constants**: UPPER_SNAKE_CASE
 
 ### Component Structure
+
 ```typescript
 // 1. Imports (external, internal, types)
 import { useState } from "react"
@@ -91,12 +99,14 @@ export function ComponentName({ prop }: ComponentNameProps) {
 ```
 
 ## Internationalization (next-intl)
+
 - Use `useTranslations()` hook for component translations
 - Translation keys in `messages/ja.json` and `messages/en.json`
 - Japanese as primary language, English as secondary
 - Consistent translation key naming
 
 ## Testing Conventions
+
 - **Test files**: `*.test.tsx` or `*.browser.test.tsx`
 - **Storybook files**: `*.stories.tsx`
 - Use `@faker-js/faker` for test data
@@ -104,6 +114,7 @@ export function ComponentName({ prop }: ComponentNameProps) {
 - Clean up test data after each test
 
 ## Git & Branch Conventions
+
 - Never work directly on `main` branch
 - Branch naming: `{0-padded-3-digit-issue-number}_feature_name`
 - Example: `019_prepare_github_actions` for Issue #19
