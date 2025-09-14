@@ -4,8 +4,8 @@ import { type NextRequest, NextResponse } from "next/server";
 import { adminAuth } from "@/lib/firebase/admin";
 import { AdminUserService } from "@/lib/firebase/admin-collections";
 import type { ApiResponse } from "@/types/common";
-import { userLoginSchema } from "@/types/schema";
 import type { User } from "@/types/schema";
+import { userLoginSchema } from "@/types/schema";
 
 /**
  * User login API

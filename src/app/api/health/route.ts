@@ -1,5 +1,5 @@
-import { dateToISOString } from "@/types/firestore";
 import { NextResponse } from "next/server";
+import { dateToISOString } from "@/types/firestore";
 
 export async function GET() {
   try {

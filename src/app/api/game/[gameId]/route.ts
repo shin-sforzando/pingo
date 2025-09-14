@@ -1,3 +1,6 @@
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import { z } from "zod";
 import { validateGameId } from "@/lib/api-utils";
 import { adminAuth } from "@/lib/firebase/admin";
 import {
@@ -8,9 +11,6 @@ import type { ApiResponse } from "@/types/common";
 import { dateToISOString } from "@/types/firestore";
 import type { Game } from "@/types/schema";
 import { gameSchema } from "@/types/schema";
-import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
-import { z } from "zod";
 
 // Schema for updating game - pick updatable fields from gameSchema and make them optional
 const updateGameSchema = gameSchema

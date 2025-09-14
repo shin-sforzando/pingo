@@ -1,6 +1,6 @@
-import { Button } from "@/components/ui/button";
 import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { NotificationDrawer } from "./NotificationDrawer";
 
 const meta: Meta<typeof NotificationDrawer> = {

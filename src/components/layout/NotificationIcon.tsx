@@ -1,9 +1,9 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { Bell } from "lucide-react";
 import type { ReactElement } from "react";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { NotificationDrawer } from "./NotificationDrawer";
 
 type NotificationIconProps = {

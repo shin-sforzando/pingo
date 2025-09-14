@@ -1,8 +1,8 @@
-import type { Locale } from "@/i18n/config";
-import { getUserLocale } from "@/services/locale";
 import { GoogleGenAI, Type } from "@google/genai";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import type { Locale } from "@/i18n/config";
+import { getUserLocale } from "@/services/locale";
 
 const generateSubjectsSchema = z.object({
   title: z.string().min(1, { message: "Title is required" }),

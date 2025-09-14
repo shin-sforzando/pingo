@@ -1,7 +1,7 @@
+import { Timestamp } from "firebase-admin/firestore";
 import type { TimestampInterface } from "@/types/firestore";
 import type { User } from "@/types/schema";
 import type { UserDocument } from "@/types/user";
-import { Timestamp } from "firebase-admin/firestore";
 
 /**
  * Convert a Date to an admin Timestamp for tests

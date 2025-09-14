@@ -1,6 +1,6 @@
-import { AuthContext } from "@/contexts/AuthContext";
 import { faker } from "@faker-js/faker";
 import type { Meta, StoryObj } from "@storybook/react";
+import { AuthContext } from "@/contexts/AuthContext";
 import { UserMenu } from "./UserMenu";
 
 const meta = {

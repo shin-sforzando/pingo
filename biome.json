@@ -28,14 +28,23 @@
         "noBannedTypes": "error"
       },
       "suspicious": {
-        "noExplicitAny": "error"
+        "noExplicitAny": "error",
+        "noUnknownAtRules": "off"
       },
       "style": {
         "noNonNullAssertion": "error"
       },
       "correctness": {
         "noUnusedImports": "error",
-        "noUnusedVariables": "error"
+        "noUnusedVariables": "error",
+        "noNestedComponentDefinitions": "warn"
+      },
+      "performance": {
+        "noImgElement": "warn"
+      },
+      "a11y": {
+        "noStaticElementInteractions": "warn",
+        "useSemanticElements": "warn"
       }
     }
   },

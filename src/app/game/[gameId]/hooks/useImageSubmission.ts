@@ -1,6 +1,6 @@
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { ConfettiRef } from "@/components/magicui/confetti";
 import type { ImageSubmissionResult } from "@/types/schema";
-import { useCallback, useEffect, useRef, useState } from "react";
 
 type UploadCompleteHandler = (
   success: boolean,

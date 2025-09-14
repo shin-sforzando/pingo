@@ -3,11 +3,10 @@ import { NextIntlClientProvider } from "next-intl";
 import { ulid } from "ulid";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render } from "vitest-browser-react";
-import enMessages from "../../messages/en.json";
-import jaMessages from "../../messages/ja.json";
-
 import { AuthProvider } from "@/contexts/AuthContext";
 import type { User } from "@/types/schema";
+import enMessages from "../../messages/en.json";
+import jaMessages from "../../messages/ja.json";
 import HomePage from "./page";
 
 // Define mocked functions using vi.hoisted
@@ -25,7 +24,10 @@ vi.mock("@/contexts/AuthContext", () => ({
 vi.mock("@/components/auth/LoginForm", () => ({
   LoginForm: ({
     onSuccess,
-  }: { onSuccess: () => void; onError: (error: Error) => void }) => (
+  }: {
+    onSuccess: () => void;
+    onError: (error: Error) => void;
+  }) => (
     <div data-testid="login-form">
       <input
         type="text"
@@ -53,7 +55,10 @@ vi.mock("@/components/auth/LoginForm", () => ({
 vi.mock("@/components/auth/RegisterForm", () => ({
   RegisterForm: ({
     onSuccess,
-  }: { onSuccess: () => void; onError: (error: Error) => void }) => (
+  }: {
+    onSuccess: () => void;
+    onError: (error: Error) => void;
+  }) => (
     <div data-testid="register-form">
       <input
         type="text"
@@ -123,7 +128,10 @@ vi.mock("@/components/ui/card", () => ({
   Card: ({
     children,
     className,
-  }: { children: React.ReactNode; className?: string }) => (
+  }: {
+    children: React.ReactNode;
+    className?: string;
+  }) => (
     <div data-testid="card" className={className}>
       {children}
     </div>
@@ -158,7 +166,10 @@ vi.mock("@/components/ui/tabs", () => ({
   TabsList: ({
     children,
     className,
-  }: { children: React.ReactNode; className?: string }) => (
+  }: {
+    children: React.ReactNode;
+    className?: string;
+  }) => (
     <div data-testid="tabs-list" className={className}>
       {children}
     </div>
@@ -166,7 +177,10 @@ vi.mock("@/components/ui/tabs", () => ({
   TabsTrigger: ({
     children,
     value,
-  }: { children: React.ReactNode; value: string }) => (
+  }: {
+    children: React.ReactNode;
+    value: string;
+  }) => (
     <button type="button" data-testid="tab" data-value={value} role="tab">
       {children}
     </button>
@@ -174,7 +188,10 @@ vi.mock("@/components/ui/tabs", () => ({
   TabsContent: ({
     children,
     value,
-  }: { children: React.ReactNode; value: string }) => (
+  }: {
+    children: React.ReactNode;
+    value: string;
+  }) => (
     <div data-testid="tabs-content" data-value={value} role="tabpanel">
       {children}
     </div>
@@ -187,9 +204,10 @@ vi.mock("next/link", () => ({
   default: ({
     href,
     children,
-  }: { href: string; children: React.ReactNode }) => (
-    <a href={href}>{children}</a>
-  ),
+  }: {
+    href: string;
+    children: React.ReactNode;
+  }) => <a href={href}>{children}</a>,
 }));
 
 describe("HomePage", () => {

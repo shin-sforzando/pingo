@@ -1,3 +1,5 @@
+import type { NextResponse } from "next/server";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
 import {
   cleanupTestUsers,
@@ -11,8 +13,6 @@ import {
 } from "@/test/helpers/game-test-helpers";
 import type { ApiResponse } from "@/types/common";
 import * as firestoreModule from "@/types/firestore";
-import type { NextResponse } from "next/server";
-import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { POST } from "./route";
 
 describe("Game Creation API Integration Test", () => {

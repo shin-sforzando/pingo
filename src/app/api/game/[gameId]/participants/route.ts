@@ -1,6 +1,6 @@
+import { NextResponse } from "next/server";
 import { AdminGameParticipationService } from "@/lib/firebase/admin-collections";
 import type { ApiResponse } from "@/types/common";
-import { NextResponse } from "next/server";
 
 /**
  * GET handler for retrieving game participants

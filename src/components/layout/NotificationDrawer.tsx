@@ -1,5 +1,8 @@
 "use client";
 
+import { faker } from "@faker-js/faker";
+import { useTranslations } from "next-intl";
+import type { ReactElement } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Drawer,
@@ -12,9 +15,6 @@ import {
 } from "@/components/ui/drawer";
 import { NotificationDisplayType, NotificationType } from "@/types/common";
 import type { Notification } from "@/types/schema";
-import { faker } from "@faker-js/faker";
-import { useTranslations } from "next-intl";
-import type { ReactElement } from "react";
 
 type NotificationDrawerProps = {
   open: boolean;

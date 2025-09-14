@@ -1,6 +1,6 @@
-import { defaultLocale } from "@/i18n/config";
 import * as nextHeaders from "next/headers";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { defaultLocale } from "@/i18n/config";
 import { clearUserLocale, getUserLocale, setUserLocale } from "./locale";
 
 // Mock the cookies module

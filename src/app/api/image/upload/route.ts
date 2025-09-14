@@ -1,8 +1,8 @@
-import { adminAuth } from "@/lib/firebase/admin";
 import type { DecodedIdToken } from "firebase-admin/auth";
 import { getStorage } from "firebase-admin/storage";
 import { type NextRequest, NextResponse } from "next/server";
 import { ulid } from "ulid";
+import { adminAuth } from "@/lib/firebase/admin";
 
 /**
  * Upload image directly to Google Cloud Storage via server

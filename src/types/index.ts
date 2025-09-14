@@ -3,8 +3,8 @@
  * Re-exports all types from the types directory
  */
 
-// Firestore related types
-export * from "./firestore";
+// Common interfaces
+export type { ApiResponse, CellPosition, CompletedLine } from "./common";
 
 // Common types - enums and basic interfaces
 export {
@@ -16,15 +16,11 @@ export {
   ProcessingStatus,
   Role,
 } from "./common";
-
-// Common interfaces
-export type { ApiResponse, CellPosition, CompletedLine } from "./common";
-
-// Schema definitions - Zod schemas and inferred types
-export * from "./schema";
-
-// User related types - Firestore document interfaces and conversion functions
-export * from "./user";
-
+// Firestore related types
+export * from "./firestore";
 // Game related types - Firestore document interfaces and conversion functions
 export * from "./game";
+// Schema definitions - Zod schemas and inferred types
+export * from "./schema";
+// User related types - Firestore document interfaces and conversion functions
+export * from "./user";

@@ -1,6 +1,6 @@
-import { Role } from "@/types/common";
 import { faker } from "@faker-js/faker";
 import type { Meta, StoryObj } from "@storybook/react";
+import { Role } from "@/types/common";
 import { ParticipantsList } from "./ParticipantsList";
 
 const meta: Meta<typeof ParticipantsList> = {

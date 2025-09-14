@@ -1,3 +1,7 @@
+import { GoogleGenAI, Type } from "@google/genai";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import { z } from "zod";
 import { adminAuth } from "@/lib/firebase/admin";
 import {
   AdminGameBoardService,
@@ -10,10 +14,6 @@ import type { ApiResponse } from "@/types/common";
 import { AcceptanceStatus, ProcessingStatus } from "@/types/common";
 import type { AnalysisResult, Cell } from "@/types/schema";
 import { analysisResultSchema } from "@/types/schema";
-import { GoogleGenAI, Type } from "@google/genai";
-import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
-import { z } from "zod";
 
 // Request body schema
 const analyzeRequestSchema = z.object({

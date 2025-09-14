@@ -1,7 +1,7 @@
+import { useCallback, useEffect, useState } from "react";
 import type { Participant } from "@/components/game/ParticipantsList";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Cell, Game, PlayerBoard, Submission } from "@/types/schema";
-import { useCallback, useEffect, useState } from "react";
 
 interface GameDataState {
   game: Game | null;
@@ -44,6 +44,78 @@ export function useGameData(gameId: string) {
       return null;
     }
   }, []);
+
+  /**
+   * Refreshes participants data from API
+   * Called after successful image submissions to update completion stats
+   */
+  const refreshParticipants = useCallback(async () => {
+    if (!user || !gameId) return;
+
+    try {
+      const authToken = await getAuthToken();
+      if (!authToken) return;
+
+      const response = await fetch(`/api/game/${gameId}/participants`, {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setState((prev) => ({
+          ...prev,
+          participants: data.data || [],
+        }));
+      }
+    } catch (error) {
+      console.error("Failed to refresh participants:", error);
+    }
+  }, [user, gameId, getAuthToken]);
+
+  /**
+   * Refreshes user's submissions data from API
+   * Fetches latest submissions to show recent upload results
+   */
+  const refreshSubmissions = useCallback(async () => {
+    if (!user || !gameId) return;
+
+    try {
+      const authToken = await getAuthToken();
+      if (!authToken) return;
+
+      const response = await fetch(
+        `/api/game/${gameId}/submission?userId=${user.id}&limit=10`,
+        {
+          headers: { Authorization: `Bearer ${authToken}` },
+        },
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setState((prev) => ({
+          ...prev,
+          submissions: data.data || [],
+        }));
+      } else {
+        console.error(
+          "Failed to fetch submissions:",
+          response.status,
+          response.statusText,
+        );
+        // Prevent infinite loading by setting empty array
+        setState((prev) => ({
+          ...prev,
+          submissions: [],
+        }));
+      }
+    } catch (error) {
+      console.error("Failed to refresh submissions:", error);
+      setState((prev) => ({
+        ...prev,
+        submissions: [],
+      }));
+    }
+  }, [user, gameId, getAuthToken]);
 
   /**
    * Loads initial game data from multiple API endpoints
@@ -153,79 +225,7 @@ export function useGameData(gameId: string) {
         isLoading: false,
       }));
     }
-  }, [user, gameId, getAuthToken]);
-
-  /**
-   * Refreshes participants data from API
-   * Called after successful image submissions to update completion stats
-   */
-  const refreshParticipants = useCallback(async () => {
-    if (!user || !gameId) return;
-
-    try {
-      const authToken = await getAuthToken();
-      if (!authToken) return;
-
-      const response = await fetch(`/api/game/${gameId}/participants`, {
-        headers: { Authorization: `Bearer ${authToken}` },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setState((prev) => ({
-          ...prev,
-          participants: data.data || [],
-        }));
-      }
-    } catch (error) {
-      console.error("Failed to refresh participants:", error);
-    }
-  }, [user, gameId, getAuthToken]);
-
-  /**
-   * Refreshes user's submissions data from API
-   * Fetches latest submissions to show recent upload results
-   */
-  const refreshSubmissions = useCallback(async () => {
-    if (!user || !gameId) return;
-
-    try {
-      const authToken = await getAuthToken();
-      if (!authToken) return;
-
-      const response = await fetch(
-        `/api/game/${gameId}/submission?userId=${user.id}&limit=10`,
-        {
-          headers: { Authorization: `Bearer ${authToken}` },
-        },
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        setState((prev) => ({
-          ...prev,
-          submissions: data.data || [],
-        }));
-      } else {
-        console.error(
-          "Failed to fetch submissions:",
-          response.status,
-          response.statusText,
-        );
-        // Prevent infinite loading by setting empty array
-        setState((prev) => ({
-          ...prev,
-          submissions: [],
-        }));
-      }
-    } catch (error) {
-      console.error("Failed to refresh submissions:", error);
-      setState((prev) => ({
-        ...prev,
-        submissions: [],
-      }));
-    }
-  }, [user, gameId, getAuthToken]);
+  }, [user, gameId, getAuthToken, refreshParticipants, refreshSubmissions]);
 
   /**
    * Sets up real-time Firestore listener for player board updates

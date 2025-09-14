@@ -1,6 +1,6 @@
+import { useTranslations } from "next-intl";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Game } from "@/types/schema";
-import { useTranslations } from "next-intl";
 
 interface GameHeaderProps {
   game: Game | null;

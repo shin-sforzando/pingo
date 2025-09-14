@@ -1,9 +1,9 @@
 "use client";
 
-import { useAuth } from "@/contexts/AuthContext";
-import { useTranslations } from "next-intl";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import type { ReactElement } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { NotificationIcon } from "./NotificationIcon";
 import { UserMenu } from "./UserMenu";

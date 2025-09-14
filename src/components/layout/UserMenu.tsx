@@ -1,5 +1,10 @@
 "use client";
 
+import { Languages, LogOut, User as UserIcon } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
+import type { ReactElement } from "react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -12,11 +17,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/AuthContext";
 import { setUserLocale } from "@/services/locale";
-import { Languages, LogOut, User as UserIcon } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import type { ReactElement } from "react";
 
 export function UserMenu(): ReactElement {
   const { user, logout } = useAuth();

@@ -1,9 +1,9 @@
 "use client";
 
-import Loading from "@/app/loading";
-import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { type ReactNode, useEffect } from "react";
+import Loading from "@/app/loading";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface AuthGuardProps {
   children: ReactNode;

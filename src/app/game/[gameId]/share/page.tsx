@@ -1,5 +1,16 @@
 "use client";
 
+import {
+  ActivityIcon,
+  CalendarIcon,
+  PercentIcon,
+  PlayIcon,
+  TableIcon,
+} from "lucide-react";
+import Link from "next/link";
+import { useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
 import { BingoBoard } from "@/components/game/BingoBoard";
 import { InfoCard } from "@/components/game/InfoCard";
 import { QRCodeCard } from "@/components/game/QRCodeCard";
@@ -10,17 +21,6 @@ import { BASE_URL } from "@/lib/constants";
 import { formatDate } from "@/lib/utils";
 import { GameStatus } from "@/types/common";
 import type { Game, GameBoard } from "@/types/schema";
-import {
-  ActivityIcon,
-  CalendarIcon,
-  PercentIcon,
-  PlayIcon,
-  TableIcon,
-} from "lucide-react";
-import { useTranslations } from "next-intl";
-import Link from "next/link";
-import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
 
 export default function SharePage() {
   const params = useParams();

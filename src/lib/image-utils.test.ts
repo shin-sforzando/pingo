@@ -1,13 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  DEFAULT_IMAGE_OPTIONS,
-  MAX_FILE_SIZE,
-  SUPPORTED_IMAGE_TYPES,
   createImagePreviewUrl,
+  DEFAULT_IMAGE_OPTIONS,
   isValidFileSize,
   isValidImageFile,
+  MAX_FILE_SIZE,
   processImage,
   revokeImagePreviewUrl,
+  SUPPORTED_IMAGE_TYPES,
 } from "./image-utils";
 
 // Mock heic2any

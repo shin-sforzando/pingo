@@ -2,10 +2,9 @@ import { page } from "@vitest/browser/context";
 import { NextIntlClientProvider } from "next-intl";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render } from "vitest-browser-react";
-import { Header } from "./Header";
-
 import enMessages from "../../../messages/en.json";
 import jaMessages from "../../../messages/ja.json";
+import { Header } from "./Header";
 
 // Define mocked functions using vi.hoisted
 const mockUseAuth = vi.hoisted(() => vi.fn());
@@ -25,7 +24,9 @@ vi.mock("./LanguageSwitcher", () => ({
 vi.mock("./NotificationIcon", () => ({
   NotificationIcon: ({
     hasUnreadNotifications,
-  }: { hasUnreadNotifications: boolean }) => (
+  }: {
+    hasUnreadNotifications: boolean;
+  }) => (
     <div data-testid="notification-icon" data-unread={hasUnreadNotifications}>
       NotificationIcon
     </div>
@@ -43,7 +44,11 @@ vi.mock("next/link", () => ({
     href,
     className,
     children,
-  }: { href: string; className?: string; children: React.ReactNode }) => (
+  }: {
+    href: string;
+    className?: string;
+    children: React.ReactNode;
+  }) => (
     <a href={href} className={className}>
       {children}
     </a>

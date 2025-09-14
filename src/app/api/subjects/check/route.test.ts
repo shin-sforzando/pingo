@@ -1,5 +1,5 @@
-import { createApiRequest } from "@/test/helpers/api-test-helpers";
 import { beforeAll, describe, expect, it } from "vitest";
+import { createApiRequest } from "@/test/helpers/api-test-helpers";
 import { POST as generatePOST } from "../generate/route";
 import { POST } from "./route";
 

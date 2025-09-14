@@ -5,19 +5,19 @@
 import { dateToTimestamp } from "../../types/firestore";
 import {
   type EventDocument,
+  eventFromFirestore,
+  eventToFirestore,
   type GameBoardDocument,
   type GameDocument,
   type GameParticipationDocument,
-  type PlayerBoardDocument,
-  type SubmissionDocument,
-  eventFromFirestore,
-  eventToFirestore,
   gameBoardFromFirestore,
   gameFromFirestore,
   gameParticipationFromFirestore,
   gameToFirestore,
+  type PlayerBoardDocument,
   playerBoardFromFirestore,
   playerBoardToFirestore,
+  type SubmissionDocument,
   submissionFromFirestore,
   submissionToFirestore,
 } from "../../types/game";

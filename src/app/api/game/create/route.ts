@@ -24,12 +24,12 @@ import {
 import {
   type Cell,
   type CompletedLine,
+  cellSchema,
   type Event,
   type Game,
   type GameParticipation,
-  type PlayerBoard,
-  cellSchema,
   gameCreationSchema,
+  type PlayerBoard,
 } from "../../../../types/schema";
 
 // Constants

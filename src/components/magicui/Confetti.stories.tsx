@@ -1,6 +1,6 @@
-import { Button } from "@/components/ui/button";
 import type { Meta, StoryObj } from "@storybook/react";
 import { useRef } from "react";
+import { Button } from "@/components/ui/button";
 import { Confetti, type ConfettiRef } from "./confetti";
 
 const meta: Meta<typeof Confetti> = {

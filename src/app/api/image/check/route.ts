@@ -1,3 +1,6 @@
+import { GoogleGenAI, Type } from "@google/genai";
+import { type NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { adminAuth } from "@/lib/firebase/admin";
 import {
   AdminGameBoardService,
@@ -12,9 +15,6 @@ import type {
   PlayerBoard,
   Submission,
 } from "@/types/schema";
-import { GoogleGenAI, Type } from "@google/genai";
-import { type NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
 
 // Request schema
 const checkImageSchema = z.object({

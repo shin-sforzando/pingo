@@ -1,7 +1,7 @@
-import { GameStatus } from "@/types/common";
-import type { Game } from "@/types/schema";
 import { faker } from "@faker-js/faker";
 import type { Meta, StoryObj } from "@storybook/react";
+import { GameStatus } from "@/types/common";
+import type { Game } from "@/types/schema";
 import { GameInfo } from "./GameInfo";
 
 const meta: Meta<typeof GameInfo> = {
