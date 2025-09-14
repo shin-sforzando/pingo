@@ -1,3 +1,7 @@
+import { faker } from "@faker-js/faker";
+import type { DecodedIdToken } from "firebase-admin/auth";
+import type { NextRequest } from "next/server";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { adminAuth } from "@/lib/firebase/admin";
 import {
   AdminGameBoardService,
@@ -7,10 +11,6 @@ import {
   AdminTransactionService,
 } from "@/lib/firebase/admin-collections";
 import { GameStatus } from "@/types/common";
-import { faker } from "@faker-js/faker";
-import type { DecodedIdToken } from "firebase-admin/auth";
-import type { NextRequest } from "next/server";
-import { beforeEach, describe, expect, it, vi } from "vitest";
 import { POST } from "./route";
 
 // Mock Firebase Admin

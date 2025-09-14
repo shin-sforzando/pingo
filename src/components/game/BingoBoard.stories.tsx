@@ -1,6 +1,6 @@
-import type { Cell } from "@/types/schema";
 import { fakerJA as faker } from "@faker-js/faker";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs";
+import type { Cell } from "@/types/schema";
 import { BingoBoard } from "./BingoBoard";
 import type { BingoCellState } from "./BingoCell";
 

@@ -3,7 +3,6 @@
 # *.log
 # tmp/
 
-.clinerules
 .dockerignore
 .github/
 .gitignore
@@ -13,7 +12,7 @@
 .vscode/
 *.secret
 biome.json
-cline_docs/
+docs/
 coverage/
 knip.json
 lefthook*.yml

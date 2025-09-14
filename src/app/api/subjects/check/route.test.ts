@@ -1,5 +1,5 @@
-import { createApiRequest } from "@/test/helpers/api-test-helpers";
 import { beforeAll, describe, expect, it } from "vitest";
+import { createApiRequest } from "@/test/helpers/api-test-helpers";
 import { POST as generatePOST } from "../generate/route";
 import { POST } from "./route";
 
@@ -23,7 +23,8 @@ describe("subjects/check API", () => {
     const data = await response.json();
 
     expect(response.status).toBe(400);
-    expect(data.error.subjects).toBeDefined();
+    expect(data.error).toBeDefined();
+    expect(Array.isArray(data.error)).toBe(true);
   });
 
   it("should validate subjects array is not empty", async () => {
@@ -35,7 +36,8 @@ describe("subjects/check API", () => {
     const data = await response.json();
 
     expect(response.status).toBe(400);
-    expect(data.error.subjects).toBeDefined();
+    expect(data.error).toBeDefined();
+    expect(Array.isArray(data.error)).toBe(true);
   });
 
   it("should validate field types", async () => {
@@ -48,8 +50,9 @@ describe("subjects/check API", () => {
     const data = await response.json();
 
     expect(response.status).toBe(400);
-    expect(data.error.subjects).toBeDefined();
-    expect(data.error.language).toBeDefined();
+    expect(data.error).toBeDefined();
+    expect(Array.isArray(data.error)).toBe(true);
+    expect(data.error.length).toBeGreaterThan(0);
   });
 
   it("should approve appropriate subjects in English", async () => {

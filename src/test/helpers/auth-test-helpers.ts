@@ -1,7 +1,7 @@
-import type { AuthContextType } from "@/contexts/AuthContext";
-import type { User } from "@/types/schema";
 import { ulid } from "ulid";
 import { vi } from "vitest";
+import type { AuthContextType } from "@/contexts/AuthContext";
+import type { User } from "@/types/schema";
 
 /**
  * Authentication test helpers

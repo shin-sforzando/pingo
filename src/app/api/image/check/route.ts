@@ -1,3 +1,6 @@
+import { GoogleGenAI, Type } from "@google/genai";
+import { type NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { adminAuth } from "@/lib/firebase/admin";
 import {
   AdminGameBoardService,
@@ -12,14 +15,11 @@ import type {
   PlayerBoard,
   Submission,
 } from "@/types/schema";
-import { GoogleGenAI, Type } from "@google/genai";
-import { type NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
 
 // Request schema
 const checkImageSchema = z.object({
   gameId: z.string(),
-  imageUrl: z.string().url("Valid image URL is required"),
+  imageUrl: z.url("Valid image URL is required"),
   submissionId: z.string(),
 });
 
@@ -594,7 +594,7 @@ Be strict in your matching - only match if you're confident the image clearly sh
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: "Invalid request data", details: error.errors },
+        { error: "Invalid request data", details: error.issues },
         { status: 400 },
       );
     }

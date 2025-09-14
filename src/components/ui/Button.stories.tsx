@@ -1,6 +1,4 @@
-import { Button } from "@/components/ui/button";
-import type { Meta, StoryObj } from "@storybook/react";
-import { fn } from "@storybook/test";
+import type { Meta, StoryObj } from "@storybook/nextjs";
 import {
   ArrowRight,
   Check,
@@ -10,6 +8,8 @@ import {
   Plus,
   Trash,
 } from "lucide-react";
+import { fn } from "storybook/test";
+import { Button } from "@/components/ui/button";
 
 /**
  * The Button component is used to trigger an action or event, such as submitting a form, opening a dialog, canceling an action, or performing a delete operation.

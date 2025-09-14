@@ -1,3 +1,15 @@
+import type { DecodedIdToken } from "firebase-admin/auth";
+import type { NextResponse } from "next/server";
+import { ulid } from "ulid";
+import {
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 import { adminAuth } from "@/lib/firebase/admin";
 import {
   AdminGameParticipationService,
@@ -15,18 +27,6 @@ import {
 import type { ApiResponse } from "@/types/common";
 import { GameStatus, ProcessingStatus } from "@/types/common";
 import type { Game, Submission } from "@/types/schema";
-import type { DecodedIdToken } from "firebase-admin/auth";
-import type { NextResponse } from "next/server";
-import { ulid } from "ulid";
-import {
-  afterAll,
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from "vitest";
 import { GET, POST } from "./route";
 
 // Mock Firebase Admin

@@ -1,7 +1,7 @@
+import { fakerJA as faker } from "@faker-js/faker";
+import type { Meta, StoryObj } from "@storybook/nextjs";
 import { GameStatus } from "@/types/common";
 import type { Cell, Game } from "@/types/schema";
-import { fakerJA as faker } from "@faker-js/faker";
-import type { Meta, StoryObj } from "@storybook/react";
 import SharePage from "./page";
 
 // Generate sample cells for a 5x5 board
@@ -64,7 +64,7 @@ const mockUseParams = () => ({ gameId: "VALID1" });
 
 // Override the useParams function if possible
 try {
-  // @ts-ignore - This is a mock for Storybook
+  // @ts-expect-error - This is a mock for Storybook
   nextNavigation.useParams = mockUseParams;
 } catch (error) {
   console.warn("Could not mock useParams:", error);

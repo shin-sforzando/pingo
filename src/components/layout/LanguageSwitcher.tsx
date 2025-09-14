@@ -1,10 +1,10 @@
 "use client";
 
+import { Languages } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { setUserLocale } from "@/services/locale";
-import { Languages } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
 
 export function LanguageSwitcher() {
   const router = useRouter();

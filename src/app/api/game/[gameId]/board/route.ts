@@ -1,7 +1,7 @@
+import { NextResponse } from "next/server";
 import { AdminGameBoardService } from "@/lib/firebase/admin-collections";
 import type { ApiResponse } from "@/types/common";
 import type { GameBoard } from "@/types/schema";
-import { NextResponse } from "next/server";
 
 /**
  * GET handler for retrieving game board data

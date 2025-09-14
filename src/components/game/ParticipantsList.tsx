@@ -1,12 +1,12 @@
 "use client";
 
+import { Crown, Trophy, Users } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatRelativeDate } from "@/lib/utils";
 import { Role } from "@/types/common";
-import { Crown, Trophy, Users } from "lucide-react";
-import { useTranslations } from "next-intl";
 
 export interface Participant {
   /**

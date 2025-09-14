@@ -1,3 +1,6 @@
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import { ulid } from "ulid";
 import { adminAuth } from "@/lib/firebase/admin";
 import {
   AdminGameParticipationService,
@@ -7,9 +10,6 @@ import {
 import type { ApiResponse } from "@/types/common";
 import { ProcessingStatus } from "@/types/common";
 import { type Submission, submissionSchema } from "@/types/schema";
-import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
-import { ulid } from "ulid";
 
 // Schema for creating submission - reuse from schema.ts
 const createSubmissionSchema = submissionSchema.pick({
@@ -72,7 +72,7 @@ export async function POST(
           error: {
             code: "INVALID_INPUT",
             message: "Invalid input data",
-            details: validationResult.error.errors,
+            details: validationResult.error.issues,
           },
         },
         { status: 400 },

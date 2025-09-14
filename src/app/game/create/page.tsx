@@ -1,5 +1,11 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useId, useState } from "react";
+import { type Resolver, type SubmitHandler, useForm } from "react-hook-form";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { BingoBoard } from "@/components/game/BingoBoard";
 import { type Subject, SubjectList } from "@/components/game/SubjectList";
@@ -28,12 +34,6 @@ import { auth } from "@/lib/firebase/client";
 import { cn } from "@/lib/utils";
 import type { Cell, GameCreationData } from "@/types/schema";
 import { gameCreationSchema } from "@/types/schema";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useId, useState } from "react";
-import { type Resolver, type SubmitHandler, useForm } from "react-hook-form";
 
 // Use the existing gameCreationSchema
 type GameCreateFormValues = GameCreationData;

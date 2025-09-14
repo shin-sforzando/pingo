@@ -24,16 +24,20 @@ export const baseSchema = z.object({
  * User schema
  */
 export const userSchema = baseSchema.extend({
-  id: z.string().ulid(), // ULID
+  id: z.ulid(), // ULID
   username: z
     .string()
-    .min(3, { message: "Auth.errors.usernameTooShort" })
-    .max(20, { message: "Auth.errors.usernameTooLong" }),
+    .min(3, {
+      error: "Auth.errors.usernameTooShort",
+    })
+    .max(20, {
+      error: "Auth.errors.usernameTooLong",
+    }),
   lastLoginAt: z.date().nullable(),
   participatingGames: z.array(z.string()).max(5),
   gameHistory: z.array(z.string()),
   memo: z.string().optional(),
-  isTestUser: z.boolean().default(false),
+  isTestUser: z.boolean().prefault(false),
 });
 
 /**
@@ -42,15 +46,25 @@ export const userSchema = baseSchema.extend({
 export const userCreationSchema = z.object({
   username: z
     .string()
-    .min(1, { message: "Auth.errors.usernameRequired" })
-    .min(3, { message: "Auth.errors.usernameTooShort" })
-    .max(20, { message: "Auth.errors.usernameTooLong" }),
+    .min(1, {
+      error: "Auth.errors.usernameRequired",
+    })
+    .min(3, {
+      error: "Auth.errors.usernameTooShort",
+    })
+    .max(20, {
+      error: "Auth.errors.usernameTooLong",
+    }),
   password: z
     .string()
-    .min(1, { message: "Auth.errors.passwordRequired" })
-    .min(8, { message: "Auth.errors.passwordTooShort" })
+    .min(1, {
+      error: "Auth.errors.passwordRequired",
+    })
+    .min(8, {
+      error: "Auth.errors.passwordTooShort",
+    })
     .regex(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]+$/, {
-      message: "Auth.errors.passwordInvalid",
+      error: "Auth.errors.passwordInvalid",
     }),
   isTestUser: z.boolean(),
 });
@@ -59,34 +73,38 @@ export const userCreationSchema = z.object({
  * User login schema
  */
 export const userLoginSchema = z.object({
-  username: z.string().min(1, { message: "Auth.errors.usernameRequired" }),
-  password: z.string().min(1, { message: "Auth.errors.passwordRequired" }),
+  username: z.string().min(1, {
+    error: "Auth.errors.usernameRequired",
+  }),
+  password: z.string().min(1, {
+    error: "Auth.errors.passwordRequired",
+  }),
 });
 
 /**
  * Notification schema
  */
 export const notificationSchema = baseSchema.extend({
-  id: z.string().ulid(), // ULID
-  type: z.nativeEnum(NotificationType),
-  displayType: z.nativeEnum(NotificationDisplayType),
+  id: z.ulid(), // ULID
+  type: z.enum(NotificationType),
+  displayType: z.enum(NotificationDisplayType),
   message: z.string(),
-  read: z.boolean().default(false),
+  read: z.boolean().prefault(false),
   relatedGameId: z.string().optional(),
-  details: z.record(z.unknown()).optional(),
+  details: z.record(z.string(), z.unknown()).optional(),
 });
 
 /**
  * Game participation schema
  */
 export const gameParticipationSchema = baseSchema.extend({
-  userId: z.string().ulid(),
+  userId: z.ulid(),
   gameId: z.string(),
-  role: z.nativeEnum(Role),
+  role: z.enum(Role),
   joinedAt: z.date(),
-  completedLines: z.number().int().min(0).max(12),
+  completedLines: z.int().min(0).max(12),
   lastCompletedAt: z.date().nullable(),
-  submissionCount: z.number().int().min(0).max(30),
+  submissionCount: z.int().min(0).max(30),
 });
 
 /**
@@ -95,18 +113,18 @@ export const gameParticipationSchema = baseSchema.extend({
 export const cellSchema = z.object({
   id: z.string(),
   position: z.object({
-    x: z.number().int().min(0).max(4),
-    y: z.number().int().min(0).max(4),
+    x: z.int().min(0).max(4),
+    y: z.int().min(0).max(4),
   }),
   subject: z.string(),
-  isFree: z.boolean().default(false),
+  isFree: z.boolean().prefault(false),
 });
 
 /**
  * Cell state schema
  */
 export const cellStateSchema = z.object({
-  isOpen: z.boolean().default(false),
+  isOpen: z.boolean().prefault(false),
   openedAt: z.date().nullable(),
   openedBySubmissionId: z.string().nullable(),
 });
@@ -117,7 +135,7 @@ export const cellStateSchema = z.object({
 export const cellStateApiSchema = z.object({
   isOpen: z.boolean(),
   openedAt: z
-    .union([z.date(), z.string().datetime()])
+    .union([z.date(), z.iso.datetime()])
     .nullable()
     .transform((val) => {
       if (val === null) return null;
@@ -130,8 +148,8 @@ export const cellStateApiSchema = z.object({
  * Completed line schema
  */
 export const completedLineSchema = z.object({
-  type: z.nativeEnum(LineType),
-  index: z.number().int().min(0).max(4),
+  type: z.enum(LineType),
+  index: z.int().min(0).max(4),
   completedAt: z.date(),
 });
 
@@ -139,9 +157,9 @@ export const completedLineSchema = z.object({
  * Completed line schema for API requests (with date transformation)
  */
 export const completedLineApiSchema = z.object({
-  type: z.nativeEnum(LineType),
+  type: z.enum(LineType),
   index: z.number(),
-  completedAt: z.union([z.date(), z.string().datetime()]).transform((val) => {
+  completedAt: z.union([z.date(), z.iso.datetime()]).transform((val) => {
     return val instanceof Date ? val : new Date(val);
   }),
 });
@@ -150,8 +168,8 @@ export const completedLineApiSchema = z.object({
  * Player board schema
  */
 export const playerBoardSchema = z.object({
-  userId: z.string().ulid(),
-  cellStates: z.record(cellStateSchema),
+  userId: z.ulid(),
+  cellStates: z.record(z.string(), cellStateSchema),
   completedLines: z.array(completedLineSchema),
 });
 
@@ -169,15 +187,15 @@ export const gameSchema = baseSchema.extend({
   id: z.string().regex(/^[A-Z0-9]{6}$/),
   title: z.string().min(1).max(50),
   theme: z.string().min(1).max(50),
-  creatorId: z.string().ulid(),
+  creatorId: z.ulid(),
   expiresAt: z.date(),
-  isPublic: z.boolean().default(false),
-  isPhotoSharingEnabled: z.boolean().default(true),
-  requiredBingoLines: z.number().int().min(1).max(5).default(1),
-  confidenceThreshold: z.number().min(0).max(1).default(0.5),
-  maxSubmissionsPerUser: z.number().int().min(1).max(100).default(30),
+  isPublic: z.boolean().prefault(false),
+  isPhotoSharingEnabled: z.boolean().prefault(true),
+  requiredBingoLines: z.int().min(1).max(5).prefault(1),
+  confidenceThreshold: z.number().min(0).max(1).prefault(0.5),
+  maxSubmissionsPerUser: z.int().min(1).max(100).prefault(30),
   notes: z.string().optional(),
-  status: z.nativeEnum(GameStatus).default(GameStatus.ACTIVE),
+  status: z.enum(GameStatus).prefault(GameStatus.ACTIVE),
 });
 
 /**
@@ -186,20 +204,28 @@ export const gameSchema = baseSchema.extend({
 export const gameCreationSchema = z.object({
   title: z
     .string()
-    .min(1, { message: "Game.errors.titleRequired" })
-    .max(50, { message: "Game.errors.titleTooLong" }),
+    .min(1, {
+      error: "Game.errors.titleRequired",
+    })
+    .max(50, {
+      error: "Game.errors.titleTooLong",
+    }),
   theme: z
     .string()
-    .min(1, { message: "Game.errors.themeRequired" })
-    .max(50, { message: "Game.errors.themeTooLong" }),
-  expiresAt: z
-    .date()
-    .min(new Date(), { message: "Game.errors.expiresAtInvalid" }),
-  isPublic: z.boolean().default(false),
-  isPhotoSharingEnabled: z.boolean().default(true),
-  requiredBingoLines: z.number().int().min(1).max(5).default(1),
-  confidenceThreshold: z.number().min(0).max(1).default(0.5),
-  maxSubmissionsPerUser: z.number().int().min(1).max(100).default(30),
+    .min(1, {
+      error: "Game.errors.themeRequired",
+    })
+    .max(50, {
+      error: "Game.errors.themeTooLong",
+    }),
+  expiresAt: z.date().min(new Date(), {
+    error: "Game.errors.expiresAtInvalid",
+  }),
+  isPublic: z.boolean().prefault(false),
+  isPhotoSharingEnabled: z.boolean().prefault(true),
+  requiredBingoLines: z.int().min(1).max(5).prefault(1),
+  confidenceThreshold: z.number().min(0).max(1).prefault(0.5),
+  maxSubmissionsPerUser: z.int().min(1).max(100).prefault(30),
   notes: z.string().optional(),
 });
 
@@ -207,16 +233,16 @@ export const gameCreationSchema = z.object({
  * Submission schema
  */
 export const submissionSchema = baseSchema.extend({
-  id: z.string().ulid(), // ULID
-  userId: z.string().ulid(),
-  imageUrl: z.string().url(),
+  id: z.ulid(), // ULID
+  userId: z.ulid(),
+  imageUrl: z.url(),
   submittedAt: z.date(),
   analyzedAt: z.date().nullable(),
   critique: z.string().nullable(),
   matchedCellId: z.string().nullable(),
   confidence: z.number().min(0).max(1).nullable(),
-  processingStatus: z.nativeEnum(ProcessingStatus),
-  acceptanceStatus: z.nativeEnum(AcceptanceStatus).nullable(),
+  processingStatus: z.enum(ProcessingStatus),
+  acceptanceStatus: z.enum(AcceptanceStatus).nullable(),
   errorMessage: z.string().nullable(),
   memo: z.string().optional(),
 });
@@ -225,11 +251,11 @@ export const submissionSchema = baseSchema.extend({
  * Event schema
  */
 export const eventSchema = baseSchema.extend({
-  id: z.string().ulid(), // ULID
+  id: z.ulid(), // ULID
   type: z.string(),
-  userId: z.string().ulid(),
+  userId: z.ulid(),
   timestamp: z.date(),
-  details: z.record(z.unknown()).optional(),
+  details: z.record(z.string(), z.unknown()).optional(),
 });
 
 /**
@@ -310,14 +336,14 @@ export const imageSubmissionDataSchema = z.object({
   gameId: z.string().regex(/^[A-Z0-9]{6}$/),
   fileName: z.string().min(1),
   contentType: z.string().min(1),
-  processedSize: z.number().int().positive(),
+  processedSize: z.int().positive(),
   originalDimensions: z.object({
-    width: z.number().int().positive(),
-    height: z.number().int().positive(),
+    width: z.int().positive(),
+    height: z.int().positive(),
   }),
   processedDimensions: z.object({
-    width: z.number().int().positive(),
-    height: z.number().int().positive(),
+    width: z.int().positive(),
+    height: z.int().positive(),
   }),
 });
 
@@ -325,17 +351,17 @@ export const imageSubmissionDataSchema = z.object({
  * Image submission result schema
  */
 export const imageSubmissionResultSchema = z.object({
-  submissionId: z.string().ulid(),
-  imageUrl: z.string().url(),
+  submissionId: z.ulid(),
+  imageUrl: z.url(),
   appropriate: z.boolean(),
   reason: z.string().optional(),
   confidence: z.number().min(0).max(1).optional(),
   matchedCellId: z.string().nullable().optional(),
-  acceptanceStatus: z.nativeEnum(AcceptanceStatus).optional(),
+  acceptanceStatus: z.enum(AcceptanceStatus).optional(),
   critique: z.string().optional(),
-  newlyCompletedLines: z.number().int().min(0).default(0),
-  totalCompletedLines: z.number().int().min(0).default(0),
-  requiredBingoLines: z.number().int().min(1).max(5).default(1),
+  newlyCompletedLines: z.int().min(0).prefault(0),
+  totalCompletedLines: z.int().min(0).prefault(0),
+  requiredBingoLines: z.int().min(1).max(5).prefault(1),
 });
 
 /**
@@ -345,7 +371,7 @@ export const analysisResultSchema = z.object({
   matchedCellId: z.string().nullable(),
   confidence: z.number().min(0).max(1),
   critique: z.string(),
-  acceptanceStatus: z.nativeEnum(AcceptanceStatus),
+  acceptanceStatus: z.enum(AcceptanceStatus),
 });
 
 // Export types derived from schemas

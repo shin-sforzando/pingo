@@ -6,17 +6,13 @@
   "files.associations": {
     "*.css": "tailwindcss"
   },
-  "i18n-ally.localesPaths": [
-    "messages",
-    "src/i18n"
-  ],
+  "i18n-ally.localesPaths": ["messages", "src/i18n"],
   "i18n-ally.displayLanguage": "ja",
   "i18n-ally.keystyle": "nested",
   "cSpell.words": [
     "adminsdk",
     "autodocs",
     "biomejs",
-    "clinerules",
     "cloudbuild",
     "cloudsdktool",
     "clsx",
@@ -64,9 +60,7 @@
     "WCAG",
     "xlink"
   ],
-  "cSpell.ignoreWords": [
-    "AIzaSyCYXPVHEMWgIXpDc2j-qFuvzD79eI24dws"
-  ],
+  "cSpell.ignoreWords": ["AIzaSyCYXPVHEMWgIXpDc2j-qFuvzD79eI24dws"],
   "[yaml]": {
     "editor.defaultFormatter": "redhat.vscode-yaml"
   }

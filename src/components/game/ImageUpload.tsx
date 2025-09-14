@@ -1,5 +1,9 @@
 "use client";
 
+import { Image as ImageIcon, Loader2, Upload, X } from "lucide-react";
+import Image from "next/image";
+import { useTranslations } from "next-intl";
+import { useCallback, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
@@ -17,9 +21,6 @@ import type {
   ImageUploadProps,
   ProcessedImage,
 } from "@/types/schema";
-import { Image as ImageIcon, Loader2, Upload, X } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useCallback, useRef, useState } from "react";
 
 interface ImagePreview {
   file: File;
@@ -336,11 +337,13 @@ export function ImageUpload({
               {/* Image preview */}
               {preview.previewUrl && (
                 <div className="relative mx-auto max-w-xs">
-                  <img
+                  <Image
                     src={preview.previewUrl}
                     alt="Preview"
+                    width={320}
+                    height={240}
                     className="h-auto w-full rounded-lg shadow-sm"
-                    loading="lazy"
+                    unoptimized={true}
                     onError={(error) => {
                       console.error("Image preview error:", error);
                       error.currentTarget.style.display = "none";

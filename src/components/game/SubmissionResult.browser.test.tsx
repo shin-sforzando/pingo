@@ -1,12 +1,11 @@
-import { AcceptanceStatus } from "@/types/common";
 import { page } from "@vitest/browser/context";
 import { NextIntlClientProvider } from "next-intl";
 import { describe, expect, it } from "vitest";
 import { render } from "vitest-browser-react";
-import { SubmissionResult } from "./SubmissionResult";
-
+import { AcceptanceStatus } from "@/types/common";
 import enMessages from "../../../messages/en.json";
 import jaMessages from "../../../messages/ja.json";
+import { SubmissionResult } from "./SubmissionResult";
 
 const renderWithIntl = (component: React.ReactElement, locale: "en" | "ja") => {
   const messages = locale === "en" ? enMessages : jaMessages;

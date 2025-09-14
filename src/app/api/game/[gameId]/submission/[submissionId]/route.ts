@@ -1,3 +1,5 @@
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { adminAuth } from "@/lib/firebase/admin";
 import {
   AdminBatchService,
@@ -7,8 +9,6 @@ import {
 import type { ApiResponse } from "@/types/common";
 import { ProcessingStatus } from "@/types/common";
 import { type Submission, submissionSchema } from "@/types/schema";
-import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
 
 // Schema for updating submission - reuse from schema.ts
 const updateSubmissionSchema = submissionSchema
@@ -189,7 +189,7 @@ export async function PUT(
           error: {
             code: "INVALID_INPUT",
             message: "Invalid input data",
-            details: validationResult.error.errors,
+            details: validationResult.error.issues,
           },
         },
         { status: 400 },

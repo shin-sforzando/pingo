@@ -1,11 +1,11 @@
 "use client";
 
+import { AlertTriangle, CheckCircle, XCircle } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import type { AcceptanceStatus } from "@/types/common";
-import { AlertTriangle, CheckCircle, XCircle } from "lucide-react";
-import { useTranslations } from "next-intl";
 
 export interface SubmissionResultProps {
   /**
@@ -126,6 +126,7 @@ export function SubmissionResult({
         {/* Image Preview */}
         {imageUrl && (
           <div className="flex justify-center">
+            {/* biome-ignore lint/performance/noImgElement: External URLs require <img> for browser test compatibility */}
             <img
               src={imageUrl}
               alt="Submitted content for analysis"

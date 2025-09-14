@@ -1,5 +1,8 @@
 "use client";
 
+import { useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useRef } from "react";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { BingoBoard } from "@/components/game/BingoBoard";
 import { GameInfo } from "@/components/game/GameInfo";
@@ -10,9 +13,6 @@ import { Confetti, type ConfettiRef } from "@/components/magicui/confetti";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { AcceptanceStatus } from "@/types/common";
-import { useTranslations } from "next-intl";
-import { useParams } from "next/navigation";
-import { useRef } from "react";
 import { ErrorDisplay } from "./components/ErrorDisplay";
 import { GameHeader } from "./components/GameHeader";
 import { useGameData } from "./hooks/useGameData";

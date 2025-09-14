@@ -1,4 +1,5 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs";
+import { useId } from "react";
 import { Input } from "./input";
 
 const meta: Meta<typeof Input> = {
@@ -82,28 +83,34 @@ export const Email: Story = {
 };
 
 export const WithLabel: Story = {
-  render: () => (
-    <div className="grid w-full max-w-sm items-center gap-1.5">
-      <label htmlFor="input-with-label" className="font-medium text-sm">
-        Email
-      </label>
-      <Input id="input-with-label" placeholder="Enter your email" />
-    </div>
-  ),
+  render: () => {
+    const id = useId();
+    return (
+      <div className="grid w-full max-w-sm items-center gap-1.5">
+        <label htmlFor={id} className="font-medium text-sm">
+          Email
+        </label>
+        <Input id={id} placeholder="Enter your email" />
+      </div>
+    );
+  },
 };
 
 export const WithLabelAndDescription: Story = {
-  render: () => (
-    <div className="grid w-full max-w-sm items-center gap-1.5">
-      <label htmlFor="input-with-description" className="font-medium text-sm">
-        Username
-      </label>
-      <Input id="input-with-description" placeholder="Enter username" />
-      <p className="text-muted-foreground text-sm">
-        This will be your public display name.
-      </p>
-    </div>
-  ),
+  render: () => {
+    const id = useId();
+    return (
+      <div className="grid w-full max-w-sm items-center gap-1.5">
+        <label htmlFor={id} className="font-medium text-sm">
+          Username
+        </label>
+        <Input id={id} placeholder="Enter username" />
+        <p className="text-muted-foreground text-sm">
+          This will be your public display name.
+        </p>
+      </div>
+    );
+  },
 };
 
 export const InputSizes: Story = {

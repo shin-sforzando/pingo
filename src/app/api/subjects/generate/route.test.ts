@@ -1,5 +1,5 @@
-import { createApiRequest } from "@/test/helpers/api-test-helpers";
 import { beforeAll, describe, expect, it } from "vitest";
+import { createApiRequest } from "@/test/helpers/api-test-helpers";
 import { POST } from "./route";
 
 describe("subjects/generate API", () => {
@@ -17,8 +17,9 @@ describe("subjects/generate API", () => {
     const data = await response.json();
 
     expect(response.status).toBe(400);
-    expect(data.error.title).toBeDefined();
-    expect(data.error.theme).toBeDefined();
+    expect(data.error).toBeDefined();
+    expect(Array.isArray(data.error)).toBe(true);
+    expect(data.error.length).toBeGreaterThan(0);
   });
 
   it("should validate field types", async () => {
@@ -32,7 +33,9 @@ describe("subjects/generate API", () => {
     const data = await response.json();
 
     expect(response.status).toBe(400);
-    expect(data.error.numberOfCandidates).toBeDefined();
+    expect(data.error).toBeDefined();
+    expect(Array.isArray(data.error)).toBe(true);
+    expect(data.error.length).toBeGreaterThan(0);
   });
 
   it("should generate subjects for valid input with explicit language", async () => {

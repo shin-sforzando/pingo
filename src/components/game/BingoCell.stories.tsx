@@ -1,5 +1,5 @@
 import { fakerJA as faker } from "@faker-js/faker";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs";
 import { BingoCell } from "./BingoCell";
 
 const meta = {

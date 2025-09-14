@@ -11,7 +11,7 @@
 
 ### フロントエンド
 
-- Next.js 15.3.3 (App Router)
+- Next.js 15.5.3 (App Router)
 - React 19.1.0
 - TypeScript 5
 - Tailwind CSS 4
@@ -23,16 +23,16 @@
 - Node.js 22
 - Firebase (Authentication, Firestore)
 - Google Cloud Storage
-- Google Gemini API (@google/genai 1.5.0)
+- Google Gemini API (@google/genai)
 - Docker対応
 - Google Cloud Run (デプロイ)
 
 ### 開発ツール
 
-- Biome 1.9.4 (フォーマッター・リンター)
+- Biome (フォーマッター・リンター)
 - Vitest (単体テスト)
 - Playwright (E2Eテスト)
-- Storybook 8.6.14 (UIコンポーネント開発)
+- Storybook 9 (UIコンポーネント開発)
 - lefthook (Gitフック管理)
 - git-secret (機密情報管理)
 

@@ -1,14 +1,18 @@
-import type { Locale } from "@/i18n/config";
-import { getUserLocale } from "@/services/locale";
 import { GoogleGenAI, Type } from "@google/genai";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import type { Locale } from "@/i18n/config";
+import { getUserLocale } from "@/services/locale";
 
 const generateSubjectsSchema = z.object({
-  title: z.string().min(1, { message: "Title is required" }),
-  theme: z.string().min(1, { message: "Theme is required" }),
+  title: z.string().min(1, {
+    error: "Title is required",
+  }),
+  theme: z.string().min(1, {
+    error: "Theme is required",
+  }),
   language: z.enum(["ja", "en"] as const).optional(),
-  numberOfCandidates: z.number().int().min(1).max(30).default(25),
+  numberOfCandidates: z.int().min(1).max(30).prefault(25),
 });
 
 type GenerateSubjectsRequest = z.infer<typeof generateSubjectsSchema>;
@@ -64,7 +68,7 @@ export async function POST(request: NextRequest) {
 
     if (!validationResult.success) {
       return NextResponse.json(
-        { error: validationResult.error.format() },
+        { error: validationResult.error.issues },
         { status: 400 },
       );
     }

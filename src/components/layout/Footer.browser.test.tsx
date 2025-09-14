@@ -3,10 +3,9 @@ import { NextIntlClientProvider } from "next-intl";
 import type React from "react";
 import { describe, expect, it, vi } from "vitest";
 import { render } from "vitest-browser-react";
-import { Footer } from "./Footer";
-
 import enMessages from "../../../messages/en.json";
 import jaMessages from "../../../messages/ja.json";
+import { Footer } from "./Footer";
 
 // Mock next/image and next/link
 vi.mock("next/image", () => ({
@@ -24,6 +23,7 @@ vi.mock("next/image", () => ({
     height: number;
     className: string;
   }) => (
+    // biome-ignore lint/performance/noImgElement: <img> is needed for testing image attributes
     <img
       src={src}
       alt={alt}
