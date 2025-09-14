@@ -1,63 +1,137 @@
-# Essential Development Commands for Pingo
+# 推奨コマンド一覧
 
-## Primary Development Commands
+## 開発作業
 
-### Development Server
-
-```bash
-npm run dev                # Start Next.js dev server with Turbopack
-```
-
-### Testing (CRITICAL - Always use test:once in development)
+### 基本的な開発コマンド
 
 ```bash
-npm run test:once          # Single test run (preferred for development)
-npm run test               # Watch mode (avoid in Claude Code)
-npm run test:e2e           # Playwright E2E tests
-npm run test:e2e:mobile    # Mobile Safari E2E tests
-npm run test:e2e:debug     # Debug E2E tests with headed browser
+# 開発サーバー起動（Turbopack使用）
+npm run dev
+
+# プロダクションビルド
+npm run build
+
+# プロダクションサーバー起動
+npm run start
 ```
 
-### Code Quality (Run before every commit)
+### コード品質管理
 
 ```bash
-npm run check              # Biome lint + format with --write --unsafe
-npm run check:i18n         # Check i18n translations consistency
+# Biomeによるフォーマット・リント（書き込み有効）
+npm run check
+
+# 国際化チェック
+npm run check:i18n
 ```
 
-### Build & Deploy
+### テスト実行
 
 ```bash
-npm run build              # Production build
-npm run start              # Start production server
-npm run docker             # Build and run Docker container
+# Vitest（ウォッチモード）
+npm test
+
+# Vitestテスト（単回実行）
+npm run test:once
+
+# Vitest（ウォッチモード、カバレッジなし）
+npm run test:watch
+
+# E2Eテスト（Playwright）
+npm run test:e2e
+
+# E2Eテストデバッグモード
+npm run test:e2e:debug
+
+# モバイルE2Eテスト
+npm run test:e2e:mobile
 ```
 
-### Component Development
+### Storybook
 
 ```bash
-npm run storybook          # Start Storybook on port 6006
-npm run build-storybook    # Build Storybook for production
+# Storybook開発サーバー起動
+npm run storybook
+
+# Storybookビルド
+npm run build-storybook
 ```
 
-### Maintenance Commands
+### Docker
 
 ```bash
-npm run ncu                # Check for dependency updates
-npm run knip               # Find unused dependencies/exports
-npm run repomix            # Generate codebase summary
+# Dockerイメージビルド＆実行
+npm run docker
+
+# Dockerイメージビルド
+npm run docker:build
 ```
 
-## Development Workflow
+### 依存関係・保守
 
-1. Always run `npm run test:once` after making changes
-2. Run `npm run check` to lint and format code
-3. Use `npm run storybook` for UI component development
-4. Test mobile compatibility with `npm run test:e2e:mobile`
+```bash
+# パッケージ更新チェック
+npm run ncu
 
-## System Commands (Darwin/macOS)
+# 未使用の依存関係チェック
+npm run knip
 
-- `git` - Version control
-- `ls`, `cd`, `pwd` - File navigation
-- `grep`, `find` - Text/file search
-- `brew` - Package manager (if available)
+# コードベース分析
+npm run repomix
+```
+
+## Git・セキュリティ
+
+### git-secret関連
+
+```bash
+# シークレットを復号化
+git secret reveal
+
+# シークレットを暗号化
+git secret hide -mF
+```
+
+### Google Cloud認証
+
+```bash
+# ADC設定（ローカル開発用）
+gcloud auth application-default login
+
+# GCS CORS設定
+gsutil cors set gcs-pingo-cors-config.json gs://gcs-pingo
+```
+
+## タスク完了時の確認コマンド
+
+タスク完了時は必ず以下のコマンドを実行して確認：
+
+1. **コード品質チェック**
+
+   ```bash
+   npm run check
+   ```
+
+2. **テスト実行**
+
+   ```bash
+   npm run test:once
+   ```
+
+3. **ビルド確認**
+
+   ```bash
+   npm run build
+   ```
+
+4. **国際化チェック**（i18n関連の変更時）
+
+   ```bash
+   npm run check:i18n
+   ```
+
+## 注意事項
+
+- lefthookによるpre-commitフックが設定されているため、コミット時に自動でチェックが実行される
+- テストは必ず`npm run test:once`で実行（ウォッチモードは使用しない）
+- プライベートデータは必ずgit-secretで暗号化する

@@ -1,51 +1,77 @@
-# Pingo Project Overview
+# Pingoプロジェクト概要
 
-## Purpose
+## プロジェクト基本情報
 
-Pingo is an AI-powered photo bingo game where players take photos and AI judges whether they match the bingo subjects. Players create or join games, upload photos, and AI (Google Gemini) analyzes them to determine if they match the bingo board subjects.
+- **プロジェクト名**: Pingo
+- **概要**: AIによる画像判定を用いたビンゴゲームアプリケーション
+- **プラットフォーム**: macOS (Darwin)
+- **リポジトリ**: <https://github.com/shin-sforzando/pingo>
 
-## Tech Stack
+## 技術スタック
 
-### Frontend
+### フロントエンド
 
-- **Framework**: Next.js 15 (App Router) + React 19 + TypeScript 5
-- **UI Library**: shadcn/ui + Radix UI components + Magic UI animations
-- **Styling**: Tailwind CSS 4
-- **Internationalization**: next-intl (Japanese/English)
-- **State Management**: React Context API
-- **Forms**: React Hook Form + Zod validation
-- **AI Integration**: @google/genai (Google Gemini API)
+- Next.js 15.5.3 (App Router)
+- React 19.1.0
+- TypeScript 5
+- Tailwind CSS 4
+- shadcn/ui コンポーネントライブラリ
+- next-intl (多言語対応)
 
-### Backend & Services
+### バックエンド・インフラ
 
-- **Runtime**: Node.js 22
-- **Database**: Firebase Firestore (real-time listeners)
-- **Storage**: Google Cloud Storage (signed URLs for direct upload)
-- **Authentication**: Firebase Authentication
-- **AI/ML**: Google Gemini API for image analysis and subject generation
-- **Deployment**: Docker → Google Cloud Run
+- Node.js 22
+- Firebase (Authentication, Firestore)
+- Google Cloud Storage
+- Google Gemini API (@google/genai)
+- Docker対応
+- Google Cloud Run (デプロイ)
 
-### Development Tools
+### 開発ツール
 
-- **Code Quality**: Biome.js (linter + formatter)
-- **Testing**: Vitest + @vitest/browser + Testing Library + Playwright
-- **Component Development**: Storybook 8
-- **Git Hooks**: Lefthook
-- **CI/CD**: Google Cloud Build (deploy), GitHub Actions (test/lint)
+- Biome (フォーマッター・リンター)
+- Vitest (単体テスト)
+- Playwright (E2Eテスト)
+- Storybook 9 (UIコンポーネント開発)
+- lefthook (Gitフック管理)
+- git-secret (機密情報管理)
 
-## Architecture
+## プロジェクト構造
 
-- App Router with server-side AI processing
-- Real-time updates via Firestore listeners
-- Direct GCS uploads with signed URLs for images
-- ULID for all IDs except 6-character game IDs
-- Mobile-first responsive design
-- Family-friendly content (all ages appropriate)
+```plain
+/
+├── src/
+│   ├── app/          # Next.js App Router
+│   ├── components/   # Reactコンポーネント
+│   ├── contexts/     # React Context
+│   ├── i18n/         # 多言語対応
+│   ├── lib/          # ユーティリティ
+│   ├── services/     # ビジネスロジック
+│   ├── stories/      # Storybook
+│   ├── test/         # テストユーティリティ
+│   └── types/        # TypeScript型定義
+├── messages/         # 多言語メッセージ
+├── public/           # 静的ファイル
+├── scripts/          # ビルドスクリプト
+├── cline_docs/       # Cline用ドキュメント
+└── e2e/              # E2Eテスト
+```
 
-## Key Features
+## 主な機能
 
-- Game creation with AI-generated subjects
-- Photo upload and AI analysis
-- Real-time bingo progress tracking
-- QR code game sharing
-- Multi-language support (Japanese primary, English secondary)
+- 5x5のビンゴゲーム（中央はFree）
+- 各マスには被写体候補が表示される
+- プレイヤーは写真を撮影してアップロード
+- AIが写真を判定してマスをOPEN
+- ハンドルネームとパスワードによる簡易認証
+- QRコードによるゲーム共有
+- リアルタイム更新
+
+## 環境変数
+
+- `.env`: 公開可能な環境変数（Firebase設定など）
+- `.env.local`: 機密環境変数（APIキー、認証情報）
+  - GOOGLE_CLOUD_PROJECT_ID
+  - GEMINI_API_KEY
+  - GOOGLE_APPLICATION_CREDENTIALS
+  - GOOGLE_CLOUD_STORAGE_BUCKET

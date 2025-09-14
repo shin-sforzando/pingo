@@ -1,80 +1,96 @@
-# Task Completion Checklist for Pingo
+# タスク完了時のチェックリスト
 
-## Before Starting Any Task
+## 必須確認項目
 
-1. **Ask clarifying questions** if instructions are unclear
-2. **Read latest documentation** for external service integrations
-3. **Check existing implementation patterns** before adding new features
-4. **Create Git branch** (never work on main directly)
-   - Format: `{0-padded-3-digit-issue}_feature_name`
-   - Example: `019_prepare_github_actions` for Issue #19
-
-## During Development
-
-1. **Follow type safety** - No `any` types, proper TypeScript usage
-2. **Write tests first or alongside implementation**
-3. **Create Storybook stories** for all new components
-4. **Use existing UI patterns** - shadcn/ui + Magic UI components
-5. **Follow naming conventions** - PascalCase components, camelCase functions
-6. **Add proper internationalization** - Use `useTranslations()` hook
-
-## When Task is Complete
-
-### MANDATORY Steps (Must Run)
+### 1. コード品質確認
 
 ```bash
-# 1. Run tests (CRITICAL - use test:once, not test)
-npm run test:once
-
-# 2. Run linter and formatter
 npm run check
+```
 
-# 3. Check i18n if translations were modified
+- Biomeによるフォーマット・リントがパスすること
+- エラー・警告が0件であること
+
+### 2. テスト実行
+
+```bash
+npm run test:once
+```
+
+- 全てのテストがパスすること
+- 新機能には対応するテストが追加されていること
+- カバレッジが70%以上を維持していること
+
+### 3. ビルド確認
+
+```bash
+npm run build
+```
+
+- ビルドが正常に完了すること
+- TypeScriptのコンパイルエラーがないこと
+
+### 4. 国際化確認（i18n関連の変更時）
+
+```bash
 npm run check:i18n
 ```
 
-### Verification Steps
+- 翻訳キーの不整合がないこと
+- 日本語・英語の両方に対応していること
 
-1. **Test passes** - All tests must pass before proceeding
-2. **No linter warnings** - Biome check must be clean
-3. **Storybook works** - New components have working stories
-4. **Mobile compatibility** - Test on mobile if UI changes made
-5. **Type safety** - No TypeScript errors
-6. **i18n consistency** - Both Japanese and English translations work
+## 追加確認項目（該当する場合）
 
-### Before Committing
+### UIコンポーネント追加時
 
-1. **Review changes** - Ensure no debug logs or temporary code
-2. **Test key user flows** - Manually verify critical functionality
-3. **Check for security issues** - No exposed API keys or secrets
-4. **Verify mobile responsiveness** if UI changes were made
+```bash
+npm run storybook
+```
 
-### Documentation Updates (If Applicable)
+- 新しいコンポーネントにStorybookストーリーが追加されていること
+- 各バリエーションが正しく表示されること
 
-1. **Update CLAUDE.md** if new patterns or commands added
-2. **Update component documentation** in Storybook
-3. **Add inline comments** for complex business logic (in English)
+### E2E関連の変更時
 
-## Production Readiness Checks
+```bash
+npm run test:e2e
+```
 
-- **No console.log statements** in production code
-- **Environment variables** properly configured
-- **Error handling** implemented for all API calls
-- **Loading states** and user feedback implemented
-- **Rate limiting** considerations for API endpoints
+- E2Eテストがパスすること
+- モバイル（iPhone）での動作確認
 
-## Common Gotchas to Avoid
+### Docker関連の変更時
 
-- Don't use `npm test` (watch mode) - use `npm run test:once`
-- Don't ignore Biome warnings - fix them immediately
-- Don't skip Storybook stories for new components
-- Don't commit without running the mandatory steps above
-- Don't work directly on main branch
-- Don't use `any` types or non-null assertions (`!`)
+```bash
+npm run docker
+```
 
-## When Blocked or Unsure
+- Dockerコンテナが正常に起動すること
+- <http://localhost:3000> でアプリケーションが動作すること
 
-1. **Ask the user** for clarification rather than making assumptions
-2. **Check existing codebase** for similar implementations
-3. **Read component documentation** in Storybook
-4. **Review CLAUDE.md** for project-specific guidelines
+## lefthookによる自動チェック
+
+pre-commitフックで以下が自動実行される：
+
+1. git secret hide（シークレットの暗号化）
+2. Biomeチェック（ステージされたファイル）
+3. テスト実行
+4. i18nチェック
+5. ビルド
+6. knip（未使用の依存関係チェック）
+
+## 重要な注意事項
+
+- **タスクは動作確認が完了するまで「完了」ではない**
+- 3回試行しても問題が解決しない場合は、アプローチを見直す
+- ユーザーの確認を得てから次のタスクに移る
+- エラーや警告は必ず解決する（無視しない）
+
+## メモリバンクの更新タイミング
+
+以下の場合はメモリバンクを更新：
+
+1. 新しいプロジェクトパターンの発見
+2. 重要な変更の実装後
+3. ユーザーから「update memory bank」の指示
+4. コンテキストの明確化が必要な時
