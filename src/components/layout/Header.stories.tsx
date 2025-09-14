@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs";
 import { AuthContext } from "@/contexts/AuthContext";
 import { Header } from "./Header";
 

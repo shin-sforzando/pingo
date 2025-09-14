@@ -1,5 +1,5 @@
 import { fakerJA as faker } from "@faker-js/faker";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs";
 import { GameStatus } from "@/types/common";
 import type { Cell, Game } from "@/types/schema";
 import SharePage from "./page";

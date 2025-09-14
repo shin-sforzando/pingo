@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs";
 import { GameStatus } from "@/types/common";
 import type { Game } from "@/types/schema";
 import { GameInfo } from "./GameInfo";

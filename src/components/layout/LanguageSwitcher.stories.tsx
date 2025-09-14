@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 
 const meta: Meta<typeof LanguageSwitcher> = {

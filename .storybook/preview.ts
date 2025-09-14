@@ -1,5 +1,5 @@
-import { MINIMAL_VIEWPORTS } from "@storybook/addon-viewport";
-import type { Preview } from "@storybook/react";
+import type { Preview } from "@storybook/nextjs";
+import { MINIMAL_VIEWPORTS } from "storybook/viewport";
 import "@/app/globals.css";
 
 import { withMockAuthContext } from "./decorators";

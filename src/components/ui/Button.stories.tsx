@@ -1,5 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import { fn } from "@storybook/test";
+import type { Meta, StoryObj } from "@storybook/nextjs";
 import {
   ArrowRight,
   Check,
@@ -9,6 +8,7 @@ import {
   Plus,
   Trash,
 } from "lucide-react";
+import { fn } from "storybook/test";
 import { Button } from "@/components/ui/button";
 
 /**
