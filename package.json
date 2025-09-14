@@ -66,7 +66,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.4",
-    "@faker-js/faker": "^9.9.0",
+    "@faker-js/faker": "^10.0.0",
     "@lingual/i18n-check": "^0.8.7",
     "@playwright/test": "^1.55.0",
     "@storybook/addon-a11y": "^8.6.14",
