@@ -12,7 +12,7 @@ const generateSubjectsSchema = z.object({
     error: "Theme is required",
   }),
   language: z.enum(["ja", "en"] as const).optional(),
-  numberOfCandidates: z.int().min(1).max(30).prefault(25),
+  numberOfCandidates: z.int().min(1).max(30).default(25),
 });
 
 type GenerateSubjectsRequest = z.infer<typeof generateSubjectsSchema>;
