@@ -64,7 +64,7 @@ export function UserMenu(): ReactElement {
           <>
             <DropdownMenuSeparator />
             <DropdownMenuLabel>{t("recentGames")}</DropdownMenuLabel>
-            {user.participatingGames.slice(0, 5).map((gameId) => (
+            {user.participatingGames.slice(0, 10).map((gameId) => (
               <DropdownMenuItem key={gameId} asChild>
                 <Link href={`/game/${gameId}`}>
                   Game {gameId.substring(0, 8)}...

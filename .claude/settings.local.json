@@ -63,6 +63,7 @@
       "WebFetch(domain:storybook.js.org)",
       "WebFetch(domain:ui.shadcn.com)",
       "WebFetch(domain:www.tailwind-variants.org)",
+      "WebFetch(domain:zod.dev)",
       "WebSearch"
     ]
   },

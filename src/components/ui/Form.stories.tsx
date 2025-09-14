@@ -31,30 +31,30 @@ type Story = StoryObj<typeof Form>;
 // Schema for basic form
 const basicFormSchema = z.object({
   username: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
+    error: "Username must be at least 2 characters.",
   }),
   message: z.string().min(10, {
-    message: "Message must be at least 10 characters.",
+    error: "Message must be at least 10 characters.",
   }),
 });
 
 // Schema for validation form
 const validationFormSchema = z.object({
   name: z.string().min(2, {
-    message: "Name must be at least 2 characters.",
+    error: "Name must be at least 2 characters.",
   }),
-  age: z.coerce
+  age: z
     .number()
     .min(18, {
-      message: "You must be at least 18 years old.",
+      error: "You must be at least 18 years old.",
     })
     .max(120, {
-      message: "You must be at most 120 years old.",
+      error: "You must be at most 120 years old.",
     }),
   phone: z
     .string()
     .regex(/^[0-9]{10,11}$/, {
-      message: "Please enter a valid phone number (10-11 digits).",
+      error: "Please enter a valid phone number (10-11 digits).",
     })
     .optional(),
 });
@@ -62,30 +62,30 @@ const validationFormSchema = z.object({
 // Schema for complex form
 const complexFormSchema = z.object({
   firstName: z.string().min(2, {
-    message: "First name must be at least 2 characters.",
+    error: "First name must be at least 2 characters.",
   }),
   lastName: z.string().min(2, {
-    message: "Last name must be at least 2 characters.",
+    error: "Last name must be at least 2 characters.",
   }),
-  age: z.coerce
+  age: z
     .number()
     .min(18, {
-      message: "You must be at least 18 years old.",
+      error: "You must be at least 18 years old.",
     })
     .max(120, {
-      message: "You must be at most 120 years old.",
+      error: "You must be at most 120 years old.",
     }),
   bio: z
     .string()
     .min(10, {
-      message: "Bio must be at least 10 characters.",
+      error: "Bio must be at least 10 characters.",
     })
     .max(160, {
-      message: "Bio must be at most 160 characters.",
+      error: "Bio must be at most 160 characters.",
     })
     .optional(),
   terms: z.boolean().refine((value) => value === true, {
-    message: "You must agree to the terms and conditions.",
+    error: "You must agree to the terms and conditions.",
   }),
 });
 
@@ -146,16 +146,18 @@ function BasicFormDemo() {
 }
 
 function ValidationFormDemo() {
-  const form = useForm<z.infer<typeof validationFormSchema>>({
+  type ValidationFormData = z.infer<typeof validationFormSchema>;
+
+  const form = useForm<ValidationFormData>({
     resolver: zodResolver(validationFormSchema),
     defaultValues: {
       name: "",
-      age: undefined,
+      age: 18,
       phone: "",
     },
   });
 
-  function onSubmit(values: z.infer<typeof validationFormSchema>) {
+  function onSubmit(values: ValidationFormData) {
     console.log("ℹ️ XXX: ~ onSubmit ~ values:", values);
     alert(JSON.stringify(values, null, 2));
   }
@@ -218,18 +220,20 @@ function ValidationFormDemo() {
 }
 
 function ComplexFormDemo() {
-  const form = useForm<z.infer<typeof complexFormSchema>>({
+  type ComplexFormData = z.infer<typeof complexFormSchema>;
+
+  const form = useForm<ComplexFormData>({
     resolver: zodResolver(complexFormSchema),
     defaultValues: {
       firstName: "",
       lastName: "",
-      age: undefined,
+      age: 18,
       bio: "",
       terms: false,
     },
   });
 
-  function onSubmit(values: z.infer<typeof complexFormSchema>) {
+  function onSubmit(values: ComplexFormData) {
     console.log("ℹ️ XXX: ~ onSubmit ~ values:", values);
     alert(JSON.stringify(values, null, 2));
   }

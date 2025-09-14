@@ -17,8 +17,8 @@ import { analysisResultSchema } from "@/types/schema";
 
 // Request body schema
 const analyzeRequestSchema = z.object({
-  submissionId: z.string().ulid(),
-  imageUrl: z.string().url(),
+  submissionId: z.ulid(),
+  imageUrl: z.url(),
 });
 
 // Gemini response schema for structured output

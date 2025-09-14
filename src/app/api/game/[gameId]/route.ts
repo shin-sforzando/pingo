@@ -29,7 +29,7 @@ const updateGameSchema = gameSchema
   .extend({
     // Handle date transformation for expiresAt
     expiresAt: z
-      .union([z.date(), z.string().datetime()])
+      .union([z.date(), z.iso.datetime()])
       .optional()
       .transform((val) => {
         if (!val) return undefined;
@@ -126,7 +126,7 @@ export async function PUT(
           error: {
             code: "INVALID_INPUT",
             message: "Invalid input data",
-            details: validationResult.error.errors,
+            details: validationResult.error.issues,
           },
         },
         { status: 400 },

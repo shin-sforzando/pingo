@@ -21,7 +21,7 @@ const userUpdateSchema = z
     // Optional username with validation from userSchema
     username: userSchema.shape.username.optional(),
   })
-  .merge(passwordUpdateFields);
+  .extend(passwordUpdateFields.shape);
 
 /**
  * User update API
@@ -43,7 +43,7 @@ export async function PUT(
           error: {
             code: "VALIDATION_ERROR",
             message: "Auth.errors.invalidInput",
-            details: validationResult.error.format(),
+            details: validationResult.error.issues,
           },
         },
         { status: 400 },

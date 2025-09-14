@@ -28,7 +28,7 @@ export async function POST(
           error: {
             code: "VALIDATION_ERROR",
             message: "Auth.errors.invalidInput",
-            details: validationResult.error.format(),
+            details: validationResult.error.issues,
           },
         },
         { status: 400 },

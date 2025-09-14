@@ -149,7 +149,7 @@ export async function POST(
           error: {
             code: "validation/invalid-input",
             message: "Invalid input data",
-            details: validationResult.error.format(),
+            details: validationResult.error.issues,
           },
         },
         { status: 400 },

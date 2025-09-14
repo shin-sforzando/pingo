@@ -19,7 +19,7 @@ import type {
 // Request schema
 const checkImageSchema = z.object({
   gameId: z.string(),
-  imageUrl: z.string().url("Valid image URL is required"),
+  imageUrl: z.url("Valid image URL is required"),
   submissionId: z.string(),
 });
 
@@ -594,7 +594,7 @@ Be strict in your matching - only match if you're confident the image clearly sh
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: "Invalid request data", details: error.errors },
+        { error: "Invalid request data", details: error.issues },
         { status: 400 },
       );
     }
