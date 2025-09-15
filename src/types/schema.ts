@@ -37,7 +37,7 @@ export const userSchema = baseSchema.extend({
   participatingGames: z.array(z.string()).max(5),
   gameHistory: z.array(z.string()),
   memo: z.string().optional(),
-  isTestUser: z.boolean().prefault(false),
+  isTestUser: z.boolean().default(false),
 });
 
 /**
@@ -89,7 +89,7 @@ export const notificationSchema = baseSchema.extend({
   type: z.enum(NotificationType),
   displayType: z.enum(NotificationDisplayType),
   message: z.string(),
-  read: z.boolean().prefault(false),
+  read: z.boolean().default(false),
   relatedGameId: z.string().optional(),
   details: z.record(z.string(), z.unknown()).optional(),
 });
@@ -117,14 +117,14 @@ export const cellSchema = z.object({
     y: z.int().min(0).max(4),
   }),
   subject: z.string(),
-  isFree: z.boolean().prefault(false),
+  isFree: z.boolean().default(false),
 });
 
 /**
  * Cell state schema
  */
 export const cellStateSchema = z.object({
-  isOpen: z.boolean().prefault(false),
+  isOpen: z.boolean().default(false),
   openedAt: z.date().nullable(),
   openedBySubmissionId: z.string().nullable(),
 });
@@ -189,13 +189,13 @@ export const gameSchema = baseSchema.extend({
   theme: z.string().min(1).max(50),
   creatorId: z.ulid(),
   expiresAt: z.date(),
-  isPublic: z.boolean().prefault(false),
-  isPhotoSharingEnabled: z.boolean().prefault(true),
-  requiredBingoLines: z.int().min(1).max(5).prefault(1),
-  confidenceThreshold: z.number().min(0).max(1).prefault(0.5),
-  maxSubmissionsPerUser: z.int().min(1).max(100).prefault(30),
+  isPublic: z.boolean().default(false),
+  isPhotoSharingEnabled: z.boolean().default(true),
+  requiredBingoLines: z.int().min(1).max(5).default(1),
+  confidenceThreshold: z.number().min(0).max(1).default(0.5),
+  maxSubmissionsPerUser: z.int().min(1).max(100).default(30),
   notes: z.string().optional(),
-  status: z.enum(GameStatus).prefault(GameStatus.ACTIVE),
+  status: z.enum(GameStatus).default(GameStatus.ACTIVE),
 });
 
 /**
@@ -221,11 +221,11 @@ export const gameCreationSchema = z.object({
   expiresAt: z.date().min(new Date(), {
     error: "Game.errors.expiresAtInvalid",
   }),
-  isPublic: z.boolean().prefault(false),
-  isPhotoSharingEnabled: z.boolean().prefault(true),
-  requiredBingoLines: z.int().min(1).max(5).prefault(1),
-  confidenceThreshold: z.number().min(0).max(1).prefault(0.5),
-  maxSubmissionsPerUser: z.int().min(1).max(100).prefault(30),
+  isPublic: z.boolean().default(false),
+  isPhotoSharingEnabled: z.boolean().default(true),
+  requiredBingoLines: z.int().min(1).max(5).default(1),
+  confidenceThreshold: z.number().min(0).max(1).default(0.5),
+  maxSubmissionsPerUser: z.int().min(1).max(100).default(30),
   notes: z.string().optional(),
 });
 
@@ -359,9 +359,9 @@ export const imageSubmissionResultSchema = z.object({
   matchedCellId: z.string().nullable().optional(),
   acceptanceStatus: z.enum(AcceptanceStatus).optional(),
   critique: z.string().optional(),
-  newlyCompletedLines: z.int().min(0).prefault(0),
-  totalCompletedLines: z.int().min(0).prefault(0),
-  requiredBingoLines: z.int().min(1).max(5).prefault(1),
+  newlyCompletedLines: z.int().min(0).default(0),
+  totalCompletedLines: z.int().min(0).default(0),
+  requiredBingoLines: z.int().min(1).max(5).default(1),
 });
 
 /**
