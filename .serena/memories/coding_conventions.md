@@ -1,95 +1,95 @@
-# Pingo Coding Conventions & Style Guide
+# Pingoコーディング規約とスタイルガイド
 
-## Core Development Rules
+## 基本開発ルール
 
-1. **Ask questions first** - If instructions are unclear, confirm before implementation
-2. **All comments in English** - Explain "why", not "what"
-3. **Type safety is critical** - Use TypeScript rigorously, no `any` types
-4. **Test everything** - Don't proceed until tests pass
-5. **Use standard libraries** when possible
-6. **Never ignore linter warnings**
-7. **All components need Storybook stories**
+1. **質問を先にする** - 指示が不明確な場合は実装前に確認
+2. **全コメントは英語** - 「何を」ではなく「なぜ」を説明
+3. **型安全性が重要** - TypeScriptを厳密に使用、`any`型禁止
+4. **全てをテストする** - テストが通るまで次に進まない
+5. **標準ライブラリ優先** - 可能な限り標準ライブラリを使用
+6. **Linter警告を無視しない**
+7. **全コンポーネントにStorybookストーリーが必要**
 
-## Code Style (Biome Configuration)
+## コードスタイル（Biome設定）
 
-### Formatting
+### フォーマット
 
-- **Indentation**: Spaces (configured via .editorconfig)
-- **Quotes**: Double quotes for JavaScript/TypeScript
-- **Import organization**: Automatic with Biome
-- **Line endings**: Auto-detected via .editorconfig
+- **インデント**: スペース（.editorconfigで設定）
+- **引用符**: JavaScript/TypeScriptではダブルクォート
+- **インポート整理**: Biomeによる自動整理
+- **行末文字**: .editorconfigによる自動検出
 
-### Linting Rules (Strict)
+### リンター規則（厳格）
 
-- `noExplicitAny`: ERROR - No any types allowed
-- `noNonNullAssertion`: ERROR - Avoid ! operator
-- `noUnusedImports`: ERROR - Clean up unused imports
-- `noUnusedVariables`: ERROR - Remove unused variables
-- `noBannedTypes`: ERROR - Avoid problematic types
+- `noExplicitAny`: ERROR - any型の使用禁止
+- `noNonNullAssertion`: ERROR - !演算子の使用を避ける
+- `noUnusedImports`: ERROR - 未使用インポートの除去
+- `noUnusedVariables`: ERROR - 未使用変数の除去
+- `noBannedTypes`: ERROR - 問題のある型の回避
 
-## TypeScript Conventions
+## TypeScript規約
 
-### Configuration
+### 設定
 
-- **Target**: ES2017
-- **Strict mode**: Enabled
-- **Path mapping**: `@/*` → `./src/*`
-- **JSX**: preserve (Next.js handles compilation)
+- **ターゲット**: ES2017
+- **厳格モード**: 有効
+- **パスマッピング**: `@/*` → `./src/*`
+- **JSX**: preserve（Next.jsがコンパイル処理）
 
-### Type Definitions
+### 型定義
 
-- Use Zod schemas for validation + TypeScript types
-- ULID for all IDs except 6-character game IDs
-- Firestore document interfaces separate from business logic types
-- Proper timestamp handling with TimestampInterface
+- バリデーション + TypeScript型にはZodスキーマを使用
+- 6文字ゲームID以外は全てULIDを使用
+- ビジネスロジック型とは別のFirestoreドキュメントインターフェース
+- TimestampInterfaceによる適切なタイムスタンプ処理
 
-## Component Conventions
+## コンポーネント規約
 
-### File Structure
+### ファイル構造
 
 ```plain
 src/components/
-├── ui/           # shadcn/ui components
-├── magicui/      # Magic UI animations
-├── auth/         # Authentication components
-├── layout/       # Header, Footer, Navigation
-└── game/         # Game-specific components
+├── ui/           # shadcn/uiコンポーネント
+├── magicui/      # Magic UIアニメーション
+├── auth/         # 認証コンポーネント
+├── layout/       # Header、Footer、Navigation
+└── game/         # ゲーム専用コンポーネント
 ```
 
-### Naming Patterns
+### 命名パターン
 
-- **Components**: PascalCase (e.g., `ImageUpload.tsx`)
-- **Functions**: camelCase with descriptive prefixes
-  - Event handlers: `handle` prefix (e.g., `handleClick`)
-  - Utility functions: descriptive names
-- **Interfaces**: PascalCase with descriptive suffixes
-- **Constants**: UPPER_SNAKE_CASE
+- **コンポーネント**: PascalCase（例：`ImageUpload.tsx`）
+- **関数**: 説明的な接頭辞付きcamelCase
+  - イベントハンドラー: `handle`接頭辞（例：`handleClick`）
+  - ユーティリティ関数: 説明的な名前
+- **インターフェース**: 説明的な接尾辞付きPascalCase
+- **定数**: UPPER_SNAKE_CASE
 
-### Component Structure
+### コンポーネント構造
 
 ```typescript
-// 1. Imports (external, internal, types)
+// 1. インポート（外部、内部、型の順）
 import { useState } from "react"
 import { useTranslations } from "next-intl"
 import type { ComponentProps } from "@/types"
 
-// 2. Interface definitions
+// 2. インターフェース定義
 interface ComponentNameProps {
   prop: string
 }
 
-// 3. Component definition
+// 3. コンポーネント定義
 export function ComponentName({ prop }: ComponentNameProps) {
-  // Hooks first
+  // フックを最初に
   const t = useTranslations()
   const [state, setState] = useState<Type>(initialValue)
 
-  // Event handlers
+  // イベントハンドラー
   const handleEvent = () => {
-    // Implementation
+    // 実装
   }
 
-  // Render
+  // レンダー
   return (
     <div>
       {/* JSX */}
@@ -98,23 +98,93 @@ export function ComponentName({ prop }: ComponentNameProps) {
 }
 ```
 
-## Internationalization (next-intl)
+## 国際化（next-intl）
 
-- Use `useTranslations()` hook for component translations
-- Translation keys in `messages/ja.json` and `messages/en.json`
-- Japanese as primary language, English as secondary
-- Consistent translation key naming
+- コンポーネント翻訳には`useTranslations()`フックを使用
+- 翻訳キーは`messages/ja.json`と`messages/en.json`に配置
+- 日本語をプライマリ言語、英語をセカンダリ言語として扱う
+- 一貫した翻訳キー命名規則
 
-## Testing Conventions
+## テスト規約
 
-- **Test files**: `*.test.tsx` or `*.browser.test.tsx`
-- **Storybook files**: `*.stories.tsx`
-- Use `@faker-js/faker` for test data
-- ULID generation: `faker.string.ulid()`
-- Clean up test data after each test
+- **テストファイル**: `*.test.tsx`または`*.browser.test.tsx`
+- **Storybookファイル**: `*.stories.tsx`
+- テストデータには`@faker-js/faker`を使用
+- ULID生成: `faker.string.ulid()`
+- 各テスト後にテストデータをクリーンアップ
 
-## Git & Branch Conventions
+## Gitとブランチ規約
 
-- Never work directly on `main` branch
-- Branch naming: `{0-padded-3-digit-issue-number}_feature_name`
-- Example: `019_prepare_github_actions` for Issue #19
+- `main`ブランチで直接作業しない
+- ブランチ命名: `{0埋め3桁Issue番号}_機能名`
+- 例: Issue #19の場合は`019_prepare_github_actions`
+
+## ブランチ作業フロー
+
+### 作業開始時
+
+```bash
+# mainブランチから最新を取得
+git checkout main
+git pull origin main
+
+# 新しいブランチを作成（Issue番号付き）
+git checkout -b 019_implement_game_join_ui
+```
+
+### 作業完了時
+
+```bash
+# コード品質チェック
+npm run check
+
+# テスト実行
+npm run test:once
+
+# ビルド確認
+npm run build
+
+# コミット（lefthookが自動チェック実行）
+git add .
+git commit -m "feat: implement game join UI components"
+
+# プッシュしてPR作成
+git push -u origin 019_implement_game_join_ui
+```
+
+## 必須チェック項目
+
+### タスク完了時
+
+1. `npm run check` - コード品質
+2. `npm run test:once` - テスト実行
+3. `npm run build` - ビルド確認
+4. `npm run check:i18n` - 国際化確認（i18n関連変更時）
+
+### Storybookの使用
+
+- 新コンポーネントには必ずストーリーを作成
+- `npm run storybook`でローカル確認
+- 各バリエーション（状態、Props）をカバー
+
+## セキュリティとベストプラクティス
+
+### 機密情報管理
+
+- 秘密鍵やAPIキーをコミットしない
+- git-secretによる暗号化を使用
+- `.env.local`に機密情報を配置
+
+### コード品質
+
+- ESLintやPrettierの代わりにBiomeを使用
+- 型安全性を最優先
+- 再利用可能なコンポーネントパターンに従う
+- モバイルファーストのレスポンシブデザイン
+
+### パフォーマンス
+
+- 画像最適化の実装
+- 適切なコード分割
+- Reactのベストプラクティスに従う
+- 不要な再レンダリングの回避

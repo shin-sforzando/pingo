@@ -1,95 +1,133 @@
-# Pingo Current Status & Priority Tasks
+# Pingo開発状況と優先タスク
 
-## Current Development Status
+## 現在の開発状況
 
-### ✅ Completed Features
+### ✅ 完了済み機能
 
-- **Game Creation**: Full flow with AI-generated subjects via Gemini
-- **Image Upload**: HEIC support, resize/compression, GCS integration
-- **Game Main Screen**: Bingo board, real-time updates, AI analysis
-- **Authentication**: Firebase Auth with user management
-- **UI Foundation**: shadcn/ui + Magic UI components with Storybook
-- **Internationalization**: Japanese/English support via next-intl
-- **Real-time Updates**: Firestore listeners for live game state
-- **Bingo Line Detection**: Automatic row/column/diagonal completion detection
+- **ゲーム作成**: Gemini AIによる被写体生成を含む完全なフロー
+- **画像アップロード**: HEIC対応、リサイズ/圧縮、GCS統合
+- **ゲームメイン画面**: ビンゴボード、リアルタイム更新、AI解析
+- **認証機能**: Firebase Authによるユーザー管理
+- **UI基盤**: shadcn/ui + Magic UIコンポーネント with Storybook
+- **国際化対応**: next-intlによる日本語/英語サポート
+- **リアルタイム更新**: ゲーム状態のFirestoreリスナー
+- **ビンゴライン検出**: 行/列/斜めの自動完了検出
+- **参加者管理API**: `/api/game/[gameId]/participants`エンドポイント
+- **テストカバレッジ**: 28個のテストファイル、主要APIエンドポイントのテスト実装済み
 
-### ❌ Critical Missing Features
+### ❌ 未完了の重要機能
 
-#### 1. Game Join Functionality (URGENT - Completely Missing)
+#### 1. ゲーム参加UI（緊急 - 部分的未実装）
 
-**Status**: Referenced in UI but pages/APIs don't exist
+**状況**: APIは存在するがUI層が未実装
 
-- `/game/join` page returns 404 error
-- No join API endpoints implemented
-- QR code scanning not implemented
-- Public games list missing
-- **Impact**: Users cannot join existing games (core feature broken)
+- `/game/join`ページが存在しない（404エラー）
+- QRコードスキャン機能未実装
+- 公開ゲーム一覧表示未実装
+- ゲーム参加フロー全体のUI未完成
+- **影響**: ユーザーが既存ゲームに参加できない（コア機能の欠陥）
 
-#### 2. Insufficient Test Coverage (HIGH PRIORITY)
+#### 2. セキュリティ・本番対応（高優先度）
 
-**Current**: 28 test files exist, but critical components untested
+- APIエンドポイントのレート制限未実装
+- 本番コードにデバッグログが残存
+- APIキーのセキュリティレビューが必要
+- 入力値検証の改善が必要
+- **影響**: セキュリティ脆弱性とスケーラビリティの問題
 
-- `src/components/game/ImageUpload.tsx` (no tests)
-- `src/services/image-upload.ts` (no tests)
-- `src/app/api/image/upload/route.ts` (no tests)
-- `src/app/api/game/[gameId]/submission/analyze/route.ts` (no tests)
-- **Impact**: Production reliability at risk
+#### 3. 重要コンポーネントのテスト不足（中優先度）
 
-#### 3. Security & Production Hardening (HIGH PRIORITY)
+テストが不足している重要なコンポーネント：
 
-- No rate limiting on API endpoints
-- Debug logs present in production code
-- API key security review needed
-- Input validation improvements needed
-- **Impact**: Security vulnerabilities & scalability issues
+- `src/components/game/ImageUpload.tsx`（テストなし）
+- `src/services/image-upload.ts`（テストなし）
+- `src/app/api/image/upload/route.ts`（テストなし）
+- **影響**: 本番環境での信頼性リスク
 
-## Next Sprint Priorities
+## 次スプリントの優先順位
 
-### Sprint 1: Game Join Implementation
+### スプリント1: ゲーム参加UI実装
 
-1. Create `/game/join` page with QR scanning
-2. Implement join API endpoints
-3. Add public games list functionality
-4. Test end-to-end join flow
+1. `/game/join`ページの作成（QRスキャン機能付き）
+2. ゲーム参加フローのUI実装
+3. 公開ゲーム一覧機能の追加
+4. エンドツーエンドの参加フローテスト
 
-### Sprint 2: Test Coverage & Quality
+### スプリント2: セキュリティ強化
 
-1. Add comprehensive tests for ImageUpload component
-2. Test image upload service & API routes
-3. Add integration tests for game join flow
-4. Achieve >70% test coverage target
+1. APIレート制限の実装
+2. セキュリティ監査と改善
+3. デバッグログの除去
+4. エラーハンドリングの改善
 
-### Sprint 3: Production Readiness
+### スプリント3: テストカバレッジ完成
 
-1. Implement API rate limiting
-2. Security audit & improvements
-3. Remove debug logging
-4. Performance optimization
-5. Error handling improvements
+1. ImageUploadコンポーネントの包括的テスト追加
+2. 画像アップロードサービスとAPIルートのテスト
+3. ゲーム参加フローの統合テスト
+4. テストカバレッジ70%以上の達成
 
-## Development Context Notes
+## 開発コンテキストメモ
 
-### Working Environment
+### 対象ユーザー
 
-- **Target Users**: Mobile-first (smartphone primary)
-- **Content Policy**: Family-friendly, all-ages appropriate
-- **Languages**: Japanese primary, English secondary
-- **AI Integration**: Google Gemini for image analysis & subject generation
+- **モバイルファースト**: スマートフォンが主要プラットフォーム
+- **コンテンツポリシー**: ファミリーフレンドリー、全年齢対象
+- **言語**: 日本語メイン、英語サブ
+- **AI統合**: Google Gemini による画像解析と被写体生成
 
-### Technical Constraints
+### 技術的制約
 
-- **Mobile Compatibility**: iOS Safari must work perfectly
-- **Performance Targets**:
-  - Image analysis: <3s (max 5s)
-  - Page load: <2s
-  - Max 50 players per game
-  - Max 1000 concurrent users
-- **Data Limits**: Max 30 image submissions per player per game
+- **モバイル互換性**: iOS Safariでの完璧な動作が必須
+- **パフォーマンス目標**:
+  - 画像解析: 3秒以内（最大5秒）
+  - ページロード: 2秒以内
+  - 最大50プレイヤー/ゲーム
+  - 最大1,000同時接続ユーザー
+- **データ制限**: プレイヤーあたり最大30回の画像投稿/ゲーム
 
-### Development Workflow Reminders
+### 開発ワークフローの注意点
 
-- Never work directly on `main` branch
-- Always run `npm run test:once` before committing
-- All components need Storybook stories
-- Use ULID for all IDs except 6-character game IDs
-- Follow existing patterns in similar components
+- `main`ブランチで直接作業しない
+- コミット前に必ず`npm run test:once`を実行
+- 全コンポーネントにStorybookストーリーが必要
+- 6文字ゲームID以外は全てULIDを使用
+- 類似コンポーネントの既存パターンに従う
+
+## 現在の技術仕様
+
+### 最新技術スタック
+
+- **Next.js**: 15.5.3（App Router）
+- **React**: 19.1.1
+- **TypeScript**: 5系
+- **Tailwind CSS**: 4系
+- **Firebase**: 12.2.1
+- **Google Gemini**: @google/genai 1.19.0
+
+### 開発・テスト環境
+
+- **リンター/フォーマッター**: Biome 2.2.4
+- **単体テスト**: Vitest 3.2.4
+- **E2Eテスト**: Playwright 1.55.0
+- **UI開発**: Storybook 9.1.5
+- **Gitフック**: lefthook 1.13.0
+
+### 実装済みAPIエンドポイント
+
+- **認証**: `/api/auth/*`（ログイン、登録、ユーザー管理）
+- **ゲーム管理**: `/api/game/create`, `/api/game/[gameId]`
+- **参加者管理**: `/api/game/[gameId]/participants`
+- **プレイヤーボード**: `/api/game/[gameId]/playerBoard/*`
+- **画像投稿**: `/api/game/[gameId]/submission/*`
+- **画像解析**: `/api/game/[gameId]/submission/analyze`
+- **被写体生成**: `/api/subjects/generate`
+
+## 品質保証状況
+
+### テストカバレッジ現況
+
+- **API routes**: 大部分でテスト実装済み
+- **Components**: レイアウトコンポーネント中心にテスト済み
+- **Services**: 一部のサービス層でテスト不足
+- **E2E**: 基本的なユーザーフローをカバー

@@ -1,135 +1,159 @@
-# Pingo Codebase Structure & Architecture
+# Pingoコードベース構造とアーキテクチャ
 
-## Directory Structure
+## ディレクトリ構造
 
 ```plain
 pingo/
 ├── src/
-│   ├── app/                    # Next.js App Router pages
-│   │   ├── api/               # API routes
-│   │   ├── game/              # Game-related pages
-│   │   └── debug/             # Debug utilities
-│   ├── components/            # React components
-│   │   ├── ui/               # shadcn/ui base components
-│   │   ├── magicui/          # Magic UI animations
-│   │   ├── auth/             # Authentication components
-│   │   ├── layout/           # Header, Footer, Navigation
-│   │   └── game/             # Game-specific components
-│   ├── contexts/             # React Context providers
-│   ├── lib/                  # Utility libraries & configurations
-│   ├── services/             # Business logic & API services
-│   ├── types/                # TypeScript type definitions
-│   ├── i18n/                 # Internationalization
-│   ├── stories/              # Storybook stories
-│   └── test/                 # Test utilities & fixtures
-├── messages/                 # i18n translation files
-├── docs/ (or cline_docs/)    # Project documentation
-├── public/                   # Static assets
-├── .storybook/              # Storybook configuration
-└── scripts/                 # Build & utility scripts
+│   ├── app/                    # Next.js App Router ページ
+│   │   ├── api/               # API ルート
+│   │   ├── game/              # ゲーム関連ページ
+│   │   └── debug/             # デバッグ用ユーティリティ
+│   ├── components/            # React コンポーネント
+│   │   ├── ui/               # shadcn/ui ベースコンポーネント
+│   │   ├── magicui/          # Magic UI アニメーション
+│   │   ├── auth/             # 認証コンポーネント
+│   │   ├── layout/           # Header、Footer、Navigation
+│   │   └── game/             # ゲーム専用コンポーネント
+│   ├── contexts/             # React Context プロバイダー
+│   ├── lib/                  # ユーティリティライブラリと設定
+│   ├── services/             # ビジネスロジックとAPIサービス
+│   ├── types/                # TypeScript型定義
+│   ├── i18n/                 # 国際化
+│   ├── stories/              # Storybookストーリー
+│   └── test/                 # テストユーティリティとフィクスチャ
+├── messages/                 # i18n翻訳ファイル
+├── docs/ (or cline_docs/)    # プロジェクトドキュメント
+├── public/                   # 静的アセット
+├── .storybook/              # Storybook設定
+└── scripts/                 # ビルドとユーティリティスクリプト
 ```
 
-## Key Architecture Patterns
+## 主要アーキテクチャパターン
 
-### App Router Structure (Next.js 15)
+### App Router構造（Next.js 15）
 
-- **Server Components**: Default for static content
-- **Client Components**: For interactivity (marked with 'use client')
-- **API Routes**: RESTful endpoints in `/app/api/`
-- **Middleware**: Authentication & routing logic
+- **サーバーコンポーネント**: 静的コンテンツのデフォルト
+- **クライアントコンポーネント**: インタラクティブ機能（'use client'でマーク）
+- **APIルート**: `/app/api/`内のRESTfulエンドポイント
+- **ミドルウェア**: 認証とルーティングロジック
 
-### Component Architecture
+### コンポーネントアーキテクチャ
 
-- **UI Components**: Reusable shadcn/ui + Magic UI
-- **Feature Components**: Game, Auth, Layout specific
-- **Each component has**:
-  - TypeScript interface
-  - Storybook story
-  - Unit/integration tests
-  - Proper internationalization
+- **UIコンポーネント**: 再利用可能なshadcn/ui + Magic UI
+- **機能コンポーネント**: Game、Auth、Layout専用
+- **各コンポーネントには以下が必要**:
+  - TypeScriptインターフェース
+  - Storybookストーリー
+  - 単体/統合テスト
+  - 適切な国際化対応
 
-### Data Flow
+### データフロー
 
 ```plain
-Client → API Routes → Services → Firebase/Firestore
-       ↖ Real-time ← Firestore Listeners ← Client
+クライアント → APIルート → サービス → Firebase/Firestore
+         ↖ リアルタイム ← Firestoreリスナー ← クライアント
 ```
 
-### Type System (src/types/)
+### 型システム（src/types/）
 
-- `common.ts`: Shared enums & utility types
-- `schema.ts`: Zod schemas for validation
-- `game.ts`, `user.ts`: Domain-specific types
-- `firestore.ts`: Database document interfaces
-- `index.ts`: Centralized exports
+- `common.ts`: 共有enumsとユーティリティ型
+- `schema.ts`: バリデーション用Zodスキーマ
+- `game.ts`, `user.ts`: ドメイン固有の型
+- `firestore.ts`: データベースドキュメントインターフェース
+- `index.ts`: 集約エクスポート
 
-### State Management
+### 状態管理
 
-- **React Context**: Global state (auth, game)
-- **useState/useReducer**: Local component state
-- **Firestore Listeners**: Real-time data updates
-- **React Hook Form**: Form state management
+- **React Context**: グローバル状態（認証、ゲーム）
+- **useState/useReducer**: ローカルコンポーネント状態
+- **Firestoreリスナー**: リアルタイムデータ更新
+- **React Hook Form**: フォーム状態管理
 
-## Critical Components
+## 重要なコンポーネント
 
-### Game Flow Components
+### ゲームフローコンポーネント
 
-- `ImageUpload.tsx`: Photo upload with HEIC support
-- `BingoBoard.tsx`: Interactive bingo grid
-- `BingoCell.tsx`: Individual cell with open/closed states
-- `SubmissionResult.tsx`: AI analysis results display
+- `ImageUpload.tsx`: HEIC対応の写真アップロード
+- `BingoBoard.tsx`: インタラクティブなビンゴグリッド
+- `BingoCell.tsx`: オープン/クローズ状態の個別セル
+- `SubmissionResult.tsx`: AI解析結果の表示
 
-### Authentication & Layout
+### 認証とレイアウト
 
-- `AuthGuard.tsx`: Route protection wrapper
-- `Header.tsx`: Navigation with auth state
-- `UserMenu.tsx`: User profile dropdown
-- `NotificationIcon.tsx` + `NotificationDrawer.tsx`: Real-time notifications
+- `AuthGuard.tsx`: ルート保護ラッパー
+- `Header.tsx`: 認証状態付きナビゲーション
+- `UserMenu.tsx`: ユーザープロフィールドロップダウン
+- `NotificationIcon.tsx` + `NotificationDrawer.tsx`: リアルタイム通知
 
-### Services Layer (src/services/)
+### サービス層（src/services/）
 
-- Database access via Firebase Admin SDK
-- Image upload to Google Cloud Storage
-- AI integration with Google Gemini
-- Type-safe data transformation utilities
+- Firebase Admin SDKによるデータベースアクセス
+- Google Cloud Storageへの画像アップロード
+- Google Gemini APIとのAI統合
+- 型安全なデータ変換ユーティリティ
 
-## Data Models
+## データモデル
 
-### Key Collections (Firestore)
+### 主要コレクション（Firestore）
 
-- `users/`: User profiles & authentication
-- `games/`: Game metadata & settings
-- `game_participations/`: User-game relationships
-- `games/{id}/playerBoards/`: Individual player progress
-- `games/{id}/submissions/`: Photo submissions & AI analysis
+- `users/`: ユーザープロフィールと認証
+- `games/`: ゲームメタデータと設定
+- `game_participations/`: ユーザー-ゲーム関係
+- `games/{id}/playerBoards/`: 個別プレイヤーの進行状況
+- `games/{id}/submissions/`: 写真投稿とAI解析結果
 
-### ID Conventions
+### ID規則
 
-- **ULID**: All internal IDs (users, submissions, etc.)
-- **6-char Game IDs**: User-facing game codes (e.g., "ABCDEF")
-- **Timestamps**: Firestore Timestamp with proper conversion utilities
+- **ULID**: すべての内部ID（ユーザー、投稿など）
+- **6文字ゲームID**: ユーザー向けゲームコード（例：「ABCDEF」）
+- **タイムスタンプ**: 適切な変換ユーティリティ付きFirestore Timestamp
 
-## Critical Files to Understand
+## 理解すべき重要ファイル
 
-### Configuration
+### 設定
 
-- `biome.json`: Linting & formatting rules
-- `tsconfig.json`: TypeScript configuration
-- `next.config.ts`: Next.js build configuration
-- `vitest.config.mts`: Test configuration
+- `biome.json`: リンティングとフォーマット規則
+- `tsconfig.json`: TypeScript設定
+- `next.config.ts`: Next.jsビルド設定
+- `vitest.config.mts`: テスト設定
 
-### Entry Points
+### エントリーポイント
 
-- `src/app/layout.tsx`: Root layout with providers
-- `src/app/page.tsx`: Home page
-- `src/middleware.ts`: Authentication middleware
-- `src/lib/firebase/`: Firebase configuration & utilities
+- `src/app/layout.tsx`: プロバイダー付きルートレイアウト
+- `src/app/page.tsx`: ホームページ
+- `src/middleware.ts`: 認証ミドルウェア
+- `src/lib/firebase/`: Firebase設定とユーティリティ
 
-## Development Patterns
+## 開発パターン
 
-- **Mobile-first design**: Tailwind responsive classes
-- **Component composition**: Reusable UI building blocks
-- **Error boundaries**: Proper error handling
-- **Loading states**: Skeleton components & spinners
-- **Accessibility**: ARIA labels, keyboard navigation
-- **Performance**: Image optimization, code splitting
+- **モバイルファーストデザイン**: Tailwindレスポンシブクラス
+- **コンポーネント合成**: 再利用可能なUIビルディングブロック
+- **エラーバウンダリ**: 適切なエラーハンドリング
+- **ローディング状態**: スケルトンコンポーネントとスピナー
+- **アクセシビリティ**: ARIAラベル、キーボードナビゲーション
+- **パフォーマンス**: 画像最適化、コード分割
+
+## 最新技術仕様
+
+### 技術スタック
+
+- **Next.js**: 15.5.3（最新版）
+- **React**: 19.1.1（最新版）
+- **TypeScript**: 5系
+- **Tailwind CSS**: 4系
+- **Firebase**: 12.2.1
+- **Google Gemini**: @google/genai 1.19.0
+
+### テスト環境
+
+- **単体テスト**: Vitest 3.2.4
+- **E2Eテスト**: Playwright 1.55.0
+- **ブラウザテスト**: @vitest/browser 3.2.4
+- **テストライブラリ**: @testing-library/react 16.3.0
+
+### 開発ツール
+
+- **Biome**: 2.2.4（ESLint + Prettierの代替）
+- **Storybook**: 9.1.5
+- **lefthook**: 1.13.0（Gitフック管理）
