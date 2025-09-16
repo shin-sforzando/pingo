@@ -106,8 +106,23 @@
       "validationFailed": "Failed to validate subjects",
       "titleOrThemeRequired": "Title or theme is required",
       "notEnoughValidSubjects": "Not enough valid subjects. Please try again.",
-      "submissionLimitExceeded": "Submission limit exceeded"
-    }
+      "submissionLimitExceeded": "Submission limit exceeded",
+      "invalidGameId": "Game ID must be 6 uppercase letters or numbers",
+      "gameNotFound": "Game not found",
+      "verificationFailed": "Failed to verify game",
+      "gameExpired": "This game has expired",
+      "joinFailed": "Failed to join game"
+    },
+    "joinGame": "Join Game",
+    "joinGameDescription": "Enter a 6-character game ID to join a game",
+    "enterGameId": "Enter Game ID",
+    "enterGameIdDescription": "Enter the 6-character game ID shared by the host",
+    "gameId": "Game ID",
+    "gameIdDescription": "6 alphanumeric characters (e.g., ABC123)",
+    "gameFound": "Game Found",
+    "joining": "Joining...",
+    "join": "Join",
+    "joinHelpText": "The game ID is shared by the host. You can join by scanning a QR code or entering it directly."
   },
   "Common": {
     "appName": "Pingo",
@@ -115,7 +130,10 @@
     "language": "English",
     "toLanguage": "日本語",
     "close": "Close",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "verify": "Verify",
+    "verifying": "Verifying...",
+    "notAuthenticated": "Not authenticated"
   },
   "Header": {
     "notifications": "Notifications",
