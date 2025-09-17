@@ -1,9 +1,12 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { formatDistanceToNow } from "date-fns";
+import { enUS, ja } from "date-fns/locale";
+import { Calendar, Users } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
 import { AuthGuard } from "@/components/auth/AuthGuard";
@@ -45,6 +48,7 @@ type JoinGameFormValues = z.infer<typeof joinGameSchema>;
 export default function JoinGamePage() {
   const t = useTranslations();
   const router = useRouter();
+  const locale = useLocale();
 
   // State for game verification
   const [isVerifying, setIsVerifying] = useState(false);
@@ -60,6 +64,20 @@ export default function JoinGamePage() {
   const [isJoining, setIsJoining] = useState(false);
   const [joinError, setJoinError] = useState<string | null>(null);
 
+  // State for public games
+  const [publicGames, setPublicGames] = useState<
+    Array<{
+      id: string;
+      title: string;
+      theme: string;
+      participantCount: number;
+      isParticipating?: boolean;
+      createdAt: Date | null;
+      expiresAt: Date | null;
+    }>
+  >([]);
+  const [isLoadingPublicGames, setIsLoadingPublicGames] = useState(true);
+
   // Form setup
   const form = useForm<JoinGameFormValues>({
     resolver: zodResolver(joinGameSchema),
@@ -71,6 +89,34 @@ export default function JoinGamePage() {
 
   // Watch the gameId field for changes
   const gameId = form.watch("gameId");
+
+  // Fetch public games
+  useEffect(() => {
+    const fetchPublicGames = async () => {
+      setIsLoadingPublicGames(true);
+      try {
+        const idToken = await auth.currentUser?.getIdToken();
+        const headers: HeadersInit = {};
+        if (idToken) {
+          headers.Authorization = `Bearer ${idToken}`;
+        }
+
+        const response = await fetch("/api/game/public", { headers });
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.data?.games) {
+            setPublicGames(data.data.games);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch public games:", error);
+      } finally {
+        setIsLoadingPublicGames(false);
+      }
+    };
+
+    fetchPublicGames();
+  }, []);
 
   /**
    * Handle game ID input change - convert to uppercase
@@ -329,6 +375,70 @@ export default function JoinGamePage() {
             {t("Game.joinHelpText")}
           </p>
         </div>
+
+        {/* Public Games List */}
+        {publicGames.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("Game.isPublic")}</CardTitle>
+              <CardDescription>
+                {isLoadingPublicGames
+                  ? t("Game.loading")
+                  : `${publicGames.length} ${t("Game.Share.active")}`}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {publicGames.map((game) => (
+                  <Card
+                    key={game.id}
+                    className="cursor-pointer transition-colors hover:bg-muted/50"
+                    onClick={() => {
+                      form.setValue("gameId", game.id);
+                      setVerifiedGame({
+                        id: game.id,
+                        title: game.title,
+                        theme: game.theme,
+                        expiresAt: game.expiresAt as Date,
+                      });
+                    }}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h4 className="font-semibold">{game.title}</h4>
+                          <p className="text-muted-foreground text-sm">
+                            {game.theme}
+                          </p>
+                          <div className="mt-2 flex items-center gap-4 text-muted-foreground text-sm">
+                            <span className="flex items-center gap-1">
+                              <Users className="h-3 w-3" />
+                              {game.participantCount}
+                            </span>
+                            {game.createdAt && (
+                              <span className="flex items-center gap-1">
+                                <Calendar className="h-3 w-3" />
+                                {formatDistanceToNow(new Date(game.createdAt), {
+                                  addSuffix: true,
+                                  locale: locale === "ja" ? ja : enUS,
+                                })}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        {game.isParticipating && (
+                          <span className="rounded bg-primary/10 px-2 py-1 text-primary text-xs">
+                            {t("Game.Share.participants")}
+                          </span>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </AuthGuard>
   );

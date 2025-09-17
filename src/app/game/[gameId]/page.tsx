@@ -2,7 +2,7 @@
 
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { BingoBoard } from "@/components/game/BingoBoard";
 import { GameInfo } from "@/components/game/GameInfo";
@@ -15,6 +15,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { AcceptanceStatus } from "@/types/common";
 import { ErrorDisplay } from "./components/ErrorDisplay";
 import { GameHeader } from "./components/GameHeader";
+import { JoinPrompt } from "./components/JoinPrompt";
 import { useGameData } from "./hooks/useGameData";
 import { useImageSubmission } from "./hooks/useImageSubmission";
 import {
@@ -33,6 +34,7 @@ export default function GamePage() {
   const gameId = params.gameId as string;
   const t = useTranslations("Game");
   const { user } = useAuth();
+  const [isParticipating, setIsParticipating] = useState<boolean | null>(null);
 
   // Game data management
   const {
@@ -60,6 +62,16 @@ export default function GamePage() {
       setIsUploading,
       confettiRef,
     });
+
+  // Check participation status
+  useEffect(() => {
+    if (user && game) {
+      // Check if user is participating
+      const checkParticipation =
+        user.participatingGames?.includes(game.id) || false;
+      setIsParticipating(checkParticipation);
+    }
+  }, [user, game]);
 
   // Transform data for UI components
   const latestSubmission = getLatestSubmission(submissions);
@@ -105,6 +117,21 @@ export default function GamePage() {
         <div className="container mx-auto p-4">
           <ErrorDisplay error={t("gameNotFound")} />
         </div>
+      </AuthGuard>
+    );
+  }
+
+  // Show join prompt if not participating
+  if (isParticipating === false) {
+    return (
+      <AuthGuard>
+        <JoinPrompt
+          game={game}
+          onJoinSuccess={() => {
+            // Refresh page to reload with participation status
+            window.location.reload();
+          }}
+        />
       </AuthGuard>
     );
   }

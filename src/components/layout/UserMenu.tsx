@@ -56,10 +56,17 @@ export function UserMenu(): ReactElement {
             if (response.ok) {
               const data = await response.json();
               if (data.success && data.data) {
-                infos[gameId] = {
-                  id: data.data.id,
-                  title: data.data.title,
-                };
+                // Only include non-expired games
+                const expiresAt = data.data.expiresAt
+                  ? new Date(data.data.expiresAt)
+                  : null;
+                const now = new Date();
+                if (!expiresAt || expiresAt > now) {
+                  infos[gameId] = {
+                    id: data.data.id,
+                    title: data.data.title,
+                  };
+                }
               }
             }
           } catch (error) {

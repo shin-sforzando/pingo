@@ -69,6 +69,31 @@ export namespace AdminGameService {
       .doc(gameId)
       .set(docData, { merge: true });
   }
+
+  /**
+   * Get public active games
+   */
+  export async function getPublicGames(): Promise<Game[]> {
+    const snapshot = await adminFirestore
+      .collection("games")
+      .where("isPublic", "==", true)
+      .where("status", "==", "active")
+      .get();
+
+    const games: Game[] = [];
+    for (const doc of snapshot.docs) {
+      const gameData = doc.data() as GameDocument;
+      const game = gameFromFirestore(gameData);
+
+      // Filter out expired games
+      const now = new Date();
+      if (!game.expiresAt || game.expiresAt > now) {
+        games.push(game);
+      }
+    }
+
+    return games;
+  }
 }
 
 /**
@@ -127,6 +152,18 @@ export namespace AdminGameParticipationService {
       .get();
 
     return !snapshot.empty;
+  }
+
+  /**
+   * Get participant count for a game
+   */
+  export async function getParticipantCount(gameId: string): Promise<number> {
+    const snapshot = await adminFirestore
+      .collection("game_participations")
+      .where("gameId", "==", gameId)
+      .get();
+
+    return snapshot.size;
   }
 
   /**
