@@ -208,6 +208,15 @@ describe("/api/game/[gameId]/events", () => {
                     doc: () => ({
                       get: () => Promise.resolve(mockParticipantDoc),
                     }),
+                    where: () => ({
+                      limit: () => ({
+                        get: () =>
+                          Promise.resolve({
+                            empty: true, // No participants found
+                            docs: [],
+                          }),
+                      }),
+                    }),
                   };
                 }
               },

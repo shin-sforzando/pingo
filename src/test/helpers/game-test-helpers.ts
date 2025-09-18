@@ -54,15 +54,7 @@ export const cleanupTestGames = async (gameIds: string[]) => {
         await doc.delete();
       }
 
-      // Delete game participations
-      const participationQuery = await adminFirestore
-        .collection("game_participations")
-        .where("gameId", "==", gameId)
-        .get();
-
-      for (const doc of participationQuery.docs) {
-        await doc.ref.delete();
-      }
+      // Participants are now in subcollection, already deleted above
 
       console.log(
         `ℹ️ XXX: ~ game-test-helpers.ts ~ Deleted all related collections for game: ${gameId}`,

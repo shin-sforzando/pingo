@@ -165,22 +165,18 @@ describe("/api/game/[gameId] PUT", () => {
     (
       vi.mocked(adminFirestore.collection) as ReturnType<typeof vi.fn>
     ).mockImplementation((path: string) => {
-      if (path === "game_participations") {
-        return {
-          where: () => ({
-            where: () => ({
-              where: () => ({
-                get: () => Promise.resolve(mockAdminParticipationSnapshot),
-              }),
-            }),
-          }),
-        };
-      }
       if (path === "games") {
         return {
           doc: () => ({
             get: () => Promise.resolve(mockGameDoc),
             set: mockSet,
+            collection: () => ({
+              where: () => ({
+                where: () => ({
+                  get: () => Promise.resolve(mockAdminParticipationSnapshot),
+                }),
+              }),
+            }),
           }),
         };
       }
@@ -237,21 +233,17 @@ describe("/api/game/[gameId] PUT", () => {
     (
       vi.mocked(adminFirestore.collection) as ReturnType<typeof vi.fn>
     ).mockImplementation((path: string) => {
-      if (path === "game_participations") {
-        return {
-          where: () => ({
-            where: () => ({
-              where: () => ({
-                get: () => Promise.resolve(mockEmptyParticipationSnapshot),
-              }),
-            }),
-          }),
-        };
-      }
       if (path === "games") {
         return {
           doc: () => ({
             get: () => Promise.resolve(mockGameDoc),
+            collection: () => ({
+              where: () => ({
+                where: () => ({
+                  get: () => Promise.resolve(mockEmptyParticipationSnapshot),
+                }),
+              }),
+            }),
           }),
         };
       }

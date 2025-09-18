@@ -28,7 +28,7 @@ post-checkout:
     reveal:
       interactive: true
       run: git secret reveal -v
-    install:
-      run: npm install && npx playwright install --with-deps
-    adc:
-      run: gcloud auth application-default login
+    # install:
+    #   run: npm install && npx playwright install --with-deps
+    # adc:
+    #   run: gcloud auth application-default login

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import type { ReactElement } from "react";
+import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -16,14 +17,70 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/AuthContext";
+import { auth } from "@/lib/firebase/client";
 import { setUserLocale } from "@/services/locale";
+import type { Game } from "@/types/schema";
 
 export function UserMenu(): ReactElement {
   const { user, logout } = useAuth();
   const router = useRouter();
   const locale = useLocale();
-  const t = useTranslations("Header");
+  const headerT = useTranslations("Header");
   const commonT = useTranslations("Common");
+  const [gameInfos, setGameInfos] = useState<
+    Record<string, Pick<Game, "id" | "title">>
+  >({});
+
+  // Fetch game information for participating games
+  useEffect(() => {
+    const fetchGameInfos = async () => {
+      if (!user?.participatingGames || user.participatingGames.length === 0) {
+        return;
+      }
+
+      const infos: Record<string, Pick<Game, "id" | "title">> = {};
+
+      // Fetch game information for each participating game
+      await Promise.all(
+        user.participatingGames.map(async (gameId) => {
+          try {
+            const token = await auth.currentUser?.getIdToken();
+            if (!token) return;
+
+            const response = await fetch(`/api/game/${gameId}`, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            });
+
+            if (response.ok) {
+              const data = await response.json();
+              if (data.success && data.data) {
+                // Only include non-expired games
+                const expiresAt = data.data.expiresAt
+                  ? new Date(data.data.expiresAt)
+                  : null;
+                const now = new Date();
+                if (!expiresAt || expiresAt > now) {
+                  infos[gameId] = {
+                    id: data.data.id,
+                    title: data.data.title,
+                  };
+                }
+              }
+            }
+            // Don't show games that return 404 or other errors
+          } catch (error) {
+            console.error(`Failed to fetch game info for ${gameId}:`, error);
+          }
+        }),
+      );
+
+      setGameInfos(infos);
+    };
+
+    fetchGameInfos();
+  }, [user?.participatingGames]);
 
   const toggleLocale = async (): Promise<void> => {
     try {
@@ -51,7 +108,7 @@ export function UserMenu(): ReactElement {
           <DropdownMenuItem asChild>
             <Link href="/profile">
               <UserIcon className="mr-2 h-4 w-4" />
-              {t("profile")}
+              {headerT("profile")}
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={toggleLocale}>
@@ -63,21 +120,27 @@ export function UserMenu(): ReactElement {
         {user?.participatingGames && 0 < user.participatingGames.length && (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuLabel>{t("recentGames")}</DropdownMenuLabel>
-            {user.participatingGames.slice(0, 10).map((gameId) => (
-              <DropdownMenuItem key={gameId} asChild>
-                <Link href={`/game/${gameId}`}>
-                  Game {gameId.substring(0, 8)}...
-                </Link>
-              </DropdownMenuItem>
-            ))}
+            <DropdownMenuLabel>{headerT("recentGames")}</DropdownMenuLabel>
+            {user.participatingGames
+              .filter((gameId) => gameInfos[gameId]) // Only show games with valid info
+              .slice(0, 10)
+              .map((gameId) => {
+                const gameInfo = gameInfos[gameId];
+                const displayText = `${gameInfo.title} (${gameId})`;
+
+                return (
+                  <DropdownMenuItem key={gameId} asChild>
+                    <Link href={`/game/${gameId}`}>{displayText}</Link>
+                  </DropdownMenuItem>
+                );
+              })}
           </>
         )}
 
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => logout()} variant="destructive">
           <LogOut className="mr-2 h-4 w-4" />
-          {t("logout")}
+          {headerT("logout")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

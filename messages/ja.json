@@ -46,6 +46,8 @@
     "selectDate": "日付を選択",
     "isPublic": "公開設定",
     "isPublicDescription": "このゲームを全員に公開する",
+    "availableGames": "参加可能なゲーム",
+    "availableGamesDescription": "{count}件の参加可能なゲーム",
     "isPhotoSharingEnabled": "写真共有",
     "isPhotoSharingEnabledDescription": "プレイヤー同士で写真を共有できるようにする",
     "requiredBingoLines": "必要なビンゴ列数",
@@ -93,6 +95,10 @@
       "confidenceLabel": "確信度",
       "thresholdNote": "閾値: {threshold}%以上で承認"
     },
+    "redirectingToJoinPage": "ゲーム参加ページにリダイレクトしています...",
+    "joinGameTitle": "このゲームに参加",
+    "joinGameButton": "ゲームに参加する",
+    "goToJoinPage": "ゲーム参加ページへ",
     "errors": {
       "titleRequired": "タイトルを入力してください",
       "titleTooLong": "タイトルは50文字以内で入力してください",
@@ -106,8 +112,25 @@
       "validationFailed": "被写体候補の検証に失敗しました",
       "titleOrThemeRequired": "タイトルまたはテーマを入力してください",
       "notEnoughValidSubjects": "有効な被写体候補が不足しています。もう一度お試しください。",
-      "submissionLimitExceeded": "投稿回数の上限に達しました"
-    }
+      "submissionLimitExceeded": "投稿回数の上限に達しました",
+      "invalidGameId": "ゲームIDは6文字の英数字で入力してください",
+      "gameNotFound": "ゲームが見つかりません",
+      "gameNotFoundDescription": "ゲームID「{gameId}」は存在しないか、削除された可能性があります",
+      "verificationFailed": "ゲームの確認に失敗しました",
+      "gameExpired": "このゲームは有効期限が切れています",
+      "joinFailed": "ゲームへの参加に失敗しました"
+    },
+    "joinGame": "ゲームに参加",
+    "joinGameDescription": "6文字のゲームIDを入力してゲームに参加してください",
+    "enterGameId": "ゲームIDを入力",
+    "enterGameIdDescription": "主催者から共有された6文字のゲームIDを入力してください",
+    "gameId": "ゲームID",
+    "gameIdDescription": "6文字の英数字（例：ABC123）",
+    "gameFound": "ゲームが見つかりました",
+    "joining": "参加中...",
+    "join": "参加する",
+    "joinHelpText": "ゲームIDは主催者から共有されます。QRコードまたは直接入力で参加できます。",
+    "alreadyParticipating": "参加済み"
   },
   "Common": {
     "appName": "Pingo",
@@ -115,7 +138,10 @@
     "language": "日本語",
     "toLanguage": "English",
     "close": "閉じる",
-    "cancel": "キャンセル"
+    "cancel": "キャンセル",
+    "verify": "確認",
+    "verifying": "確認中...",
+    "notAuthenticated": "認証されていません"
   },
   "Header": {
     "notifications": "通知",

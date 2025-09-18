@@ -69,6 +69,31 @@ export namespace AdminGameService {
       .doc(gameId)
       .set(docData, { merge: true });
   }
+
+  /**
+   * Get public active games
+   */
+  export async function getPublicGames(): Promise<Game[]> {
+    const snapshot = await adminFirestore
+      .collection("games")
+      .where("isPublic", "==", true)
+      .where("status", "==", "active")
+      .get();
+
+    const games: Game[] = [];
+    for (const doc of snapshot.docs) {
+      const gameData = doc.data() as GameDocument;
+      const game = gameFromFirestore(gameData);
+
+      // Filter out expired games
+      const now = new Date();
+      if (!game.expiresAt || game.expiresAt > now) {
+        games.push(game);
+      }
+    }
+
+    return games;
+  }
 }
 
 /**
@@ -102,14 +127,29 @@ export namespace AdminGameParticipationService {
     gameId: string,
     userId: string,
   ): Promise<boolean> {
-    const doc = await adminFirestore
+    // Check both old (participationId as doc ID) and new (userId as doc ID) formats
+    // First try direct lookup with userId as document ID (new format)
+    const directDoc = await adminFirestore
       .collection("games")
       .doc(gameId)
       .collection("participants")
       .doc(userId)
       .get();
 
-    return doc.exists;
+    if (directDoc.exists) {
+      return true;
+    }
+
+    // Fallback to query-based lookup for old format (participationId as doc ID)
+    const snapshot = await adminFirestore
+      .collection("games")
+      .doc(gameId)
+      .collection("participants")
+      .where("userId", "==", userId)
+      .limit(1)
+      .get();
+
+    return !snapshot.empty;
   }
 
   /**
@@ -120,13 +160,27 @@ export namespace AdminGameParticipationService {
     userId: string,
   ): Promise<boolean> {
     const snapshot = await adminFirestore
-      .collection("game_participations")
+      .collection("games")
+      .doc(gameId)
+      .collection("participants")
       .where("userId", "==", userId)
-      .where("gameId", "==", gameId)
       .where("role", "in", ["creator", "admin"])
       .get();
 
     return !snapshot.empty;
+  }
+
+  /**
+   * Get participant count for a game
+   */
+  export async function getParticipantCount(gameId: string): Promise<number> {
+    const snapshot = await adminFirestore
+      .collection("games")
+      .doc(gameId)
+      .collection("participants")
+      .get();
+
+    return snapshot.size;
   }
 
   /**
@@ -140,10 +194,11 @@ export namespace AdminGameParticipationService {
       submissionCount: number;
     }>
   > {
-    // Get participants from game_participations collection to include statistics
+    // Get participants from subcollection to include statistics
     const participationsSnapshot = await adminFirestore
-      .collection("game_participations")
-      .where("gameId", "==", gameId)
+      .collection("games")
+      .doc(gameId)
+      .collection("participants")
       .get();
 
     if (participationsSnapshot.empty) {
@@ -693,9 +748,22 @@ export namespace AdminTransactionService {
           .collection("playerBoards")
           .doc(userId);
 
-        const participationRef = adminFirestore
-          .collection("game_participations")
-          .doc(`${gameId}_${userId}`);
+        // Get first participant doc for this user
+        const participantSnapshot = await adminFirestore
+          .collection("games")
+          .doc(gameId)
+          .collection("participants")
+          .where("userId", "==", userId)
+          .limit(1)
+          .get();
+
+        const participationRef = !participantSnapshot.empty
+          ? participantSnapshot.docs[0].ref
+          : adminFirestore
+              .collection("games")
+              .doc(gameId)
+              .collection("participants")
+              .doc();
 
         // IMPORTANT: All reads must be executed before any writes in Firestore transactions
         const [existingSubmission, currentPlayerBoardDoc, participationDoc] =
@@ -749,8 +817,8 @@ export namespace AdminTransactionService {
           transaction.set(playerBoardRef, playerBoardData, { merge: true });
         }
 
-        // Update submission count and completed lines in game_participations
-        if (participationDoc.exists) {
+        // Update submission count and completed lines in participants subcollection
+        if (participationDoc?.exists) {
           const currentData = participationDoc.data();
 
           // Update completed lines count if board update includes new completed lines
@@ -801,14 +869,25 @@ export namespace AdminTransactionService {
           .collection("submissions")
           .doc(submission.id);
 
-        const participationRef = adminFirestore
-          .collection("game_participations")
-          .doc(`${gameId}_${submission.userId}`);
+        // Get participant doc for this user
+        const participantSnapshot = await adminFirestore
+          .collection("games")
+          .doc(gameId)
+          .collection("participants")
+          .where("userId", "==", submission.userId)
+          .limit(1)
+          .get();
+
+        const participationRef = !participantSnapshot.empty
+          ? participantSnapshot.docs[0].ref
+          : null;
 
         // IMPORTANT: All reads must be executed before any writes in Firestore transactions
         const [existingSubmission, participationDoc] = await Promise.all([
           transaction.get(submissionRef),
-          transaction.get(participationRef),
+          participationRef
+            ? transaction.get(participationRef)
+            : Promise.resolve(null),
         ]);
 
         // Check if submission already exists to prevent duplicates
@@ -821,8 +900,8 @@ export namespace AdminTransactionService {
         const submissionData = submissionToFirestore(submission);
         transaction.set(submissionRef, submissionData);
 
-        // Update submission count in game_participations
-        if (participationDoc.exists) {
+        // Update submission count in participants subcollection
+        if (participationDoc?.exists && participationRef) {
           const currentData = participationDoc.data();
           transaction.update(participationRef, {
             submissionCount: (currentData?.submissionCount || 0) + 1,

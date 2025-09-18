@@ -400,17 +400,6 @@ describe("/api/game/[gameId]/submission/[submissionId]", () => {
       (
         vi.mocked(adminFirestore.collection) as ReturnType<typeof vi.fn>
       ).mockImplementation((path: string) => {
-        if (path === "game_participations") {
-          return {
-            where: () => ({
-              where: () => ({
-                where: () => ({
-                  get: () => Promise.resolve(mockAdminParticipationSnapshot),
-                }),
-              }),
-            }),
-          };
-        }
         if (path === "games") {
           return {
             doc: () => ({
@@ -420,6 +409,12 @@ describe("/api/game/[gameId]/submission/[submissionId]", () => {
                   return {
                     doc: () => ({
                       get: () => Promise.resolve(mockParticipantDoc),
+                    }),
+                    where: () => ({
+                      where: () => ({
+                        get: () =>
+                          Promise.resolve(mockAdminParticipationSnapshot),
+                      }),
                     }),
                   };
                 }
@@ -515,17 +510,6 @@ describe("/api/game/[gameId]/submission/[submissionId]", () => {
       (
         vi.mocked(adminFirestore.collection) as ReturnType<typeof vi.fn>
       ).mockImplementation((path: string) => {
-        if (path === "game_participations") {
-          return {
-            where: () => ({
-              where: () => ({
-                where: () => ({
-                  get: () => Promise.resolve(mockEmptyParticipationSnapshot),
-                }),
-              }),
-            }),
-          };
-        }
         if (path === "games") {
           return {
             doc: () => ({
@@ -535,6 +519,12 @@ describe("/api/game/[gameId]/submission/[submissionId]", () => {
                   return {
                     doc: () => ({
                       get: () => Promise.resolve(mockParticipantDoc),
+                    }),
+                    where: () => ({
+                      where: () => ({
+                        get: () =>
+                          Promise.resolve(mockEmptyParticipationSnapshot),
+                      }),
                     }),
                   };
                 }
