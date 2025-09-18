@@ -237,13 +237,7 @@ export async function POST(
       const participantDoc = gameParticipationToFirestore(participation);
       transaction.set(participantDocRef, participantDoc);
 
-      // 4. Create a game participation record
-      const participationDocRef = adminFirestore
-        .collection("game_participations")
-        .doc(`${gameId}_${userId}`);
-      transaction.set(participationDocRef, participantDoc);
-
-      // 5. Create an initial player board for the creator
+      // 4. Create an initial player board for the creator
       const playerBoardDocRef = adminFirestore
         .collection(`games/${gameId}/playerBoards`)
         .doc(userId);
@@ -277,7 +271,7 @@ export async function POST(
       const playerBoardDoc = playerBoardToFirestore(playerBoard);
       transaction.set(playerBoardDocRef, playerBoardDoc);
 
-      // 6. Record a game creation event
+      // 5. Record a game creation event
       const eventId = ulid();
       const eventDocRef = adminFirestore
         .collection(`games/${gameId}/events`)

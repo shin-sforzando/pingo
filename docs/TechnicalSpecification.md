@@ -126,20 +126,6 @@ src/types/
         - details: map (通知タイプに応じた追加情報)
 ```
 
-### ゲーム参加(game_participations)
-
-```yaml
-/game_participations/
-  /{participationId}/
-    - userId: string (ULID)
-    - gameId: string (ゲームID)
-    - role: string ("creator", "admin", "participant")
-    - joinedAt: timestamp
-    - completedLines: number (達成した列数)
-    - lastCompletedAt: timestamp (最後に列を完成させた時間)
-    - submissionCount: number (画像提出回数、最大30)
-```
-
 ### ゲーム(games)
 
 ```yaml
@@ -437,7 +423,6 @@ Ensure reasons clearly explain which criteria were not met.
 データ更新:
 
 - プレイヤーボード：`completedLines`配列に新しく完成したラインを追加
-- 参加者統計：`game_participations`コレクションの`completedLines`数と`lastCompletedAt`を自動更新
 - トランザクション処理：サブミッション作成、プレイヤーボード更新、参加者統計更新をアトミックに実行
 
 Firestoreトランザクション最適化:

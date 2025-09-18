@@ -704,20 +704,6 @@ Firestoreのセキュリティルールを適切に設定し、認証済みユ�
 - "game_ended": ゲーム終了通知
 ```
 
-### ゲーム参加(game_participations)
-
-```yaml
-/game_participations/
-  /{participationId}/
-    - userId: string (ユーザーID)
-    - gameId: string (ゲームID)
-    - role: string ("creator", "admin", "participant")
-    - joinedAt: timestamp
-    - completedLines: number (達成した列数)
-    - lastCompletedAt: timestamp (最後に列を完成させた時間)
-    - submissionCount: number (画像提出回数、最大30)
-```
-
 ### ゲーム(games)
 
 ```yaml

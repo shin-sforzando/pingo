@@ -99,23 +99,22 @@ export async function POST(
     // Check if user is already participating
     const db = getFirestore();
     const participationSnapshot = await db
-      .collection("game_participations")
-      .where("gameId", "==", gameId)
+      .collection("games")
+      .doc(gameId)
+      .collection("participants")
       .where("userId", "==", userId)
       .get();
 
     if (!participationSnapshot.empty) {
-      // User is already participating
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: "ALREADY_PARTICIPATING",
-            message: "You are already participating in this game",
-          },
+      // User is already participating - return success with existing participation
+      const existingParticipation = participationSnapshot.docs[0].data();
+      return NextResponse.json({
+        success: true,
+        data: {
+          participationId: existingParticipation.id,
+          alreadyParticipating: true,
         },
-        { status: 400 },
-      );
+      });
     }
 
     // Create participation record
@@ -132,13 +131,21 @@ export async function POST(
       createdAt: dateToAdminTimestamp(now),
     };
 
+    // Save to participants subcollection with userId as document ID
     await db
-      .collection("game_participations")
-      .doc(participationId)
+      .collection("games")
+      .doc(gameId)
+      .collection("participants")
+      .doc(userId) // Use userId as document ID for consistency
       .set(participation);
 
-    // Get game board cells
-    const gameBoardDoc = await db.collection("game_boards").doc(gameId).get();
+    // Get game board cells from the correct location
+    const gameBoardDoc = await db
+      .collection("games")
+      .doc(gameId)
+      .collection("board")
+      .doc("board")
+      .get();
     if (!gameBoardDoc.exists) {
       return NextResponse.json(
         {
@@ -155,7 +162,6 @@ export async function POST(
     const gameBoard = gameBoardDoc.data() as GameBoard;
 
     // Create player board with initial cell states (all players use the same board)
-    const boardId = ulid();
     // Use object type for Firestore document structure
     const cellStates: Record<
       string,
@@ -181,7 +187,13 @@ export async function POST(
       completedLines: [],
     };
 
-    await db.collection("player_boards").doc(boardId).set(playerBoard);
+    // Store in the correct subcollection: games/{gameId}/playerBoards/{userId}
+    await db
+      .collection("games")
+      .doc(gameId)
+      .collection("playerBoards")
+      .doc(userId)
+      .set(playerBoard);
 
     // Update user's participating games
     const updatedParticipatingGames = [

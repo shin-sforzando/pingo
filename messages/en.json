@@ -46,6 +46,8 @@
     "selectDate": "Select a date",
     "isPublic": "Public Game",
     "isPublicDescription": "Make this game visible to everyone",
+    "availableGames": "Available Games",
+    "availableGamesDescription": "{count} available games",
     "isPhotoSharingEnabled": "Photo Sharing",
     "isPhotoSharingEnabledDescription": "Allow players to see each other's photos",
     "requiredBingoLines": "Required Bingo Lines",
@@ -93,6 +95,10 @@
       "confidenceLabel": "Confidence",
       "thresholdNote": "Threshold: {threshold}% or higher for acceptance"
     },
+    "redirectingToJoinPage": "Redirecting to join page...",
+    "joinGameTitle": "Join This Game",
+    "joinGameButton": "Join Game",
+    "goToJoinPage": "Go to Join Page",
     "errors": {
       "titleRequired": "Title is required",
       "titleTooLong": "Title must be at most 50 characters",
@@ -109,6 +115,7 @@
       "submissionLimitExceeded": "Submission limit exceeded",
       "invalidGameId": "Game ID must be 6 uppercase letters or numbers",
       "gameNotFound": "Game not found",
+      "gameNotFoundDescription": "Game ID \"{gameId}\" does not exist or may have been deleted",
       "verificationFailed": "Failed to verify game",
       "gameExpired": "This game has expired",
       "joinFailed": "Failed to join game"
@@ -122,7 +129,8 @@
     "gameFound": "Game Found",
     "joining": "Joining...",
     "join": "Join",
-    "joinHelpText": "The game ID is shared by the host. You can join by scanning a QR code or entering it directly."
+    "joinHelpText": "The game ID is shared by the host. You can join by scanning a QR code or entering it directly.",
+    "alreadyParticipating": "Already Joined"
   },
   "Common": {
     "appName": "Pingo",

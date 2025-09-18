@@ -185,14 +185,11 @@ describe("Game Creation API Integration Test", () => {
     expect(participantDoc.exists).toBe(true);
     expect(participantDoc.data()?.userId).toBe(testUserId);
 
-    // Verify game participation
-    const participationQuery = await adminFirestore
-      .collection("game_participations")
-      .where("gameId", "==", gameId)
-      .where("userId", "==", testUserId)
-      .get();
-    expect(participationQuery.empty).toBe(false);
-    expect(participationQuery.docs[0].data().role).toBe("creator");
+    // Verify game participation (now in subcollection)
+    // The participant document verification above already confirms participation
+    // Additional check: verify the participant has creator role
+    const participantData = participantDoc.data();
+    expect(participantData?.role).toBe("creator");
 
     // Verify event
     const eventsQuery = await adminFirestore

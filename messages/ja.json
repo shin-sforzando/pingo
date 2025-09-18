@@ -46,6 +46,8 @@
     "selectDate": "日付を選択",
     "isPublic": "公開設定",
     "isPublicDescription": "このゲームを全員に公開する",
+    "availableGames": "参加可能なゲーム",
+    "availableGamesDescription": "{count}件の参加可能なゲーム",
     "isPhotoSharingEnabled": "写真共有",
     "isPhotoSharingEnabledDescription": "プレイヤー同士で写真を共有できるようにする",
     "requiredBingoLines": "必要なビンゴ列数",
@@ -93,6 +95,10 @@
       "confidenceLabel": "確信度",
       "thresholdNote": "閾値: {threshold}%以上で承認"
     },
+    "redirectingToJoinPage": "ゲーム参加ページにリダイレクトしています...",
+    "joinGameTitle": "このゲームに参加",
+    "joinGameButton": "ゲームに参加する",
+    "goToJoinPage": "ゲーム参加ページへ",
     "errors": {
       "titleRequired": "タイトルを入力してください",
       "titleTooLong": "タイトルは50文字以内で入力してください",
@@ -109,6 +115,7 @@
       "submissionLimitExceeded": "投稿回数の上限に達しました",
       "invalidGameId": "ゲームIDは6文字の英数字で入力してください",
       "gameNotFound": "ゲームが見つかりません",
+      "gameNotFoundDescription": "ゲームID「{gameId}」は存在しないか、削除された可能性があります",
       "verificationFailed": "ゲームの確認に失敗しました",
       "gameExpired": "このゲームは有効期限が切れています",
       "joinFailed": "ゲームへの参加に失敗しました"
@@ -122,7 +129,8 @@
     "gameFound": "ゲームが見つかりました",
     "joining": "参加中...",
     "join": "参加する",
-    "joinHelpText": "ゲームIDは主催者から共有されます。QRコードまたは直接入力で参加できます。"
+    "joinHelpText": "ゲームIDは主催者から共有されます。QRコードまたは直接入力で参加できます。",
+    "alreadyParticipating": "参加済み"
   },
   "Common": {
     "appName": "Pingo",

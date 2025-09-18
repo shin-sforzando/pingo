@@ -99,7 +99,6 @@ pingo/
 
 - `users/`: ユーザープロフィールと認証
 - `games/`: ゲームメタデータと設定
-- `game_participations/`: ユーザー-ゲーム関係
 - `games/{id}/playerBoards/`: 個別プレイヤーの進行状況
 - `games/{id}/submissions/`: 写真投稿とAI解析結果
 

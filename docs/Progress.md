@@ -26,7 +26,6 @@ Pingoプロジェクトは現在、機能実装段階に入っています。基
 - 複合インデックスの最適化
   - `submissions`コレクション用の複合インデックス（`userId` + `submittedAt`）を作成
 - 参加者一覧の表示問題解決
-  - `getParticipants`メソッドを`game_participations`コレクションから統計情報付きで取得するように変更
   - 参加者APIのレスポンス型に`completedLines`と`submissionCount`を追加
   - `ParticipantsList`コンポーネントのインターフェースを更新し、TypeScriptエラーを修正
 
@@ -97,7 +96,6 @@ Pingoプロジェクトは現在、機能実装段階に入っています。基
 - ゲーム参加API（`/api/game/join`または`/api/game/[gameId]/join`）の実装
   - 現在、参加用APIが存在しない
   - 参加確認とプレイヤーボード初期化
-  - game_participationsレコード作成
 
 ### 2. テスト不足の解消（優先度：高）
 

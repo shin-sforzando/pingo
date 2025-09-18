@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { TranslatedFormMessage } from "@/components/ui/translated-form-message";
+import { useAuth } from "@/contexts/AuthContext";
 import { auth } from "@/lib/firebase/client";
 import type { Game } from "@/types/schema";
 
@@ -49,6 +50,7 @@ export default function JoinGamePage() {
   const t = useTranslations();
   const router = useRouter();
   const locale = useLocale();
+  const { user } = useAuth();
 
   // State for game verification
   const [isVerifying, setIsVerifying] = useState(false);
@@ -64,14 +66,13 @@ export default function JoinGamePage() {
   const [isJoining, setIsJoining] = useState(false);
   const [joinError, setJoinError] = useState<string | null>(null);
 
-  // State for public games
-  const [publicGames, setPublicGames] = useState<
+  // State for available games (excluding already participating)
+  const [availableGames, setAvailableGames] = useState<
     Array<{
       id: string;
       title: string;
       theme: string;
       participantCount: number;
-      isParticipating?: boolean;
       createdAt: Date | null;
       expiresAt: Date | null;
     }>
@@ -90,9 +91,14 @@ export default function JoinGamePage() {
   // Watch the gameId field for changes
   const gameId = form.watch("gameId");
 
-  // Fetch public games
+  // Fetch available games (public games excluding those already participating)
   useEffect(() => {
-    const fetchPublicGames = async () => {
+    const fetchAvailableGames = async () => {
+      // Wait for authentication to be ready
+      if (!user) {
+        return;
+      }
+
       setIsLoadingPublicGames(true);
       try {
         const idToken = await auth.currentUser?.getIdToken();
@@ -105,18 +111,33 @@ export default function JoinGamePage() {
         if (response.ok) {
           const data = await response.json();
           if (data.success && data.data?.games) {
-            setPublicGames(data.data.games);
+            // Filter out games that user is already participating in
+            interface GameWithParticipation {
+              id: string;
+              title: string;
+              theme: string;
+              participantCount: number;
+              isParticipating?: boolean;
+              createdAt: Date | null;
+              expiresAt: Date | null;
+            }
+
+            const notParticipating = data.data.games.filter(
+              (game: GameWithParticipation) => game.isParticipating !== true,
+            );
+
+            setAvailableGames(notParticipating);
           }
         }
       } catch (error) {
-        console.error("Failed to fetch public games:", error);
+        console.error("Failed to fetch available games:", error);
       } finally {
         setIsLoadingPublicGames(false);
       }
     };
 
-    fetchPublicGames();
-  }, []);
+    fetchAvailableGames();
+  }, [user]);
 
   /**
    * Handle game ID input change - convert to uppercase
@@ -248,7 +269,7 @@ export default function JoinGamePage() {
         );
       }
 
-      // Redirect to game page
+      // Always redirect to game page (whether new join or already participating)
       router.push(`/game/${data.gameId}`);
     } catch (error) {
       console.error("Error joining game:", error);
@@ -376,24 +397,27 @@ export default function JoinGamePage() {
           </p>
         </div>
 
-        {/* Public Games List */}
-        {publicGames.length > 0 && (
+        {/* Available Games List */}
+        {availableGames.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle>{t("Game.isPublic")}</CardTitle>
+              <CardTitle>{t("Game.availableGames")}</CardTitle>
               <CardDescription>
                 {isLoadingPublicGames
                   ? t("Game.loading")
-                  : `${publicGames.length} ${t("Game.Share.active")}`}
+                  : t("Game.availableGamesDescription", {
+                      count: availableGames.length,
+                    })}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                {publicGames.map((game) => (
+                {availableGames.map((game) => (
                   <Card
                     key={game.id}
                     className="cursor-pointer transition-colors hover:bg-muted/50"
-                    onClick={() => {
+                    onClick={async () => {
+                      // Set the form values and verified game
                       form.setValue("gameId", game.id);
                       setVerifiedGame({
                         id: game.id,
@@ -401,6 +425,9 @@ export default function JoinGamePage() {
                         theme: game.theme,
                         expiresAt: game.expiresAt as Date,
                       });
+
+                      // Automatically join the game
+                      await onSubmit({ gameId: game.id });
                     }}
                   >
                     <CardContent className="p-4">
@@ -426,11 +453,6 @@ export default function JoinGamePage() {
                             )}
                           </div>
                         </div>
-                        {game.isParticipating && (
-                          <span className="rounded bg-primary/10 px-2 py-1 text-primary text-xs">
-                            {t("Game.Share.participants")}
-                          </span>
-                        )}
                       </div>
                     </CardContent>
                   </Card>

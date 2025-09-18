@@ -245,7 +245,7 @@ describe("POST /api/game/[gameId]/join", () => {
     expect(data.error.code).toBe("GAME_EXPIRED");
   });
 
-  it("should return 400 if user is already participating", async () => {
+  it("should return success with alreadyParticipating flag if user is already participating", async () => {
     const { adminAuth } = await import("@/lib/firebase/admin");
     const { AdminUserService, AdminGameService } = await import(
       "@/lib/firebase/admin-collections"
@@ -284,20 +284,35 @@ describe("POST /api/game/[gameId]/join", () => {
       createdAt: new Date(),
     } as MockGame);
 
-    // Mock already participating
+    // Mock already participating with existing participation data
     vi.mocked(getFirestore).mockReturnValue({
       collection: vi.fn().mockImplementation((collectionName: string) => {
-        if (collectionName === "game_participations") {
+        if (collectionName === "games") {
           return {
-            where: vi.fn().mockReturnValue({
-              where: vi.fn().mockReturnValue({
-                get: vi.fn().mockResolvedValue({
-                  empty: false, // User is already participating
-                }),
-              }),
-            }),
             doc: vi.fn(() => ({
-              set: vi.fn(),
+              collection: vi
+                .fn()
+                .mockImplementation((subCollectionName: string) => {
+                  if (subCollectionName === "participants") {
+                    return {
+                      where: vi.fn().mockReturnValue({
+                        get: vi.fn().mockResolvedValue({
+                          empty: false, // User is already participating
+                          docs: [
+                            {
+                              data: () => ({
+                                id: "existing-participation-id",
+                                gameId: "ABC123",
+                                userId: "test-user-id",
+                              }),
+                            },
+                          ],
+                        }),
+                      }),
+                    };
+                  }
+                  return {};
+                }),
             })),
           };
         }
@@ -323,9 +338,10 @@ describe("POST /api/game/[gameId]/join", () => {
     });
     const data = await response.json();
 
-    expect(response.status).toBe(400);
-    expect(data.success).toBe(false);
-    expect(data.error.code).toBe("ALREADY_PARTICIPATING");
+    expect(response.status).toBe(200);
+    expect(data.success).toBe(true);
+    expect(data.data.participationId).toBe("existing-participation-id");
+    expect(data.data.alreadyParticipating).toBe(true);
   });
 
   it("should successfully join a game", async () => {
@@ -386,31 +402,40 @@ describe("POST /api/game/[gameId]/join", () => {
 
     vi.mocked(getFirestore).mockReturnValue({
       collection: vi.fn().mockImplementation((collectionName: string) => {
-        if (collectionName === "game_participations") {
+        if (collectionName === "games") {
           return {
-            where: vi.fn().mockReturnValue({
-              where: vi.fn().mockReturnValue({
-                get: vi.fn().mockResolvedValue({
-                  empty: true, // User is not participating
+            doc: vi.fn(() => ({
+              collection: vi
+                .fn()
+                .mockImplementation((subCollectionName: string) => {
+                  if (subCollectionName === "board") {
+                    return {
+                      doc: vi.fn(() => ({
+                        get: mockGet,
+                      })),
+                    };
+                  }
+                  if (subCollectionName === "playerBoards") {
+                    return {
+                      doc: vi.fn(() => ({
+                        set: mockSet,
+                      })),
+                    };
+                  }
+                  if (subCollectionName === "participants") {
+                    return {
+                      where: vi.fn().mockReturnValue({
+                        get: vi.fn().mockResolvedValue({
+                          empty: true, // User is not participating
+                        }),
+                      }),
+                      doc: vi.fn(() => ({
+                        set: mockSet,
+                      })),
+                    };
+                  }
+                  return {};
                 }),
-              }),
-            }),
-            doc: vi.fn(() => ({
-              set: mockSet,
-            })),
-          };
-        }
-        if (collectionName === "game_boards") {
-          return {
-            doc: vi.fn(() => ({
-              get: mockGet,
-            })),
-          };
-        }
-        if (collectionName === "player_boards") {
-          return {
-            doc: vi.fn(() => ({
-              set: mockSet,
             })),
           };
         }
@@ -491,24 +516,33 @@ describe("POST /api/game/[gameId]/join", () => {
 
     vi.mocked(getFirestore).mockReturnValue({
       collection: vi.fn().mockImplementation((collectionName: string) => {
-        if (collectionName === "game_participations") {
+        if (collectionName === "games") {
           return {
-            where: vi.fn().mockReturnValue({
-              where: vi.fn().mockReturnValue({
-                get: vi.fn().mockResolvedValue({
-                  empty: true, // User is not participating
+            doc: vi.fn(() => ({
+              collection: vi
+                .fn()
+                .mockImplementation((subCollectionName: string) => {
+                  if (subCollectionName === "board") {
+                    return {
+                      doc: vi.fn(() => ({
+                        get: mockGet,
+                      })),
+                    };
+                  }
+                  if (subCollectionName === "participants") {
+                    return {
+                      where: vi.fn().mockReturnValue({
+                        get: vi.fn().mockResolvedValue({
+                          empty: true, // User is not participating
+                        }),
+                      }),
+                      doc: vi.fn(() => ({
+                        set: vi.fn(),
+                      })),
+                    };
+                  }
+                  return {};
                 }),
-              }),
-            }),
-            doc: vi.fn(() => ({
-              set: vi.fn(),
-            })),
-          };
-        }
-        if (collectionName === "game_boards") {
-          return {
-            doc: vi.fn(() => ({
-              get: mockGet,
             })),
           };
         }

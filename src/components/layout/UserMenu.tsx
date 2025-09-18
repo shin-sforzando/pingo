@@ -69,6 +69,7 @@ export function UserMenu(): ReactElement {
                 }
               }
             }
+            // Don't show games that return 404 or other errors
           } catch (error) {
             console.error(`Failed to fetch game info for ${gameId}:`, error);
           }
@@ -120,18 +121,19 @@ export function UserMenu(): ReactElement {
           <>
             <DropdownMenuSeparator />
             <DropdownMenuLabel>{headerT("recentGames")}</DropdownMenuLabel>
-            {user.participatingGames.slice(0, 10).map((gameId) => {
-              const gameInfo = gameInfos[gameId];
-              const displayText = gameInfo?.title
-                ? `${gameInfo.title} (${gameId.substring(0, 8)})`
-                : `Game ID: ${gameId.substring(0, 8)}...`;
+            {user.participatingGames
+              .filter((gameId) => gameInfos[gameId]) // Only show games with valid info
+              .slice(0, 10)
+              .map((gameId) => {
+                const gameInfo = gameInfos[gameId];
+                const displayText = `${gameInfo.title} (${gameId})`;
 
-              return (
-                <DropdownMenuItem key={gameId} asChild>
-                  <Link href={`/game/${gameId}`}>{displayText}</Link>
-                </DropdownMenuItem>
-              );
-            })}
+                return (
+                  <DropdownMenuItem key={gameId} asChild>
+                    <Link href={`/game/${gameId}`}>{displayText}</Link>
+                  </DropdownMenuItem>
+                );
+              })}
           </>
         )}
 

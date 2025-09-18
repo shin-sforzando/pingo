@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { AuthGuard } from "@/components/auth/AuthGuard";
@@ -10,12 +10,13 @@ import { ImageUpload } from "@/components/game/ImageUpload";
 import { ParticipantsList } from "@/components/game/ParticipantsList";
 import { SubmissionResult } from "@/components/game/SubmissionResult";
 import { Confetti, type ConfettiRef } from "@/components/magicui/confetti";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
+import { auth } from "@/lib/firebase/client";
 import { AcceptanceStatus } from "@/types/common";
 import { ErrorDisplay } from "./components/ErrorDisplay";
 import { GameHeader } from "./components/GameHeader";
-import { JoinPrompt } from "./components/JoinPrompt";
 import { useGameData } from "./hooks/useGameData";
 import { useImageSubmission } from "./hooks/useImageSubmission";
 import {
@@ -31,6 +32,7 @@ import {
  */
 export default function GamePage() {
   const params = useParams();
+  const router = useRouter();
   const gameId = params.gameId as string;
   const t = useTranslations("Game");
   const { user } = useAuth();
@@ -65,13 +67,20 @@ export default function GamePage() {
 
   // Check participation status
   useEffect(() => {
-    if (user && game) {
-      // Check if user is participating
-      const checkParticipation =
-        user.participatingGames?.includes(game.id) || false;
-      setIsParticipating(checkParticipation);
+    if (user) {
+      // If game failed to load, check if user is participating by gameId
+      if (error && !game) {
+        const checkParticipation =
+          user.participatingGames?.includes(gameId) || false;
+        setIsParticipating(checkParticipation);
+      } else if (game) {
+        // Check if user is participating
+        const checkParticipation =
+          user.participatingGames?.includes(game.id) || false;
+        setIsParticipating(checkParticipation);
+      }
     }
-  }, [user, game]);
+  }, [user, game, error, gameId]);
 
   // Transform data for UI components
   const latestSubmission = getLatestSubmission(submissions);
@@ -99,39 +108,89 @@ export default function GamePage() {
     );
   }
 
-  // Error state
-  if (error) {
+  // Show join prompt if not participating and game exists
+  if (isParticipating === false && !error && game) {
     return (
       <AuthGuard>
         <div className="container mx-auto p-4">
-          <ErrorDisplay error={error} />
+          <Card className="mx-auto max-w-md">
+            <CardHeader>
+              <CardTitle>{t("joinGameTitle")}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">{t("title")}</p>
+                  <p className="font-semibold">{game.title}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">{t("theme")}</p>
+                  <p>{game.theme}</p>
+                </div>
+                <Button
+                  className="w-full"
+                  onClick={async () => {
+                    try {
+                      const response = await fetch(`/api/game/${gameId}/join`, {
+                        method: "POST",
+                        headers: {
+                          Authorization: `Bearer ${await auth.currentUser?.getIdToken()}`,
+                        },
+                      });
+                      if (response.ok) {
+                        router.refresh();
+                      }
+                    } catch (error) {
+                      console.error("Failed to join game:", error);
+                    }
+                  }}
+                >
+                  {t("joinGameButton")}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </AuthGuard>
     );
   }
 
-  // Game not found state
-  if (!game) {
+  // Error state or game not found
+  if (error || !game) {
     return (
       <AuthGuard>
         <div className="container mx-auto p-4">
-          <ErrorDisplay error={t("gameNotFound")} />
+          <Card className="mx-auto max-w-md">
+            <CardHeader>
+              <CardTitle>{t("errors.gameNotFound")}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground mb-4">
+                {t("errors.gameNotFoundDescription", { gameId })}
+              </p>
+              <Button
+                className="w-full"
+                onClick={() => router.push("/game/join")}
+              >
+                {t("Game.goToJoinPage")}
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </AuthGuard>
     );
   }
 
-  // Show join prompt if not participating
+  // Already handled above, but TypeScript needs this
   if (isParticipating === false) {
+    router.push(`/game/join?gameId=${gameId}`);
     return (
       <AuthGuard>
-        <JoinPrompt
-          game={game}
-          onJoinSuccess={() => {
-            // Refresh page to reload with participation status
-            window.location.reload();
-          }}
-        />
+        <div className="container mx-auto p-4">
+          <div className="text-center">
+            <p>{t("Game.redirectingToJoinPage")}</p>
+          </div>
+        </div>
       </AuthGuard>
     );
   }
