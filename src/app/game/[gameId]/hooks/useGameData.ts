@@ -209,8 +209,15 @@ export function useGameData(gameId: string) {
       }));
 
       // Load additional data in parallel
+      // Only fetch submissions if user is participating in the game
       console.log("ℹ️ XXX: ~ useGameData.ts ~ Loading additional data");
-      await Promise.all([refreshParticipants(), refreshSubmissions()]);
+      const isParticipating = user.participatingGames?.includes(gameId);
+      if (isParticipating) {
+        await Promise.all([refreshParticipants(), refreshSubmissions()]);
+      } else {
+        // Non-participants can see participants but not submissions
+        await refreshParticipants();
+      }
       console.log("ℹ️ XXX: ~ useGameData.ts ~ All data loaded successfully");
     } catch (error) {
       const errorMessage =

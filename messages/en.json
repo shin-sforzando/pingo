@@ -96,6 +96,7 @@
       "thresholdNote": "Threshold: {threshold}% or higher for acceptance"
     },
     "redirectingToJoinPage": "Redirecting to join page...",
+    "redirectingToSharePage": "Redirecting to game details page...",
     "joinGameTitle": "Join This Game",
     "joinGameButton": "Join Game",
     "goToJoinPage": "Go to Join Page",

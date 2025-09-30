@@ -13,7 +13,6 @@ import { Confetti, type ConfettiRef } from "@/components/magicui/confetti";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
-import { auth } from "@/lib/firebase/client";
 import { AcceptanceStatus } from "@/types/common";
 import { ErrorDisplay } from "./components/ErrorDisplay";
 import { GameHeader } from "./components/GameHeader";
@@ -95,8 +94,15 @@ export default function GamePage() {
     playerBoard?.completedLines || [],
   );
 
-  // Loading state
-  if (isLoading) {
+  // Redirect to share page if not participating
+  useEffect(() => {
+    if (isParticipating === false) {
+      router.push(`/game/${gameId}/share`);
+    }
+  }, [isParticipating, gameId, router]);
+
+  // Loading state or redirecting
+  if (isLoading || isParticipating === null) {
     return (
       <AuthGuard>
         <div className="container mx-auto p-4">
@@ -108,48 +114,16 @@ export default function GamePage() {
     );
   }
 
-  // Show join prompt if not participating and game exists
-  if (isParticipating === false && !error && game) {
+  // Show redirect message while navigating
+  if (isParticipating === false) {
     return (
       <AuthGuard>
         <div className="container mx-auto p-4">
-          <Card className="mx-auto max-w-md">
-            <CardHeader>
-              <CardTitle>{t("joinGameTitle")}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">{t("title")}</p>
-                  <p className="font-semibold">{game.title}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">{t("theme")}</p>
-                  <p>{game.theme}</p>
-                </div>
-                <Button
-                  className="w-full"
-                  onClick={async () => {
-                    try {
-                      const response = await fetch(`/api/game/${gameId}/join`, {
-                        method: "POST",
-                        headers: {
-                          Authorization: `Bearer ${await auth.currentUser?.getIdToken()}`,
-                        },
-                      });
-                      if (response.ok) {
-                        router.refresh();
-                      }
-                    } catch (error) {
-                      console.error("Failed to join game:", error);
-                    }
-                  }}
-                >
-                  {t("joinGameButton")}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="text-center">
+            <p className="text-muted-foreground">
+              {t("redirectingToSharePage")}
+            </p>
+          </div>
         </div>
       </AuthGuard>
     );
@@ -172,24 +146,10 @@ export default function GamePage() {
                 className="w-full"
                 onClick={() => router.push("/game/join")}
               >
-                {t("Game.goToJoinPage")}
+                {t("goToJoinPage")}
               </Button>
             </CardContent>
           </Card>
-        </div>
-      </AuthGuard>
-    );
-  }
-
-  // Already handled above, but TypeScript needs this
-  if (isParticipating === false) {
-    router.push(`/game/join?gameId=${gameId}`);
-    return (
-      <AuthGuard>
-        <div className="container mx-auto p-4">
-          <div className="text-center">
-            <p>{t("Game.redirectingToJoinPage")}</p>
-          </div>
         </div>
       </AuthGuard>
     );

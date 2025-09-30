@@ -96,6 +96,7 @@
       "thresholdNote": "閾値: {threshold}%以上で承認"
     },
     "redirectingToJoinPage": "ゲーム参加ページにリダイレクトしています...",
+    "redirectingToSharePage": "ゲーム詳細ページにリダイレクトしています...",
     "joinGameTitle": "このゲームに参加",
     "joinGameButton": "ゲームに参加する",
     "goToJoinPage": "ゲーム参加ページへ",
