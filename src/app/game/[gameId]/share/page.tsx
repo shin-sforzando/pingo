@@ -7,8 +7,7 @@ import {
   PlayIcon,
   TableIcon,
 } from "lucide-react";
-import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { BingoBoard } from "@/components/game/BingoBoard";
@@ -17,7 +16,9 @@ import { QRCodeCard } from "@/components/game/QRCodeCard";
 import { HyperText } from "@/components/magicui/hyper-text";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 import { BASE_URL } from "@/lib/constants";
+import { auth } from "@/lib/firebase/client";
 import { formatDate } from "@/lib/utils";
 import { GameStatus } from "@/types/common";
 import type { Game, GameBoard } from "@/types/schema";
@@ -25,8 +26,10 @@ import type { Game, GameBoard } from "@/types/schema";
 export default function SharePage() {
   const params = useParams();
   const gameId = params.gameId as string;
+  const router = useRouter();
 
   const t = useTranslations("Game.Share");
+  const { user } = useAuth();
 
   const [game, setGame] = useState<Game | null>(null);
   const [board, setBoard] = useState<GameBoard | null>(null);
@@ -35,6 +38,8 @@ export default function SharePage() {
   >([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [isParticipating, setIsParticipating] = useState(false);
+  const [isJoining, setIsJoining] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -82,6 +87,96 @@ export default function SharePage() {
 
     fetchData();
   }, [gameId]);
+
+  // Check if user is participating in this game by fetching from API
+  useEffect(() => {
+    const checkParticipation = async () => {
+      if (!user) {
+        setIsParticipating(false);
+        return;
+      }
+
+      try {
+        const idToken = await auth.currentUser?.getIdToken();
+        if (!idToken) {
+          setIsParticipating(false);
+          return;
+        }
+
+        // Check participation by calling the participants API
+        const response = await fetch(`/api/game/${gameId}/participants`, {
+          headers: {
+            Authorization: `Bearer ${idToken}`,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.data) {
+            // Check if current user is in the participants list
+            const isUserParticipating = data.data.some(
+              (participant: { id: string }) => participant.id === user.id,
+            );
+            setIsParticipating(isUserParticipating);
+          } else {
+            setIsParticipating(false);
+          }
+        } else {
+          setIsParticipating(false);
+        }
+      } catch (error) {
+        console.error("Error checking participation:", error);
+        setIsParticipating(false);
+      }
+    };
+
+    checkParticipation();
+  }, [user?.id, gameId, user]);
+
+  // Handle join button click
+  const handleJoinClick = async () => {
+    if (isParticipating) {
+      // Already participating, just navigate to game page
+      router.push(`/game/${gameId}`);
+      return;
+    }
+
+    // Not participating yet, join the game first
+    setIsJoining(true);
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      if (!idToken) {
+        throw new Error("Not authenticated");
+      }
+
+      const response = await fetch(`/api/game/${gameId}/join`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${idToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error?.message || "Failed to join game");
+      }
+
+      const responseData = await response.json();
+      if (!responseData.success) {
+        throw new Error(responseData.error?.message || "Failed to join game");
+      }
+
+      // Successfully joined, navigate to game page
+      router.push(`/game/${gameId}`);
+    } catch (error) {
+      console.error("Error joining game:", error);
+      // Even if join fails, still try to navigate (user might already be joined)
+      router.push(`/game/${gameId}`);
+    } finally {
+      setIsJoining(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -139,13 +234,21 @@ export default function SharePage() {
         </div>
       </div>
 
-      {/* Join game button */}
+      {/* Play/Join game button */}
       <div className="mb-6 flex justify-center">
-        <Button variant="default" size="lg" className="gap-2" asChild>
-          <Link href={`/game/${gameId}`}>
-            <PlayIcon className="h-5 w-5" />
-            {t("joinGame")}
-          </Link>
+        <Button
+          variant="default"
+          size="lg"
+          className="gap-2"
+          onClick={handleJoinClick}
+          disabled={isJoining}
+        >
+          <PlayIcon className="h-5 w-5" />
+          {isJoining
+            ? "Joining..."
+            : isParticipating
+              ? t("playGame")
+              : t("joinGame")}
         </Button>
       </div>
 
@@ -221,13 +324,21 @@ export default function SharePage() {
         </div>
       )}
 
-      {/* Join game button */}
+      {/* Play/Join game button */}
       <div className="mb-6 flex justify-center">
-        <Button variant="default" size="lg" className="gap-2" asChild>
-          <Link href={`/game/${gameId}`}>
-            <PlayIcon className="h-5 w-5" />
-            {t("joinGame")}
-          </Link>
+        <Button
+          variant="default"
+          size="lg"
+          className="gap-2"
+          onClick={handleJoinClick}
+          disabled={isJoining}
+        >
+          <PlayIcon className="h-5 w-5" />
+          {isJoining
+            ? "Joining..."
+            : isParticipating
+              ? t("playGame")
+              : t("joinGame")}
         </Button>
       </div>
     </div>

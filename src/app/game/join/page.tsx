@@ -269,8 +269,8 @@ export default function JoinGamePage() {
         );
       }
 
-      // Always redirect to game page (whether new join or already participating)
-      router.push(`/game/${data.gameId}`);
+      // Redirect to share page to show game details
+      router.push(`/game/${data.gameId}/share`);
     } catch (error) {
       console.error("Error joining game:", error);
       setJoinError(

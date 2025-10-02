@@ -29,6 +29,7 @@ Pingoは、AIによる画像判定を活用したビンゴゲームです。
     - demo / daredem0
     - demo1 / daredem0
     - demo2 / daredem0
+    - demo3 / daredem0
 - **標準ライブラリ優先** - 可能な限り標準ライブラリを使用
 - **Linter警告を無視しない**
 - **全コンポーネントにStorybookストーリーが必要**

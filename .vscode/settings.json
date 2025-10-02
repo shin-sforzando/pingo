@@ -73,5 +73,8 @@
   },
   "i18n-ally.displayLanguage": "ja",
   "i18n-ally.keystyle": "nested",
-  "i18n-ally.localesPaths": ["messages", "src/i18n"]
+  "i18n-ally.localesPaths": ["messages", "src/i18n"],
+  "[html]": {
+    "editor.defaultFormatter": "vscode.html-language-features"
+  }
 }
