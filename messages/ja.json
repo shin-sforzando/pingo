@@ -46,6 +46,8 @@
     "selectDate": "日付を選択",
     "isPublic": "公開設定",
     "isPublicDescription": "このゲームを全員に公開する",
+    "participatingGames": "参加中のゲーム",
+    "participatingGamesDescription": "{count}件の参加中のゲーム",
     "availableGames": "参加可能なゲーム",
     "availableGamesDescription": "{count}件の参加可能なゲーム",
     "isPhotoSharingEnabled": "写真共有",

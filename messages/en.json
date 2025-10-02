@@ -46,6 +46,8 @@
     "selectDate": "Select a date",
     "isPublic": "Public Game",
     "isPublicDescription": "Make this game visible to everyone",
+    "participatingGames": "Games you're currently participating in",
+    "participatingGamesDescription": "{count} games you're participating in",
     "availableGames": "Available Games",
     "availableGamesDescription": "{count} available games",
     "isPhotoSharingEnabled": "Photo Sharing",

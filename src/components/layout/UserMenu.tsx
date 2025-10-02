@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import type { ReactElement } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -31,10 +31,21 @@ export function UserMenu(): ReactElement {
     Record<string, Pick<Game, "id" | "title">>
   >({});
 
+  // Memoize the participatingGames array to prevent unnecessary re-renders
+  const _participatingGamesIds = useMemo(
+    () => user?.participatingGames?.join(",") ?? "",
+    [user?.participatingGames],
+  );
+
   // Fetch game information for participating games
   useEffect(() => {
     const fetchGameInfos = async () => {
-      if (!user?.participatingGames || user.participatingGames.length === 0) {
+      if (!user) {
+        return;
+      }
+
+      if (!user.participatingGames || user.participatingGames.length === 0) {
+        setGameInfos({});
         return;
       }
 
@@ -80,7 +91,7 @@ export function UserMenu(): ReactElement {
     };
 
     fetchGameInfos();
-  }, [user?.participatingGames]);
+  }, [user]);
 
   const toggleLocale = async (): Promise<void> => {
     try {
@@ -89,6 +100,16 @@ export function UserMenu(): ReactElement {
       router.refresh();
     } catch (error) {
       console.error("Failed to switch language:", error);
+    }
+  };
+
+  const handleLogout = async (): Promise<void> => {
+    try {
+      await logout();
+      // Redirect to homepage after successful logout
+      router.push("/");
+    } catch (error) {
+      console.error("Failed to logout:", error);
     }
   };
 
@@ -138,7 +159,7 @@ export function UserMenu(): ReactElement {
         )}
 
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => logout()} variant="destructive">
+        <DropdownMenuItem onClick={handleLogout} variant="destructive">
           <LogOut className="mr-2 h-4 w-4" />
           {headerT("logout")}
         </DropdownMenuItem>
