@@ -371,6 +371,31 @@ Respond with a JSON object containing:
 
 Be strict in your matching - only match if you're confident the image clearly shows the subject.`;
 
+    const analysisResponseSchema = {
+      type: Type.OBJECT,
+      properties: {
+        description: {
+          type: Type.STRING,
+          description: "A detailed description of what you see in the image",
+        },
+        matchedCellId: {
+          type: Type.STRING,
+          nullable: true,
+          description: "The ID of the matching cell, or null if no good match",
+        },
+        confidence: {
+          type: Type.NUMBER,
+          description: "Your confidence level (0.0 to 1.0) in the match",
+        },
+        reasoning: {
+          type: Type.STRING,
+          description:
+            "Explanation of why you chose this match or why no match was found",
+        },
+      },
+      required: ["description", "matchedCellId", "confidence", "reasoning"],
+    };
+
     const analysisResult = await model({
       model: "gemini-2.0-flash-001",
       contents: [
@@ -384,6 +409,7 @@ Be strict in your matching - only match if you're confident the image clearly sh
       ],
       config: {
         responseMimeType: "application/json",
+        responseSchema: analysisResponseSchema,
       },
     });
 
@@ -397,6 +423,9 @@ Be strict in your matching - only match if you're confident the image clearly sh
 
     try {
       analysisResponse = JSON.parse(analysisText);
+      console.log("ℹ️ XXX: ~ image/check/route.ts ~ Gemini analysis response", {
+        analysisResponse,
+      });
     } catch {
       console.error("Failed to parse Gemini analysis response:", analysisText);
       return NextResponse.json(
@@ -405,10 +434,15 @@ Be strict in your matching - only match if you're confident the image clearly sh
       );
     }
 
+    // Validate and provide defaults for missing fields
+    const description =
+      analysisResponse.description || "No description provided";
+    const reasoning = analysisResponse.reasoning || "No reasoning provided";
+    const matchedCellId = analysisResponse.matchedCellId ?? null;
+    const confidence = analysisResponse.confidence ?? 0;
+
     // Determine acceptance status based on confidence threshold
-    const isAccepted =
-      analysisResponse.matchedCellId &&
-      game.confidenceThreshold <= analysisResponse.confidence;
+    const isAccepted = matchedCellId && game.confidenceThreshold <= confidence;
 
     const acceptanceStatus = isAccepted
       ? AcceptanceStatus.ACCEPTED
@@ -421,9 +455,9 @@ Be strict in your matching - only match if you're confident the image clearly sh
       imageUrl,
       submittedAt: now,
       analyzedAt: now,
-      critique: `${analysisResponse.description}\n\n${analysisResponse.reasoning}`,
-      matchedCellId: analysisResponse.matchedCellId,
-      confidence: analysisResponse.confidence,
+      critique: `${description}\n\n${reasoning}`,
+      matchedCellId,
+      confidence,
       processingStatus: ProcessingStatus.ANALYZED,
       acceptanceStatus,
       errorMessage: null,
@@ -432,8 +466,7 @@ Be strict in your matching - only match if you're confident the image clearly sh
     } as Submission;
 
     // Step 4: Use transaction to atomically create submission and update player board
-    if (isAccepted && analysisResponse.matchedCellId) {
-      const matchedCellId = analysisResponse.matchedCellId; // Type narrowing
+    if (isAccepted && matchedCellId) {
       // Update cell state if not already open (double-check to prevent race conditions)
       if (!playerBoard.cellStates[matchedCellId]?.isOpen) {
         playerBoard.cellStates[matchedCellId] = {
@@ -512,8 +545,8 @@ Be strict in your matching - only match if you're confident the image clearly sh
           // Return error response to client indicating partial failure
           const errorResponse: ImageCheckResponse = {
             appropriate: true,
-            confidence: analysisResponse.confidence,
-            matchedCellId: analysisResponse.matchedCellId,
+            confidence,
+            matchedCellId,
             acceptanceStatus: AcceptanceStatus.NO_MATCH, // Downgrade to NO_MATCH due to processing failure
             critique: `Processing failed: ${transactionResult.error}. ${submission.critique}`,
             newlyCompletedLines: 0,
@@ -535,8 +568,8 @@ Be strict in your matching - only match if you're confident the image clearly sh
         // Return success response with confetti trigger information
         const successResponse: ImageCheckResponse = {
           appropriate: true,
-          confidence: analysisResponse.confidence,
-          matchedCellId: analysisResponse.matchedCellId,
+          confidence,
+          matchedCellId,
           acceptanceStatus,
           critique: submission.critique,
           newlyCompletedLines: freshlyCompletedLines.length,
@@ -579,8 +612,8 @@ Be strict in your matching - only match if you're confident the image clearly sh
 
     const finalResponse: ImageCheckResponse = {
       appropriate: true,
-      confidence: analysisResponse.confidence,
-      matchedCellId: analysisResponse.matchedCellId,
+      confidence,
+      matchedCellId,
       acceptanceStatus,
       critique: submission.critique,
       newlyCompletedLines: 0,

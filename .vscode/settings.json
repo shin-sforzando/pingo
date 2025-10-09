@@ -1,8 +1,14 @@
 {
+  "[html]": {
+    "editor.defaultFormatter": "vscode.html-language-features"
+  },
   "[markdown]": {
     "editor.codeActionsOnSave": {
       "source.fixAll.markdownlint": "explicit"
     }
+  },
+  "[xml]": {
+    "editor.defaultFormatter": "DotJoshJohnson.xml"
   },
   "[yaml]": {
     "editor.defaultFormatter": "redhat.vscode-yaml"
@@ -60,11 +66,11 @@
     "WCAG",
     "xlink"
   ],
-  "editor.defaultFormatter": "biomejs.biome",
   "editor.codeActionsOnSave": {
     "source.fixAll.biome": "explicit",
     "source.organizeImports.biome": "explicit"
   },
+  "editor.defaultFormatter": "biomejs.biome",
   "editor.quickSuggestions": {
     "strings": "on"
   },
@@ -73,8 +79,5 @@
   },
   "i18n-ally.displayLanguage": "ja",
   "i18n-ally.keystyle": "nested",
-  "i18n-ally.localesPaths": ["messages", "src/i18n"],
-  "[html]": {
-    "editor.defaultFormatter": "vscode.html-language-features"
-  }
+  "i18n-ally.localesPaths": ["messages", "src/i18n"]
 }
