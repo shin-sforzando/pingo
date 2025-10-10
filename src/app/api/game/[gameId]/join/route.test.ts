@@ -70,6 +70,12 @@ vi.mock("@/lib/firebase/admin", () => ({
 // Mock Firebase Admin Firestore
 vi.mock("firebase-admin/firestore", () => ({
   getFirestore: vi.fn(),
+  FieldValue: {
+    arrayUnion: vi.fn((...elements) => ({
+      _methodName: "FieldValue.arrayUnion",
+      _elements: elements,
+    })),
+  },
 }));
 
 // Mock Firebase Admin Collections
@@ -79,6 +85,9 @@ vi.mock("@/lib/firebase/admin-collections", () => ({
   },
   AdminUserService: {
     getUser: vi.fn(),
+  },
+  AdminTransactionService: {
+    joinGame: vi.fn(),
   },
 }));
 
@@ -295,20 +304,16 @@ describe("POST /api/game/[gameId]/join", () => {
                 .mockImplementation((subCollectionName: string) => {
                   if (subCollectionName === "participants") {
                     return {
-                      where: vi.fn().mockReturnValue({
+                      doc: vi.fn(() => ({
                         get: vi.fn().mockResolvedValue({
-                          empty: false, // User is already participating
-                          docs: [
-                            {
-                              data: () => ({
-                                id: "existing-participation-id",
-                                gameId: "ABC123",
-                                userId: "test-user-id",
-                              }),
-                            },
-                          ],
+                          exists: true, // User is already participating
+                          data: () => ({
+                            id: "existing-participation-id",
+                            gameId: "ABC123",
+                            userId: "test-user-id",
+                          }),
                         }),
-                      }),
+                      })),
                     };
                   }
                   return {};
@@ -346,9 +351,8 @@ describe("POST /api/game/[gameId]/join", () => {
 
   it("should successfully join a game", async () => {
     const { adminAuth } = await import("@/lib/firebase/admin");
-    const { AdminUserService, AdminGameService } = await import(
-      "@/lib/firebase/admin-collections"
-    );
+    const { AdminUserService, AdminGameService, AdminTransactionService } =
+      await import("@/lib/firebase/admin-collections");
     const { getFirestore } = await import("firebase-admin/firestore");
 
     vi.mocked(adminAuth.verifyIdToken).mockResolvedValue({
@@ -383,23 +387,7 @@ describe("POST /api/game/[gameId]/join", () => {
       createdAt: new Date(),
     } as MockGame);
 
-    // Mock Firestore operations
-    const mockSet = vi.fn().mockResolvedValue(undefined);
-    const mockUpdate = vi.fn().mockResolvedValue(undefined);
-    const mockGet = vi.fn();
-
-    // Mock game board
-    mockGet.mockResolvedValueOnce({
-      exists: true,
-      data: () => ({
-        cells: [
-          { id: "cell_0", subject: "Test1", isFree: false },
-          { id: "cell_12", subject: "FREE", isFree: true },
-          { id: "cell_24", subject: "Test2", isFree: false },
-        ],
-      }),
-    });
-
+    // Mock user not yet participating
     vi.mocked(getFirestore).mockReturnValue({
       collection: vi.fn().mockImplementation((collectionName: string) => {
         if (collectionName === "games") {
@@ -408,29 +396,12 @@ describe("POST /api/game/[gameId]/join", () => {
               collection: vi
                 .fn()
                 .mockImplementation((subCollectionName: string) => {
-                  if (subCollectionName === "board") {
-                    return {
-                      doc: vi.fn(() => ({
-                        get: mockGet,
-                      })),
-                    };
-                  }
-                  if (subCollectionName === "playerBoards") {
-                    return {
-                      doc: vi.fn(() => ({
-                        set: mockSet,
-                      })),
-                    };
-                  }
                   if (subCollectionName === "participants") {
                     return {
-                      where: vi.fn().mockReturnValue({
-                        get: vi.fn().mockResolvedValue({
-                          empty: true, // User is not participating
-                        }),
-                      }),
                       doc: vi.fn(() => ({
-                        set: mockSet,
+                        get: vi.fn().mockResolvedValue({
+                          exists: false, // User is NOT participating yet
+                        }),
                       })),
                     };
                   }
@@ -439,15 +410,14 @@ describe("POST /api/game/[gameId]/join", () => {
             })),
           };
         }
-        // Other collections (users, game_events)
-        return {
-          doc: vi.fn(() => ({
-            set: mockSet,
-            update: mockUpdate,
-          })),
-        };
+        return {};
       }),
     } as unknown as ReturnType<typeof getFirestore>);
+
+    // Mock successful transaction
+    vi.mocked(AdminTransactionService.joinGame).mockResolvedValue({
+      success: true,
+    });
 
     const request = new NextRequest("http://localhost/api/game/ABC123/join", {
       method: "POST",
@@ -465,13 +435,21 @@ describe("POST /api/game/[gameId]/join", () => {
     expect(data.success).toBe(true);
     expect(data.data).toHaveProperty("participationId");
     expect(data.data.participationId).toBeTruthy();
+
+    // Verify transaction was called
+    expect(AdminTransactionService.joinGame).toHaveBeenCalledWith(
+      "ABC123",
+      "test-user-id",
+      "test-user",
+      expect.any(String), // participationId (ULID)
+      expect.any(String), // eventId (ULID)
+    );
   });
 
   it("should return 404 if game board is not found", async () => {
     const { adminAuth } = await import("@/lib/firebase/admin");
-    const { AdminUserService, AdminGameService } = await import(
-      "@/lib/firebase/admin-collections"
-    );
+    const { AdminUserService, AdminGameService, AdminTransactionService } =
+      await import("@/lib/firebase/admin-collections");
     const { getFirestore } = await import("firebase-admin/firestore");
 
     vi.mocked(adminAuth.verifyIdToken).mockResolvedValue({
@@ -506,14 +484,7 @@ describe("POST /api/game/[gameId]/join", () => {
       createdAt: new Date(),
     } as MockGame);
 
-    // Mock Firestore operations
-    const mockGet = vi.fn();
-
-    // Mock game board not found
-    mockGet.mockResolvedValueOnce({
-      exists: false,
-    });
-
+    // Mock user not yet participating
     vi.mocked(getFirestore).mockReturnValue({
       collection: vi.fn().mockImplementation((collectionName: string) => {
         if (collectionName === "games") {
@@ -522,22 +493,12 @@ describe("POST /api/game/[gameId]/join", () => {
               collection: vi
                 .fn()
                 .mockImplementation((subCollectionName: string) => {
-                  if (subCollectionName === "board") {
-                    return {
-                      doc: vi.fn(() => ({
-                        get: mockGet,
-                      })),
-                    };
-                  }
                   if (subCollectionName === "participants") {
                     return {
-                      where: vi.fn().mockReturnValue({
-                        get: vi.fn().mockResolvedValue({
-                          empty: true, // User is not participating
-                        }),
-                      }),
                       doc: vi.fn(() => ({
-                        set: vi.fn(),
+                        get: vi.fn().mockResolvedValue({
+                          exists: false, // User is NOT participating yet
+                        }),
                       })),
                     };
                   }
@@ -546,14 +507,15 @@ describe("POST /api/game/[gameId]/join", () => {
             })),
           };
         }
-        return {
-          doc: vi.fn(() => ({
-            set: vi.fn(),
-            update: vi.fn(),
-          })),
-        };
+        return {};
       }),
     } as unknown as ReturnType<typeof getFirestore>);
+
+    // Mock transaction failure due to game board not found
+    vi.mocked(AdminTransactionService.joinGame).mockResolvedValue({
+      success: false,
+      error: "Game board not found",
+    });
 
     const request = new NextRequest("http://localhost/api/game/ABC123/join", {
       method: "POST",
@@ -567,8 +529,8 @@ describe("POST /api/game/[gameId]/join", () => {
     });
     const data = await response.json();
 
-    expect(response.status).toBe(404);
+    expect(response.status).toBe(500);
     expect(data.success).toBe(false);
-    expect(data.error.code).toBe("GAME_BOARD_NOT_FOUND");
+    expect(data.error.code).toBe("TRANSACTION_FAILED");
   });
 });

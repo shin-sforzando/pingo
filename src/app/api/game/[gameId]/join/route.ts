@@ -4,11 +4,10 @@ import { ulid } from "ulid";
 import { adminAuth } from "@/lib/firebase/admin";
 import {
   AdminGameService,
+  AdminTransactionService,
   AdminUserService,
 } from "@/lib/firebase/admin-collections";
 import type { ApiResponse } from "@/types/common";
-import { dateToAdminTimestamp } from "@/types/firestore";
-import type { GameBoard } from "@/types/schema";
 
 /**
  * POST handler for joining a game
@@ -96,134 +95,64 @@ export async function POST(
       );
     }
 
-    // Check if user is already participating
+    // Check if user is already participating (quick check before transaction)
     const db = getFirestore();
-    const participationSnapshot = await db
+    const participationDoc = await db
       .collection("games")
       .doc(gameId)
       .collection("participants")
-      .where("userId", "==", userId)
+      .doc(userId)
       .get();
 
-    if (!participationSnapshot.empty) {
+    if (participationDoc.exists) {
       // User is already participating - return success with existing participation
-      const existingParticipation = participationSnapshot.docs[0].data();
+      const existingParticipation = participationDoc.data();
       return NextResponse.json({
         success: true,
         data: {
-          participationId: existingParticipation.id,
+          participationId: existingParticipation?.id || userId,
           alreadyParticipating: true,
         },
       });
     }
 
-    // Create participation record
+    // Generate IDs for the transaction
     const participationId = ulid();
-    const now = new Date();
-    const participation = {
-      id: participationId,
+    const eventId = ulid();
+
+    // Execute game join transaction
+    const result = await AdminTransactionService.joinGame(
       gameId,
       userId,
-      username: user.username,
-      joinedAt: dateToAdminTimestamp(now),
-      completedLines: 0,
-      isWinner: false,
-      createdAt: dateToAdminTimestamp(now),
-    };
+      user.username,
+      participationId,
+      eventId,
+    );
 
-    // Save to participants subcollection with userId as document ID
-    await db
-      .collection("games")
-      .doc(gameId)
-      .collection("participants")
-      .doc(userId) // Use userId as document ID for consistency
-      .set(participation);
+    if (!result.success) {
+      // Check if error is due to already participating
+      if (result.error?.includes("already participating")) {
+        return NextResponse.json({
+          success: true,
+          data: {
+            participationId: userId,
+            alreadyParticipating: true,
+          },
+        });
+      }
 
-    // Get game board cells from the correct location
-    const gameBoardDoc = await db
-      .collection("games")
-      .doc(gameId)
-      .collection("board")
-      .doc("board")
-      .get();
-    if (!gameBoardDoc.exists) {
+      // Handle other transaction errors
       return NextResponse.json(
         {
           success: false,
           error: {
-            code: "GAME_BOARD_NOT_FOUND",
-            message: "Game board not found",
+            code: "TRANSACTION_FAILED",
+            message: result.error || "Failed to join game",
           },
         },
-        { status: 404 },
+        { status: 500 },
       );
     }
-
-    const gameBoard = gameBoardDoc.data() as GameBoard;
-
-    // Create player board with initial cell states (all players use the same board)
-    // Use object type for Firestore document structure
-    const cellStates: Record<
-      string,
-      {
-        isOpen: boolean;
-        openedAt: ReturnType<typeof dateToAdminTimestamp>;
-        openedBySubmissionId: string | null;
-      }
-    > = {};
-
-    // Initialize all cell states as not opened
-    gameBoard.cells.forEach((cell) => {
-      cellStates[cell.id] = {
-        isOpen: cell.isFree || false, // Free cells start as open
-        openedAt: cell.isFree ? dateToAdminTimestamp(new Date()) : null,
-        openedBySubmissionId: null,
-      };
-    });
-
-    const playerBoard = {
-      userId,
-      cellStates,
-      completedLines: [],
-    };
-
-    // Store in the correct subcollection: games/{gameId}/playerBoards/{userId}
-    await db
-      .collection("games")
-      .doc(gameId)
-      .collection("playerBoards")
-      .doc(userId)
-      .set(playerBoard);
-
-    // Update user's participating games
-    const updatedParticipatingGames = [
-      ...(user.participatingGames || []),
-      gameId,
-    ];
-    await db
-      .collection("users")
-      .doc(userId)
-      .update({
-        participatingGames: updatedParticipatingGames,
-        updatedAt: dateToAdminTimestamp(new Date()),
-      });
-
-    // Create game event
-    const eventId = ulid();
-    await db
-      .collection("game_events")
-      .doc(eventId)
-      .set({
-        id: eventId,
-        gameId,
-        type: "player_joined",
-        userId,
-        username: user.username,
-        details: {
-          participationId,
-        },
-        createdAt: dateToAdminTimestamp(new Date()),
-      });
 
     return NextResponse.json({
       success: true,

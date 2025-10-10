@@ -919,4 +919,143 @@ export namespace AdminTransactionService {
       };
     }
   }
+
+  /**
+   * Atomically join a game with all related operations
+   * Ensures data consistency for participation, player board, user update, and event creation
+   */
+  export async function joinGame(
+    gameId: string,
+    userId: string,
+    username: string,
+    participationId: string,
+    eventId: string,
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      // Dynamic import for FieldValue
+      const { FieldValue } = await import("firebase-admin/firestore");
+
+      await adminFirestore.runTransaction(async (transaction) => {
+        // Define all document references
+        const participantRef = adminFirestore
+          .collection("games")
+          .doc(gameId)
+          .collection("participants")
+          .doc(userId);
+        const gameBoardRef = adminFirestore
+          .collection("games")
+          .doc(gameId)
+          .collection("board")
+          .doc("board");
+        const playerBoardRef = adminFirestore
+          .collection("games")
+          .doc(gameId)
+          .collection("playerBoards")
+          .doc(userId);
+        const userRef = adminFirestore.collection("users").doc(userId);
+        const eventRef = adminFirestore.collection("game_events").doc(eventId);
+
+        // IMPORTANT: All reads must be executed before any writes in Firestore transactions
+        const [participantDoc, gameBoardDoc, playerBoardDoc] =
+          await Promise.all([
+            transaction.get(participantRef),
+            transaction.get(gameBoardRef),
+            transaction.get(playerBoardRef),
+          ]);
+
+        // Double-check participation (race condition protection)
+        if (participantDoc.exists) {
+          throw new Error("User is already participating in this game");
+        }
+
+        // Verify game board exists
+        if (!gameBoardDoc.exists) {
+          throw new Error("Game board not found");
+        }
+
+        // Check if player board already exists (shouldn't happen, but validate)
+        if (playerBoardDoc.exists) {
+          throw new Error("Player board already exists");
+        }
+
+        const gameBoard = gameBoardFromFirestore(
+          gameBoardDoc.data() as GameBoardDocument,
+        );
+        const now = new Date();
+        const timestamp = dateToTimestamp(now);
+
+        // Prepare participation record
+        const participation = {
+          id: participationId,
+          gameId,
+          userId,
+          username,
+          joinedAt: timestamp,
+          completedLines: 0,
+          isWinner: false,
+          createdAt: timestamp,
+          submissionCount: 0,
+          lastCompletedAt: null,
+          updatedAt: null,
+        };
+
+        // Prepare player board with initial cell states (using Date objects for domain model)
+        const cellStates: Record<
+          string,
+          {
+            isOpen: boolean;
+            openedAt: Date | null;
+            openedBySubmissionId: string | null;
+          }
+        > = {};
+
+        // Initialize all cell states as not opened
+        gameBoard.cells.forEach((cell) => {
+          cellStates[cell.id] = {
+            isOpen: cell.isFree || false, // Free cells start as open
+            openedAt: cell.isFree ? now : null,
+            openedBySubmissionId: null,
+          };
+        });
+
+        const playerBoard: PlayerBoard = {
+          userId,
+          cellStates,
+          completedLines: [],
+        };
+
+        const playerBoardData = playerBoardToFirestore(playerBoard);
+
+        // Prepare game event
+        const eventData = eventToFirestore({
+          id: eventId,
+          type: "player_joined",
+          userId,
+          timestamp: now,
+          details: {
+            participationId,
+          },
+          createdAt: now,
+          updatedAt: null,
+        });
+
+        // Now perform all writes atomically
+        transaction.set(participantRef, participation);
+        transaction.set(playerBoardRef, playerBoardData);
+        transaction.update(userRef, {
+          participatingGames: FieldValue.arrayUnion(gameId),
+          updatedAt: timestamp,
+        });
+        transaction.set(eventRef, eventData);
+      });
+
+      return { success: true };
+    } catch (error) {
+      console.error("Transaction failed:", error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
+    }
+  }
 }
