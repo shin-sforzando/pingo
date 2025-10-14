@@ -29,6 +29,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { TranslatedFormMessage } from "@/components/ui/translated-form-message";
 import { useAuth } from "@/contexts/AuthContext";
+import { useGameJoin } from "@/hooks/useGameJoin";
 import { useParticipatingGames } from "@/hooks/useParticipatingGames";
 import { auth } from "@/lib/firebase/client";
 import type { Game } from "@/types/schema";
@@ -63,9 +64,8 @@ export default function JoinGamePage() {
     null,
   );
 
-  // State for joining game
-  const [isJoining, setIsJoining] = useState(false);
-  const [joinError, setJoinError] = useState<string | null>(null);
+  // Use custom hook for game join functionality
+  const { joinGame, isJoining, error: joinError } = useGameJoin();
 
   // Fetch participating games using custom hook
   const {
@@ -255,50 +255,14 @@ export default function JoinGamePage() {
       }
     }
 
-    setIsJoining(true);
-    setJoinError(null);
+    // Use the custom hook to join the game
+    const result = await joinGame(data.gameId);
 
-    try {
-      // Get auth token
-      const idToken = await auth.currentUser?.getIdToken();
-      if (!idToken) {
-        throw new Error(t("Common.notAuthenticated"));
-      }
-
-      // Join the game
-      const response = await fetch(`/api/game/${data.gameId}/join`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${idToken}`,
-        },
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          errorData.error?.message || t("Game.errors.joinFailed"),
-        );
-      }
-
-      const responseData = await response.json();
-
-      if (!responseData.success) {
-        throw new Error(
-          responseData.error?.message || t("Game.errors.joinFailed"),
-        );
-      }
-
+    if (result.success) {
       // Redirect to share page to show game details
       router.push(`/game/${data.gameId}/share`);
-    } catch (error) {
-      console.error("Error joining game:", error);
-      setJoinError(
-        error instanceof Error ? error.message : t("Game.errors.joinFailed"),
-      );
-    } finally {
-      setIsJoining(false);
     }
+    // Error handling is managed by the hook
   };
 
   return (

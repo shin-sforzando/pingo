@@ -17,8 +17,9 @@ import { HyperText } from "@/components/magicui/hyper-text";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { useGameJoin } from "@/hooks/useGameJoin";
+import { useGameParticipation } from "@/hooks/useGameParticipation";
 import { BASE_URL } from "@/lib/constants";
-import { auth } from "@/lib/firebase/client";
 import { formatDate } from "@/lib/utils";
 import { GameStatus } from "@/types/common";
 import type { Game, GameBoard } from "@/types/schema";
@@ -31,6 +32,10 @@ export default function SharePage() {
   const t = useTranslations("Game.Share");
   const { user } = useAuth();
 
+  // Use custom hooks for participation and join functionality
+  const { isParticipating } = useGameParticipation(gameId, user);
+  const { joinGame, isJoining } = useGameJoin();
+
   const [game, setGame] = useState<Game | null>(null);
   const [board, setBoard] = useState<GameBoard | null>(null);
   const [participants, setParticipants] = useState<
@@ -38,8 +43,6 @@ export default function SharePage() {
   >([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [isParticipating, setIsParticipating] = useState(false);
-  const [isJoining, setIsJoining] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -88,52 +91,7 @@ export default function SharePage() {
     fetchData();
   }, [gameId]);
 
-  // Check if user is participating in this game by fetching from API
-  useEffect(() => {
-    const checkParticipation = async () => {
-      if (!user) {
-        setIsParticipating(false);
-        return;
-      }
-
-      try {
-        const idToken = await auth.currentUser?.getIdToken();
-        if (!idToken) {
-          setIsParticipating(false);
-          return;
-        }
-
-        // Check participation by calling the participants API
-        const response = await fetch(`/api/game/${gameId}/participants`, {
-          headers: {
-            Authorization: `Bearer ${idToken}`,
-          },
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          if (data.success && data.data) {
-            // Check if current user is in the participants list
-            const isUserParticipating = data.data.some(
-              (participant: { id: string }) => participant.id === user.id,
-            );
-            setIsParticipating(isUserParticipating);
-          } else {
-            setIsParticipating(false);
-          }
-        } else {
-          setIsParticipating(false);
-        }
-      } catch (error) {
-        console.error("Error checking participation:", error);
-        setIsParticipating(false);
-      }
-    };
-
-    checkParticipation();
-  }, [user?.id, gameId, user]);
-
-  // Handle join button click
+  // Handle join button click using the custom hook
   const handleJoinClick = async () => {
     if (isParticipating) {
       // Already participating, just navigate to game page
@@ -142,39 +100,15 @@ export default function SharePage() {
     }
 
     // Not participating yet, join the game first
-    setIsJoining(true);
-    try {
-      const idToken = await auth.currentUser?.getIdToken();
-      if (!idToken) {
-        throw new Error("Not authenticated");
-      }
+    const result = await joinGame(gameId);
 
-      const response = await fetch(`/api/game/${gameId}/join`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${idToken}`,
-        },
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error?.message || "Failed to join game");
-      }
-
-      const responseData = await response.json();
-      if (!responseData.success) {
-        throw new Error(responseData.error?.message || "Failed to join game");
-      }
-
-      // Successfully joined, navigate to game page
+    if (result.success || result.data?.alreadyParticipating) {
+      // Successfully joined or already participating, navigate to game page
       router.push(`/game/${gameId}`);
-    } catch (error) {
-      console.error("Error joining game:", error);
-      // Even if join fails, still try to navigate (user might already be joined)
+    } else {
+      // Join failed, but still try to navigate (user might already be joined)
+      console.error("Error joining game:", result.error);
       router.push(`/game/${gameId}`);
-    } finally {
-      setIsJoining(false);
     }
   };
 

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import type { Participant } from "@/components/game/ParticipantsList";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAuthenticatedFetch } from "@/hooks/useAuthenticatedFetch";
 import type { Cell, Game, PlayerBoard, Submission } from "@/types/schema";
 
 interface GameDataState {
@@ -20,6 +21,7 @@ interface GameDataState {
  */
 export function useGameData(gameId: string) {
   const { user } = useAuth();
+  const { authenticatedFetch } = useAuthenticatedFetch();
   const [state, setState] = useState<GameDataState>({
     game: null,
     gameBoard: null,
@@ -32,20 +34,6 @@ export function useGameData(gameId: string) {
   });
 
   /**
-   * Fetches authentication token for API calls
-   * Centralized token management to avoid repetition
-   */
-  const getAuthToken = useCallback(async (): Promise<string | null> => {
-    try {
-      const { auth } = await import("@/lib/firebase/client");
-      return (await auth.currentUser?.getIdToken()) || null;
-    } catch (error) {
-      console.error("Failed to get auth token:", error);
-      return null;
-    }
-  }, []);
-
-  /**
    * Refreshes participants data from API
    * Called after successful image submissions to update completion stats
    */
@@ -53,12 +41,9 @@ export function useGameData(gameId: string) {
     if (!user || !gameId) return;
 
     try {
-      const authToken = await getAuthToken();
-      if (!authToken) return;
-
-      const response = await fetch(`/api/game/${gameId}/participants`, {
-        headers: { Authorization: `Bearer ${authToken}` },
-      });
+      const response = await authenticatedFetch(
+        `/api/game/${gameId}/participants`,
+      );
 
       if (response.ok) {
         const data = await response.json();
@@ -70,7 +55,7 @@ export function useGameData(gameId: string) {
     } catch (error) {
       console.error("Failed to refresh participants:", error);
     }
-  }, [user, gameId, getAuthToken]);
+  }, [user, gameId, authenticatedFetch]);
 
   /**
    * Refreshes user's submissions data from API
@@ -80,14 +65,8 @@ export function useGameData(gameId: string) {
     if (!user || !gameId) return;
 
     try {
-      const authToken = await getAuthToken();
-      if (!authToken) return;
-
-      const response = await fetch(
+      const response = await authenticatedFetch(
         `/api/game/${gameId}/submission?userId=${user.id}&limit=10`,
-        {
-          headers: { Authorization: `Bearer ${authToken}` },
-        },
       );
 
       if (response.ok) {
@@ -115,7 +94,7 @@ export function useGameData(gameId: string) {
         submissions: [],
       }));
     }
-  }, [user, gameId, getAuthToken]);
+  }, [user, gameId, authenticatedFetch]);
 
   /**
    * Loads initial game data from multiple API endpoints
@@ -139,16 +118,9 @@ export function useGameData(gameId: string) {
       console.log("ℹ️ XXX: ~ useGameData.ts ~ Starting game data load");
       setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
-      const authToken = await getAuthToken();
-      if (!authToken) {
-        throw new Error("Authentication token not available");
-      }
-
-      const headers = { Authorization: `Bearer ${authToken}` };
-
       // Fetch game data
       console.log("ℹ️ XXX: ~ useGameData.ts ~ Fetching game data");
-      const gameResponse = await fetch(`/api/game/${gameId}`, { headers });
+      const gameResponse = await authenticatedFetch(`/api/game/${gameId}`);
       if (!gameResponse.ok) {
         const errorData = await gameResponse.json();
         throw new Error(errorData.error?.message || "Failed to load game");
@@ -162,9 +134,9 @@ export function useGameData(gameId: string) {
 
       // Fetch game board
       console.log("ℹ️ XXX: ~ useGameData.ts ~ Fetching game board");
-      const gameBoardResponse = await fetch(`/api/game/${gameId}/board`, {
-        headers,
-      });
+      const gameBoardResponse = await authenticatedFetch(
+        `/api/game/${gameId}/board`,
+      );
       let gameBoard: Cell[] | null = null;
       if (gameBoardResponse.ok) {
         const gameBoardData = await gameBoardResponse.json();
@@ -180,9 +152,8 @@ export function useGameData(gameId: string) {
 
       // Fetch player board
       console.log("ℹ️ XXX: ~ useGameData.ts ~ Fetching player board");
-      const boardResponse = await fetch(
+      const boardResponse = await authenticatedFetch(
         `/api/game/${gameId}/playerBoard/${user.id}`,
-        { headers },
       );
       let playerBoard: PlayerBoard | null = null;
       if (boardResponse.ok) {
@@ -232,7 +203,13 @@ export function useGameData(gameId: string) {
         isLoading: false,
       }));
     }
-  }, [user, gameId, getAuthToken, refreshParticipants, refreshSubmissions]);
+  }, [
+    user,
+    gameId,
+    authenticatedFetch,
+    refreshParticipants,
+    refreshSubmissions,
+  ]);
 
   /**
    * Sets up real-time Firestore listener for player board updates

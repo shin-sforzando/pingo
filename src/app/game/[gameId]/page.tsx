@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { BingoBoard } from "@/components/game/BingoBoard";
 import { GameInfo } from "@/components/game/GameInfo";
@@ -13,7 +13,7 @@ import { Confetti, type ConfettiRef } from "@/components/magicui/confetti";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
-import { auth } from "@/lib/firebase/client";
+import { useGameParticipation } from "@/hooks/useGameParticipation";
 import { AcceptanceStatus } from "@/types/common";
 import { ErrorDisplay } from "./components/ErrorDisplay";
 import { GameHeader } from "./components/GameHeader";
@@ -36,7 +36,9 @@ export default function GamePage() {
   const gameId = params.gameId as string;
   const t = useTranslations("Game");
   const { user } = useAuth();
-  const [isParticipating, setIsParticipating] = useState<boolean | null>(null);
+
+  // Check participation status using custom hook
+  const { isParticipating } = useGameParticipation(gameId, user);
 
   // Game data management
   const {
@@ -64,54 +66,6 @@ export default function GamePage() {
       setIsUploading,
       confettiRef,
     });
-
-  // Check participation status by fetching from API
-  useEffect(() => {
-    const checkParticipation = async () => {
-      if (!user) {
-        // Don't set to false yet - AuthGuard will handle unauthenticated users
-        // Keep it as null to show loading state
-        return;
-      }
-
-      try {
-        const idToken = await auth.currentUser?.getIdToken();
-        if (!idToken) {
-          // Keep it as null - authentication may still be in progress
-          return;
-        }
-
-        // Check participation by calling the participants API
-        const response = await fetch(`/api/game/${gameId}/participants`, {
-          headers: {
-            Authorization: `Bearer ${idToken}`,
-          },
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-
-          if (data.success && data.data) {
-            // Check if current user is in the participants list
-            // Note: API returns 'id' field, not 'userId'
-            const isUserParticipating = data.data.some(
-              (participant: { id: string }) => participant.id === user.id,
-            );
-            setIsParticipating(isUserParticipating);
-          } else {
-            setIsParticipating(false);
-          }
-        } else {
-          setIsParticipating(false);
-        }
-      } catch (error) {
-        console.error("Error checking participation:", error);
-        setIsParticipating(false);
-      }
-    };
-
-    checkParticipation();
-  }, [user?.id, gameId, user]);
 
   // Transform data for UI components
   const latestSubmission = getLatestSubmission(submissions);
