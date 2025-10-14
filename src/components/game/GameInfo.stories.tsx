@@ -22,7 +22,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const baseGame: Game = {
-  id: faker.string.alphanumeric(6).toUpperCase(), // 6桁英数
+  id: faker.string.alphanumeric(6).toUpperCase(), // 6-character alphanumeric game ID
   title: "Nature Photography Bingo",
   theme: "Nature and Wildlife",
   creatorId: faker.string.ulid(), // ULID

@@ -32,7 +32,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useGameJoin } from "@/hooks/useGameJoin";
 import { useParticipatingGames } from "@/hooks/useParticipatingGames";
 import { auth } from "@/lib/firebase/client";
-import type { Game } from "@/types/schema";
+import type { VerifiedGameInfo } from "@/types/schema";
 
 // Form validation schema
 const joinGameSchema = z.object({
@@ -56,10 +56,9 @@ export default function JoinGamePage() {
 
   // State for game verification
   const [isVerifying, setIsVerifying] = useState(false);
-  const [verifiedGame, setVerifiedGame] = useState<Pick<
-    Game,
-    "id" | "title" | "theme" | "expiresAt"
-  > | null>(null);
+  const [verifiedGame, setVerifiedGame] = useState<VerifiedGameInfo | null>(
+    null,
+  );
   const [verificationError, setVerificationError] = useState<string | null>(
     null,
   );
@@ -473,7 +472,7 @@ export default function JoinGamePage() {
                         id: game.id,
                         title: game.title,
                         theme: game.theme,
-                        expiresAt: game.expiresAt as Date,
+                        expiresAt: game.expiresAt,
                       });
 
                       // Automatically join the game

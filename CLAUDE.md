@@ -64,7 +64,7 @@ Pingoは、AIによる画像判定を活用したビンゴゲームです。
 
 ### 2. テストカバレッジ（高）
 
-以下の重要コンポーネントでテストが不足：
+以下の重要コンポーネントでテストが不足:
 
 - `src/components/game/ImageUpload.tsx`
 - `src/services/image-upload.ts`
@@ -79,7 +79,7 @@ Pingoは、AIによる画像判定を活用したビンゴゲームです。
 
 ## メモリーバンクファイル
 
-`docs/`内の主要ドキュメント：
+`docs/`内の主要ドキュメント:
 
 - `ProjectBrief.md` - プロジェクトの目標と要件
 - `TechnicalSpecification.md` - 完全な技術仕様  

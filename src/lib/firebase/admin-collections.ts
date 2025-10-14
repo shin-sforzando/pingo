@@ -953,7 +953,11 @@ export namespace AdminTransactionService {
           .collection("playerBoards")
           .doc(userId);
         const userRef = adminFirestore.collection("users").doc(userId);
-        const eventRef = adminFirestore.collection("game_events").doc(eventId);
+        const eventRef = adminFirestore
+          .collection("games")
+          .doc(gameId)
+          .collection("events")
+          .doc(eventId);
 
         // IMPORTANT: All reads must be executed before any writes in Firestore transactions
         const [participantDoc, gameBoardDoc, playerBoardDoc] =

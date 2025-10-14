@@ -392,3 +392,11 @@ export type Event = z.infer<typeof eventSchema>;
 export type ImageSubmissionData = z.infer<typeof imageSubmissionDataSchema>;
 export type ImageSubmissionResult = z.infer<typeof imageSubmissionResultSchema>;
 export type AnalysisResult = z.infer<typeof analysisResultSchema>;
+
+/**
+ * Verified game info type - subset of Game used for display after game ID verification
+ * Inherits from Game type but allows nullable expiresAt to match API response
+ */
+export type VerifiedGameInfo = Pick<Game, "id" | "title" | "theme"> & {
+  expiresAt: Date | null;
+};

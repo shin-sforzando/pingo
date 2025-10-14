@@ -106,7 +106,7 @@ gsutil cors set gcs-pingo-cors-config.json gs://gcs-pingo
 
 ## タスク完了時の確認コマンド
 
-タスク完了時は必ず以下のコマンドを実行して確認：
+タスク完了時は必ず以下のコマンドを実行して確認
 
 1. **コード品質チェック**
 
