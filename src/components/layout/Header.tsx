@@ -9,7 +9,7 @@ import { NotificationIcon } from "./NotificationIcon";
 import { UserMenu } from "./UserMenu";
 
 export function Header(): ReactElement {
-  const t = useTranslations("Common");
+  const t = useTranslations();
   const { user } = useAuth();
 
   return (
@@ -20,7 +20,7 @@ export function Header(): ReactElement {
         {/* System name - centered */}
         <div className="flex flex-1 justify-center" data-testid="app-name">
           <Link href="/" className="font-black text-4xl">
-            {t("appName")}
+            {t("Common.appName")}
           </Link>
         </div>
         <div className="flex flex-1 items-center justify-end gap-2">

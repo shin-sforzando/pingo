@@ -13,7 +13,7 @@ export function LanguageSwitcher() {
   const LOCALE_JA = "ja";
   const LOCALE_EN = "en";
 
-  const t = useTranslations("Common");
+  const t = useTranslations();
 
   const toggleLocale = async () => {
     try {
@@ -35,7 +35,7 @@ export function LanguageSwitcher() {
       onClick={toggleLocale}
     >
       <Languages className="mr-2 h-4 w-4" />
-      {t("toLanguage")}
+      {t("Common.toLanguage")}
     </Button>
   );
 }

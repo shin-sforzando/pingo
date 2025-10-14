@@ -23,8 +23,7 @@ export function UserMenu(): ReactElement {
   const { user, logout } = useAuth();
   const router = useRouter();
   const locale = useLocale();
-  const headerT = useTranslations("Header");
-  const commonT = useTranslations("Common");
+  const t = useTranslations();
 
   // Fetch participating games using custom hook (lightweight mode for menu)
   const { participatingGames } = useParticipatingGames(user, {
@@ -67,19 +66,19 @@ export function UserMenu(): ReactElement {
           <DropdownMenuItem asChild>
             <Link href="/profile">
               <UserIcon className="mr-2 h-4 w-4" />
-              {headerT("profile")}
+              {t("Header.profile")}
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={toggleLocale}>
             <Languages className="mr-2 h-4 w-4" />
-            {commonT("toLanguage")}
+            {t("Common.toLanguage")}
           </DropdownMenuItem>
         </DropdownMenuGroup>
 
         {participatingGames.length > 0 && (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuLabel>{headerT("recentGames")}</DropdownMenuLabel>
+            <DropdownMenuLabel>{t("Header.recentGames")}</DropdownMenuLabel>
             {participatingGames.slice(0, 10).map((game) => {
               const displayText = `${game.title} (${game.id})`;
 
@@ -95,7 +94,7 @@ export function UserMenu(): ReactElement {
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout} variant="destructive">
           <LogOut className="mr-2 h-4 w-4" />
-          {headerT("logout")}
+          {t("Header.logout")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

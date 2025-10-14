@@ -34,7 +34,7 @@ export interface GameInfoProps {
  * Shows status, settings, expiration, and other game details
  */
 export function GameInfo({ game, className }: GameInfoProps) {
-  const t = useTranslations("Game.Share");
+  const t = useTranslations();
 
   // Determine status badge variant and color
   const getStatusConfig = () => {
@@ -43,19 +43,19 @@ export function GameInfo({ game, className }: GameInfoProps) {
         return {
           variant: "default" as const,
           color: "bg-green-100 text-green-800",
-          label: t("active"),
+          label: t("Game.active"),
         };
       case GameStatus.ENDED:
         return {
           variant: "secondary" as const,
           color: "bg-gray-100 text-gray-800",
-          label: t("ended"),
+          label: t("Game.ended"),
         };
       case GameStatus.ARCHIVED:
         return {
           variant: "outline" as const,
           color: "bg-orange-100 text-orange-800",
-          label: t("archived"),
+          label: t("Game.archived"),
         };
       default:
         return {
@@ -72,7 +72,7 @@ export function GameInfo({ game, className }: GameInfoProps) {
     <Card className={className}>
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
-          <span>{t("status")}</span>
+          <span>{t("Game.status")}</span>
           <Badge variant={statusConfig.variant} className={statusConfig.color}>
             {statusConfig.label}
           </Badge>
@@ -83,7 +83,7 @@ export function GameInfo({ game, className }: GameInfoProps) {
         <div className="flex items-center gap-3">
           <Calendar className="h-4 w-4 text-muted-foreground" />
           <div className="flex-1">
-            <p className="font-medium text-sm">{t("expirationDate")}</p>
+            <p className="font-medium text-sm">{t("Game.expirationDate")}</p>
             <p className="text-muted-foreground text-sm">
               {formatDate(game.expiresAt)}
             </p>
@@ -96,9 +96,11 @@ export function GameInfo({ game, className }: GameInfoProps) {
         <div className="flex items-center gap-3">
           <Target className="h-4 w-4 text-muted-foreground" />
           <div className="flex-1">
-            <p className="font-medium text-sm">{t("requiredBingoLines")}</p>
+            <p className="font-medium text-sm">
+              {t("Game.requiredBingoLines")}
+            </p>
             <p className="text-muted-foreground text-sm">
-              {game.requiredBingoLines} {t("lines")}
+              {game.requiredBingoLines} {t("Game.lines")}
             </p>
           </div>
         </div>
@@ -109,7 +111,9 @@ export function GameInfo({ game, className }: GameInfoProps) {
         <div className="flex items-center gap-3">
           <TrendingUp className="h-4 w-4 text-muted-foreground" />
           <div className="flex-1">
-            <p className="font-medium text-sm">{t("confidenceThreshold")}</p>
+            <p className="font-medium text-sm">
+              {t("Game.confidenceThreshold")}
+            </p>
             <p className="text-muted-foreground text-sm">
               {Math.round(game.confidenceThreshold * 100)}%
             </p>
@@ -127,7 +131,7 @@ export function GameInfo({ game, className }: GameInfoProps) {
           )}
           <div className="flex-1">
             <p className="font-medium text-sm">
-              {game.isPublic ? t("public") : t("private")}
+              {game.isPublic ? t("Game.public") : t("Game.private")}
             </p>
           </div>
         </div>
@@ -142,9 +146,9 @@ export function GameInfo({ game, className }: GameInfoProps) {
             <EyeOff className="h-4 w-4 text-muted-foreground" />
           )}
           <div className="flex-1">
-            <p className="font-medium text-sm">{t("photoSharing")}</p>
+            <p className="font-medium text-sm">{t("Game.photoSharing")}</p>
             <p className="text-muted-foreground text-sm">
-              {game.isPhotoSharingEnabled ? t("on") : t("off")}
+              {game.isPhotoSharingEnabled ? t("Game.on") : t("Game.off")}
             </p>
           </div>
         </div>
@@ -156,7 +160,7 @@ export function GameInfo({ game, className }: GameInfoProps) {
             <div className="flex items-start gap-3">
               <Camera className="mt-0.5 h-4 w-4 text-muted-foreground" />
               <div className="flex-1">
-                <p className="mb-2 font-medium text-sm">{t("notes")}</p>
+                <p className="mb-2 font-medium text-sm">{t("Game.notes")}</p>
                 <p className="text-muted-foreground text-sm leading-relaxed">
                   {game.notes}
                 </p>

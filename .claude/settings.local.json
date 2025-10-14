@@ -65,6 +65,8 @@
       "mcp__serena__write_memory",
       "WebFetch(domain:docs.github.com)",
       "WebFetch(domain:github.com)",
+      "WebFetch(domain:next-intl-docs.vercel.app)",
+      "WebFetch(domain:next-intl.dev)",
       "WebFetch(domain:storybook.js.org)",
       "WebFetch(domain:ui.shadcn.com)",
       "WebFetch(domain:www.radix-ui.com)",

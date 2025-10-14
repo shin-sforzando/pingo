@@ -12,7 +12,7 @@ interface GameHeaderProps {
  * Provides visual context for the current game session
  */
 export function GameHeader({ game, className }: GameHeaderProps) {
-  const t = useTranslations("Game");
+  const t = useTranslations();
 
   if (!game) return null;
 
@@ -24,7 +24,7 @@ export function GameHeader({ game, className }: GameHeaderProps) {
         </CardTitle>
         {game.theme && (
           <p className="text-center text-muted-foreground text-sm">
-            {t("theme")}: {game.theme}
+            {t("Game.theme")}: {game.theme}
           </p>
         )}
       </CardHeader>

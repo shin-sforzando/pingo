@@ -34,7 +34,7 @@ export default function GamePage() {
   const params = useParams();
   const router = useRouter();
   const gameId = params.gameId as string;
-  const t = useTranslations("Game");
+  const t = useTranslations();
   const { user } = useAuth();
 
   // Check participation status using custom hook
@@ -94,7 +94,7 @@ export default function GamePage() {
       <AuthGuard>
         <div className="container mx-auto p-4">
           <div className="text-center">
-            <p className="text-muted-foreground">{t("loading")}</p>
+            <p className="text-muted-foreground">{t("Game.loading")}</p>
           </div>
         </div>
       </AuthGuard>
@@ -108,7 +108,7 @@ export default function GamePage() {
         <div className="container mx-auto p-4">
           <div className="text-center">
             <p className="text-muted-foreground">
-              {t("redirectingToSharePage")}
+              {t("Game.redirectingToSharePage")}
             </p>
           </div>
         </div>
@@ -123,17 +123,17 @@ export default function GamePage() {
         <div className="container mx-auto p-4">
           <Card className="mx-auto max-w-md">
             <CardHeader>
-              <CardTitle>{t("errors.gameNotFound")}</CardTitle>
+              <CardTitle>{t("Game.errors.gameNotFound")}</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground mb-4">
-                {t("errors.gameNotFoundDescription", { gameId })}
+                {t("Game.errors.gameNotFoundDescription", { gameId })}
               </p>
               <Button
                 className="w-full"
                 onClick={() => router.push("/game/join")}
               >
-                {t("goToJoinPage")}
+                {t("Game.goToJoinPage")}
               </Button>
             </CardContent>
           </Card>
@@ -158,7 +158,7 @@ export default function GamePage() {
         {/* User's bingo board */}
         <Card>
           <CardHeader>
-            <CardTitle>{t("yourBoard")}</CardTitle>
+            <CardTitle>{t("Game.yourBoard")}</CardTitle>
           </CardHeader>
           <CardContent>
             <BingoBoard
@@ -173,7 +173,7 @@ export default function GamePage() {
         {/* Image upload interface */}
         <Card>
           <CardHeader>
-            <CardTitle>{t("uploadImage")}</CardTitle>
+            <CardTitle>{t("Game.uploadImage")}</CardTitle>
           </CardHeader>
           <CardContent>
             <ImageUpload
@@ -190,7 +190,7 @@ export default function GamePage() {
         {latestSubmission && (
           <Card>
             <CardHeader>
-              <CardTitle>{t("latestResult")}</CardTitle>
+              <CardTitle>{t("Game.latestResult")}</CardTitle>
             </CardHeader>
             <CardContent>
               <SubmissionResult

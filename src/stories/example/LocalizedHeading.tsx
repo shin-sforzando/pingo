@@ -16,7 +16,7 @@ export default function LocalizedHeading({
   size = "medium",
 }: LocalizedHeadingProps) {
   // Use translations from the HomePage namespace
-  const t = useTranslations("HomePage");
+  const t = useTranslations();
 
   // Define size classes for different heading sizes
   const sizeClasses = {
@@ -27,7 +27,7 @@ export default function LocalizedHeading({
 
   return (
     <h1 className={sizeClasses[size]}>
-      {t("welcome")} {t("title")}
+      {t("HomePage.welcome")} {t("HomePage.title")}
     </h1>
   );
 }

@@ -101,6 +101,7 @@ export function ComponentName({ prop }: ComponentNameProps) {
 ## 国際化（next-intl）
 
 - コンポーネント翻訳には`useTranslations()`フックを使用
+  - 名前空間を省略して宣言し、ネストされた翻訳キーでも全て記述するように統一
 - 翻訳キーは`messages/ja.json`と`messages/en.json`に配置
 - 日本語をプライマリ言語、英語をセカンダリ言語として扱う
 - 一貫した翻訳キー命名規則
