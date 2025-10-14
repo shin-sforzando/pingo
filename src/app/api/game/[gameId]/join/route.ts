@@ -106,26 +106,22 @@ export async function POST(
 
     if (participationDoc.exists) {
       // User is already participating - return success with existing participation
-      const existingParticipation = participationDoc.data();
       return NextResponse.json({
         success: true,
         data: {
-          participationId: existingParticipation?.id || userId,
+          participationId: userId,
           alreadyParticipating: true,
         },
       });
     }
 
-    // Generate IDs for the transaction
-    const participationId = ulid();
+    // Generate event ID for the transaction
     const eventId = ulid();
 
     // Execute game join transaction
     const result = await AdminTransactionService.joinGame(
       gameId,
       userId,
-      user.username,
-      participationId,
       eventId,
     );
 
@@ -191,7 +187,7 @@ export async function POST(
     return NextResponse.json({
       success: true,
       data: {
-        participationId,
+        participationId: userId,
       },
     });
   } catch (error) {

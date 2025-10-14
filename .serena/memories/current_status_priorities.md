@@ -42,11 +42,20 @@
 
 #### 翻訳構造のリファクタリング
 
-- **共通フィールドラベルの抽出**: 11個のラベルを`Game.*`レベルに統合
-  - `status`, `expirationDate`, `photoSharing`, `lines`
-  - `public`, `private`, `on`, `off`, `active`, `ended`, `archived`
-- **重複削除**: `Game.Share.*`から14個の重複キーを削除
-- **未使用名前空間の削除**: `GameInfo.*`全体（15キー）を削除
+- **共通フィールドラベルの抽出**: 11個のラベルを `Game.*` レベルに統合
+  - `status`
+  - `expirationDate`
+  - `photoSharing`
+  - `lines`
+  - `public`
+  - `private`
+  - `on`
+  - `off`
+  - `active`
+  - `ended`
+  - `archived`
+- **重複削除**: `Game.Share.*` から14個の重複キーを削除
+- **未使用名前空間の削除**: `GameInfo.*` 全体（15キー）を削除
 - **命名規則統一**: `imageUpload.*` → `ImageUpload.*`にリネーム
 - **翻訳パターンの標準化**:
   - 常に`useTranslations()`（引数なし）を使用

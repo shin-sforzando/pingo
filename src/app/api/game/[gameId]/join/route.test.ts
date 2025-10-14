@@ -345,7 +345,7 @@ describe("POST /api/game/[gameId]/join", () => {
 
     expect(response.status).toBe(200);
     expect(data.success).toBe(true);
-    expect(data.data.participationId).toBe("existing-participation-id");
+    expect(data.data.participationId).toBe("test-user-id");
     expect(data.data.alreadyParticipating).toBe(true);
   });
 
@@ -440,8 +440,6 @@ describe("POST /api/game/[gameId]/join", () => {
     expect(AdminTransactionService.joinGame).toHaveBeenCalledWith(
       "ABC123",
       "test-user-id",
-      "test-user",
-      expect.any(String), // participationId (ULID)
       expect.any(String), // eventId (ULID)
     );
   });

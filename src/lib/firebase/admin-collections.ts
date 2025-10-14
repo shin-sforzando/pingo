@@ -2,7 +2,11 @@
  * Admin SDK data access layer with type safety
  * Provides consistent data access patterns for server-side operations
  */
-import { dateToTimestamp } from "../../types/firestore";
+import { Role } from "../../types/common";
+import {
+  dateToTimestamp,
+  type TimestampInterface,
+} from "../../types/firestore";
 import {
   type EventDocument,
   eventFromFirestore,
@@ -927,8 +931,6 @@ export namespace AdminTransactionService {
   export async function joinGame(
     gameId: string,
     userId: string,
-    username: string,
-    participationId: string,
     eventId: string,
   ): Promise<{ success: boolean; error?: string }> {
     try {
@@ -986,21 +988,17 @@ export namespace AdminTransactionService {
           gameBoardDoc.data() as GameBoardDocument,
         );
         const now = new Date();
-        const timestamp = dateToTimestamp(now);
+        const timestamp = dateToTimestamp(now) as TimestampInterface;
 
         // Prepare participation record
-        const participation = {
-          id: participationId,
-          gameId,
+        const participation: GameParticipationDocument = {
           userId,
-          username,
+          gameId,
+          role: Role.PARTICIPANT,
           joinedAt: timestamp,
-          completedLines: 0,
-          isWinner: false,
           createdAt: timestamp,
+          completedLines: 0,
           submissionCount: 0,
-          lastCompletedAt: null,
-          updatedAt: null,
         };
 
         // Prepare player board with initial cell states (using Date objects for domain model)
@@ -1036,9 +1034,7 @@ export namespace AdminTransactionService {
           type: "player_joined",
           userId,
           timestamp: now,
-          details: {
-            participationId,
-          },
+          details: {},
           createdAt: now,
           updatedAt: null,
         });
