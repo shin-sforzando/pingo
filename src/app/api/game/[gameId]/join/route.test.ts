@@ -529,8 +529,9 @@ describe("POST /api/game/[gameId]/join", () => {
     });
     const data = await response.json();
 
-    expect(response.status).toBe(500);
+    expect(response.status).toBe(404);
     expect(data.success).toBe(false);
-    expect(data.error.code).toBe("TRANSACTION_FAILED");
+    expect(data.error.code).toBe("GAME_BOARD_NOT_FOUND");
+    expect(data.error.message).toContain("Game board data is missing");
   });
 });

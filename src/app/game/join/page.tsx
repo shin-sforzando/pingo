@@ -6,7 +6,7 @@ import { enUS, ja } from "date-fns/locale";
 import { Calendar, Users } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
 import { AuthGuard } from "@/components/auth/AuthGuard";
@@ -29,6 +29,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { TranslatedFormMessage } from "@/components/ui/translated-form-message";
 import { useAuth } from "@/contexts/AuthContext";
+import { useParticipatingGames } from "@/hooks/useParticipatingGames";
 import { auth } from "@/lib/firebase/client";
 import type { Game } from "@/types/schema";
 
@@ -66,20 +67,12 @@ export default function JoinGamePage() {
   const [isJoining, setIsJoining] = useState(false);
   const [joinError, setJoinError] = useState<string | null>(null);
 
-  // State for participating games
-  const [participatingGames, setParticipatingGames] = useState<
-    Array<{
-      id: string;
-      title: string;
-      theme: string;
-      notes?: string;
-      participantCount: number;
-      createdAt: Date | null;
-      expiresAt: Date | null;
-    }>
-  >([]);
-  const [isLoadingParticipatingGames, setIsLoadingParticipatingGames] =
-    useState(true);
+  // Fetch participating games using custom hook
+  const {
+    participatingGames,
+    isLoading: isLoadingParticipatingGames,
+    error: participatingGamesError,
+  } = useParticipatingGames(user, { fetchDetails: true });
 
   // State for available games (excluding already participating)
   const [availableGames, setAvailableGames] = useState<
@@ -107,116 +100,15 @@ export default function JoinGamePage() {
   // Watch the gameId field for changes
   const gameId = form.watch("gameId");
 
-  // Memoize the participatingGames array to prevent unnecessary re-renders
-  const _participatingGamesIds = useMemo(
-    () => user?.participatingGames?.join(",") ?? "",
-    [user?.participatingGames],
-  );
-
-  // Fetch participating games with their information
+  // Log participating games error if any
   useEffect(() => {
-    const fetchParticipatingGames = async () => {
-      if (!user) {
-        setIsLoadingParticipatingGames(false);
-        return;
-      }
-
-      if (!user.participatingGames || user.participatingGames.length === 0) {
-        setParticipatingGames([]);
-        setIsLoadingParticipatingGames(false);
-        return;
-      }
-
-      setIsLoadingParticipatingGames(true);
-      try {
-        const idToken = await auth.currentUser?.getIdToken();
-        if (!idToken) {
-          setIsLoadingParticipatingGames(false);
-          return;
-        }
-
-        const games: Array<{
-          id: string;
-          title: string;
-          theme: string;
-          notes?: string;
-          participantCount: number;
-          createdAt: Date | null;
-          expiresAt: Date | null;
-        }> = [];
-
-        // Fetch game information and participant count for each participating game
-        await Promise.all(
-          user.participatingGames.map(async (gameId) => {
-            try {
-              const [gameResponse, participantsResponse] = await Promise.all([
-                fetch(`/api/game/${gameId}`, {
-                  headers: {
-                    Authorization: `Bearer ${idToken}`,
-                  },
-                }),
-                fetch(`/api/game/${gameId}/participants`, {
-                  headers: {
-                    Authorization: `Bearer ${idToken}`,
-                  },
-                }),
-              ]);
-
-              if (gameResponse.ok) {
-                const gameData = await gameResponse.json();
-                if (gameData.success && gameData.data) {
-                  // Check if game has not expired
-                  const expiresAt = gameData.data.expiresAt
-                    ? new Date(gameData.data.expiresAt)
-                    : null;
-                  const now = new Date();
-                  if (!expiresAt || expiresAt > now) {
-                    // Get participant count
-                    let participantCount = 0;
-                    if (participantsResponse.ok) {
-                      const participantsData =
-                        await participantsResponse.json();
-                      if (
-                        participantsData.success &&
-                        Array.isArray(participantsData.data)
-                      ) {
-                        participantCount = participantsData.data.length;
-                      }
-                    }
-
-                    games.push({
-                      id: gameData.data.id,
-                      title: gameData.data.title,
-                      theme: gameData.data.theme,
-                      notes: gameData.data.notes,
-                      participantCount,
-                      createdAt: gameData.data.createdAt
-                        ? new Date(gameData.data.createdAt)
-                        : null,
-                      expiresAt: gameData.data.expiresAt
-                        ? new Date(gameData.data.expiresAt)
-                        : null,
-                    });
-                  }
-                }
-              }
-              // Don't show games that return 404 or other errors
-            } catch (error) {
-              console.error(`Failed to fetch game info for ${gameId}:`, error);
-            }
-          }),
-        );
-
-        setParticipatingGames(games);
-      } catch (error) {
-        console.error("Failed to fetch participating games:", error);
-      } finally {
-        setIsLoadingParticipatingGames(false);
-      }
-    };
-
-    fetchParticipatingGames();
-  }, [user]);
+    if (participatingGamesError) {
+      console.error(
+        "Error fetching participating games:",
+        participatingGamesError,
+      );
+    }
+  }, [participatingGamesError]);
 
   // Fetch available games (public games excluding those already participating)
   useEffect(() => {

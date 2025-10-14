@@ -130,8 +130,10 @@ export async function POST(
     );
 
     if (!result.success) {
-      // Check if error is due to already participating
-      if (result.error?.includes("already participating")) {
+      const errorMessage = result.error || "";
+
+      // Map specific transaction errors to appropriate response codes
+      if (errorMessage.includes("already participating")) {
         return NextResponse.json({
           success: true,
           data: {
@@ -141,13 +143,45 @@ export async function POST(
         });
       }
 
-      // Handle other transaction errors
+      if (errorMessage.includes("Game board not found")) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              code: "GAME_BOARD_NOT_FOUND",
+              message:
+                "Game board data is missing. Please contact the game creator.",
+              details: errorMessage,
+            },
+          },
+          { status: 404 },
+        );
+      }
+
+      if (errorMessage.includes("Player board already exists")) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              code: "PLAYER_BOARD_EXISTS",
+              message:
+                "You already have a player board for this game. Please try refreshing.",
+              details: errorMessage,
+            },
+          },
+          { status: 409 }, // Conflict
+        );
+      }
+
+      // Handle other unexpected transaction errors
       return NextResponse.json(
         {
           success: false,
           error: {
             code: "TRANSACTION_FAILED",
-            message: result.error || "Failed to join game",
+            message:
+              "Failed to join game due to a database error. Please try again.",
+            details: errorMessage,
           },
         },
         { status: 500 },
