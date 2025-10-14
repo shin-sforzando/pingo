@@ -14,18 +14,32 @@
 
 ### フォーマット
 
-- **インデント**: スペース（.editorconfigで設定）
+- **インデント**: スペース2文字（.editorconfigで設定）
 - **引用符**: JavaScript/TypeScriptではダブルクォート
 - **インポート整理**: Biomeによる自動整理
-- **行末文字**: .editorconfigによる自動検出
+- **行末文字**: LF（Unix形式、.editorconfigで設定）
+- **文字エンコーディング**: UTF-8
 
-### リンター規則（厳格）
+### リンター規則
 
-- `noExplicitAny`: ERROR - any型の使用禁止
-- `noNonNullAssertion`: ERROR - !演算子の使用を避ける
-- `noUnusedImports`: ERROR - 未使用インポートの除去
-- `noUnusedVariables`: ERROR - 未使用変数の除去
-- `noBannedTypes`: ERROR - 問題のある型の回避
+**ERROR（厳格）**:
+
+- `noExplicitAny` - any型の使用禁止
+- `noNonNullAssertion` - !演算子の使用を避ける
+- `noUnusedImports` - 未使用インポートの除去
+- `noUnusedVariables` - 未使用変数の除去
+- `noBannedTypes` - 問題のある型（Object, String等）の回避
+
+**WARN（推奨）**:
+
+- `noNestedComponentDefinitions` - ネストされたコンポーネント定義の警告
+- `noImgElement` - `<img>`より`<Image>`推奨（パフォーマンス）
+- `noStaticElementInteractions` - アクセシビリティ警告
+- `useSemanticElements` - セマンティックHTML推奨
+
+**OFF（無効化）**:
+
+- `noUnknownAtRules` - Tailwind CSS対応のため無効化
 
 ## TypeScript規約
 
@@ -108,9 +122,28 @@ export function ComponentName({ prop }: ComponentNameProps) {
 
 ## テスト規約
 
-- **テストファイル**: `*.test.tsx`または`*.browser.test.tsx`
+### テストファイル命名
+
+- **単体テスト（jsdom）**: `*.test.tsx` または `*.test.ts`
+- **ブラウザテスト**: `*.browser.test.tsx`
 - **Storybookファイル**: `*.stories.tsx`
-- テストデータには`@faker-js/faker`を使用
+
+### テストタイプ
+
+**1. 単体テスト（Vitest jsdom）**
+- APIルート、カスタムフック、サービス層
+- jsdom環境で高速実行
+- ファイルパターン: `src/**/*.test.{ts,tsx}`
+
+**2. ブラウザテスト（Vitest Browser Mode）**
+- 実ブラウザ（webkit + Playwright）でコンポーネント/ページをテスト
+- DOM操作、ユーザーインタラクションの統合テスト
+- ファイルパターン: `src/**/*.browser.test.{ts,tsx}`
+- 設定: `vitest.config.mts`のbrowserプロジェクト
+
+### テストデータ
+
+- `@faker-js/faker`を使用
 - ULID生成: `faker.string.ulid()`
 - 各テスト後にテストデータをクリーンアップ
 

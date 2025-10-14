@@ -5,8 +5,8 @@
 Pingoプロジェクトは現在、機能実装段階に入っています。基礎構築が完了し、ゲーム作成機能、画像投稿機能、ゲームメイン画面の実装が完了しました。
 
 > [!NOTE]
-> 詳細な要件や設計の情報については、 `./cline_docs/TechnicalSpecification.md` を参照してください。
-> 過去の開発履歴については、 `./cline_docs/Archived_yyyymmdd.md` を参照してください。
+> 詳細な要件や設計の情報については、 `./docs/TechnicalSpecification.md` を参照してください。
+> 過去の開発履歴については、 `./docs/Archived_yyyymmdd.md` を参照してください。
 
 ## 最近の変更
 
@@ -197,7 +197,6 @@ Pingoプロジェクトは現在、機能実装段階に入っています。基
 ### 7. 開発環境・ツール
 
 - Storybook関連:
-  - Storybook 9系へのアップグレード
   - 一部画面のStorybookストーリー不足
 
 - その他:

@@ -8,6 +8,7 @@ pingo/
 │   ├── app/                    # Next.js App Router ページ
 │   │   ├── api/               # API ルート
 │   │   ├── game/              # ゲーム関連ページ
+│   │   │   └── [gameId]/hooks/ # ゲーム固有のカスタムフック
 │   │   └── debug/             # デバッグ用ユーティリティ
 │   ├── components/            # React コンポーネント
 │   │   ├── ui/               # shadcn/ui ベースコンポーネント
@@ -16,6 +17,7 @@ pingo/
 │   │   ├── layout/           # Header、Footer、Navigation
 │   │   └── game/             # ゲーム専用コンポーネント
 │   ├── contexts/             # React Context プロバイダー
+│   ├── hooks/                # カスタムReact Hooks
 │   ├── lib/                  # ユーティリティライブラリと設定
 │   ├── services/             # ビジネスロジックとAPIサービス
 │   ├── types/                # TypeScript型定義
@@ -23,10 +25,11 @@ pingo/
 │   ├── stories/              # Storybookストーリー
 │   └── test/                 # テストユーティリティとフィクスチャ
 ├── messages/                 # i18n翻訳ファイル
-├── docs/ (or cline_docs/)    # プロジェクトドキュメント
+├── docs/                     # プロジェクトドキュメント
 ├── public/                   # 静的アセット
 ├── .storybook/              # Storybook設定
-└── scripts/                 # ビルドとユーティリティスクリプト
+├── scripts/                 # ビルドとユーティリティスクリプト
+└── middleware.ts            # Next.js認証ミドルウェア（ルート階層）
 ```
 
 ## 主要アーキテクチャパターン
@@ -72,26 +75,77 @@ pingo/
 
 ## 重要なコンポーネント
 
-### ゲームフローコンポーネント
+### ゲームフローコンポーネント（src/components/game/）
 
 - `ImageUpload.tsx`: HEIC対応の写真アップロード
 - `BingoBoard.tsx`: インタラクティブなビンゴグリッド
 - `BingoCell.tsx`: オープン/クローズ状態の個別セル
 - `SubmissionResult.tsx`: AI解析結果の表示
+- `GameInfo.tsx`: ゲーム詳細情報カード
+- `InfoCard.tsx`: 汎用情報カード（アイコン付き）
+- `ParticipantsList.tsx`: 参加者一覧表示
+- `QRCodeCard.tsx`: QRコード表示カード
+- `SubjectList.tsx`: 被写体リスト（ドラッグ&ドロップ対応）
+- `SubjectItem.tsx`: 個別被写体アイテム
+- `DndContextWrapper.tsx`: ドラッグ&ドロップコンテキストラッパー
 
-### 認証とレイアウト
+### 認証とレイアウト（src/components/auth/, src/components/layout/）
 
 - `AuthGuard.tsx`: ルート保護ラッパー
 - `Header.tsx`: 認証状態付きナビゲーション
 - `UserMenu.tsx`: ユーザープロフィールドロップダウン
 - `NotificationIcon.tsx` + `NotificationDrawer.tsx`: リアルタイム通知
 
+### カスタムフック
+
+**グローバルフック（src/hooks/）**:
+
+- `useGameJoin.ts`: ゲーム参加処理（楽観的UI更新、トランザクション対応）
+- `useGameParticipation.ts`: ゲーム参加状態の確認
+- `useParticipatingGames.ts`: 参加中のゲームリスト取得
+- `useAuthenticatedFetch.ts`: 認証付きフェッチのユーティリティ
+
+**ゲーム固有フック（src/app/game/[gameId]/hooks/）**:
+
+- `useGameData.ts`: ゲームデータ取得の統一インターフェース（Firestoreリスナー統合）
+- `useImageSubmission.ts`: 画像投稿処理
+
 ### サービス層（src/services/）
 
+- `game.ts`: ゲームビジネスロジック（Firestore操作、トランザクション処理）
+- `image-upload.ts`: 画像アップロードロジック（GCS署名付きURL、メタデータ管理）
+- `locale.ts`: ロケール管理とバリデーション
 - Firebase Admin SDKによるデータベースアクセス
-- Google Cloud Storageへの画像アップロード
+- Google Cloud Storageとの統合
 - Google Gemini APIとのAI統合
 - 型安全なデータ変換ユーティリティ
+
+### ユーティリティライブラリ（src/lib/）
+
+- `firebase/admin.ts`: Firebase Admin SDK初期化と設定
+- `firebase/admin-collections.ts`: Firestoreコレクション型安全アクセス
+- `firebase/client.ts`: Firebase Client SDK初期化（認証、Firestore）
+- `image-utils.ts`: 画像処理ユーティリティ（HEIC変換、リサイズ、圧縮）
+- `api-utils.ts`: APIレスポンスヘルパー、エラーハンドリング
+- `utils.ts`: 汎用ユーティリティ（cn、日付フォーマット、バリデーション）
+- `constants.ts`: アプリケーション定数（URL、制限値）
+
+### 実装済みページ
+
+**認証不要**:
+
+- `/` - ホームページ（ランディングページ）
+
+**認証必要**:
+
+- `/game/create` - ゲーム作成ページ（被写体生成、設定）
+- `/game/join` - ゲーム参加ページ（ID入力、公開ゲーム一覧、参加中ゲーム一覧）
+- `/game/[gameId]` - ゲームメインページ（ビンゴボード、画像投稿、リアルタイム更新）
+- `/game/[gameId]/share` - ゲーム共有ページ（QRコード、参加者一覧）
+
+**デバッグ**:
+
+- `/debug/*` - 開発用デバッグツール
 
 ## データモデル
 
@@ -121,7 +175,7 @@ pingo/
 
 - `src/app/layout.tsx`: プロバイダー付きルートレイアウト
 - `src/app/page.tsx`: ホームページ
-- `src/middleware.ts`: 認証ミドルウェア
+- `middleware.ts`: 認証ミドルウェア（ルート階層）
 - `src/lib/firebase/`: Firebase設定とユーティリティ
 
 ## 開発パターン
@@ -154,5 +208,5 @@ pingo/
 ### 開発ツール
 
 - **Biome**: 2.2.4（ESLint + Prettierの代替）
-- **Storybook**: 9.1.5
+- **Storybook**: 9.1.6
 - **lefthook**: 1.13.0（Gitフック管理）

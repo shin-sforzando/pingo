@@ -54,15 +54,18 @@ npm run storybook
 - 各バリエーション（状態、Props）が正しく表示されること
 - アクセシビリティが適切に実装されていること
 
-### E2E関連の変更時
+### ブラウザテスト関連の変更時
 
 ```bash
-npm run test:e2e
+npm run test:once
 ```
 
-- E2Eテストがパスすること
-- モバイル（iPhone）での動作確認
-- 主要なユーザーフローが正常に動作すること
+- 全ブラウザテスト（`*.browser.test.tsx`）がパスすること
+- webkit（Safari）での動作確認
+- 主要なコンポーネント/ページが正常に動作すること
+
+**注**: 従来型Playwright E2Eテスト（`npm run test:e2e`）は設定済みですが、テストファイル（`e2e/*.spec.ts`）は未作成です。
+現在のブラウザベーステストはVitest Browser Modeで実装されており、 `npm run test:once` で実行されます。
 
 ### Docker関連の変更時
 

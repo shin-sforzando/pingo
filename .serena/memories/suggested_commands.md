@@ -31,21 +31,23 @@ npm run check:i18n
 # Vitest（ウォッチモード）
 npm test
 
-# Vitestテスト（単回実行）
+# Vitestテスト（単回実行）- 単体テスト（jsdom）とブラウザテスト（webkit）を実行
 npm run test:once
 
 # Vitest（ウォッチモード、カバレッジなし）
 npm run test:watch
 
-# E2Eテスト（Playwright）
+# 従来型E2Eテスト（Playwright）- ※テストファイル未作成、インフラのみ設定済み
 npm run test:e2e
 
-# E2Eテストデバッグモード
+# E2Eテストデバッグモード - ※テストファイル未作成
 npm run test:e2e:debug
 
-# モバイルE2Eテスト
+# モバイルE2Eテスト - ※テストファイル未作成
 npm run test:e2e:mobile
 ```
+
+**注**: 現在、ブラウザベースのテストは**Vitest Browser Mode**（`*.browser.test.tsx`）で実装されています。従来型のPlaywright E2Eテスト（`e2e/*.spec.ts`）は設定のみ完了しており、テストファイルは未作成です。
 
 ### Storybook
 
@@ -133,5 +135,5 @@ gsutil cors set gcs-pingo-cors-config.json gs://gcs-pingo
 ## 注意事項
 
 - lefthookによるpre-commitフックが設定されているため、コミット時に自動でチェックが実行される
-- テストは必ず`npm run test:once`で実行（ウォッチモードは使用しない）
+- テストは必ず　`npm run test:once`　で実行（ウォッチモードは使用しない）
 - プライベートデータは必ずgit-secretで暗号化する
