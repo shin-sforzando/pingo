@@ -16,14 +16,22 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/AuthContext";
+import { useParticipatingGames } from "@/hooks/useParticipatingGames";
 import { setUserLocale } from "@/services/locale";
+
+// Maximum number of recent games to display in the user menu dropdown
+const MAX_RECENT_GAMES_DISPLAY = 10;
 
 export function UserMenu(): ReactElement {
   const { user, logout } = useAuth();
   const router = useRouter();
   const locale = useLocale();
-  const t = useTranslations("Header");
-  const commonT = useTranslations("Common");
+  const t = useTranslations();
+
+  // Fetch participating games using custom hook (lightweight mode for menu)
+  const { participatingGames } = useParticipatingGames(user, {
+    fetchDetails: false,
+  });
 
   const toggleLocale = async (): Promise<void> => {
     try {
@@ -32,6 +40,16 @@ export function UserMenu(): ReactElement {
       router.refresh();
     } catch (error) {
       console.error("Failed to switch language:", error);
+    }
+  };
+
+  const handleLogout = async (): Promise<void> => {
+    try {
+      await logout();
+      // Redirect to homepage after successful logout
+      router.push("/");
+    } catch (error) {
+      console.error("Failed to logout:", error);
     }
   };
 
@@ -51,33 +69,37 @@ export function UserMenu(): ReactElement {
           <DropdownMenuItem asChild>
             <Link href="/profile">
               <UserIcon className="mr-2 h-4 w-4" />
-              {t("profile")}
+              {t("Header.profile")}
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={toggleLocale}>
             <Languages className="mr-2 h-4 w-4" />
-            {commonT("toLanguage")}
+            {t("Common.toLanguage")}
           </DropdownMenuItem>
         </DropdownMenuGroup>
 
-        {user?.participatingGames && 0 < user.participatingGames.length && (
+        {participatingGames.length > 0 && (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuLabel>{t("recentGames")}</DropdownMenuLabel>
-            {user.participatingGames.slice(0, 10).map((gameId) => (
-              <DropdownMenuItem key={gameId} asChild>
-                <Link href={`/game/${gameId}`}>
-                  Game {gameId.substring(0, 8)}...
-                </Link>
-              </DropdownMenuItem>
-            ))}
+            <DropdownMenuLabel>{t("Header.recentGames")}</DropdownMenuLabel>
+            {participatingGames
+              .slice(0, MAX_RECENT_GAMES_DISPLAY)
+              .map((game) => {
+                const displayText = `${game.title} (${game.id})`;
+
+                return (
+                  <DropdownMenuItem key={game.id} asChild>
+                    <Link href={`/game/${game.id}`}>{displayText}</Link>
+                  </DropdownMenuItem>
+                );
+              })}
           </>
         )}
 
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => logout()} variant="destructive">
+        <DropdownMenuItem onClick={handleLogout} variant="destructive">
           <LogOut className="mr-2 h-4 w-4" />
-          {t("logout")}
+          {t("Header.logout")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

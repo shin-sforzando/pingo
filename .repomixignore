@@ -1,24 +1,28 @@
 # Add patterns to ignore here, one per line
-# Example:
-# *.log
-# tmp/
 
+.claude/
+.coderabbit.yaml
 .dockerignore
+.editorconfig
+.env.local
 .github/
 .gitignore
 .gitsecret/
 .next/
 .repomixignore
+.serena/
 .vscode/
 *.secret
 biome.json
-docs/
 coverage/
+docs/
 knip.json
 lefthook*.yml
 LICENSE.md
 messages/
+messages/
 node_modules/
 package-lock.json
 README.md
+repomix-output.xml
 src/stories/example/

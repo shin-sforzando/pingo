@@ -1,8 +1,8 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { AuthGuard } from "@/components/auth/AuthGuard";
 import { BingoBoard } from "@/components/game/BingoBoard";
 import { GameInfo } from "@/components/game/GameInfo";
@@ -10,8 +10,10 @@ import { ImageUpload } from "@/components/game/ImageUpload";
 import { ParticipantsList } from "@/components/game/ParticipantsList";
 import { SubmissionResult } from "@/components/game/SubmissionResult";
 import { Confetti, type ConfettiRef } from "@/components/magicui/confetti";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
+import { useGameParticipation } from "@/hooks/useGameParticipation";
 import { AcceptanceStatus } from "@/types/common";
 import { ErrorDisplay } from "./components/ErrorDisplay";
 import { GameHeader } from "./components/GameHeader";
@@ -30,9 +32,13 @@ import {
  */
 export default function GamePage() {
   const params = useParams();
+  const router = useRouter();
   const gameId = params.gameId as string;
-  const t = useTranslations("Game");
+  const t = useTranslations();
   const { user } = useAuth();
+
+  // Check participation status using custom hook
+  const { isParticipating } = useGameParticipation(gameId, user);
 
   // Game data management
   const {
@@ -74,36 +80,64 @@ export default function GamePage() {
     playerBoard?.completedLines || [],
   );
 
-  // Loading state
-  if (isLoading) {
+  // Redirect to share page if not participating (only after check completes)
+  useEffect(() => {
+    // Only redirect if user is logged in but not participating
+    // Why: Prevents redirect to share page on logout, allowing AuthGuard to redirect to home
+    if (user && isParticipating === false) {
+      router.push(`/game/${gameId}/share`);
+    }
+  }, [user, isParticipating, gameId, router]);
+
+  // Loading state or redirecting
+  if (isLoading || isParticipating === null) {
     return (
       <AuthGuard>
         <div className="container mx-auto p-4">
           <div className="text-center">
-            <p className="text-muted-foreground">{t("loading")}</p>
+            <p className="text-muted-foreground">{t("Game.loading")}</p>
           </div>
         </div>
       </AuthGuard>
     );
   }
 
-  // Error state
-  if (error) {
+  // Show redirect message while navigating
+  if (isParticipating === false) {
     return (
       <AuthGuard>
         <div className="container mx-auto p-4">
-          <ErrorDisplay error={error} />
+          <div className="text-center">
+            <p className="text-muted-foreground">
+              {t("Game.redirectingToSharePage")}
+            </p>
+          </div>
         </div>
       </AuthGuard>
     );
   }
 
-  // Game not found state
-  if (!game) {
+  // Error state or game not found
+  if (error || !game) {
     return (
       <AuthGuard>
         <div className="container mx-auto p-4">
-          <ErrorDisplay error={t("gameNotFound")} />
+          <Card className="mx-auto max-w-md">
+            <CardHeader>
+              <CardTitle>{t("Game.errors.gameNotFound")}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground mb-4">
+                {t("Game.errors.gameNotFoundDescription", { gameId })}
+              </p>
+              <Button
+                className="w-full"
+                onClick={() => router.push("/game/join")}
+              >
+                {t("Game.goToJoinPage")}
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </AuthGuard>
     );
@@ -125,7 +159,7 @@ export default function GamePage() {
         {/* User's bingo board */}
         <Card>
           <CardHeader>
-            <CardTitle>{t("yourBoard")}</CardTitle>
+            <CardTitle>{t("Game.yourBoard")}</CardTitle>
           </CardHeader>
           <CardContent>
             <BingoBoard
@@ -140,7 +174,7 @@ export default function GamePage() {
         {/* Image upload interface */}
         <Card>
           <CardHeader>
-            <CardTitle>{t("uploadImage")}</CardTitle>
+            <CardTitle>{t("Game.uploadImage")}</CardTitle>
           </CardHeader>
           <CardContent>
             <ImageUpload
@@ -157,7 +191,7 @@ export default function GamePage() {
         {latestSubmission && (
           <Card>
             <CardHeader>
-              <CardTitle>{t("latestResult")}</CardTitle>
+              <CardTitle>{t("Game.latestResult")}</CardTitle>
             </CardHeader>
             <CardContent>
               <SubmissionResult

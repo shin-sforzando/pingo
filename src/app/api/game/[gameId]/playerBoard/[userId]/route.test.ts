@@ -273,6 +273,15 @@ describe("/api/game/[gameId]/playerBoard/[userId]", () => {
                     doc: () => ({
                       get: () => Promise.resolve(mockParticipantDoc),
                     }),
+                    where: () => ({
+                      limit: () => ({
+                        get: () =>
+                          Promise.resolve({
+                            empty: true, // No participants found for query
+                            docs: [],
+                          }),
+                      }),
+                    }),
                   };
                 }
               },
@@ -350,17 +359,6 @@ describe("/api/game/[gameId]/playerBoard/[userId]", () => {
       (
         vi.mocked(adminFirestore.collection) as ReturnType<typeof vi.fn>
       ).mockImplementation((path: string) => {
-        if (path === "game_participations") {
-          return {
-            where: () => ({
-              where: () => ({
-                where: () => ({
-                  get: () => Promise.resolve(mockAdminParticipationSnapshot),
-                }),
-              }),
-            }),
-          };
-        }
         if (path === "games") {
           return {
             doc: () => ({
@@ -370,6 +368,12 @@ describe("/api/game/[gameId]/playerBoard/[userId]", () => {
                   return {
                     doc: () => ({
                       get: () => Promise.resolve(mockParticipantDoc),
+                    }),
+                    where: () => ({
+                      where: () => ({
+                        get: () =>
+                          Promise.resolve(mockAdminParticipationSnapshot),
+                      }),
                     }),
                   };
                 }

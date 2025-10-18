@@ -5,36 +5,35 @@
 Pingoプロジェクトは現在、機能実装段階に入っています。基礎構築が完了し、ゲーム作成機能、画像投稿機能、ゲームメイン画面の実装が完了しました。
 
 > [!NOTE]
-> 詳細な要件や設計の情報については、 `./cline_docs/TechnicalSpecification.md` を参照してください。
-> 過去の開発履歴については、 `./cline_docs/Archived_yyyymmdd.md` を参照してください。
+> 詳細な要件や設計の情報については、 `./docs/TechnicalSpecification.md` を参照してください。
+> 過去の開発履歴については、 `./docs/Archived_yyyymmdd.md` を参照してください。
 
 ## 最近の変更
 
 ### ビンゴライン検出と参加者統計更新機能の完全実装
 
 - ビンゴライン検出機能の実装
-  - `detectCompletedLines`関数を追加：5x5グリッドで行、列、対角線の完成を検出
+  - `detectCompletedLines` 関数を追加: 5x5グリッドで行、列、対角線の完成を検出
   - 画像受け入れ時に自動的にビンゴライン検出を実行
-  - 新しく完成したラインのみを`playerBoard.completedLines`に追加
+  - 新しく完成したラインのみを `playerBoard.completedLines` に追加
 - 参加者統計の自動更新
-  - `submissionCount`：新しいサブミッション作成時に自動インクリメント
-  - `completedLines`：ビンゴライン完成時に自動更新
-  - `lastCompletedAt`：新しいライン完成時にタイムスタンプを更新
+  - `submissionCount`: 新しいサブミッション作成時に自動インクリメント
+  - `completedLines`: ビンゴライン完成時に自動更新
+  - `lastCompletedAt`: 新しいライン完成時にタイムスタンプを更新
 - Firestoreトランザクション処理の修正
   - "Firestore transactions require all reads to be executed before all writes"エラーを解決
-  - すべての読み取り操作を`Promise.all()`でまとめて実行し、その後に書き込み操作を実行
+  - すべての読み取り操作を `Promise.all()` でまとめて実行し、その後に書き込み操作を実行
 - 複合インデックスの最適化
-  - `submissions`コレクション用の複合インデックス（`userId` + `submittedAt`）を作成
+  - `submissions` コレクション用の複合インデックス（`userId` + `submittedAt`）を作成
 - 参加者一覧の表示問題解決
-  - `getParticipants`メソッドを`game_participations`コレクションから統計情報付きで取得するように変更
-  - 参加者APIのレスポンス型に`completedLines`と`submissionCount`を追加
-  - `ParticipantsList`コンポーネントのインターフェースを更新し、TypeScriptエラーを修正
+  - 参加者APIのレスポンス型に `completedLines` と `submissionCount` を追加
+  - `ParticipantsList` コンポーネントのインターフェースを更新し、TypeScriptエラーを修正
 
 ### ゲームメイン画面の完全実装完了
 
 - ゲームメイン画面ページ（`/game/[gameId]`）の実装
 - 画像アップロード→Gemini分析→セル自動更新の統合フロー完成
-  - `/api/image/check`エンドポイントの完全書き直し
+  - `/api/image/check` エンドポイントの完全書き直し
   - Gemini分析、Submissionレコード作成、セル状態更新を統合
   - 公序良俗チェック + ビンゴセル分析の2段階処理
   - 確信度による自動承認/拒否判定
@@ -84,7 +83,7 @@ Pingoプロジェクトは現在、機能実装段階に入っています。基
 
 ## 次のステップ
 
-### 1. ゲーム参加機能の実装（優先度：最高・未実装）
+### 1. ゲーム参加機能の実装（優先度: 最高・未実装）
 
 重要: ホームページで`/game/join`へのリンクが存在するが、実際のページとAPIが未実装
 
@@ -94,12 +93,11 @@ Pingoプロジェクトは現在、機能実装段階に入っています。基
   - ゲームID（6桁）手動入力フォーム
   - 公開ゲーム一覧表示
 
-- ゲーム参加API（`/api/game/join`または`/api/game/[gameId]/join`）の実装
+- ゲーム参加API（`/api/game/join` または `/api/game/[gameId]/join`）の実装
   - 現在、参加用APIが存在しない
   - 参加確認とプレイヤーボード初期化
-  - game_participationsレコード作成
 
-### 2. テスト不足の解消（優先度：高）
+### 2. テスト不足の解消（優先度: 高）
 
 現状: 28個のテストファイルが存在するが、重要なコンポーネントのテストが不足
 
@@ -113,7 +111,7 @@ Pingoプロジェクトは現在、機能実装段階に入っています。基
   - ULIDテストデータの適切な使用（`faker.string.ulid()`）
   - エラーケースのテスト強化
 
-### 3. 本番対応とセキュリティ（優先度：高）
+### 3. 本番対応とセキュリティ（優先度: 高）
 
 - セキュリティ強化
   - レート制限の実装
@@ -124,7 +122,7 @@ Pingoプロジェクトは現在、機能実装段階に入っています。基
   - デバッグログの削除
   - パフォーマンス最適化
 
-### 4. ユーザビリティ向上（優先度：中）
+### 4. ユーザビリティ向上（優先度: 中）
 
 - ローディング・エラー表示の改善
 - 演出の追加（Confetti等）
@@ -135,7 +133,7 @@ Pingoプロジェクトは現在、機能実装段階に入っています。基
 ### 1. 重大な未実装機能
 
 - ゲーム参加機能が完全に未実装
-  - `/game/join`ページが存在しない（ホームページからリンクされているが404エラー）
+  - `/game/join` ページが存在しない（ホームページからリンクされているが404エラー）
   - ゲーム参加用API（`/api/game/join`等）が存在しない
   - 参加フローが実装されていない
 
@@ -149,13 +147,13 @@ Pingoプロジェクトは現在、機能実装段階に入っています。基
 
 - テスト品質の問題:
   - ULIDであるべき場所で適当な値を使用
-  - `faker.string.ulid()`の活用不足
+  - `faker.string.ulid()` の活用不足
   - エラーケースのテスト不足
 
 ### 3. 技術的課題
 
 - 画像判定の不具合:
-  - `matchedCellId`が「cell_22」でなく「山の稜線」等の文字列で返る場合がある
+  - `matchedCellId` が「cell_22」でなく「山の稜線」等の文字列で返る場合がある
   - 以降の処理が適切に行われない
 
 - コード構造の問題:
@@ -182,7 +180,7 @@ Pingoプロジェクトは現在、機能実装段階に入っています。基
 ### 5. 国際化・多言語対応
 
 - critique結果の多言語対応:
-  - `critiqueJa`と`critiqueEn`の分離
+  - `critiqueJa` と `critiqueEn` の分離
   - 現在のLocaleに応じた表示切り替え
 
 - エラーメッセージの多言語対応
@@ -199,7 +197,6 @@ Pingoプロジェクトは現在、機能実装段階に入っています。基
 ### 7. 開発環境・ツール
 
 - Storybook関連:
-  - Storybook 9系へのアップグレード
   - 一部画面のStorybookストーリー不足
 
 - その他:

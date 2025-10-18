@@ -174,8 +174,8 @@ node_modules/
 # Claude Code
 !.claude/settings.local.json
 
-# Serena MCP cache
-.serena/cache/
+# Playwright MCP
+.playwright-mcp/
 
 # Git Secret
 .gitsecret/keys/random_seed

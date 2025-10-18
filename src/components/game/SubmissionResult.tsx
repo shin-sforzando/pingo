@@ -56,7 +56,7 @@ export function SubmissionResult({
   imageUrl,
   className,
 }: SubmissionResultProps) {
-  const t = useTranslations("Game.SubmissionResult");
+  const t = useTranslations();
 
   // Determine status icon and color based on acceptance status
   const getStatusConfig = () => {
@@ -119,7 +119,7 @@ export function SubmissionResult({
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-lg">
           <StatusIcon className={cn("h-5 w-5", statusConfig.color)} />
-          {t("title")}
+          {t("Game.SubmissionResult.title")}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -145,10 +145,10 @@ export function SubmissionResult({
             variant={statusConfig.badgeVariant}
             className={statusConfig.badgeColor}
           >
-            {t(`status.${acceptanceStatus}`)}
+            {t(`Game.SubmissionResult.status.${acceptanceStatus}`)}
           </Badge>
           <span className="text-muted-foreground text-sm">
-            {t("confidence", {
+            {t("Game.SubmissionResult.confidence", {
               confidence: confidencePercentage,
               threshold: thresholdPercentage,
             })}
@@ -159,7 +159,7 @@ export function SubmissionResult({
         {acceptanceStatus === "accepted" && matchedCellSubject && (
           <div className="rounded-md bg-green-100 p-3">
             <p className="font-medium text-green-800 text-sm">
-              {t("matchedCell")}
+              {t("Game.SubmissionResult.matchedCell")}
             </p>
             <p className="text-green-700 text-sm">{matchedCellSubject}</p>
           </div>
@@ -167,7 +167,9 @@ export function SubmissionResult({
 
         {/* AI Critique */}
         <div>
-          <p className="mb-2 font-medium text-sm">{t("analysis")}</p>
+          <p className="mb-2 font-medium text-sm">
+            {t("Game.SubmissionResult.analysis")}
+          </p>
           <p className="text-muted-foreground text-sm leading-relaxed">
             {critique}
           </p>
@@ -176,7 +178,7 @@ export function SubmissionResult({
         {/* Confidence Bar */}
         <div>
           <div className="mb-2 flex justify-between text-sm">
-            <span>{t("confidenceLabel")}</span>
+            <span>{t("Game.SubmissionResult.confidenceLabel")}</span>
             <span>{confidencePercentage}%</span>
           </div>
           <div className="h-2 w-full rounded-full bg-gray-200">
@@ -191,7 +193,9 @@ export function SubmissionResult({
             />
           </div>
           <div className="mt-1 text-muted-foreground text-xs">
-            {t("thresholdNote", { threshold: thresholdPercentage })}
+            {t("Game.SubmissionResult.thresholdNote", {
+              threshold: thresholdPercentage,
+            })}
           </div>
         </div>
       </CardContent>

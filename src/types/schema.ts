@@ -392,3 +392,20 @@ export type Event = z.infer<typeof eventSchema>;
 export type ImageSubmissionData = z.infer<typeof imageSubmissionDataSchema>;
 export type ImageSubmissionResult = z.infer<typeof imageSubmissionResultSchema>;
 export type AnalysisResult = z.infer<typeof analysisResultSchema>;
+
+/**
+ * Game info type - used for displaying games in lists, verification, and cards
+ * Can be used for both public and private games
+ * Includes optional fields that may not be available in all contexts
+ */
+export interface GameInfo {
+  id: string;
+  title: string;
+  theme: string;
+  notes?: string;
+  participantCount?: number;
+  createdAt: Date | null;
+  expiresAt: Date | null;
+  isPublic?: boolean;
+  isParticipating?: boolean;
+}

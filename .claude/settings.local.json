@@ -1,6 +1,7 @@
 {
   "permissions": {
     "allow": [
+      "Bash(awk:*)",
       "Bash(cat:*)",
       "Bash(curl:*)",
       "Bash(find:*)",
@@ -13,8 +14,13 @@
       "Bash(gh run list:*)",
       "Bash(gh run view:*)",
       "Bash(git log:*)",
+      "Bash(lefthook run pre-commit:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run check:i18n:*)",
       "Bash(npm run check)",
       "Bash(npm run test:*)",
+      "Bash(npm run test:once)",
+      "Bash(npm test:*)",
       "Bash(npx npm-check-updates:*)",
       "mcp__context7__get-library-docs",
       "mcp__context7__resolve-library-id",
@@ -61,6 +67,8 @@
       "mcp__serena__write_memory",
       "WebFetch(domain:docs.github.com)",
       "WebFetch(domain:github.com)",
+      "WebFetch(domain:next-intl-docs.vercel.app)",
+      "WebFetch(domain:next-intl.dev)",
       "WebFetch(domain:storybook.js.org)",
       "WebFetch(domain:ui.shadcn.com)",
       "WebFetch(domain:www.radix-ui.com)",

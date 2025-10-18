@@ -48,8 +48,6 @@ export function NotificationDrawer({
   onOpenChange,
 }: NotificationDrawerProps): ReactElement {
   const t = useTranslations();
-  const headerT = useTranslations("Header");
-  const commonT = useTranslations("Common");
 
   // Using dummy data
   const notifications = DUMMY_NOTIFICATIONS;
@@ -59,9 +57,9 @@ export function NotificationDrawer({
       <DrawerContent>
         <div className="mx-auto w-full max-w-md">
           <DrawerHeader>
-            <DrawerTitle>{headerT("notifications")}</DrawerTitle>
+            <DrawerTitle>{t("Header.notifications")}</DrawerTitle>
             <DrawerDescription>
-              {headerT("notificationsDescription")}
+              {t("Header.notificationsDescription")}
             </DrawerDescription>
           </DrawerHeader>
 
@@ -89,14 +87,14 @@ export function NotificationDrawer({
               </ul>
             ) : (
               <p className="py-4 text-center text-muted-foreground">
-                {headerT("noNotifications")}
+                {t("Header.noNotifications")}
               </p>
             )}
           </div>
 
           <DrawerFooter>
             <DrawerClose asChild>
-              <Button variant="outline">{commonT("close")}</Button>
+              <Button variant="outline">{t("Common.close")}</Button>
             </DrawerClose>
           </DrawerFooter>
         </div>
