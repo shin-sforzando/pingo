@@ -43,17 +43,6 @@ The content is organized as follows:
 </file_summary>
 
 <directory_structure>
-.claude/
-  settings.local.json
-.serena/
-  memories/
-    codebase_structure.md
-    coding_conventions.md
-    current_status_priorities.md
-    project_overview.md
-    suggested_commands.md
-    task_completion_checklist.md
-  project.yml
 .storybook/
   decorators.tsx
   main.ts
@@ -195,6 +184,9 @@ src/
       DndContextWrapper.tsx
       GameInfo.stories.tsx
       GameInfo.tsx
+      GameInfoCard.browser.test.tsx
+      GameInfoCard.stories.tsx
+      GameInfoCard.tsx
       ImageUpload.stories.tsx
       ImageUpload.tsx
       InfoCard.tsx
@@ -269,6 +261,7 @@ src/
     useGameJoin.ts
     useGameParticipation.test.ts
     useGameParticipation.ts
+    useParticipatingGames.test.ts
     useParticipatingGames.ts
   i18n/
     config.ts
@@ -302,8 +295,6 @@ src/
     index.ts
     schema.ts
     user.ts
-.coderabbit.yaml
-.editorconfig
 .mcp.json
 CLAUDE.md
 cloudbuild.yaml
@@ -781,6 +772,17 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 </file>
 
+<file path="src/lib/api-utils.ts">
+import { NextResponse } from "next/server";
+⋮----
+export async function withErrorHandling<T>(
+  operation: () => Promise<T>,
+  errorMessage: string,
+)
+⋮----
+export function validateGameId(gameId: string | undefined)
+</file>
+
 <file path="src/lib/constants.ts">
 
 </file>
@@ -948,22 +950,6 @@ export function notificationToFirestore(
 ): NotificationDocument
 </file>
 
-<file path=".editorconfig">
-root = true
-
-# Unix-style newlines with a newline ending every file
-[*]
-charset = utf-8
-end_of_line = lf
-indent_style = space
-indent_size = 2
-insert_final_newline = true
-trim_trailing_whitespace = true
-
-[*.md]
-trim_trailing_whitespace = false
-</file>
-
 <file path="components.json">
 {
   "$schema": "https://ui.shadcn.com/schema.json",
@@ -1065,37 +1051,6 @@ async function extractFirebaseCredentials(
 function parseArguments(args: string[]):
 ⋮----
 async function main(): Promise<void>
-</file>
-
-<file path="src/app/api/game/public/route.ts">
-import { NextResponse } from "next/server";
-import { adminAuth } from "@/lib/firebase/admin";
-import {
-  AdminGameParticipationService,
-  AdminGameService,
-  AdminUserService,
-} from "@/lib/firebase/admin-collections";
-import type { ApiResponse } from "@/types/common";
-import type { Game } from "@/types/schema";
-⋮----
-export async function GET(request: Request): Promise<
-  NextResponse<
-    ApiResponse<{
-      games: Array<
-        Partial<Game> & {
-          isParticipating?: boolean;
-          participantCount: number;
-        }
-      >;
-    }>
-  >
-> {
-  try {
-
-    let userId: string | null = null;
-    let userParticipatingGames: string[] = [];
-
-    const authHeader = request.headers.get("Authorization");
 </file>
 
 <file path="src/app/game/[gameId]/hooks/useGameData.test.ts">
@@ -1276,11 +1231,87 @@ import { BingoCell } from "./BingoCell";
 type Story = StoryObj<typeof meta>;
 </file>
 
+<file path="src/components/game/GameInfoCard.browser.test.tsx">
+import { page, userEvent } from "@vitest/browser/context";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { render } from "vitest-browser-react";
+import type { GameInfo } from "@/types/schema";
+import { GameInfoCard } from "./GameInfoCard";
+⋮----
+expect(container.textContent).not.toContain("Family friendly game");
+⋮----
+const usersIcon = container.querySelector('svg[class*="lucide-users"]');
+expect(usersIcon).toBeNull();
+⋮----
+const calendarIcon = container.querySelector(
+        'svg[class*="lucide-calendar"]',
+      );
+expect(calendarIcon).toBeNull();
+⋮----
+const card = page.getByText("Summer Adventure");
+await userEvent.click(card);
+⋮----
+expect(mockOnClick).toHaveBeenCalledTimes(1);
+expect(mockOnClick).toHaveBeenCalledWith(mockGame);
+⋮----
+expect(card).toBeDefined();
+expect(card?.className).toContain("hover:bg-muted/50");
+</file>
+
+<file path="src/components/game/GameInfoCard.stories.tsx">
+import type { Meta, StoryObj } from "@storybook/react";
+import { fn } from "storybook/test";
+import type { GameInfo } from "@/types/schema";
+import { GameInfoCard } from "./GameInfoCard";
+⋮----
+type Story = StoryObj<typeof meta>;
+</file>
+
+<file path="src/components/game/GameInfoCard.tsx">
+import { formatDistanceToNow } from "date-fns";
+import { enUS, ja } from "date-fns/locale";
+import { Calendar, Users } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import type { GameInfo } from "@/types/schema";
+⋮----
+export interface GameInfoCardProps {
+
+
+
+  game: GameInfo;
+
+
+
+  onClick: (game: GameInfo) => void;
+
+
+
+  locale: string;
+
+
+
+  className?: string;
+}
+</file>
+
 <file path="src/components/game/QRCodeCard.stories.tsx">
 import type { Meta, StoryObj } from "@storybook/nextjs";
 import { QRCodeCard } from "./QRCodeCard";
 ⋮----
 type Story = StoryObj<typeof meta>;
+</file>
+
+<file path="src/components/game/QRCodeCard.tsx">
+import { QRCodeSVG } from "qrcode.react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+⋮----
+export interface QRCodeCardProps {
+  gameId: string;
+  url: string;
+  size?: number;
+}
+⋮----
+export function QRCodeCard(
 </file>
 
 <file path="src/components/game/SubjectItem.stories.tsx">
@@ -1783,36 +1814,15 @@ export function useGameParticipation(
 ): UseGameParticipationReturn
 </file>
 
-<file path="src/hooks/useParticipatingGames.ts">
-import { useEffect, useState } from "react";
-import { auth } from "@/lib/firebase/client";
+<file path="src/hooks/useParticipatingGames.test.ts">
+import { renderHook, waitFor } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { User } from "@/types/schema";
+import { useParticipatingGames } from "./useParticipatingGames";
 ⋮----
-interface ParticipatingGame {
-  id: string;
-  title: string;
-  theme?: string;
-  notes?: string;
-  participantCount?: number;
-  createdAt?: Date | null;
-  expiresAt?: Date | null;
-}
+// No notes field when fetchDetails is false
 ⋮----
-interface UseParticipatingGamesOptions {
-
-
-
-
-
-  fetchDetails?: boolean;
-}
-⋮----
-export function useParticipatingGames(
-  user: User | null,
-  options: UseParticipatingGamesOptions = {},
-)
-⋮----
-const fetchParticipatingGames = async () =>
+// Should only call game API, not participants API
 </file>
 
 <file path="src/i18n/request.ts">
@@ -1825,15 +1835,20 @@ import { describe, expect, it } from "vitest";
 import { adminAuth, adminFirestore } from "./admin";
 </file>
 
-<file path="src/lib/api-utils.ts">
-import { NextResponse } from "next/server";
+<file path="src/services/game.ts">
+import type { ApiResponse } from "@/types/common";
+import type { Game, GameBoard } from "@/types/schema";
 ⋮----
-export async function withErrorHandling<T>(
-  operation: () => Promise<T>,
-  errorMessage: string,
-)
+export interface Participant {
+  id: string;
+  username: string;
+}
 ⋮----
-export function validateGameId(gameId: string | undefined)
+export async function getGameData(gameId: string): Promise<Game | null>
+⋮----
+export async function getGameBoard(gameId: string): Promise<GameBoard | null>
+⋮----
+export async function getParticipants(gameId: string): Promise<Participant[]>
 </file>
 
 <file path="src/services/locale.test.ts">
@@ -1873,23 +1888,6 @@ export function userToFirestoreForTest(
 
 <file path="src/types/index.ts">
 
-</file>
-
-<file path=".coderabbit.yaml">
-language: "ja-JP"
-early_access: true
-reviews:
-  profile: "chill"
-  request_changes_workflow: false
-  high_level_summary: true
-  poem: false
-  review_status: true
-  collapse_walkthrough: false
-  auto_review:
-    enabled: true
-    drafts: false
-chat:
-  auto_reply: true
 </file>
 
 <file path="cors.json">
@@ -1988,71 +1986,6 @@ setupFiles: ["./vitest.browser.setup.ts"], // Add browser setup file
 "**/stories/example/*.tsx", // Exclude example stories
 </file>
 
-<file path=".serena/project.yml">
-language: typescript
-
-
-
-ignore_all_files_in_gitignore: true
-
-
-
-
-ignored_paths: []
-
-
-
-
-read_only: false
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-excluded_tools: []
-
-
-
-initial_prompt: ""
-
-project_name: "pingo"
-</file>
-
 <file path="src/app/api/auth/logout/route.test.ts">
 import bcrypt from "bcrypt";
 import type { NextResponse } from "next/server";
@@ -2078,6 +2011,37 @@ import type { ApiResponse } from "@/types/common";
 import type { User } from "@/types/schema";
 ⋮----
 import { POST } from "./route";
+</file>
+
+<file path="src/app/api/game/public/route.ts">
+import { NextResponse } from "next/server";
+import { adminAuth } from "@/lib/firebase/admin";
+import {
+  AdminGameParticipationService,
+  AdminGameService,
+  AdminUserService,
+} from "@/lib/firebase/admin-collections";
+import type { ApiResponse } from "@/types/common";
+import type { Game } from "@/types/schema";
+⋮----
+export async function GET(request: Request): Promise<
+  NextResponse<
+    ApiResponse<{
+      games: Array<
+        Partial<Game> & {
+          isParticipating?: boolean;
+          participantCount: number;
+        }
+      >;
+    }>
+  >
+> {
+  try {
+
+    let userId: string | null = null;
+    let userParticipatingGames: string[] = [];
+
+    const authHeader = request.headers.get("Authorization");
 </file>
 
 <file path="src/app/api/health/route.ts">
@@ -2165,19 +2129,6 @@ interface AuthGuardProps {
 }
 ⋮----
 export function AuthGuard(
-</file>
-
-<file path="src/components/game/QRCodeCard.tsx">
-import { QRCodeSVG } from "qrcode.react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-⋮----
-export interface QRCodeCardProps {
-  gameId: string;
-  url: string;
-  size?: number;
-}
-⋮----
-export function QRCodeCard(
 </file>
 
 <file path="src/components/game/SubmissionResult.stories.tsx">
@@ -2366,26 +2317,46 @@ export function useAuth()
 export function AuthProvider(
 </file>
 
+<file path="src/hooks/useParticipatingGames.ts">
+import { useEffect, useState } from "react";
+import { auth } from "@/lib/firebase/client";
+import type { GameInfo, User } from "@/types/schema";
+⋮----
+interface UseParticipatingGamesOptions {
+
+
+
+
+
+  fetchDetails?: boolean;
+}
+⋮----
+export function useParticipatingGames(
+  user: User | null,
+  options: UseParticipatingGamesOptions = {},
+)
+⋮----
+const fetchParticipatingGames = async () =>
+⋮----
+// Fetch game information for each participating game
+⋮----
+// Always fetch basic game info
+⋮----
+// Check if game has not expired
+⋮----
+// Optionally fetch detailed information
+⋮----
+// Fetch participant count
+⋮----
+// Silently fail participant count fetch
+⋮----
+// Silently skip games that return 404 or other errors
+</file>
+
 <file path="src/lib/firebase/admin.ts">
 import { cert, getApps, initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
-</file>
-
-<file path="src/services/game.ts">
-import type { ApiResponse } from "@/types/common";
-import type { Game, GameBoard } from "@/types/schema";
-⋮----
-export interface Participant {
-  id: string;
-  username: string;
-}
-⋮----
-export async function getGameData(gameId: string): Promise<Game | null>
-⋮----
-export async function getGameBoard(gameId: string): Promise<GameBoard | null>
-⋮----
-export async function getParticipants(gameId: string): Promise<Participant[]>
 </file>
 
 <file path="src/test/helpers/api-test-helpers.ts">
@@ -2623,171 +2594,6 @@ import createNextIntlPlugin from "next-intl/plugin";
 }
 </file>
 
-<file path=".serena/memories/current_status_priorities.md">
-# Pingo開発状況と優先タスク
-
-## 現在の開発状況
-
-### ✅ 完了済み機能
-
-- **ゲーム作成**: Gemini AIによる被写体生成を含む完全なフロー
-- **画像アップロード**: HEIC対応、リサイズ/圧縮、GCS統合
-- **ゲームメイン画面**: ビンゴボード、リアルタイム更新、AI解析
-- **認証機能**: Firebase Authによるユーザー管理
-- **UI基盤**: shadcn/ui + Magic UIコンポーネント with Storybook
-- **国際化対応**: next-intlによる日本語/英語サポート
-- **リアルタイム更新**: ゲーム状態のFirestoreリスナー
-- **ビンゴライン検出**: 行/列/斜めの自動完了検出
-- **参加者管理API**: `/api/game/[gameId]/participants`エンドポイント
-- **テストカバレッジ**: 255個のテスト、主要APIエンドポイントのテスト実装済み
-- **ゲーム参加機能**: カスタムフック（useGameJoin、useGameParticipation、useParticipatingGames）による完全な参加フロー実装
-- **ゲーム参加UI**: `/game/join`ページの完全実装（手動ID入力、検証、参加機能）
-- **公開ゲーム一覧**: `/api/game/public`エンドポイントと一覧表示UI
-- **参加中のゲーム一覧**: UserMenuおよびjoinページでの表示機能
-- **翻訳構造の最適化**: 共通フィールドラベルの統合、重複削除、命名規則統一
-- **QRコード機能**: QRコード表示機能の完全実装（スキャンはOS標準機能を利用）
-
-### 🔄 最近完了した作業（ブランチ049_game_participation_feature）
-
-#### ゲーム参加機能の完全実装
-
-- **useGameJoin**: ゲーム参加処理のカスタムフック（トランザクション対応）
-- **useGameParticipation**: ゲーム参加状態の確認フック
-- **useParticipatingGames**: 参加中のゲームリストを取得するフック
-- **useGameData**: ゲームデータ取得の統一インターフェース
-- **`/game/join`ページ**: 527行の完全な実装
-  - ゲームID手動入力と検証
-  - リアルタイム入力検証（6文字、大文字のみ）
-  - ゲーム情報の事前確認
-  - 参加中のゲーム一覧表示
-  - 公開ゲーム一覧表示（クリックで自動参加）
-- **`/api/game/public`エンドポイント**: 公開ゲームの取得
-- **参加状態チェックの強化**: 参加済みユーザーへのリダイレクトメッセージ
-- **UserMenuでの参加中ゲーム表示機能**
-- **QRコード表示**: `QRCodeCard`コンポーネントによるゲームURL/IDのQRコード表示（スキャンはスマートフォンOS標準機能）
-
-#### 翻訳構造のリファクタリング
-
-- **共通フィールドラベルの抽出**: 11個のラベルを`Game.*`レベルに統合
-  - `status`, `expirationDate`, `photoSharing`, `lines`
-  - `public`, `private`, `on`, `off`, `active`, `ended`, `archived`
-- **重複削除**: `Game.Share.*`から14個の重複キーを削除
-- **未使用名前空間の削除**: `GameInfo.*`全体（15キー）を削除
-- **命名規則統一**: `imageUpload.*` → `ImageUpload.*`にリネーム
-- **翻訳パターンの標準化**:
-  - 常に`useTranslations()`（引数なし）を使用
-  - フルパスキー（例：`Game.status`）で参照
-  - 3層階層構造：共通（`Game.*`）、ページ固有（`Game.Share.*`）、コンポーネント固有（`ImageUpload.*`）
-- **成果**: 総キー数232→215（-7.3%）、重複0、未使用キー0、テスト255/255合格
-
-## 開発コンテキストメモ
-
-### 対象ユーザー
-
-- **モバイルファースト**: スマートフォンが主要プラットフォーム
-- **コンテンツポリシー**: ファミリーフレンドリー、全年齢対象
-- **言語**: 日本語メイン、英語サブ
-- **AI統合**: Google Gemini による画像解析と被写体生成
-
-### 技術的制約
-
-- **モバイル互換性**: iOS Safariでの完璧な動作が必須
-- **パフォーマンス目標**:
-  - 画像解析: 3秒以内（最大5秒）
-  - ページロード: 2秒以内
-  - 最大50プレイヤー/ゲーム
-  - 最大1,000同時接続ユーザー
-- **データ制限**: プレイヤーあたり最大30回の画像投稿/ゲーム
-
-### 開発ワークフローの注意点
-
-- `main`ブランチで直接作業しない
-- コミット前に必ず`npm run test:once`を実行
-- 全コンポーネントにStorybookストーリーが必要
-- 6文字ゲームID以外は全てULIDを使用
-- 類似コンポーネントの既存パターンに従う
-- 翻訳キーは`useTranslations()`（引数なし）でフルパス参照を使用
-
-## 現在の技術仕様
-
-### 最新技術スタック
-
-- **Next.js**: 15.5.3（App Router）
-- **React**: 19.1.1
-- **TypeScript**: 5系
-- **Tailwind CSS**: 4系
-- **Firebase**: 12.2.1
-- **Google Gemini**: @google/genai 1.19.0
-
-### 開発・テスト環境
-
-- **リンター/フォーマッター**: Biome 2.2.4
-- **単体テスト**: Vitest 3.2.4
-- **E2Eテスト**: Playwright 1.55.0
-- **UI開発**: Storybook 9.1.6
-- **Gitフック**: lefthook 1.13.0
-
-### 実装済みAPIエンドポイント
-
-- **ヘルスチェック**: `/api/health`
-- **認証**: `/api/auth/*`（login, register, logout, update, me）
-- **ゲーム管理**:
-  - `/api/game/create` - ゲーム作成
-  - `/api/game/[gameId]` - ゲーム情報取得
-  - `/api/game/[gameId]/board` - ゲームボード取得
-  - `/api/game/[gameId]/events` - ゲームイベント
-- **公開ゲーム**: `/api/game/public` - 公開ゲーム一覧取得
-- **ゲーム参加**: `/api/game/[gameId]/join` - ゲーム参加処理
-- **参加者管理**: `/api/game/[gameId]/participants` - 参加者一覧取得
-- **プレイヤーボード**: `/api/game/[gameId]/playerBoard/[userId]` - 個別プレイヤーボード
-- **画像管理**:
-  - `/api/image/getUploadUrl` - GCS署名付きURL取得
-  - `/api/image/upload` - 画像アップロード
-  - `/api/image/check` - 画像適切性チェック（AI）
-- **画像投稿**:
-  - `/api/game/[gameId]/submission` - 投稿作成
-  - `/api/game/[gameId]/submission/[submissionId]` - 投稿詳細
-  - `/api/game/[gameId]/submission/analyze` - AI画像解析
-- **被写体管理**:
-  - `/api/subjects/generate` - AI被写体生成
-  - `/api/subjects/check` - 被写体チェック
-
-### 実装済みカスタムフック
-
-- **useGameJoin**: ゲーム参加処理（楽観的UI更新、トランザクション対応）
-- **useGameParticipation**: ゲーム参加状態の確認
-- **useParticipatingGames**: 参加中のゲームリスト取得
-- **useGameData**: ゲームデータ取得の統一インターフェース
-- **useAuthenticatedFetch**: 認証付きフェッチのユーティリティ
-
-### 実装済みページ
-
-- **`/game/join`**: ゲーム参加ページ（手動ID入力、検証、公開ゲーム一覧、参加中ゲーム一覧）
-- **`/game/[gameId]`**: ゲームメインページ
-- **`/game/[gameId]/share`**: ゲーム共有ページ
-- **`/game/create`**: ゲーム作成ページ
-
-## 品質保証状況
-
-### テストカバレッジ現況
-
-- **テスト総数**: 255個（34ファイル）
-- **合格率**: 100%（255/255）
-- **API routes**: 大部分でテスト実装済み
-- **Components**: レイアウトコンポーネント中心にテスト済み
-- **Hooks**: useGameJoin、useGameParticipation、useGameData、useParticipatingGamesのテスト完了
-- **Services**: 一部のサービス層でテスト不足
-- **ブラウザテスト**: Vitest Browserモード（Playwright + webkit）で10ファイル実装済み
-
-### 翻訳ファイル状況
-
-- **総キー数**: 215個（ja.json、en.json）
-- **名前空間**: Common、Game、Auth、Header、Footer、HomePage、ImageUpload、Notification、ParticipantsList
-- **重複**: 0個（すべて解消済み）
-- **未使用キー**: 0個（すべて削除済み）
-- **命名規則違反**: 0個（すべて修正済み）
-</file>
-
 <file path="src/app/api/auth/login/route.test.ts">
 import bcrypt from "bcrypt";
 import type { NextResponse } from "next/server";
@@ -2888,6 +2694,18 @@ import type { ApiResponse } from "@/types/common";
 import type { User } from "@/types/schema";
 ⋮----
 import { PUT } from "./route";
+</file>
+
+<file path="src/app/api/game/[gameId]/board/route.ts">
+import { NextResponse } from "next/server";
+import { AdminGameBoardService } from "@/lib/firebase/admin-collections";
+import type { ApiResponse } from "@/types/common";
+import type { GameBoard } from "@/types/schema";
+⋮----
+export async function GET(
+  _request: Request,
+  { params }: { params: Promise<{ gameId: string }> },
+): Promise<NextResponse<ApiResponse<GameBoard>>>
 </file>
 
 <file path="src/app/api/game/[gameId]/events/route.test.ts">
@@ -3049,6 +2867,20 @@ interface GameHeaderProps {
   game: Game | null;
   className?: string;
 }
+</file>
+
+<file path="src/app/game/[gameId]/share/page.stories.tsx">
+import { fakerJA as faker } from "@faker-js/faker";
+import type { Meta, StoryObj } from "@storybook/nextjs";
+import { GameStatus } from "@/types/common";
+import type { Cell, Game } from "@/types/schema";
+import SharePage from "./page";
+⋮----
+const generateSampleCells = (): Cell[] =>
+⋮----
+const mockUseParams = () => (
+⋮----
+type Story = StoryObj<typeof meta>;
 </file>
 
 <file path="src/components/game/BingoBoard.stories.tsx">
@@ -3363,685 +3195,6 @@ export function eventFromFirestore(doc: EventDocument): Event
 export function eventToFirestore(event: Event): EventDocument
 </file>
 
-<file path=".serena/memories/codebase_structure.md">
-# Pingoコードベース構造とアーキテクチャ
-
-## ディレクトリ構造
-
-```plain
-pingo/
-├── src/
-│   ├── app/                    # Next.js App Router ページ
-│   │   ├── api/               # API ルート
-│   │   ├── game/              # ゲーム関連ページ
-│   │   │   └── [gameId]/hooks/ # ゲーム固有のカスタムフック
-│   │   └── debug/             # デバッグ用ユーティリティ
-│   ├── components/            # React コンポーネント
-│   │   ├── ui/               # shadcn/ui ベースコンポーネント
-│   │   ├── magicui/          # Magic UI アニメーション
-│   │   ├── auth/             # 認証コンポーネント
-│   │   ├── layout/           # Header、Footer、Navigation
-│   │   └── game/             # ゲーム専用コンポーネント
-│   ├── contexts/             # React Context プロバイダー
-│   ├── hooks/                # カスタムReact Hooks
-│   ├── lib/                  # ユーティリティライブラリと設定
-│   ├── services/             # ビジネスロジックとAPIサービス
-│   ├── types/                # TypeScript型定義
-│   ├── i18n/                 # 国際化
-│   ├── stories/              # Storybookストーリー
-│   └── test/                 # テストユーティリティとフィクスチャ
-├── messages/                 # i18n翻訳ファイル
-├── docs/                     # プロジェクトドキュメント
-├── public/                   # 静的アセット
-├── .storybook/              # Storybook設定
-├── scripts/                 # ビルドとユーティリティスクリプト
-└── middleware.ts            # Next.js認証ミドルウェア（ルート階層）
-```
-
-## 主要アーキテクチャパターン
-
-### App Router構造（Next.js 15）
-
-- **サーバーコンポーネント**: 静的コンテンツのデフォルト
-- **クライアントコンポーネント**: インタラクティブ機能（'use client'でマーク）
-- **APIルート**: `/app/api/`内のRESTfulエンドポイント
-- **ミドルウェア**: 認証とルーティングロジック
-
-### コンポーネントアーキテクチャ
-
-- **UIコンポーネント**: 再利用可能なshadcn/ui + Magic UI
-- **機能コンポーネント**: Game、Auth、Layout専用
-- **各コンポーネントには以下が必要**:
-  - TypeScriptインターフェース
-  - Storybookストーリー
-  - 単体/統合テスト
-  - 適切な国際化対応
-
-### データフロー
-
-```plain
-クライアント → APIルート → サービス → Firebase/Firestore
-         ↖ リアルタイム ← Firestoreリスナー ← クライアント
-```
-
-### 型システム（src/types/）
-
-- `common.ts`: 共有enumsとユーティリティ型
-- `schema.ts`: バリデーション用Zodスキーマ
-- `game.ts`, `user.ts`: ドメイン固有の型
-- `firestore.ts`: データベースドキュメントインターフェース
-- `index.ts`: 集約エクスポート
-
-### 状態管理
-
-- **React Context**: グローバル状態（認証、ゲーム）
-- **useState/useReducer**: ローカルコンポーネント状態
-- **Firestoreリスナー**: リアルタイムデータ更新
-- **React Hook Form**: フォーム状態管理
-
-## 重要なコンポーネント
-
-### ゲームフローコンポーネント（src/components/game/）
-
-- `ImageUpload.tsx`: HEIC対応の写真アップロード
-- `BingoBoard.tsx`: インタラクティブなビンゴグリッド
-- `BingoCell.tsx`: オープン/クローズ状態の個別セル
-- `SubmissionResult.tsx`: AI解析結果の表示
-- `GameInfo.tsx`: ゲーム詳細情報カード
-- `InfoCard.tsx`: 汎用情報カード（アイコン付き）
-- `ParticipantsList.tsx`: 参加者一覧表示
-- `QRCodeCard.tsx`: QRコード表示カード
-- `SubjectList.tsx`: 被写体リスト（ドラッグ&ドロップ対応）
-- `SubjectItem.tsx`: 個別被写体アイテム
-- `DndContextWrapper.tsx`: ドラッグ&ドロップコンテキストラッパー
-
-### 認証とレイアウト（src/components/auth/, src/components/layout/）
-
-- `AuthGuard.tsx`: ルート保護ラッパー
-- `Header.tsx`: 認証状態付きナビゲーション
-- `UserMenu.tsx`: ユーザープロフィールドロップダウン
-- `NotificationIcon.tsx` + `NotificationDrawer.tsx`: リアルタイム通知
-
-### カスタムフック
-
-**グローバルフック（src/hooks/）**:
-
-- `useGameJoin.ts`: ゲーム参加処理（楽観的UI更新、トランザクション対応）
-- `useGameParticipation.ts`: ゲーム参加状態の確認
-- `useParticipatingGames.ts`: 参加中のゲームリスト取得
-- `useAuthenticatedFetch.ts`: 認証付きフェッチのユーティリティ
-
-**ゲーム固有フック（src/app/game/[gameId]/hooks/）**:
-
-- `useGameData.ts`: ゲームデータ取得の統一インターフェース（Firestoreリスナー統合）
-- `useImageSubmission.ts`: 画像投稿処理
-
-### サービス層（src/services/）
-
-- `game.ts`: ゲームビジネスロジック（Firestore操作、トランザクション処理）
-- `image-upload.ts`: 画像アップロードロジック（GCS署名付きURL、メタデータ管理）
-- `locale.ts`: ロケール管理とバリデーション
-- Firebase Admin SDKによるデータベースアクセス
-- Google Cloud Storageとの統合
-- Google Gemini APIとのAI統合
-- 型安全なデータ変換ユーティリティ
-
-### ユーティリティライブラリ（src/lib/）
-
-- `firebase/admin.ts`: Firebase Admin SDK初期化と設定
-- `firebase/admin-collections.ts`: Firestoreコレクション型安全アクセス
-- `firebase/client.ts`: Firebase Client SDK初期化（認証、Firestore）
-- `image-utils.ts`: 画像処理ユーティリティ（HEIC変換、リサイズ、圧縮）
-- `api-utils.ts`: APIレスポンスヘルパー、エラーハンドリング
-- `utils.ts`: 汎用ユーティリティ（cn、日付フォーマット、バリデーション）
-- `constants.ts`: アプリケーション定数（URL、制限値）
-
-### 実装済みページ
-
-**認証不要**:
-
-- `/` - ホームページ（ランディングページ）
-
-**認証必要**:
-
-- `/game/create` - ゲーム作成ページ（被写体生成、設定）
-- `/game/join` - ゲーム参加ページ（ID入力、公開ゲーム一覧、参加中ゲーム一覧）
-- `/game/[gameId]` - ゲームメインページ（ビンゴボード、画像投稿、リアルタイム更新）
-- `/game/[gameId]/share` - ゲーム共有ページ（QRコード、参加者一覧）
-
-**デバッグ**:
-
-- `/debug/*` - 開発用デバッグツール
-
-## データモデル
-
-### 主要コレクション（Firestore）
-
-- `users/`: ユーザープロフィールと認証
-- `games/`: ゲームメタデータと設定
-- `games/{id}/playerBoards/`: 個別プレイヤーの進行状況
-- `games/{id}/submissions/`: 写真投稿とAI解析結果
-
-### ID規則
-
-- **ULID**: すべての内部ID（ユーザー、投稿など）
-- **6文字ゲームID**: ユーザー向けゲームコード（例：「ABCDEF」）
-- **タイムスタンプ**: 適切な変換ユーティリティ付きFirestore Timestamp
-
-## 理解すべき重要ファイル
-
-### 設定
-
-- `biome.json`: リンティングとフォーマット規則
-- `tsconfig.json`: TypeScript設定
-- `next.config.ts`: Next.jsビルド設定
-- `vitest.config.mts`: テスト設定
-
-### エントリーポイント
-
-- `src/app/layout.tsx`: プロバイダー付きルートレイアウト
-- `src/app/page.tsx`: ホームページ
-- `middleware.ts`: 認証ミドルウェア（ルート階層）
-- `src/lib/firebase/`: Firebase設定とユーティリティ
-
-## 開発パターン
-
-- **モバイルファーストデザイン**: Tailwindレスポンシブクラス
-- **コンポーネント合成**: 再利用可能なUIビルディングブロック
-- **エラーバウンダリ**: 適切なエラーハンドリング
-- **ローディング状態**: スケルトンコンポーネントとスピナー
-- **アクセシビリティ**: ARIAラベル、キーボードナビゲーション
-- **パフォーマンス**: 画像最適化、コード分割
-
-## 最新技術仕様
-
-### 技術スタック
-
-- **Next.js**: 15.5.3（最新版）
-- **React**: 19.1.1（最新版）
-- **TypeScript**: 5系
-- **Tailwind CSS**: 4系
-- **Firebase**: 12.2.1
-- **Google Gemini**: @google/genai 1.19.0
-
-### テスト環境
-
-- **単体テスト**: Vitest 3.2.4
-- **E2Eテスト**: Playwright 1.55.0
-- **ブラウザテスト**: @vitest/browser 3.2.4
-- **テストライブラリ**: @testing-library/react 16.3.0
-
-### 開発ツール
-
-- **Biome**: 2.2.4（ESLint + Prettierの代替）
-- **Storybook**: 9.1.6
-- **lefthook**: 1.13.0（Gitフック管理）
-</file>
-
-<file path=".serena/memories/coding_conventions.md">
-# Pingoコーディング規約とスタイルガイド
-
-## 基本開発ルール
-
-1. **質問を先にする** - 指示が不明確な場合は実装前に確認
-2. **全コメントは英語** - 「何を」ではなく「なぜ」を説明
-3. **型安全性が重要** - TypeScriptを厳密に使用、`any`型禁止
-4. **全てをテストする** - テストが通るまで次に進まない
-5. **標準ライブラリ優先** - 可能な限り標準ライブラリを使用
-6. **Linter警告を無視しない**
-7. **全コンポーネントにStorybookストーリーが必要**
-
-## コードスタイル（Biome設定）
-
-### フォーマット
-
-- **インデント**: スペース2文字（.editorconfigで設定）
-- **引用符**: JavaScript/TypeScriptではダブルクォート
-- **インポート整理**: Biomeによる自動整理
-- **行末文字**: LF（Unix形式、.editorconfigで設定）
-- **文字エンコーディング**: UTF-8
-
-### リンター規則
-
-**ERROR（厳格）**:
-
-- `noExplicitAny` - any型の使用禁止
-- `noNonNullAssertion` - !演算子の使用を避ける
-- `noUnusedImports` - 未使用インポートの除去
-- `noUnusedVariables` - 未使用変数の除去
-- `noBannedTypes` - 問題のある型（Object, String等）の回避
-
-**WARN（推奨）**:
-
-- `noNestedComponentDefinitions` - ネストされたコンポーネント定義の警告
-- `noImgElement` - `<img>`より`<Image>`推奨（パフォーマンス）
-- `noStaticElementInteractions` - アクセシビリティ警告
-- `useSemanticElements` - セマンティックHTML推奨
-
-**OFF（無効化）**:
-
-- `noUnknownAtRules` - Tailwind CSS対応のため無効化
-
-## TypeScript規約
-
-### 設定
-
-- **ターゲット**: ES2017
-- **厳格モード**: 有効
-- **パスマッピング**: `@/*` → `./src/*`
-- **JSX**: preserve（Next.jsがコンパイル処理）
-
-### 型定義
-
-- バリデーション + TypeScript型にはZodスキーマを使用
-- 6文字ゲームID以外は全てULIDを使用
-- ビジネスロジック型とは別のFirestoreドキュメントインターフェース
-- TimestampInterfaceによる適切なタイムスタンプ処理
-
-## コンポーネント規約
-
-### ファイル構造
-
-```plain
-src/components/
-├── ui/           # shadcn/uiコンポーネント
-├── magicui/      # Magic UIアニメーション
-├── auth/         # 認証コンポーネント
-├── layout/       # Header、Footer、Navigation
-└── game/         # ゲーム専用コンポーネント
-```
-
-### 命名パターン
-
-- **コンポーネント**: PascalCase（例：`ImageUpload.tsx`）
-- **関数**: 説明的な接頭辞付きcamelCase
-  - イベントハンドラー: `handle`接頭辞（例：`handleClick`）
-  - ユーティリティ関数: 説明的な名前
-- **インターフェース**: 説明的な接尾辞付きPascalCase
-- **定数**: UPPER_SNAKE_CASE
-
-### コンポーネント構造
-
-```typescript
-// 1. インポート（外部、内部、型の順）
-import { useState } from "react"
-import { useTranslations } from "next-intl"
-import type { ComponentProps } from "@/types"
-
-// 2. インターフェース定義
-interface ComponentNameProps {
-  prop: string
-}
-
-// 3. コンポーネント定義
-export function ComponentName({ prop }: ComponentNameProps) {
-  // フックを最初に
-  const t = useTranslations()
-  const [state, setState] = useState<Type>(initialValue)
-
-  // イベントハンドラー
-  const handleEvent = () => {
-    // 実装
-  }
-
-  // レンダー
-  return (
-    <div>
-      {/* JSX */}
-    </div>
-  )
-}
-```
-
-## 国際化（next-intl）
-
-- コンポーネント翻訳には`useTranslations()`フックを使用
-  - 名前空間を省略して宣言し、ネストされた翻訳キーでも全て記述するように統一
-- 翻訳キーは`messages/ja.json`と`messages/en.json`に配置
-- 日本語をプライマリ言語、英語をセカンダリ言語として扱う
-- 一貫した翻訳キー命名規則
-
-## テスト規約
-
-### テストファイル命名
-
-- **単体テスト（jsdom）**: `*.test.tsx` または `*.test.ts`
-- **ブラウザテスト**: `*.browser.test.tsx`
-- **Storybookファイル**: `*.stories.tsx`
-
-### テストタイプ
-
-**1. 単体テスト（Vitest jsdom）**
-- APIルート、カスタムフック、サービス層
-- jsdom環境で高速実行
-- ファイルパターン: `src/**/*.test.{ts,tsx}`
-
-**2. ブラウザテスト（Vitest Browser Mode）**
-- 実ブラウザ（webkit + Playwright）でコンポーネント/ページをテスト
-- DOM操作、ユーザーインタラクションの統合テスト
-- ファイルパターン: `src/**/*.browser.test.{ts,tsx}`
-- 設定: `vitest.config.mts`のbrowserプロジェクト
-
-### テストデータ
-
-- `@faker-js/faker`を使用
-- ULID生成: `faker.string.ulid()`
-- 各テスト後にテストデータをクリーンアップ
-
-## Gitとブランチ規約
-
-- `main`ブランチで直接作業しない
-- ブランチ命名: `{0埋め3桁Issue番号}_機能名`
-- 例: Issue #19の場合は`019_prepare_github_actions`
-
-## ブランチ作業フロー
-
-### 作業開始時
-
-```bash
-# mainブランチから最新を取得
-git checkout main
-git pull origin main
-
-# 新しいブランチを作成（Issue番号付き）
-git checkout -b 019_implement_game_join_ui
-```
-
-### 作業完了時
-
-```bash
-# コード品質チェック
-npm run check
-
-# テスト実行
-npm run test:once
-
-# ビルド確認
-npm run build
-
-# コミット（lefthookが自動チェック実行）
-git add .
-git commit -m "feat: implement game join UI components"
-
-# プッシュしてPR作成
-git push -u origin 019_implement_game_join_ui
-```
-
-## 必須チェック項目
-
-### タスク完了時
-
-1. `npm run check` - コード品質
-2. `npm run test:once` - テスト実行
-3. `npm run build` - ビルド確認
-4. `npm run check:i18n` - 国際化確認（i18n関連変更時）
-
-### Storybookの使用
-
-- 新コンポーネントには必ずストーリーを作成
-- `npm run storybook`でローカル確認
-- 各バリエーション（状態、Props）をカバー
-
-## セキュリティとベストプラクティス
-
-### 機密情報管理
-
-- 秘密鍵やAPIキーをコミットしない
-- git-secretによる暗号化を使用
-- `.env.local`に機密情報を配置
-
-### コード品質
-
-- ESLintやPrettierの代わりにBiomeを使用
-- 型安全性を最優先
-- 再利用可能なコンポーネントパターンに従う
-- モバイルファーストのレスポンシブデザイン
-
-### パフォーマンス
-
-- 画像最適化の実装
-- 適切なコード分割
-- Reactのベストプラクティスに従う
-- 不要な再レンダリングの回避
-</file>
-
-<file path=".serena/memories/project_overview.md">
-# Pingoプロジェクト概要
-
-## プロジェクト基本情報
-
-- **プロジェクト名**: Pingo
-- **概要**: AIによる画像判定を用いたビンゴゲームアプリケーション
-- **プラットフォーム**: macOS (Darwin)
-- **リポジトリ**: <https://github.com/shin-sforzando/pingo>
-
-## 技術スタック
-
-### フロントエンド
-
-- Next.js 15.5.3 (App Router)
-- React 19.1.1
-- TypeScript 5
-- Tailwind CSS 4
-- shadcn/ui コンポーネントライブラリ
-- next-intl 4.3.8 (多言語対応)
-
-### バックエンド・インフラ
-
-- Node.js 22
-- Firebase (Authentication, Firestore)
-- Google Cloud Storage
-- Google Gemini API (@google/genai)
-- Docker対応
-- Google Cloud Run (デプロイ)
-
-### 開発ツール
-
-- Biome 2.2.4 (フォーマッター・リンター)
-- Vitest 3.2.4 (単体テスト)
-- Playwright 1.55.0 (E2Eテスト)
-- Storybook 9.1.6 (UIコンポーネント開発)
-- lefthook 1.13.0 (Gitフック管理)
-- git-secret (機密情報管理)
-
-## プロジェクト構造
-
-```plain
-/
-├── src/
-│   ├── app/          # Next.js App Router
-│   ├── components/   # Reactコンポーネント
-│   ├── contexts/     # React Context
-│   ├── hooks/        # カスタムReact Hooks
-│   ├── i18n/         # 多言語対応
-│   ├── lib/          # ユーティリティ
-│   ├── services/     # ビジネスロジック
-│   ├── stories/      # Storybook
-│   ├── test/         # テストユーティリティ
-│   └── types/        # TypeScript型定義
-├── messages/         # 多言語メッセージ
-├── docs/             # プロジェクトドキュメント
-├── public/           # 静的ファイル
-├── scripts/          # ビルドスクリプト
-├── .storybook/       # Storybook設定
-└── middleware.ts     # Next.js認証ミドルウェア
-```
-
-## 主な機能
-
-- 5x5のビンゴゲーム（中央はFree）
-- 各マスには被写体候補が表示される（AI生成）
-- プレイヤーは写真を撮影してアップロード（HEIC対応）
-- AIが写真を判定してマスをOPEN
-- ハンドルネームとパスワードによる認証
-- QRコードによるゲーム共有（スマートフォンOS標準機能で読み取り）
-- ゲーム参加機能（手動ID入力、公開ゲーム一覧）
-- リアルタイム更新（Firestoreリスナー）
-- 多言語対応（日本語/英語）
-
-## テスト戦略
-
-### 単体テスト（Vitest jsdom）
-- APIルート、カスタムフック、サービス層
-- 255個のテスト、100%合格率
-
-### ブラウザテスト（Vitest Browser Mode）
-- Playwright + webkitで実ブラウザ実行
-- ページとコンポーネントの統合テスト
-- 10ファイル実装済み（ホーム、ゲーム作成/参加、レイアウトコンポーネント）
-
-## 環境変数
-
-- `.env`: 公開可能な環境変数（Firebase設定など）
-- `.env.local`: 機密環境変数（APIキー、認証情報）
-  - GOOGLE_CLOUD_PROJECT_ID
-  - GEMINI_API_KEY
-  - GOOGLE_APPLICATION_CREDENTIALS
-  - GOOGLE_CLOUD_STORAGE_BUCKET
-</file>
-
-<file path=".serena/memories/suggested_commands.md">
-# 推奨コマンド一覧
-
-## 開発作業
-
-### 基本的な開発コマンド
-
-```bash
-# 開発サーバー起動（Turbopack使用）
-npm run dev
-
-# プロダクションビルド
-npm run build
-
-# プロダクションサーバー起動
-npm run start
-```
-
-### コード品質管理
-
-```bash
-# Biomeによるフォーマット・リント（書き込み有効）
-npm run check
-
-# 国際化チェック
-npm run check:i18n
-```
-
-### テスト実行
-
-```bash
-# Vitest（ウォッチモード）
-npm test
-
-# Vitestテスト（単回実行）- 単体テスト（jsdom）とブラウザテスト（webkit）を実行
-npm run test:once
-
-# Vitest（ウォッチモード、カバレッジなし）
-npm run test:watch
-
-# 従来型E2Eテスト（Playwright）- ※テストファイル未作成、インフラのみ設定済み
-npm run test:e2e
-
-# E2Eテストデバッグモード - ※テストファイル未作成
-npm run test:e2e:debug
-
-# モバイルE2Eテスト - ※テストファイル未作成
-npm run test:e2e:mobile
-```
-
-**注**: 現在、ブラウザベースのテストは**Vitest Browser Mode**（`*.browser.test.tsx`）で実装されています。従来型のPlaywright E2Eテスト（`e2e/*.spec.ts`）は設定のみ完了しており、テストファイルは未作成です。
-
-### Storybook
-
-```bash
-# Storybook開発サーバー起動
-npm run storybook
-
-# Storybookビルド
-npm run build-storybook
-```
-
-### Docker
-
-```bash
-# Dockerイメージビルド＆実行
-npm run docker
-
-# Dockerイメージビルド
-npm run docker:build
-```
-
-### 依存関係・保守
-
-```bash
-# パッケージ更新チェック
-npm run ncu
-
-# 未使用の依存関係チェック
-npm run knip
-
-# コードベース分析
-npm run repomix
-```
-
-## Git・セキュリティ
-
-### git-secret関連
-
-```bash
-# シークレットを復号化
-git secret reveal
-
-# シークレットを暗号化
-git secret hide -mF
-```
-
-### Google Cloud認証
-
-```bash
-# ADC設定（ローカル開発用）
-gcloud auth application-default login
-
-# GCS CORS設定
-gsutil cors set gcs-pingo-cors-config.json gs://gcs-pingo
-```
-
-## タスク完了時の確認コマンド
-
-タスク完了時は必ず以下のコマンドを実行して確認：
-
-1. **コード品質チェック**
-
-   ```bash
-   npm run check
-   ```
-
-2. **テスト実行**
-
-   ```bash
-   npm run test:once
-   ```
-
-3. **ビルド確認**
-
-   ```bash
-   npm run build
-   ```
-
-4. **国際化チェック**（i18n関連の変更時）
-
-   ```bash
-   npm run check:i18n
-   ```
-
-## 注意事項
-
-- lefthookによるpre-commitフックが設定されているため、コミット時に自動でチェックが実行される
-- テストは必ず　`npm run test:once`　で実行（ウォッチモードは使用しない）
-- プライベートデータは必ずgit-secretで暗号化する
-</file>
-
 <file path="src/app/api/auth/me/route.test.ts">
 import bcrypt from "bcrypt";
 import type { NextResponse } from "next/server";
@@ -4083,99 +3236,30 @@ export async function PUT(
 ): Promise<NextResponse<ApiResponse<
 </file>
 
-<file path="src/app/api/game/[gameId]/board/route.ts">
+<file path="src/app/api/game/[gameId]/participants/route.ts">
 import { NextResponse } from "next/server";
-import { AdminGameBoardService } from "@/lib/firebase/admin-collections";
+import { AdminGameParticipationService } from "@/lib/firebase/admin-collections";
 import type { ApiResponse } from "@/types/common";
-import type { GameBoard } from "@/types/schema";
 ⋮----
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ gameId: string }> },
-): Promise<NextResponse<ApiResponse<GameBoard>>>
-</file>
-
-<file path="src/app/api/game/[gameId]/join/route.test.ts">
-import type { DecodedIdToken } from "firebase-admin/auth";
-import { NextRequest } from "next/server";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { Game, User } from "@/types/schema";
-import { POST } from "./route";
-⋮----
-type MockUser = Pick<
-  User,
-  | "id"
-  | "username"
-  | "participatingGames"
-  | "createdAt"
-  | "lastLoginAt"
-  | "gameHistory"
-  | "isTestUser"
-> &
-  Partial<
-    Omit<
-      User,
-      | "id"
-      | "username"
-      | "participatingGames"
-      | "createdAt"
-      | "lastLoginAt"
-      | "gameHistory"
-      | "isTestUser"
+): Promise<
+  NextResponse<
+    ApiResponse<
+      Array<{
+        id: string;
+        username: string;
+        completedLines: number;
+        submissionCount: number;
+      }>
     >
-  >;
-type MockGame = Pick<
-  Game,
-  | "id"
-  | "title"
-  | "theme"
-  | "creatorId"
-  | "expiresAt"
-  | "isPublic"
-  | "isPhotoSharingEnabled"
-  | "requiredBingoLines"
-  | "confidenceThreshold"
-  | "maxSubmissionsPerUser"
-  | "status"
-  | "createdAt"
-> &
-  Partial<
-    Omit<
-      Game,
-      | "id"
-      | "title"
-      | "theme"
-      | "creatorId"
-      | "expiresAt"
-      | "isPublic"
-      | "isPhotoSharingEnabled"
-      | "requiredBingoLines"
-      | "confidenceThreshold"
-      | "maxSubmissionsPerUser"
-      | "status"
-      | "createdAt"
-    >
-  >;
-</file>
+  >
+> {
+  try {
+    const { gameId } = await params;
 
-<file path="src/app/api/game/[gameId]/join/route.ts">
-import { getFirestore } from "firebase-admin/firestore";
-import { NextResponse } from "next/server";
-import { ulid } from "ulid";
-import { adminAuth } from "@/lib/firebase/admin";
-import {
-  AdminGameService,
-  AdminTransactionService,
-  AdminUserService,
-} from "@/lib/firebase/admin-collections";
-import type { ApiResponse } from "@/types/common";
-⋮----
-export async function POST(
-  request: Request,
-  { params }: { params: Promise<{ gameId: string }> },
-): Promise<NextResponse<ApiResponse<
-⋮----
-// Map specific transaction errors to appropriate response codes
+if (!gameId)
 </file>
 
 <file path="src/app/api/game/[gameId]/playerBoard/[userId]/route.test.ts">
@@ -4288,30 +3372,6 @@ export function useImageSubmission({
 const randomInRange = (min: number, max: number)
 </file>
 
-<file path="src/app/game/[gameId]/share/page.stories.tsx">
-import { fakerJA as faker } from "@faker-js/faker";
-import type { Meta, StoryObj } from "@storybook/nextjs";
-import { GameStatus } from "@/types/common";
-import type { Cell, Game } from "@/types/schema";
-import SharePage from "./page";
-⋮----
-const generateSampleCells = (): Cell[] =>
-⋮----
-const mockUseParams = () => (
-⋮----
-type Story = StoryObj<typeof meta>;
-</file>
-
-<file path="src/components/game/GameInfo.stories.tsx">
-import { faker } from "@faker-js/faker";
-import type { Meta, StoryObj } from "@storybook/nextjs";
-import { GameStatus } from "@/types/common";
-import type { Game } from "@/types/schema";
-import { GameInfo } from "./GameInfo";
-⋮----
-type Story = StoryObj<typeof meta>;
-</file>
-
 <file path="src/components/game/ParticipantsList.stories.tsx">
 import { faker } from "@faker-js/faker";
 import type { Meta, StoryObj } from "@storybook/nextjs";
@@ -4321,164 +3381,6 @@ import { ParticipantsList } from "./ParticipantsList";
 type Story = StoryObj<typeof meta>;
 ⋮----
 const generateParticipant = (role: Role, completedLines = 0) => (
-</file>
-
-<file path=".serena/memories/task_completion_checklist.md">
-# タスク完了時のチェックリスト
-
-## 必須確認項目
-
-### 1. コード品質確認
-
-```bash
-npm run check
-```
-
-- Biomeによるフォーマット・リントがパスすること
-- エラー・警告が0件であること
-- TypeScriptコンパイルエラーがないこと
-
-### 2. テスト実行
-
-```bash
-npm run test:once
-```
-
-- 全てのテストがパスすること
-- 新機能には対応するテストが追加されていること
-- テストカバレッジが適切に維持されていること
-
-### 3. ビルド確認
-
-```bash
-npm run build
-```
-
-- プロダクションビルドが正常に完了すること
-- Next.jsの最適化処理が成功すること
-- 静的アセットが正しく生成されること
-
-### 4. 国際化確認（i18n関連の変更時）
-
-```bash
-npm run check:i18n
-```
-
-- 翻訳キーの不整合がないこと
-- 日本語・英語の両方に適切に対応していること
-- 未翻訳のキーが存在しないこと
-
-## 追加確認項目（該当する場合）
-
-### UIコンポーネント追加・変更時
-
-```bash
-npm run storybook
-```
-
-- 新しいコンポーネントにStorybookストーリーが追加されていること
-- 各バリエーション（状態、Props）が正しく表示されること
-- アクセシビリティが適切に実装されていること
-
-### ブラウザテスト関連の変更時
-
-```bash
-npm run test:once
-```
-
-- 全ブラウザテスト（`*.browser.test.tsx`）がパスすること
-- webkit（Safari）での動作確認
-- 主要なコンポーネント/ページが正常に動作すること
-
-**注**: 従来型Playwright E2Eテスト（`npm run test:e2e`）は設定済みですが、テストファイル（`e2e/*.spec.ts`）は未作成です。
-現在のブラウザベーステストはVitest Browser Modeで実装されており、 `npm run test:once` で実行されます。
-
-### Docker関連の変更時
-
-```bash
-npm run docker
-```
-
-- Dockerコンテナが正常に起動すること
-- <http://localhost:3000> でアプリケーションが動作すること
-- 本番環境に近い状態でテストできること
-
-## lefthookによる自動チェック
-
-pre-commitフックで以下が自動実行される：
-
-1. **git secret hide**: シークレットの暗号化
-2. **Biomeチェック**: ステージされたファイルの品質確認
-3. **テスト実行**: 関連するテストの実行
-4. **i18nチェック**: 国際化関連の検証
-5. **ビルド**: プロダクションビルドの確認
-6. **knip**: 未使用の依存関係チェック
-
-## ブランチ作業の確認事項
-
-### 作業開始時
-
-- `main`ブランチから最新を取得済み
-- 適切なブランチ命名規則に従っている（`{0埋め3桁Issue番号}_機能名`）
-- Issue番号がある場合は必ずブランチ名に含める
-
-### 作業完了時
-
-- 全ての必須確認項目をクリア
-- コミットメッセージが適切（英語、わかりやすい説明）
-- 機密情報が含まれていないことを確認
-- PR作成前に最終確認
-
-## 重要な注意事項
-
-### 品質保証
-
-- **タスクは動作確認が完了するまで「完了」ではない**
-- 3回試行しても問題が解決しない場合は、アプローチを見直す
-- ユーザーの確認を得てから次のタスクに移る
-- エラーや警告は必ず解決する（無視しない）
-
-### セキュリティ
-
-- APIキーや機密情報をコミットしない
-- git-secretによる暗号化を適切に使用
-- デバッグログが本番コードに残らないよう注意
-
-### パフォーマンス目標
-
-開発時は以下の目標値を意識する：
-
-- **画像解析応答**: 3秒以内（最大5秒）
-- **ページロード**: 2秒以内
-- **同時接続**: 最大1,000ユーザー
-- **ゲーム参加者**: 最大50人/ゲーム
-
-## メモリバンクの更新タイミング
-
-以下の場合はメモリバンクを更新：
-
-1. **新しいプロジェクトパターンの発見**: アーキテクチャや実装パターンの変更
-2. **重要な変更の実装後**: 主要機能の追加や修正
-3. **ユーザーからの明示的な指示**: 「update memory bank」の指示時
-4. **コンテキストの明確化が必要な時**: 混乱や情報の古さが発見された場合
-
-## 現在の技術仕様
-
-### 必須ツール・バージョン
-
-- **Node.js**: 22系
-- **npm**: 最新版
-- **Next.js**: 15.5.3
-- **React**: 19.1.1
-- **TypeScript**: 5系
-- **Biome**: 2.2.4
-
-### 推奨IDE設定
-
-- VS Codeでの開発を推奨
-- Biome拡張機能の有効化
-- TypeScript厳格モードの使用
-- Auto-formatの設定
 </file>
 
 <file path="src/app/api/auth/login/route.ts">
@@ -4512,30 +3414,87 @@ export async function POST(
 ): Promise<NextResponse<ApiResponse<
 </file>
 
-<file path="src/app/api/game/[gameId]/participants/route.ts">
+<file path="src/app/api/game/[gameId]/join/route.test.ts">
+import type { DecodedIdToken } from "firebase-admin/auth";
+import { NextRequest } from "next/server";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { Game, User } from "@/types/schema";
+import { POST } from "./route";
+⋮----
+type MockUser = Pick<
+  User,
+  | "id"
+  | "username"
+  | "participatingGames"
+  | "createdAt"
+  | "lastLoginAt"
+  | "gameHistory"
+  | "isTestUser"
+> &
+  Partial<
+    Omit<
+      User,
+      | "id"
+      | "username"
+      | "participatingGames"
+      | "createdAt"
+      | "lastLoginAt"
+      | "gameHistory"
+      | "isTestUser"
+    >
+  >;
+type MockGame = Pick<
+  Game,
+  | "id"
+  | "title"
+  | "theme"
+  | "creatorId"
+  | "expiresAt"
+  | "isPublic"
+  | "isPhotoSharingEnabled"
+  | "requiredBingoLines"
+  | "confidenceThreshold"
+  | "maxSubmissionsPerUser"
+  | "status"
+  | "createdAt"
+> &
+  Partial<
+    Omit<
+      Game,
+      | "id"
+      | "title"
+      | "theme"
+      | "creatorId"
+      | "expiresAt"
+      | "isPublic"
+      | "isPhotoSharingEnabled"
+      | "requiredBingoLines"
+      | "confidenceThreshold"
+      | "maxSubmissionsPerUser"
+      | "status"
+      | "createdAt"
+    >
+  >;
+</file>
+
+<file path="src/app/api/game/[gameId]/join/route.ts">
+import { getFirestore } from "firebase-admin/firestore";
 import { NextResponse } from "next/server";
-import { AdminGameParticipationService } from "@/lib/firebase/admin-collections";
+import { ulid } from "ulid";
+import { adminAuth } from "@/lib/firebase/admin";
+import {
+  AdminGameService,
+  AdminTransactionService,
+  AdminUserService,
+} from "@/lib/firebase/admin-collections";
 import type { ApiResponse } from "@/types/common";
 ⋮----
-export async function GET(
-  _request: Request,
+export async function POST(
+  request: Request,
   { params }: { params: Promise<{ gameId: string }> },
-): Promise<
-  NextResponse<
-    ApiResponse<
-      Array<{
-        id: string;
-        username: string;
-        completedLines: number;
-        submissionCount: number;
-      }>
-    >
-  >
-> {
-  try {
-    const { gameId } = await params;
-
-if (!gameId)
+): Promise<NextResponse<ApiResponse<
+⋮----
+// Map specific transaction errors to appropriate response codes
 </file>
 
 <file path="src/app/api/game/[gameId]/submission/analyze/route.ts">
@@ -4614,6 +3573,113 @@ interface GameDataState {
 export function useGameData(gameId: string)
 ⋮----
 const setupRealtimeListener = async () =>
+</file>
+
+<file path="src/app/game/[gameId]/share/page.tsx">
+import {
+  ActivityIcon,
+  CalendarIcon,
+  PercentIcon,
+  PlayIcon,
+  TableIcon,
+} from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
+import { BingoBoard } from "@/components/game/BingoBoard";
+import { InfoCard } from "@/components/game/InfoCard";
+import { QRCodeCard } from "@/components/game/QRCodeCard";
+import { HyperText } from "@/components/magicui/hyper-text";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
+import { useGameJoin } from "@/hooks/useGameJoin";
+import { useGameParticipation } from "@/hooks/useGameParticipation";
+import { BASE_URL } from "@/lib/constants";
+import { formatDate } from "@/lib/utils";
+import { GameStatus } from "@/types/common";
+import type { Game, GameBoard } from "@/types/schema";
+⋮----
+async function fetchData()
+⋮----
+const handleJoinClick = async () =>
+⋮----
+title=
+value=
+</file>
+
+<file path="src/app/game/create/page.tsx">
+import { zodResolver } from "@hookform/resolvers/zod";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useId, useState } from "react";
+import { type Resolver, type SubmitHandler, useForm } from "react-hook-form";
+import { AuthGuard } from "@/components/auth/AuthGuard";
+import { BingoBoard } from "@/components/game/BingoBoard";
+import { type Subject, SubjectList } from "@/components/game/SubjectList";
+import { ShineBorder } from "@/components/magicui/shine-border";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
+import { TranslatedFormMessage } from "@/components/ui/translated-form-message";
+import { auth } from "@/lib/firebase/client";
+import { cn } from "@/lib/utils";
+import type { Cell, GameCreationData } from "@/types/schema";
+import { gameCreationSchema } from "@/types/schema";
+⋮----
+type GameCreateFormValues = GameCreationData;
+⋮----
+// Watch title and theme values for button enabling/disabling
+⋮----
+const generateSubjects = async () =>
+⋮----
+const updateCells = (subjectList: Subject[]) =>
+⋮----
+/**
+   * Handle subjects change from SubjectList component
+   */
+const handleSubjectsChange = (newSubjects: Subject[]) =>
+⋮----
+// State for form submission
+⋮----
+/**
+   * Handle form submission
+   */
+const onSubmit: SubmitHandler<GameCreateFormValues> = async (data) =>
+⋮----
+<form onSubmit=
+⋮----
+<CardTitle>
+⋮----
+disabled=
+</file>
+
+<file path="src/components/game/GameInfo.stories.tsx">
+import { faker } from "@faker-js/faker";
+import type { Meta, StoryObj } from "@storybook/nextjs";
+import { GAME_ID_LENGTH } from "@/lib/constants";
+import { GameStatus } from "@/types/common";
+import type { Game } from "@/types/schema";
+import { GameInfo } from "./GameInfo";
+⋮----
+type Story = StoryObj<typeof meta>;
 </file>
 
 <file path="src/lib/image-utils.test.ts">
@@ -4839,6 +3905,32 @@ export async function PUT(
 ): Promise<NextResponse<ApiResponse<PlayerBoard>>>
 </file>
 
+<file path="src/app/api/game/[gameId]/route.ts">
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import { z } from "zod";
+import { validateGameId } from "@/lib/api-utils";
+import { adminAuth } from "@/lib/firebase/admin";
+import {
+  AdminGameParticipationService,
+  AdminGameService,
+} from "@/lib/firebase/admin-collections";
+import type { ApiResponse } from "@/types/common";
+import { dateToISOString } from "@/types/firestore";
+import type { Game } from "@/types/schema";
+import { gameSchema } from "@/types/schema";
+⋮----
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ gameId: string }> },
+)
+⋮----
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ gameId: string }> },
+): Promise<NextResponse<ApiResponse<Game>>>
+</file>
+
 <file path="src/app/api/image/check/route.test.ts">
 import { faker } from "@faker-js/faker";
 import type { DecodedIdToken } from "firebase-admin/auth";
@@ -4891,102 +3983,6 @@ const handleUploadComplete = (
 ) =>
 ⋮----
 const handleImageProcessed = (processedImage: ProcessedImage) =>
-</file>
-
-<file path="src/app/game/[gameId]/share/page.tsx">
-import {
-  ActivityIcon,
-  CalendarIcon,
-  PercentIcon,
-  PlayIcon,
-  TableIcon,
-} from "lucide-react";
-import { useParams, useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
-import { BingoBoard } from "@/components/game/BingoBoard";
-import { InfoCard } from "@/components/game/InfoCard";
-import { QRCodeCard } from "@/components/game/QRCodeCard";
-import { HyperText } from "@/components/magicui/hyper-text";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { useAuth } from "@/contexts/AuthContext";
-import { useGameJoin } from "@/hooks/useGameJoin";
-import { useGameParticipation } from "@/hooks/useGameParticipation";
-import { BASE_URL } from "@/lib/constants";
-import { formatDate } from "@/lib/utils";
-import { GameStatus } from "@/types/common";
-import type { Game, GameBoard } from "@/types/schema";
-⋮----
-async function fetchData()
-⋮----
-const handleJoinClick = async () =>
-⋮----
-title=
-value=
-</file>
-
-<file path="src/app/game/create/page.tsx">
-import { zodResolver } from "@hookform/resolvers/zod";
-import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useId, useState } from "react";
-import { type Resolver, type SubmitHandler, useForm } from "react-hook-form";
-import { AuthGuard } from "@/components/auth/AuthGuard";
-import { BingoBoard } from "@/components/game/BingoBoard";
-import { type Subject, SubjectList } from "@/components/game/SubjectList";
-import { ShineBorder } from "@/components/magicui/shine-border";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
-import { TranslatedFormMessage } from "@/components/ui/translated-form-message";
-import { auth } from "@/lib/firebase/client";
-import { cn } from "@/lib/utils";
-import type { Cell, GameCreationData } from "@/types/schema";
-import { gameCreationSchema } from "@/types/schema";
-⋮----
-type GameCreateFormValues = GameCreationData;
-⋮----
-// Watch title and theme values for button enabling/disabling
-⋮----
-const generateSubjects = async () =>
-⋮----
-const updateCells = (subjectList: Subject[]) =>
-⋮----
-/**
-   * Handle subjects change from SubjectList component
-   */
-const handleSubjectsChange = (newSubjects: Subject[]) =>
-⋮----
-// State for form submission
-⋮----
-/**
-   * Handle form submission
-   */
-const onSubmit: SubmitHandler<GameCreateFormValues> = async (data) =>
-⋮----
-<form onSubmit=
-⋮----
-<CardTitle>
-⋮----
-disabled=
 </file>
 
 <file path="src/components/game/ParticipantsList.tsx">
@@ -5095,6 +4091,70 @@ const getStatusConfig = () =>
 <StatusIcon className=
 </file>
 
+<file path="src/app/api/game/[gameId]/submission/[submissionId]/route.ts">
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import { adminAuth } from "@/lib/firebase/admin";
+import {
+  AdminBatchService,
+  AdminGameParticipationService,
+  AdminSubmissionService,
+} from "@/lib/firebase/admin-collections";
+import type { ApiResponse } from "@/types/common";
+import { ProcessingStatus } from "@/types/common";
+import { type Submission, submissionSchema } from "@/types/schema";
+⋮----
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ gameId: string; submissionId: string }> },
+): Promise<NextResponse<ApiResponse<Submission>>>
+⋮----
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ gameId: string; submissionId: string }> },
+): Promise<NextResponse<ApiResponse<Submission>>>
+</file>
+
+<file path="src/app/api/game/create/route.ts">
+import { FieldValue } from "firebase-admin/firestore";
+import { customAlphabet } from "nanoid";
+import { type NextRequest, NextResponse } from "next/server";
+import { ulid } from "ulid";
+import { z } from "zod";
+import { GAME_ID_LENGTH } from "../../../../lib/constants";
+import { adminAuth, adminFirestore } from "../../../../lib/firebase/admin";
+import { AdminGameService } from "../../../../lib/firebase/admin-collections";
+import { type ApiResponse, GameStatus, Role } from "../../../../types/common";
+import { convertTimestampsToDate } from "../../../../types/firestore";
+import {
+  cellToFirestore,
+  eventToFirestore,
+  gameParticipationToFirestore,
+  gameToFirestore,
+  playerBoardToFirestore,
+} from "../../../../types/game";
+import {
+  type Cell,
+  type CompletedLine,
+  cellSchema,
+  type Event,
+  type Game,
+  type GameParticipation,
+  gameCreationSchema,
+  type PlayerBoard,
+} from "../../../../types/schema";
+⋮----
+function generateGameId(isTest = false): string
+⋮----
+async function gameIdExists(gameId: string): Promise<boolean>
+⋮----
+async function generateUniqueGameId(isTest = false): Promise<string>
+⋮----
+export async function POST(
+  request: NextRequest,
+): Promise<NextResponse<ApiResponse<
+</file>
+
 <file path="CLAUDE.md">
 # CLAUDE.md
 
@@ -5153,31 +4213,23 @@ Pingoは、AIによる画像判定を活用したビンゴゲームです。
 
 ## 優先タスク
 
-### 1. ゲーム参加機能（重要・未実装）
+### テストカバレッジ（高）
 
-- `/game/join`ページの作成（現在404エラー）
-- 参加用APIエンドポイントの実装
-- QRコードスキャン + 手動ゲームID入力
-- 公開ゲーム一覧表示
-
-### 2. テストカバレッジ（高）
-
-以下の重要コンポーネントでテストが不足：
+以下の重要コンポーネントでテストが不足:
 
 - `src/components/game/ImageUpload.tsx`
 - `src/services/image-upload.ts`
 - `src/app/api/image/upload/route.ts`
 - `src/app/api/game/[gameId]/submission/analyze/route.ts`
 
-### 3. セキュリティ・本番対応（高）
+### セキュリティ・本番対応（高）
 
-- レート制限の実装
 - APIキーのセキュリティレビュー
 - デバッグログの削除
 
 ## メモリーバンクファイル
 
-`docs/`内の主要ドキュメント：
+`docs/`内の主要ドキュメント:
 
 - `ProjectBrief.md` - プロジェクトの目標と要件
 - `TechnicalSpecification.md` - 完全な技術仕様  
@@ -5195,246 +4247,6 @@ Pingoは、AIによる画像判定を活用したビンゴゲームです。
 ## リファレンス
 
 - [Tailwind CSS](https://tailwindcss.com/docs/installation/using-vite)
-</file>
-
-<file path="src/app/api/game/[gameId]/submission/[submissionId]/route.ts">
-import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
-import { adminAuth } from "@/lib/firebase/admin";
-import {
-  AdminBatchService,
-  AdminGameParticipationService,
-  AdminSubmissionService,
-} from "@/lib/firebase/admin-collections";
-import type { ApiResponse } from "@/types/common";
-import { ProcessingStatus } from "@/types/common";
-import { type Submission, submissionSchema } from "@/types/schema";
-⋮----
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ gameId: string; submissionId: string }> },
-): Promise<NextResponse<ApiResponse<Submission>>>
-⋮----
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ gameId: string; submissionId: string }> },
-): Promise<NextResponse<ApiResponse<Submission>>>
-</file>
-
-<file path="src/app/api/game/[gameId]/route.ts">
-import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
-import { z } from "zod";
-import { validateGameId } from "@/lib/api-utils";
-import { adminAuth } from "@/lib/firebase/admin";
-import {
-  AdminGameParticipationService,
-  AdminGameService,
-} from "@/lib/firebase/admin-collections";
-import type { ApiResponse } from "@/types/common";
-import { dateToISOString } from "@/types/firestore";
-import type { Game } from "@/types/schema";
-import { gameSchema } from "@/types/schema";
-⋮----
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ gameId: string }> },
-)
-⋮----
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ gameId: string }> },
-): Promise<NextResponse<ApiResponse<Game>>>
-</file>
-
-<file path="src/app/api/game/create/route.ts">
-import { FieldValue } from "firebase-admin/firestore";
-import { customAlphabet } from "nanoid";
-import { type NextRequest, NextResponse } from "next/server";
-import { ulid } from "ulid";
-import { z } from "zod";
-import { adminAuth, adminFirestore } from "../../../../lib/firebase/admin";
-import { AdminGameService } from "../../../../lib/firebase/admin-collections";
-import { type ApiResponse, GameStatus, Role } from "../../../../types/common";
-import { convertTimestampsToDate } from "../../../../types/firestore";
-import {
-  cellToFirestore,
-  eventToFirestore,
-  gameParticipationToFirestore,
-  gameToFirestore,
-  playerBoardToFirestore,
-} from "../../../../types/game";
-import {
-  type Cell,
-  type CompletedLine,
-  cellSchema,
-  type Event,
-  type Game,
-  type GameParticipation,
-  gameCreationSchema,
-  type PlayerBoard,
-} from "../../../../types/schema";
-⋮----
-function generateGameId(isTest = false): string
-⋮----
-async function gameIdExists(gameId: string): Promise<boolean>
-⋮----
-async function generateUniqueGameId(isTest = false): Promise<string>
-⋮----
-export async function POST(
-  request: NextRequest,
-): Promise<NextResponse<ApiResponse<
-</file>
-
-<file path="src/app/game/join/page.tsx">
-import { zodResolver } from "@hookform/resolvers/zod";
-import { formatDistanceToNow } from "date-fns";
-import { enUS, ja } from "date-fns/locale";
-import { Calendar, Users } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useLocale, useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
-import { type SubmitHandler, useForm } from "react-hook-form";
-import { z } from "zod";
-import { AuthGuard } from "@/components/auth/AuthGuard";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { TranslatedFormMessage } from "@/components/ui/translated-form-message";
-import { useAuth } from "@/contexts/AuthContext";
-import { useGameJoin } from "@/hooks/useGameJoin";
-import { useParticipatingGames } from "@/hooks/useParticipatingGames";
-import { auth } from "@/lib/firebase/client";
-import type { Game } from "@/types/schema";
-⋮----
-type JoinGameFormValues = z.infer<typeof joinGameSchema>;
-⋮----
-// Watch the gameId field for changes
-⋮----
-const fetchAvailableGames = async () =>
-⋮----
-interface GameWithParticipation {
-              id: string;
-              title: string;
-              theme: string;
-              notes?: string;
-              participantCount: number;
-              isParticipating?: boolean;
-              createdAt: Date | null;
-              expiresAt: Date | null;
-            }
-⋮----
-const handleGameIdChange = (value: string) =>
-⋮----
-const verifyGame = async () =>
-⋮----
-const onSubmit: SubmitHandler<JoinGameFormValues> = async (data) =>
-⋮----
-<form onSubmit=
-⋮----
-<CardTitle>
-⋮----
-</file>
-
-<file path=".claude/settings.local.json">
-{
-  "permissions": {
-    "allow": [
-      "Bash(awk:*)",
-      "Bash(cat:*)",
-      "Bash(curl:*)",
-      "Bash(find:*)",
-      "Bash(gh api:*)",
-      "Bash(gh issue create:*)",
-      "Bash(gh issue list:*)",
-      "Bash(gh issue view:*)",
-      "Bash(gh pr list:*)",
-      "Bash(gh pr view:*)",
-      "Bash(gh run list:*)",
-      "Bash(gh run view:*)",
-      "Bash(git log:*)",
-      "Bash(lefthook run pre-commit:*)",
-      "Bash(npm run build:*)",
-      "Bash(npm run check:i18n:*)",
-      "Bash(npm run check)",
-      "Bash(npm run test:*)",
-      "Bash(npm test:*)",
-      "Bash(npx npm-check-updates:*)",
-      "mcp__context7__get-library-docs",
-      "mcp__context7__resolve-library-id",
-      "mcp__ide__getDiagnostics",
-      "mcp__playwright__browser_click",
-      "mcp__playwright__browser_close",
-      "mcp__playwright__browser_console_messages",
-      "mcp__playwright__browser_drag",
-      "mcp__playwright__browser_evaluate",
-      "mcp__playwright__browser_file_upload",
-      "mcp__playwright__browser_fill_form",
-      "mcp__playwright__browser_handle_dialog",
-      "mcp__playwright__browser_hover",
-      "mcp__playwright__browser_install",
-      "mcp__playwright__browser_navigate_back",
-      "mcp__playwright__browser_navigate",
-      "mcp__playwright__browser_network_requests",
-      "mcp__playwright__browser_press_key",
-      "mcp__playwright__browser_resize",
-      "mcp__playwright__browser_select_option",
-      "mcp__playwright__browser_snapshot",
-      "mcp__playwright__browser_tabs",
-      "mcp__playwright__browser_take_screenshot",
-      "mcp__playwright__browser_type",
-      "mcp__playwright__browser_wait_for",
-      "mcp__serena__check_onboarding_performed",
-      "mcp__serena__delete_memory",
-      "mcp__serena__find_file",
-      "mcp__serena__find_referencing_symbols",
-      "mcp__serena__find_symbol",
-      "mcp__serena__get_current_config",
-      "mcp__serena__get_symbols_overview",
-      "mcp__serena__insert_after_symbol",
-      "mcp__serena__insert_before_symbol",
-      "mcp__serena__list_dir",
-      "mcp__serena__list_memories",
-      "mcp__serena__onboarding",
-      "mcp__serena__read_memory",
-      "mcp__serena__replace_symbol_body",
-      "mcp__serena__search_for_pattern",
-      "mcp__serena__think_about_collected_information",
-      "mcp__serena__think_about_task_adherence",
-      "mcp__serena__think_about_whether_you_are_done",
-      "mcp__serena__write_memory",
-      "WebFetch(domain:docs.github.com)",
-      "WebFetch(domain:github.com)",
-      "WebFetch(domain:next-intl-docs.vercel.app)",
-      "WebFetch(domain:next-intl.dev)",
-      "WebFetch(domain:storybook.js.org)",
-      "WebFetch(domain:ui.shadcn.com)",
-      "WebFetch(domain:www.radix-ui.com)",
-      "WebFetch(domain:www.tailwind-variants.org)",
-      "WebFetch(domain:zod.dev)",
-      "WebSearch"
-    ]
-  },
-  "enabledMcpjsonServers": [
-    "playwright",
-    "serena"
-  ],
-  "outputStyle": "Explanatory"
-}
 </file>
 
 <file path="src/app/api/game/[gameId]/submission/route.ts">
@@ -5460,6 +4272,66 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ gameId: string }> },
 ): Promise<NextResponse<ApiResponse<Submission[]>>>
+</file>
+
+<file path="src/app/game/join/page.tsx">
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
+import { type SubmitHandler, useForm } from "react-hook-form";
+import { z } from "zod";
+import { AuthGuard } from "@/components/auth/AuthGuard";
+import { GameInfoCard } from "@/components/game/GameInfoCard";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { TranslatedFormMessage } from "@/components/ui/translated-form-message";
+import { useAuth } from "@/contexts/AuthContext";
+import { useGameJoin } from "@/hooks/useGameJoin";
+import { useParticipatingGames } from "@/hooks/useParticipatingGames";
+import { GAME_ID_LENGTH, GAME_ID_PATTERN } from "@/lib/constants";
+import { auth } from "@/lib/firebase/client";
+import type { GameInfo } from "@/types/schema";
+⋮----
+type JoinGameFormValues = z.infer<typeof joinGameSchema>;
+⋮----
+// Watch the gameId field for changes
+⋮----
+const fetchAvailableGames = async () =>
+⋮----
+const handleGameIdChange = (value: string) =>
+⋮----
+const verifyGame = async () =>
+⋮----
+const onSubmit: SubmitHandler<JoinGameFormValues> = async (data) =>
+⋮----
+<form onSubmit=
+⋮----
+<CardTitle>
+⋮----
+
+⋮----
+router.push(`/game/$
+⋮----
+onClick=
+⋮----
+const result = await joinGame(game.id);
+if (result.success)
 </file>
 
 <file path="src/components/game/ImageUpload.tsx">
@@ -5622,10 +4494,97 @@ export type Event = z.infer<typeof eventSchema>;
 export type ImageSubmissionData = z.infer<typeof imageSubmissionDataSchema>;
 export type ImageSubmissionResult = z.infer<typeof imageSubmissionResultSchema>;
 export type AnalysisResult = z.infer<typeof analysisResultSchema>;
+⋮----
+export interface GameInfo {
+  id: string;
+  title: string;
+  theme: string;
+  notes?: string;
+  participantCount?: number;
+  createdAt: Date | null;
+  expiresAt: Date | null;
+  isPublic?: boolean;
+  isParticipating?: boolean;
+}
+</file>
+
+<file path="src/app/api/image/check/route.ts">
+import { GoogleGenAI, Type } from "@google/genai";
+import { type NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import { adminAuth } from "@/lib/firebase/admin";
+import {
+  AdminGameBoardService,
+  AdminGameService,
+  AdminPlayerBoardService,
+  AdminTransactionService,
+} from "@/lib/firebase/admin-collections";
+import { AcceptanceStatus, LineType, ProcessingStatus } from "@/types/common";
+import type {
+  Cell,
+  CompletedLine,
+  PlayerBoard,
+  Submission,
+} from "@/types/schema";
+⋮----
+interface ImageCheckResponse {
+  appropriate: boolean;
+  confidence: number | null;
+  matchedCellId: string | null;
+  acceptanceStatus: AcceptanceStatus;
+  critique: string | null;
+  newlyCompletedLines: number;
+  totalCompletedLines: number;
+  requiredBingoLines: number;
+  reason?: string;
+}
+⋮----
+function detectCompletedLines(
+  gameBoard: { cells: Cell[] },
+  playerBoard: PlayerBoard,
+): CompletedLine[]
+⋮----
+export async function POST(request: NextRequest)
+</file>
+
+<file path="src/app/game/[gameId]/page.tsx">
+import { useParams, useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useEffect, useRef } from "react";
+import { AuthGuard } from "@/components/auth/AuthGuard";
+import { BingoBoard } from "@/components/game/BingoBoard";
+import { GameInfo } from "@/components/game/GameInfo";
+import { ImageUpload } from "@/components/game/ImageUpload";
+import { ParticipantsList } from "@/components/game/ParticipantsList";
+import { SubmissionResult } from "@/components/game/SubmissionResult";
+import { Confetti, type ConfettiRef } from "@/components/magicui/confetti";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth } from "@/contexts/AuthContext";
+import { useGameParticipation } from "@/hooks/useGameParticipation";
+import { AcceptanceStatus } from "@/types/common";
+import { ErrorDisplay } from "./components/ErrorDisplay";
+import { GameHeader } from "./components/GameHeader";
+import { useGameData } from "./hooks/useGameData";
+import { useImageSubmission } from "./hooks/useImageSubmission";
+import {
+  convertCellStatesToBingoFormat,
+  convertCompletedLinesToIndices,
+  findMatchedCellSubject,
+  getLatestSubmission,
+} from "./utils/gameDataTransforms";
+⋮----
+{/* Game information */}
+⋮----
+{/* Participants list */}
 </file>
 
 <file path="src/lib/firebase/admin-collections.ts">
-import { dateToTimestamp } from "../../types/firestore";
+import { Role } from "../../types/common";
+import {
+  dateToTimestamp,
+  type TimestampInterface,
+} from "../../types/firestore";
 import {
   type EventDocument,
   eventFromFirestore,
@@ -5825,81 +4784,8 @@ export async function createSubmissionOnly(
 export async function joinGame(
     gameId: string,
     userId: string,
-    username: string,
-    participationId: string,
     eventId: string,
 ): Promise<
-</file>
-
-<file path="src/app/game/[gameId]/page.tsx">
-import { useParams, useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
-import { useEffect, useRef } from "react";
-import { AuthGuard } from "@/components/auth/AuthGuard";
-import { BingoBoard } from "@/components/game/BingoBoard";
-import { GameInfo } from "@/components/game/GameInfo";
-import { ImageUpload } from "@/components/game/ImageUpload";
-import { ParticipantsList } from "@/components/game/ParticipantsList";
-import { SubmissionResult } from "@/components/game/SubmissionResult";
-import { Confetti, type ConfettiRef } from "@/components/magicui/confetti";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useAuth } from "@/contexts/AuthContext";
-import { useGameParticipation } from "@/hooks/useGameParticipation";
-import { AcceptanceStatus } from "@/types/common";
-import { ErrorDisplay } from "./components/ErrorDisplay";
-import { GameHeader } from "./components/GameHeader";
-import { useGameData } from "./hooks/useGameData";
-import { useImageSubmission } from "./hooks/useImageSubmission";
-import {
-  convertCellStatesToBingoFormat,
-  convertCompletedLinesToIndices,
-  findMatchedCellSubject,
-  getLatestSubmission,
-} from "./utils/gameDataTransforms";
-⋮----
-{/* Game information */}
-⋮----
-{/* Participants list */}
-</file>
-
-<file path="src/app/api/image/check/route.ts">
-import { GoogleGenAI, Type } from "@google/genai";
-import { type NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
-import { adminAuth } from "@/lib/firebase/admin";
-import {
-  AdminGameBoardService,
-  AdminGameService,
-  AdminPlayerBoardService,
-  AdminTransactionService,
-} from "@/lib/firebase/admin-collections";
-import { AcceptanceStatus, LineType, ProcessingStatus } from "@/types/common";
-import type {
-  Cell,
-  CompletedLine,
-  PlayerBoard,
-  Submission,
-} from "@/types/schema";
-⋮----
-interface ImageCheckResponse {
-  appropriate: boolean;
-  confidence: number | null;
-  matchedCellId: string | null;
-  acceptanceStatus: AcceptanceStatus;
-  critique: string | null;
-  newlyCompletedLines: number;
-  totalCompletedLines: number;
-  requiredBingoLines: number;
-  reason?: string;
-}
-⋮----
-function detectCompletedLines(
-  gameBoard: { cells: Cell[] },
-  playerBoard: PlayerBoard,
-): CompletedLine[]
-⋮----
-export async function POST(request: NextRequest)
 </file>
 
 <file path="package.json">

@@ -10,6 +10,7 @@ import { customAlphabet } from "nanoid";
 import { type NextRequest, NextResponse } from "next/server";
 import { ulid } from "ulid";
 import { z } from "zod";
+import { GAME_ID_LENGTH } from "../../../../lib/constants";
 import { adminAuth, adminFirestore } from "../../../../lib/firebase/admin";
 import { AdminGameService } from "../../../../lib/firebase/admin-collections";
 import { type ApiResponse, GameStatus, Role } from "../../../../types/common";
@@ -35,7 +36,6 @@ import {
 // Constants
 const PROD_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const TEST_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-const GAME_ID_LENGTH = 6;
 
 // Schema for game creation request with cells
 const gameCreateSchema = gameCreationSchema.extend({

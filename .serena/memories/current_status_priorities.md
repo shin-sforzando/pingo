@@ -15,7 +15,7 @@
 
 #### ゲーム参加機能
 
-- **ゲーム参加UI**: `/game/join`ページの完全実装
+- **ゲーム参加UI**: `/game/join` ページの完全実装
   - 手動ID入力と検証（6文字、大文字のみ）
   - ゲーム情報の事前確認（参加者数を含む）
   - 参加中のゲーム一覧表示（クリックで直接ゲームページへ）
@@ -49,15 +49,9 @@
 
 #### 型定義とコード品質
 
-- **型の統合**: `GameInfo`型の導入
-  - `PublicGameInfo`と`VerifiedGameInfo`を`GameInfo`に統合
-  - 公開/非公開に関係なく使用可能
-  - `isPublic`フィールドでゲームの公開状態を明示
-  - `isParticipating`フィールドでユーザーの参加状態を表示
+- **型の統合**: `GameInfo` 型の導入
 - **翻訳構造の最適化**: 共通フィールドラベルの統合、重複削除、命名規則統一
-  - 総キー数232→215（-7.3%）
-  - 重複0、未使用キー0
-  - `useTranslations()`（引数なし）でフルパス参照に統一
+- **定数管理の改善**: マジックナンバー排除とDRY原則の徹底
 - **国際化対応**: next-intlによる日本語/英語サポート
 
 #### テスト
@@ -87,13 +81,14 @@
 
 ### 開発ワークフローの注意点
 
-- `main`ブランチで直接作業しない
-- コミット前に必ず`npm run test:once`を実行
+- `main` ブランチで直接作業しない
+- コミット前に必ず `npm run test:once` を実行
 - 全コンポーネントにStorybookストーリーが必要
 - 6文字ゲームID以外は全てULIDを使用
 - 類似コンポーネントの既存パターンに従う
-- 翻訳キーは`useTranslations()`（引数なし）でフルパス参照を使用
+- 翻訳キーは `useTranslations()` （引数なし）でフルパス参照を使用
 - DRY原則を遵守し、再利用可能なコンポーネントを作成
+- マジックナンバーを避け、 `src/lib/constants.ts` に定数を集約
 
 ## 現在の技術仕様
 
@@ -164,34 +159,28 @@
 - **`/game/[gameId]/share`**: ゲーム共有ページ
 - **`/game/create`**: ゲーム作成ページ
 
-### 型定義
+### 定数管理
 
-#### GameInfo型
-
-`src/types/schema.ts`で定義された統一ゲーム情報型：
+#### 集約済み定数（`src/lib/constants.ts`）
 
 ```typescript
-export interface GameInfo {
-  id: string;
-  title: string;
-  theme: string;
-  notes?: string;
-  participantCount: number;
-  createdAt: Date | null;
-  expiresAt: Date | null;
-  isPublic?: boolean;
-  isParticipating?: boolean;
-}
+// Base URL for the application
+export const BASE_URL =
+  (typeof process !== "undefined" && process.env.NEXT_PUBLIC_BASE_URL) ||
+  "http://localhost:3000";
+
+// Game ID configuration
+export const GAME_ID_LENGTH = 6;
+export const GAME_ID_PATTERN = /^[A-Z0-9]{6}$/;
 ```
 
-**用途**:
+**使用箇所**:
 
-- ゲーム参加ページの検証済みゲーム表示
-- 参加中のゲーム一覧
-- 公開ゲーム一覧
-- GameInfoCardコンポーネント
-
-**以前の型**: `PublicGameInfo`と`VerifiedGameInfo`を統合して`GameInfo`に変更
+- APIルート: ゲームID生成
+- バリデーション: Zodスキーマ、フォーム検証
+- UI: Input maxLength、表示制約
+- テスト: Storybook、faker データ生成
+- 翻訳: ICU Message Formatによる変数補間
 
 ## 品質保証状況
 
@@ -204,7 +193,6 @@ export interface GameInfo {
 - **Hooks**: useGameJoin、useGameParticipation、useGameData、useParticipatingGamesのテスト完了
 - **Services**: 一部のサービス層でテスト不足
 - **ブラウザテスト**: Vitest Browserモード（Playwright + webkit）で11ファイル実装済み
-  - GameInfoCard.browser.test.tsx: 13テストケース
 
 ### 翻訳ファイル状況
 
@@ -213,6 +201,7 @@ export interface GameInfo {
 - **重複**: 0個（すべて解消済み）
 - **未使用キー**: 0個（すべて削除済み）
 - **命名規則違反**: 0個（すべて修正済み）
+- **変数補間**: ICU Message FormatによるゲームID長さの動的表示
 
 ## 優先タスク
 
@@ -227,7 +216,6 @@ export interface GameInfo {
 
 ### 2. セキュリティ・本番対応（高優先度）
 
-- レート制限の実装
 - APIキーのセキュリティレビュー
 - デバッグログの削除
 

@@ -10,6 +10,7 @@
 6. **Linter警告を無視しない**
 7. **全コンポーネントにStorybookストーリーが必要**
 8. **DRY原則を遵守** - 重複コードを避け、再利用可能なコンポーネント/型を作成
+9. **マジックナンバーを使用しない** - 定数として集約し、単一の真実の源を維持
 
 ## コードスタイル（Biome設定）
 
@@ -41,6 +42,154 @@
 **OFF（無効化）**:
 
 - `noUnknownAtRules` - Tailwind CSS対応のため無効化
+
+## 定数管理とマジックナンバーの排除
+
+### 原則: 単一の真実の源（Single Source of Truth）
+
+すべての設定値と制約は `src/lib/constants.ts` に集約し、コード全体で再利用する
+
+### 実例: ゲームID長さ制約の集約
+
+Before（問題あり）:
+
+```typescript
+// ❌ BAD: コード全体にマジックナンバー "6" が散在（12箇所以上）
+
+// src/app/api/game/create/route.ts
+const GAME_ID_LENGTH = 6;  // ローカル定数
+
+// src/app/game/join/page.tsx
+const joinGameSchema = z.object({
+  gameId: z.string()
+    .min(6)  // マジックナンバー
+    .max(6)  // マジックナンバー
+    .regex(/^[A-Z0-9]{6}$/)  // マジックナンバー
+});
+const upperValue = value.slice(0, 6);  // マジックナンバー
+if (gameIdValue.length !== 6) { }  // マジックナンバー
+<Input maxLength={6} />  // マジックナンバー
+
+// src/components/game/GameInfo.stories.tsx
+id: faker.string.alphanumeric(6)  // マジックナンバー
+
+// messages/ja.json
+"gameIdDescription": "6文字のアルファベット大文字（例: ABCDEF）"
+
+// messages/en.json
+"gameIdDescription": "6 uppercase letters (e.g., ABCDEF)"
+```
+
+After（改善版）:
+
+```typescript
+// ✅ GOOD: src/lib/constants.ts - 単一の真実の源
+/**
+ * Game ID configuration
+ */
+export const GAME_ID_LENGTH = 6;
+export const GAME_ID_PATTERN = /^[A-Z0-9]{6}$/;
+
+// src/app/api/game/create/route.ts
+import { GAME_ID_LENGTH } from "../../../../lib/constants";
+const nanoid = customAlphabet(alphabet, GAME_ID_LENGTH);
+
+// src/app/game/join/page.tsx
+import { GAME_ID_LENGTH, GAME_ID_PATTERN } from "@/lib/constants";
+
+const joinGameSchema = z.object({
+  gameId: z.string()
+    .min(GAME_ID_LENGTH)
+    .max(GAME_ID_LENGTH)
+    .regex(GAME_ID_PATTERN)
+});
+const upperValue = value.slice(0, GAME_ID_LENGTH);
+if (gameIdValue.length !== GAME_ID_LENGTH) { }
+<Input maxLength={GAME_ID_LENGTH} />
+
+// src/components/game/GameInfo.stories.tsx
+import { GAME_ID_LENGTH } from "@/lib/constants";
+id: faker.string.alphanumeric(GAME_ID_LENGTH)
+
+// messages/ja.json
+"gameIdDescription": "{gameIdLength}文字のアルファベット大文字（例: ABCDEF）"
+
+// messages/en.json
+"gameIdDescription": "{gameIdLength} uppercase letters (e.g., ABCDEF)"
+
+// 翻訳呼び出し側
+t("Game.gameIdDescription", { gameIdLength: GAME_ID_LENGTH })
+```
+
+**改善点**:
+
+- ✅ 変更が1箇所で完結（ `constants.ts` のみ修正）
+- ✅ コンパイル時の型安全性
+- ✅ IDE補完とリファクタリング対応
+- ✅ 翻訳文字列も定数から値を取得
+- ✅ コード全体で一貫した値
+
+### 翻訳ファイルでの定数使用（next-intl）
+
+next-intlのICU Message Formatを活用して、翻訳文字列中のマジックナンバーも定数化する
+
+**パターン**: 翻訳文字列に `{variableName}` プレースホルダーを配置し、呼び出し側でパラメータとして渡す
+
+```typescript
+// messages/ja.json
+{
+  "Game": {
+    "gameIdDescription": "{gameIdLength}文字のアルファベット大文字（例: ABCDEF）",
+    "joinGameDescription": "{gameIdLength}文字のゲームIDを入力してゲームに参加してください"
+  }
+}
+
+// messages/en.json
+{
+  "Game": {
+    "gameIdDescription": "{gameIdLength} uppercase letters (e.g., ABCDEF)",
+    "joinGameDescription": "Enter a {gameIdLength}-character game ID to join a game"
+  }
+}
+
+// コンポーネントでの使用
+import { GAME_ID_LENGTH } from "@/lib/constants";
+
+const t = useTranslations();
+<p>{t("Game.gameIdDescription", { gameIdLength: GAME_ID_LENGTH })}</p>
+```
+
+**メリット**:
+
+- ✅ 翻訳文字列も定数から値を取得
+- ✅ 多言語対応しながら値の一貫性を保持
+- ✅ 翻訳者は `{gameIdLength}` の意味を理解しやすい
+
+### constants.tsのブラウザ互換性
+
+Node.js専用APIを使用する場合は、ランタイムチェックを追加する
+
+```typescript
+// ❌ BAD: ブラウザテストで失敗
+export const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+
+// ✅ GOOD: ブラウザとNode.js両対応
+export const BASE_URL =
+  (typeof process !== "undefined" && process.env.NEXT_PUBLIC_BASE_URL) ||
+  "http://localhost:3000";
+```
+
+**Why**: Vitest Browser Mode（webkit/chromium）では `process` が存在しないため、ランタイムチェックが必要
+
+### 定数配置のガイドライン
+
+| 定数の種類 | 配置場所 | 例 |
+|----------|---------|---|
+| アプリケーション全体の設定 | `src/lib/constants.ts` | `GAME_ID_LENGTH`, `BASE_URL` |
+| 列挙型 | `src/types/common.ts` | `GameStatus`, `ProcessingStatus` |
+| バリデーション正規表現 | `src/lib/constants.ts` | `GAME_ID_PATTERN` |
+| Firebase設定 | `src/lib/firebase/config.ts` | `firebaseConfig` |
+| 環境変数 | `.env.local` | `GEMINI_API_KEY` |
 
 ## TypeScript規約
 
@@ -108,9 +257,9 @@ const [state, setState] = useState<VerifiedGameInfo | null>(null);
 
 **メリット**:
 
-- 基礎型（ `Game` ）の変更に自動追従
-- 型の意図が明確（「Gameのサブセット + カスタマイズ」）
-- 複数箇所で再利用可能
+- ✅ 基礎型（ `Game` ）の変更に自動追従
+- ✅ 型の意図が明確（「Gameのサブセット + カスタマイズ」）
+- ✅ 複数箇所で再利用可能
 
 ##### 2. Omit（不要なフィールドを除外）
 
@@ -599,6 +748,7 @@ git push -u origin 019_implement_game_join_ui
 - 再利用可能なコンポーネントパターンに従う
 - モバイルファーストのレスポンシブデザイン
 - DRY原則を遵守
+- マジックナンバーを避け、定数を使用
 
 ### パフォーマンス
 

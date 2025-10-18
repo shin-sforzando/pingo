@@ -65,7 +65,7 @@ export function GameInfoCard({
               {game.expiresAt && (
                 <span className="flex items-center gap-1">
                   <Calendar className="h-3 w-3" />
-                  {formatDistanceToNow(new Date(game.expiresAt), {
+                  {formatDistanceToNow(game.expiresAt, {
                     addSuffix: true,
                     locale: locale === "ja" ? ja : enUS,
                   })}

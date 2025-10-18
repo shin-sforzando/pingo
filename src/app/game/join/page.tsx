@@ -29,6 +29,7 @@ import { TranslatedFormMessage } from "@/components/ui/translated-form-message";
 import { useAuth } from "@/contexts/AuthContext";
 import { useGameJoin } from "@/hooks/useGameJoin";
 import { useParticipatingGames } from "@/hooks/useParticipatingGames";
+import { GAME_ID_LENGTH, GAME_ID_PATTERN } from "@/lib/constants";
 import { auth } from "@/lib/firebase/client";
 import type { GameInfo } from "@/types/schema";
 
@@ -36,9 +37,12 @@ import type { GameInfo } from "@/types/schema";
 const joinGameSchema = z.object({
   gameId: z
     .string()
-    .min(6, "Game ID must be 6 characters")
-    .max(6, "Game ID must be 6 characters")
-    .regex(/^[A-Z0-9]{6}$/, "Game ID must be 6 uppercase letters or numbers"),
+    .min(GAME_ID_LENGTH, `Game ID must be ${GAME_ID_LENGTH} characters`)
+    .max(GAME_ID_LENGTH, `Game ID must be ${GAME_ID_LENGTH} characters`)
+    .regex(
+      GAME_ID_PATTERN,
+      `Game ID must be ${GAME_ID_LENGTH} uppercase letters or numbers`,
+    ),
 });
 
 type JoinGameFormValues = z.infer<typeof joinGameSchema>;
@@ -115,7 +119,7 @@ export default function JoinGamePage() {
         if (response.ok) {
           const data = await response.json();
           if (data.success && data.data?.games) {
-            // Filter out games that user is already participating in
+            // Filter out games where user is already participating (true) or status unknown (undefined)
             const notParticipating = data.data.games.filter(
               (game: GameInfo) => game.isParticipating !== true,
             );
@@ -140,7 +144,7 @@ export default function JoinGamePage() {
     const upperValue = value
       .toUpperCase()
       .replace(/[^A-Z0-9]/g, "")
-      .slice(0, 6);
+      .slice(0, GAME_ID_LENGTH);
     form.setValue("gameId", upperValue);
 
     // Clear verification state when input changes
@@ -156,8 +160,10 @@ export default function JoinGamePage() {
   const verifyGame = async () => {
     const gameIdValue = form.getValues("gameId");
 
-    if (!gameIdValue || gameIdValue.length !== 6) {
-      setVerificationError(t("Game.errors.invalidGameId"));
+    if (!gameIdValue || gameIdValue.length !== GAME_ID_LENGTH) {
+      setVerificationError(
+        t("Game.errors.invalidGameId", { gameIdLength: GAME_ID_LENGTH }),
+      );
       return;
     }
 
@@ -274,7 +280,7 @@ export default function JoinGamePage() {
         <div>
           <h1 className="font-bold text-3xl">{t("Game.joinGame")}</h1>
           <p className="mt-2 text-muted-foreground">
-            {t("Game.joinGameDescription")}
+            {t("Game.joinGameDescription", { gameIdLength: GAME_ID_LENGTH })}
           </p>
         </div>
 
@@ -284,7 +290,9 @@ export default function JoinGamePage() {
               <CardHeader>
                 <CardTitle>{t("Game.enterGameId")}</CardTitle>
                 <CardDescription>
-                  {t("Game.enterGameIdDescription")}
+                  {t("Game.joinGameDescription", {
+                    gameIdLength: GAME_ID_LENGTH,
+                  })}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -295,14 +303,16 @@ export default function JoinGamePage() {
                     <FormItem>
                       <FormLabel>{t("Game.gameId")}</FormLabel>
                       <FormDescription>
-                        {t("Game.gameIdDescription")}
+                        {t("Game.gameIdDescription", {
+                          gameIdLength: GAME_ID_LENGTH,
+                        })}
                       </FormDescription>
                       <div className="flex space-x-2">
                         <FormControl>
                           <Input
                             {...field}
                             placeholder="ABC123"
-                            maxLength={6}
+                            maxLength={GAME_ID_LENGTH}
                             className="font-mono text-2xl text-center uppercase"
                             onChange={(e) => handleGameIdChange(e.target.value)}
                             autoComplete="off"
@@ -313,7 +323,9 @@ export default function JoinGamePage() {
                           type="button"
                           variant="outline"
                           onClick={verifyGame}
-                          disabled={gameId.length !== 6 || isVerifying}
+                          disabled={
+                            gameId.length !== GAME_ID_LENGTH || isVerifying
+                          }
                         >
                           {isVerifying
                             ? t("Common.verifying")
