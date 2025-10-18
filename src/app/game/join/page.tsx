@@ -1,15 +1,13 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { formatDistanceToNow } from "date-fns";
-import { enUS, ja } from "date-fns/locale";
-import { Calendar, Users } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
 import { AuthGuard } from "@/components/auth/AuthGuard";
+import { GameInfoCard } from "@/components/game/GameInfoCard";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -32,7 +30,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useGameJoin } from "@/hooks/useGameJoin";
 import { useParticipatingGames } from "@/hooks/useParticipatingGames";
 import { auth } from "@/lib/firebase/client";
-import type { VerifiedGameInfo } from "@/types/schema";
+import type { GameInfo } from "@/types/schema";
 
 // Form validation schema
 const joinGameSchema = z.object({
@@ -56,9 +54,7 @@ export default function JoinGamePage() {
 
   // State for game verification
   const [isVerifying, setIsVerifying] = useState(false);
-  const [verifiedGame, setVerifiedGame] = useState<VerifiedGameInfo | null>(
-    null,
-  );
+  const [verifiedGame, setVerifiedGame] = useState<GameInfo | null>(null);
   const [verificationError, setVerificationError] = useState<string | null>(
     null,
   );
@@ -74,17 +70,7 @@ export default function JoinGamePage() {
   } = useParticipatingGames(user, { fetchDetails: true });
 
   // State for available games (excluding already participating)
-  const [availableGames, setAvailableGames] = useState<
-    Array<{
-      id: string;
-      title: string;
-      theme: string;
-      notes?: string;
-      participantCount: number;
-      createdAt: Date | null;
-      expiresAt: Date | null;
-    }>
-  >([]);
+  const [availableGames, setAvailableGames] = useState<GameInfo[]>([]);
   const [isLoadingPublicGames, setIsLoadingPublicGames] = useState(true);
 
   // Form setup
@@ -130,19 +116,8 @@ export default function JoinGamePage() {
           const data = await response.json();
           if (data.success && data.data?.games) {
             // Filter out games that user is already participating in
-            interface GameWithParticipation {
-              id: string;
-              title: string;
-              theme: string;
-              notes?: string;
-              participantCount: number;
-              isParticipating?: boolean;
-              createdAt: Date | null;
-              expiresAt: Date | null;
-            }
-
             const notParticipating = data.data.games.filter(
-              (game: GameWithParticipation) => game.isParticipating !== true,
+              (game: GameInfo) => game.isParticipating !== true,
             );
 
             setAvailableGames(notParticipating);
@@ -223,12 +198,41 @@ export default function JoinGamePage() {
         throw new Error(t("Game.errors.gameExpired"));
       }
 
+      // Fetch participant count
+      let participantCount = 0;
+      try {
+        const participantsResponse = await fetch(
+          `/api/game/${gameIdValue}/participants`,
+          {
+            headers: {
+              Authorization: `Bearer ${idToken}`,
+            },
+          },
+        );
+
+        if (participantsResponse.ok) {
+          const participantsData = await participantsResponse.json();
+          if (
+            participantsData.success &&
+            Array.isArray(participantsData.data)
+          ) {
+            participantCount = participantsData.data.length;
+          }
+        }
+      } catch (error) {
+        // Silently fail participant count fetch, default to 0
+        console.error("Failed to fetch participants:", error);
+      }
+
       // Store verified game info
       setVerifiedGame({
         id: game.id,
         title: game.title,
         theme: game.theme,
         expiresAt: game.expiresAt,
+        participantCount,
+        createdAt: null,
+        isPublic: game.isPublic,
       });
     } catch (error) {
       console.error("Error verifying game:", error);
@@ -293,8 +297,8 @@ export default function JoinGamePage() {
                       <FormDescription>
                         {t("Game.gameIdDescription")}
                       </FormDescription>
-                      <FormControl>
-                        <div className="flex space-x-2">
+                      <div className="flex space-x-2">
+                        <FormControl>
                           <Input
                             {...field}
                             placeholder="ABC123"
@@ -304,18 +308,18 @@ export default function JoinGamePage() {
                             autoComplete="off"
                             autoCapitalize="characters"
                           />
-                          <Button
-                            type="button"
-                            variant="outline"
-                            onClick={verifyGame}
-                            disabled={gameId.length !== 6 || isVerifying}
-                          >
-                            {isVerifying
-                              ? t("Common.verifying")
-                              : t("Common.verify")}
-                          </Button>
-                        </div>
-                      </FormControl>
+                        </FormControl>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={verifyGame}
+                          disabled={gameId.length !== 6 || isVerifying}
+                        >
+                          {isVerifying
+                            ? t("Common.verifying")
+                            : t("Common.verify")}
+                        </Button>
+                      </div>
                       <TranslatedFormMessage />
                       {verificationError && (
                         <p className="text-destructive text-sm">
@@ -334,41 +338,40 @@ export default function JoinGamePage() {
                 <CardHeader>
                   <CardTitle>{t("Game.gameFound")}</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2">
-                  <div>
-                    <span className="font-semibold">{t("Game.title")}:</span>{" "}
-                    {verifiedGame.title}
-                  </div>
-                  <div>
-                    <span className="font-semibold">{t("Game.theme")}:</span>{" "}
-                    {verifiedGame.theme}
-                  </div>
-                  {verifiedGame.expiresAt && (
-                    <div>
-                      <span className="font-semibold">
-                        {t("Game.expiresAt")}:
-                      </span>{" "}
-                      {new Date(verifiedGame.expiresAt).toLocaleDateString()}
-                    </div>
+                <CardContent className="space-y-4">
+                  <GameInfoCard
+                    game={{
+                      id: verifiedGame.id,
+                      title: verifiedGame.title,
+                      theme: verifiedGame.theme,
+                      participantCount: verifiedGame.participantCount,
+                      createdAt: null,
+                      expiresAt: verifiedGame.expiresAt,
+                    }}
+                    locale={locale}
+                    onClick={() => {
+                      // Verified game card is not clickable
+                    }}
+                    className="border-0"
+                  />
+
+                  {/* Submit button */}
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    size="lg"
+                    disabled={isJoining}
+                  >
+                    {isJoining ? t("Game.joining") : t("Game.join")}
+                  </Button>
+
+                  {joinError && (
+                    <p className="text-destructive text-sm text-center">
+                      {joinError}
+                    </p>
                   )}
                 </CardContent>
               </Card>
-            )}
-
-            {/* Submit button */}
-            <Button
-              type="submit"
-              className="w-full"
-              size="lg"
-              disabled={!verifiedGame || isJoining}
-            >
-              {isJoining ? t("Game.joining") : t("Game.join")}
-            </Button>
-
-            {joinError && (
-              <p className="text-destructive text-sm text-center">
-                {joinError}
-              </p>
             )}
           </form>
         </Form>
@@ -396,50 +399,15 @@ export default function JoinGamePage() {
             <CardContent>
               <div className="space-y-2">
                 {participatingGames.map((game) => (
-                  <Card
+                  <GameInfoCard
                     key={game.id}
-                    className="cursor-pointer transition-colors hover:bg-muted/50"
-                    onClick={() => {
+                    game={game}
+                    locale={locale}
+                    onClick={(game) => {
                       // Navigate to the game page directly
                       router.push(`/game/${game.id}`);
                     }}
-                  >
-                    <CardContent className="p-4">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-semibold">{game.title}</h4>
-                            <span className="font-mono text-muted-foreground text-xs">
-                              {game.id}
-                            </span>
-                          </div>
-                          <p className="text-muted-foreground text-sm">
-                            {game.theme}
-                          </p>
-                          {game.notes && (
-                            <p className="mt-1 text-muted-foreground text-xs italic">
-                              {game.notes}
-                            </p>
-                          )}
-                          <div className="mt-2 flex items-center gap-4 text-muted-foreground text-sm">
-                            <span className="flex items-center gap-1">
-                              <Users className="h-3 w-3" />
-                              {game.participantCount}
-                            </span>
-                            {game.expiresAt && (
-                              <span className="flex items-center gap-1">
-                                <Calendar className="h-3 w-3" />
-                                {formatDistanceToNow(new Date(game.expiresAt), {
-                                  addSuffix: true,
-                                  locale: locale === "ja" ? ja : enUS,
-                                })}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  />
                 ))}
               </div>
             </CardContent>
@@ -462,59 +430,19 @@ export default function JoinGamePage() {
             <CardContent>
               <div className="space-y-2">
                 {availableGames.map((game) => (
-                  <Card
+                  <GameInfoCard
                     key={game.id}
-                    className="cursor-pointer transition-colors hover:bg-muted/50"
-                    onClick={async () => {
-                      // Set the form values and verified game
-                      form.setValue("gameId", game.id);
-                      setVerifiedGame({
-                        id: game.id,
-                        title: game.title,
-                        theme: game.theme,
-                        expiresAt: game.expiresAt,
-                      });
-
-                      // Automatically join the game
-                      await onSubmit({ gameId: game.id });
+                    game={game}
+                    locale={locale}
+                    onClick={async (game) => {
+                      // Directly join the game without showing verification
+                      const result = await joinGame(game.id);
+                      if (result.success) {
+                        // Redirect to share page after successful join
+                        router.push(`/game/${game.id}/share`);
+                      }
                     }}
-                  >
-                    <CardContent className="p-4">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-semibold">{game.title}</h4>
-                            <span className="font-mono text-muted-foreground text-xs">
-                              {game.id}
-                            </span>
-                          </div>
-                          <p className="text-muted-foreground text-sm">
-                            {game.theme}
-                          </p>
-                          {game.notes && (
-                            <p className="mt-1 text-muted-foreground text-xs italic">
-                              {game.notes}
-                            </p>
-                          )}
-                          <div className="mt-2 flex items-center gap-4 text-muted-foreground text-sm">
-                            <span className="flex items-center gap-1">
-                              <Users className="h-3 w-3" />
-                              {game.participantCount}
-                            </span>
-                            {game.expiresAt && (
-                              <span className="flex items-center gap-1">
-                                <Calendar className="h-3 w-3" />
-                                {formatDistanceToNow(new Date(game.expiresAt), {
-                                  addSuffix: true,
-                                  locale: locale === "ja" ? ja : enUS,
-                                })}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  />
                 ))}
               </div>
             </CardContent>

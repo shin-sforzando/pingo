@@ -9,6 +9,7 @@
 5. **標準ライブラリ優先** - 可能な限り標準ライブラリを使用
 6. **Linter警告を無視しない**
 7. **全コンポーネントにStorybookストーリーが必要**
+8. **DRY原則を遵守** - 重複コードを避け、再利用可能なコンポーネント/型を作成
 
 ## コードスタイル（Biome設定）
 
@@ -68,7 +69,7 @@
 1. **`src/types/schema.ts`** - Zodスキーマとドメインモデル型
    - アプリケーション全体で使用する型
    - Zodスキーマから推論される型
-   - 例: `Game`, `User`, `Submission`
+   - 例: `Game`, `User`, `Submission`, `PublicGameInfo`, `VerifiedGameInfo`
 
 2. **`src/types/game.ts`** - Firestoreドキュメント型と変換関数
    - Firestore用のドキュメントインターフェース
@@ -221,6 +222,97 @@ setVerifiedGame({
 
 ## コンポーネント規約
 
+### DRY原則の適用
+
+重複コードを発見したら、即座に再利用可能なコンポーネントに抽出する
+
+#### 実例: GameInfoCardの作成
+
+Before（問題あり）:
+
+```typescript
+// join/page.tsx - 参加中ゲーム表示（80行）
+{participatingGames.map((game) => (
+  <Card key={game.id} className="cursor-pointer hover:bg-muted/50">
+    <CardContent className="p-4">
+      <div className="flex items-start justify-between">
+        <div className="flex-1">
+          <div className="flex items-center gap-2">
+            <h4 className="font-semibold">{game.title}</h4>
+            <span className="font-mono text-muted-foreground text-xs">{game.id}</span>
+          </div>
+          <p className="text-muted-foreground text-sm">{game.theme}</p>
+          {/* ... さらに40行 ... */}
+        </div>
+      </div>
+    </CardContent>
+  </Card>
+))}
+
+// 同じページ内で公開ゲーム表示も同様のコード（80行）
+{availableGames.map((game) => (
+  <Card key={game.id} className="cursor-pointer hover:bg-muted/50">
+    {/* ... 上記と同じ構造 ... */}
+  </Card>
+))}
+```
+
+After（改善版）:
+
+```typescript
+// src/components/game/GameInfoCard.tsx
+export interface GameInfoCardProps {
+  game: PublicGameInfo;
+  onClick: (game: PublicGameInfo) => void;
+  locale: string;
+  className?: string;
+}
+
+export function GameInfoCard({ game, onClick, locale, className }: GameInfoCardProps) {
+  return (
+    <Card
+      className={`cursor-pointer transition-colors hover:bg-muted/50 ${className || ""}`}
+      onClick={() => onClick(game)}
+    >
+      <CardContent className="p-4">
+        {/* 統一されたゲーム情報表示ロジック */}
+      </CardContent>
+    </Card>
+  );
+}
+
+// join/page.tsx - 参加中ゲーム（3行に削減）
+{participatingGames.map((game) => (
+  <GameInfoCard
+    key={game.id}
+    game={game}
+    locale={locale}
+    onClick={(game) => router.push(`/game/${game.id}`)}
+  />
+))}
+
+// join/page.tsx - 公開ゲーム（5行に削減）
+{availableGames.map((game) => (
+  <GameInfoCard
+    key={game.id}
+    game={game}
+    locale={locale}
+    onClick={async (game) => {
+      const result = await joinGame(game.id);
+      if (result.success) router.push(`/game/${game.id}/share`);
+    }}
+  />
+))}
+```
+
+**改善結果**:
+
+- ✅ 重複コード160行 → 3+5行（95%削減）
+- ✅ GameInfoCardコンポーネント: 80行で再利用可能
+- ✅ Storybookストーリー追加（6パターン）
+- ✅ ブラウザテスト追加（12テストケース）
+- ✅ 統一されたUI/UX
+
 ### ファイル構造
 
 ```plain
@@ -229,12 +321,12 @@ src/components/
 ├── magicui/      # Magic UIアニメーション
 ├── auth/         # 認証コンポーネント
 ├── layout/       # Header、Footer、Navigation
-└── game/         # ゲーム専用コンポーネント
+└── game/         # ゲーム専用コンポーネント（GameInfoCard等）
 ```
 
 ### 命名パターン
 
-- **コンポーネント**: PascalCase（例: `ImageUpload.tsx`）
+- **コンポーネント**: PascalCase（例: `ImageUpload.tsx`, `GameInfoCard.tsx`）
 - **関数**: 説明的な接頭辞付きcamelCase
   - イベントハンドラー: `handle` 接頭辞（例: `handleClick`）
   - ユーティリティ関数: 説明的な名前
@@ -274,6 +366,109 @@ export function ComponentName({ prop }: ComponentNameProps) {
 }
 ```
 
+## React Hooks最適化
+
+### useEffectの依存配列最適化
+
+**オブジェクトを依存配列に含めない** - 不要な再レンダリングを防ぐため、安定したプリミティブ値を使用
+
+#### 実例: useParticipatingGamesの依存配列最適化
+
+Before（問題あり）:
+
+```typescript
+export function useParticipatingGames(user: User | null) {
+  const [participatingGames, setParticipatingGames] = useState<PublicGameInfo[]>([]);
+
+  useEffect(() => {
+    const fetchGames = async () => {
+      if (!user || !user.participatingGames) return;
+      // フェッチ処理...
+    };
+    fetchGames();
+  }, [user]); // ❌ userオブジェクト全体を依存配列に含める → 不要な再レンダリング
+}
+```
+
+After（改善版）:
+
+```typescript
+export function useParticipatingGames(user: User | null) {
+  const [participatingGames, setParticipatingGames] = useState<PublicGameInfo[]>([]);
+
+  // Extract stable primitive values from user object
+  const userId = user?.id;
+  const participatingGameIdsKey = user?.participatingGames?.join(",") || "";
+
+  useEffect(() => {
+    const fetchGames = async () => {
+      if (!userId || !participatingGameIdsKey) return;
+      const participatingGameIds = participatingGameIdsKey.split(",");
+      // フェッチ処理...
+    };
+    fetchGames();
+  }, [userId, participatingGameIdsKey, fetchDetails]); // ✅ 安定したプリミティブ値のみ
+}
+```
+
+**改善点**:
+
+- ✅ userオブジェクトの参照変更による不要な再レンダリング防止
+- ✅ IDと配列を文字列として安定化
+- ✅ パフォーマンス向上
+
+### useEffectのrace condition回避
+
+複数のuseEffectが同時にリダイレクトを試みる場合、適切な条件チェックで優先順位を制御する
+
+#### 実例: ログアウト時のリダイレクトrace condition
+
+Before（問題あり）:
+
+```typescript
+// game/[gameId]/page.tsx
+export default function GamePage() {
+  const { user } = useAuth();
+  const { isParticipating } = useGameParticipation(gameId, user);
+
+  // ❌ ログアウト時にもisParticipating=falseになり、シェアページへリダイレクト
+  useEffect(() => {
+    if (isParticipating === false) {
+      router.push(`/game/${gameId}/share`);
+    }
+  }, [isParticipating, gameId, router]);
+
+  // AuthGuardが"/"へリダイレクトしようとするが、上記が先に実行される
+  return <AuthGuard>{/* ... */}</AuthGuard>;
+}
+```
+
+After（改善版）:
+
+```typescript
+// game/[gameId]/page.tsx
+export default function GamePage() {
+  const { user } = useAuth();
+  const { isParticipating } = useGameParticipation(gameId, user);
+
+  // ✅ ログイン済みユーザーのみシェアページへリダイレクト
+  // Why: Prevents redirect to share page on logout, allowing AuthGuard to redirect to home
+  useEffect(() => {
+    if (user && isParticipating === false && isParticipating !== null) {
+      router.push(`/game/${gameId}/share`);
+    }
+  }, [user, isParticipating, gameId, router]);
+
+  return <AuthGuard>{/* ... */}</AuthGuard>;
+}
+```
+
+**改善点**:
+
+- ✅ `user`チェック追加により、ログアウト時のリダイレクトを防止
+- ✅ AuthGuardのリダイレクト（`"/"`）を優先
+- ✅ ログイン済み未参加ユーザーのみシェアページへリダイレクト
+
 ## 国際化（next-intl）
 
 - コンポーネント翻訳には `useTranslations()` フックを使用
@@ -304,12 +499,36 @@ export function ComponentName({ prop }: ComponentNameProps) {
 - DOM操作、ユーザーインタラクションの統合テスト
 - ファイルパターン: `src/**/*.browser.test.{ts,tsx}`
 - 設定: `vitest.config.mts` のbrowserプロジェクト
+- **注意**: `page.queryByText()`は存在しない。`container.textContent`または`page.getByText()`を使用
 
 ### テストデータ
 
 - `@faker-js/faker` を使用
 - ULID生成: `faker.string.ulid()`
 - 各テスト後にテストデータをクリーンアップ
+
+### テストのベストプラクティス
+
+#### 型定義とテストの整合性
+
+テストは実装の型定義に合わせる
+
+```typescript
+// ❌ BAD: 型定義と異なる期待値
+// PublicGameInfoではparticipantCountがnumber型（必須）
+expect(result.current.participatingGames[0].participantCount).toBeUndefined();
+
+// ✅ GOOD: 型定義に合わせた期待値
+// fetchDetails: falseでもデフォルト値0を設定
+expect(result.current.participatingGames[0]).toEqual({
+  id: "GAME01",
+  title: "Summer Adventure",
+  theme: "",
+  participantCount: 0,
+  createdAt: null,
+  expiresAt: null,
+});
+```
 
 ## Gitとブランチ規約
 
@@ -379,10 +598,11 @@ git push -u origin 019_implement_game_join_ui
 - 型安全性を最優先
 - 再利用可能なコンポーネントパターンに従う
 - モバイルファーストのレスポンシブデザイン
+- DRY原則を遵守
 
 ### パフォーマンス
 
 - 画像最適化の実装
 - 適切なコード分割
 - Reactのベストプラクティスに従う
-- 不要な再レンダリングの回避
+- 不要な再レンダリングの回避（useEffect依存配列の最適化）

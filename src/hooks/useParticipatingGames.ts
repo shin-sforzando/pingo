@@ -1,20 +1,6 @@
 import { useEffect, useState } from "react";
 import { auth } from "@/lib/firebase/client";
-import type { User } from "@/types/schema";
-
-/**
- * Participating game information interface
- * Supports both detailed and minimal game information
- */
-interface ParticipatingGame {
-  id: string;
-  title: string;
-  theme?: string;
-  notes?: string;
-  participantCount?: number;
-  createdAt?: Date | null;
-  expiresAt?: Date | null;
-}
+import type { GameInfo, User } from "@/types/schema";
 
 interface UseParticipatingGamesOptions {
   /**
@@ -47,25 +33,29 @@ export function useParticipatingGames(
 ) {
   const { fetchDetails = true } = options;
 
-  const [participatingGames, setParticipatingGames] = useState<
-    ParticipatingGame[]
-  >([]);
+  const [participatingGames, setParticipatingGames] = useState<GameInfo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
+  // Extract stable values from user object to avoid unnecessary re-renders
+  const userId = user?.id;
+  const participatingGameIdsKey = user?.participatingGames?.join(",") || "";
+
   useEffect(() => {
     const fetchParticipatingGames = async () => {
-      if (!user) {
+      if (!userId) {
         setParticipatingGames([]);
         setIsLoading(false);
         return;
       }
 
-      if (!user.participatingGames || user.participatingGames.length === 0) {
+      if (!participatingGameIdsKey) {
         setParticipatingGames([]);
         setIsLoading(false);
         return;
       }
+
+      const participatingGameIds = participatingGameIdsKey.split(",");
 
       setIsLoading(true);
       setError(null);
@@ -77,11 +67,11 @@ export function useParticipatingGames(
           return;
         }
 
-        const games: ParticipatingGame[] = [];
+        const games: GameInfo[] = [];
 
         // Fetch game information for each participating game
         await Promise.all(
-          user.participatingGames.map(async (gameId) => {
+          participatingGameIds.map(async (gameId) => {
             try {
               // Always fetch basic game info
               const gameResponse = await fetch(`/api/game/${gameId}`, {
@@ -100,9 +90,13 @@ export function useParticipatingGames(
                   const now = new Date();
 
                   if (!expiresAt || expiresAt > now) {
-                    const gameInfo: ParticipatingGame = {
+                    const gameInfo: GameInfo = {
                       id: gameData.data.id,
                       title: gameData.data.title,
+                      theme: "",
+                      participantCount: 0,
+                      createdAt: null,
+                      expiresAt: null,
                     };
 
                     // Optionally fetch detailed information
@@ -168,7 +162,7 @@ export function useParticipatingGames(
     };
 
     fetchParticipatingGames();
-  }, [user, fetchDetails]);
+  }, [userId, participatingGameIdsKey, fetchDetails]);
 
   return { participatingGames, isLoading, error };
 }

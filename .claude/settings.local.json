@@ -19,6 +19,7 @@
       "Bash(npm run check:i18n:*)",
       "Bash(npm run check)",
       "Bash(npm run test:*)",
+      "Bash(npm run test:once)",
       "Bash(npm test:*)",
       "Bash(npx npm-check-updates:*)",
       "mcp__context7__get-library-docs",

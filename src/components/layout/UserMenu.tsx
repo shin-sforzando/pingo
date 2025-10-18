@@ -19,6 +19,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useParticipatingGames } from "@/hooks/useParticipatingGames";
 import { setUserLocale } from "@/services/locale";
 
+// Maximum number of recent games to display in the user menu dropdown
+const MAX_RECENT_GAMES_DISPLAY = 10;
+
 export function UserMenu(): ReactElement {
   const { user, logout } = useAuth();
   const router = useRouter();
@@ -79,15 +82,17 @@ export function UserMenu(): ReactElement {
           <>
             <DropdownMenuSeparator />
             <DropdownMenuLabel>{t("Header.recentGames")}</DropdownMenuLabel>
-            {participatingGames.slice(0, 10).map((game) => {
-              const displayText = `${game.title} (${game.id})`;
+            {participatingGames
+              .slice(0, MAX_RECENT_GAMES_DISPLAY)
+              .map((game) => {
+                const displayText = `${game.title} (${game.id})`;
 
-              return (
-                <DropdownMenuItem key={game.id} asChild>
-                  <Link href={`/game/${game.id}`}>{displayText}</Link>
-                </DropdownMenuItem>
-              );
-            })}
+                return (
+                  <DropdownMenuItem key={game.id} asChild>
+                    <Link href={`/game/${game.id}`}>{displayText}</Link>
+                  </DropdownMenuItem>
+                );
+              })}
           </>
         )}
 

@@ -82,11 +82,12 @@ export default function GamePage() {
 
   // Redirect to share page if not participating (only after check completes)
   useEffect(() => {
-    // Only redirect if participation check has completed (not null) and user is not participating
-    if (isParticipating === false && isParticipating !== null) {
+    // Only redirect if user is logged in but not participating
+    // Why: Prevents redirect to share page on logout, allowing AuthGuard to redirect to home
+    if (user && isParticipating === false && isParticipating !== null) {
       router.push(`/game/${gameId}/share`);
     }
-  }, [isParticipating, gameId, router]);
+  }, [user, isParticipating, gameId, router]);
 
   // Loading state or redirecting
   if (isLoading || isParticipating === null) {

@@ -68,6 +68,7 @@ export async function GET(request: Request): Promise<
           confidenceThreshold: game.confidenceThreshold,
           maxSubmissionsPerUser: game.maxSubmissionsPerUser,
           isPhotoSharingEnabled: game.isPhotoSharingEnabled,
+          isPublic: game.isPublic,
           notes: game.notes,
           createdAt: game.createdAt,
           participantCount,

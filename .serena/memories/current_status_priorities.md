@@ -4,64 +4,67 @@
 
 ### ✅ 完了済み機能
 
+#### コア機能
+
 - **ゲーム作成**: Gemini AIによる被写体生成を含む完全なフロー
 - **画像アップロード**: HEIC対応、リサイズ/圧縮、GCS統合
 - **ゲームメイン画面**: ビンゴボード、リアルタイム更新、AI解析
 - **認証機能**: Firebase Authによるユーザー管理
-- **UI基盤**: shadcn/ui + Magic UIコンポーネント with Storybook
-- **国際化対応**: next-intlによる日本語/英語サポート
 - **リアルタイム更新**: ゲーム状態のFirestoreリスナー
 - **ビンゴライン検出**: 行/列/斜めの自動完了検出
-- **参加者管理API**: `/api/game/[gameId]/participants`エンドポイント
-- **テストカバレッジ**: 255個のテスト、主要APIエンドポイントのテスト実装済み
-- **ゲーム参加機能**: カスタムフック（useGameJoin、useGameParticipation、useParticipatingGames）による完全な参加フロー実装
-- **ゲーム参加UI**: `/game/join`ページの完全実装（手動ID入力、検証、参加機能）
-- **公開ゲーム一覧**: `/api/game/public`エンドポイントと一覧表示UI
-- **参加中のゲーム一覧**: UserMenuおよびjoinページでの表示機能
-- **翻訳構造の最適化**: 共通フィールドラベルの統合、重複削除、命名規則統一
+
+#### ゲーム参加機能
+
+- **ゲーム参加UI**: `/game/join`ページの完全実装
+  - 手動ID入力と検証（6文字、大文字のみ）
+  - ゲーム情報の事前確認（参加者数を含む）
+  - 参加中のゲーム一覧表示（クリックで直接ゲームページへ）
+  - 公開ゲーム一覧表示（クリックで直接参加→シェアページへ）
+  - GameInfoCardによる統一された表示
+  - FormControl/Label適切な関連付け（アクセシビリティ対応）
+  - 「参加する」ボタンを検証済みゲームカード内に配置（UX改善）
+- **カスタムフック**:
+  - `useGameJoin`: ゲーム参加処理（楽観的UI更新、トランザクション対応）
+  - `useGameParticipation`: ゲーム参加状態の確認
+  - `useParticipatingGames`: 参加中のゲームリスト取得（依存配列最適化済み）
+  - `useGameData`: ゲームデータ取得の統一インターフェース
+- **APIエンドポイント**:
+  - `/api/game/public` - 公開ゲーム一覧取得（isPublicフィールド含む）
+  - `/api/game/[gameId]/join` - ゲーム参加処理
+  - `/api/game/[gameId]/participants` - 参加者一覧取得
 - **QRコード機能**: QRコード表示機能の完全実装（スキャンはOS標準機能を利用）
 
-### 🔄 最近完了した作業（ブランチ049_game_participation_feature）
+#### UI/UXコンポーネント
 
-#### ゲーム参加機能の完全実装
+- **UI基盤**: shadcn/ui + Magic UIコンポーネント with Storybook
+- **GameInfoCard**: 再利用可能なゲーム情報カードコンポーネント
+  - DRY原則適用により重複コード80行以上削減
+  - 検証済みゲーム、参加中ゲーム、公開ゲームで共通利用
+  - 7つのStorybookストーリー（FullInfo, MinimalInfo, LongNotes, ExpiringSoon, JapaneseLocale, VerifiedGame）
+  - 13のブラウザテストケース
+- **UserMenu**: 参加中ゲーム表示機能（最大10件）
+- **認証状態管理**: ログアウト時のリダイレクト最適化
+  - ゲームページからログアウト時にトップページへ正しくリダイレクト
+  - useEffect race conditionの解決
 
-- **useGameJoin**: ゲーム参加処理のカスタムフック（トランザクション対応）
-- **useGameParticipation**: ゲーム参加状態の確認フック
-- **useParticipatingGames**: 参加中のゲームリストを取得するフック
-- **useGameData**: ゲームデータ取得の統一インターフェース
-- **`/game/join`ページ**: 527行の完全な実装
-  - ゲームID手動入力と検証
-  - リアルタイム入力検証（6文字、大文字のみ）
-  - ゲーム情報の事前確認
-  - 参加中のゲーム一覧表示
-  - 公開ゲーム一覧表示（クリックで自動参加）
-- **`/api/game/public`エンドポイント**: 公開ゲームの取得
-- **参加状態チェックの強化**: 参加済みユーザーへのリダイレクトメッセージ
-- **UserMenuでの参加中ゲーム表示機能**
-- **QRコード表示**: `QRCodeCard`コンポーネントによるゲームURL/IDのQRコード表示（スキャンはスマートフォンOS標準機能）
+#### 型定義とコード品質
 
-#### 翻訳構造のリファクタリング
+- **型の統合**: `GameInfo`型の導入
+  - `PublicGameInfo`と`VerifiedGameInfo`を`GameInfo`に統合
+  - 公開/非公開に関係なく使用可能
+  - `isPublic`フィールドでゲームの公開状態を明示
+  - `isParticipating`フィールドでユーザーの参加状態を表示
+- **翻訳構造の最適化**: 共通フィールドラベルの統合、重複削除、命名規則統一
+  - 総キー数232→215（-7.3%）
+  - 重複0、未使用キー0
+  - `useTranslations()`（引数なし）でフルパス参照に統一
+- **国際化対応**: next-intlによる日本語/英語サポート
 
-- **共通フィールドラベルの抽出**: 11個のラベルを `Game.*` レベルに統合
-  - `status`
-  - `expirationDate`
-  - `photoSharing`
-  - `lines`
-  - `public`
-  - `private`
-  - `on`
-  - `off`
-  - `active`
-  - `ended`
-  - `archived`
-- **重複削除**: `Game.Share.*` から14個の重複キーを削除
-- **未使用名前空間の削除**: `GameInfo.*` 全体（15キー）を削除
-- **命名規則統一**: `imageUpload.*` → `ImageUpload.*`にリネーム
-- **翻訳パターンの標準化**:
-  - 常に`useTranslations()`（引数なし）を使用
-  - フルパスキー（例: `Game.status`）で参照
-  - 3層階層構造: 共通（`Game.*`）、ページ固有（`Game.Share.*`）、コンポーネント固有（`ImageUpload.*`）
-- **成果**: 総キー数232→215（-7.3%）、重複0、未使用キー0、テスト255/255合格
+#### テスト
+
+- **テストカバレッジ**: 281個のテスト（36ファイル）、主要APIエンドポイントのテスト実装済み
+- **ブラウザテスト**: Vitest Browserモード（Playwright + webkit）で11ファイル実装済み
+- **合格率**: 100%（281/281）
 
 ## 開発コンテキストメモ
 
@@ -90,6 +93,7 @@
 - 6文字ゲームID以外は全てULIDを使用
 - 類似コンポーネントの既存パターンに従う
 - 翻訳キーは`useTranslations()`（引数なし）でフルパス参照を使用
+- DRY原則を遵守し、再利用可能なコンポーネントを作成
 
 ## 現在の技術仕様
 
@@ -119,7 +123,7 @@
   - `/api/game/[gameId]` - ゲーム情報取得
   - `/api/game/[gameId]/board` - ゲームボード取得
   - `/api/game/[gameId]/events` - ゲームイベント
-- **公開ゲーム**: `/api/game/public` - 公開ゲーム一覧取得
+- **公開ゲーム**: `/api/game/public` - 公開ゲーム一覧取得（isPublicフィールド含む）
 - **ゲーム参加**: `/api/game/[gameId]/join` - ゲーム参加処理
 - **参加者管理**: `/api/game/[gameId]/participants` - 参加者一覧取得
 - **プレイヤーボード**: `/api/game/[gameId]/playerBoard/[userId]` - 個別プレイヤーボード
@@ -139,28 +143,68 @@
 
 - **useGameJoin**: ゲーム参加処理（楽観的UI更新、トランザクション対応）
 - **useGameParticipation**: ゲーム参加状態の確認
-- **useParticipatingGames**: 参加中のゲームリスト取得
+- **useParticipatingGames**: 参加中のゲームリスト取得（依存配列最適化、GameInfo型使用）
 - **useGameData**: ゲームデータ取得の統一インターフェース
 - **useAuthenticatedFetch**: 認証付きフェッチのユーティリティ
+
+### 実装済みコンポーネント
+
+#### 再利用可能コンポーネント
+
+- **GameInfoCard**: ゲーム情報表示カード
+  - 検証済み/参加中/公開ゲーム一覧で使用
+  - GameInfo型を受け取り統一された表示
+  - 7つのStorybookストーリー
+  - 13のブラウザテストケース
 
 ### 実装済みページ
 
 - **`/game/join`**: ゲーム参加ページ（手動ID入力、検証、公開ゲーム一覧、参加中ゲーム一覧）
-- **`/game/[gameId]`**: ゲームメインページ
+- **`/game/[gameId]`**: ゲームメインページ（ログアウトリダイレクト修正済み）
 - **`/game/[gameId]/share`**: ゲーム共有ページ
 - **`/game/create`**: ゲーム作成ページ
+
+### 型定義
+
+#### GameInfo型
+
+`src/types/schema.ts`で定義された統一ゲーム情報型：
+
+```typescript
+export interface GameInfo {
+  id: string;
+  title: string;
+  theme: string;
+  notes?: string;
+  participantCount: number;
+  createdAt: Date | null;
+  expiresAt: Date | null;
+  isPublic?: boolean;
+  isParticipating?: boolean;
+}
+```
+
+**用途**:
+
+- ゲーム参加ページの検証済みゲーム表示
+- 参加中のゲーム一覧
+- 公開ゲーム一覧
+- GameInfoCardコンポーネント
+
+**以前の型**: `PublicGameInfo`と`VerifiedGameInfo`を統合して`GameInfo`に変更
 
 ## 品質保証状況
 
 ### テストカバレッジ現況
 
-- **テスト総数**: 255個（34ファイル）
-- **合格率**: 100%（255/255）
+- **テスト総数**: 281個（36ファイル）
+- **合格率**: 100%（281/281）
 - **API routes**: 大部分でテスト実装済み
-- **Components**: レイアウトコンポーネント中心にテスト済み
+- **Components**: レイアウトコンポーネント、GameInfoCard等でテスト済み
 - **Hooks**: useGameJoin、useGameParticipation、useGameData、useParticipatingGamesのテスト完了
 - **Services**: 一部のサービス層でテスト不足
-- **ブラウザテスト**: Vitest Browserモード（Playwright + webkit）で10ファイル実装済み
+- **ブラウザテスト**: Vitest Browserモード（Playwright + webkit）で11ファイル実装済み
+  - GameInfoCard.browser.test.tsx: 13テストケース
 
 ### 翻訳ファイル状況
 
@@ -169,3 +213,26 @@
 - **重複**: 0個（すべて解消済み）
 - **未使用キー**: 0個（すべて削除済み）
 - **命名規則違反**: 0個（すべて修正済み）
+
+## 優先タスク
+
+### 1. テストカバレッジ（高優先度）
+
+以下の重要コンポーネントでテストが不足:
+
+- `src/components/game/ImageUpload.tsx`
+- `src/services/image-upload.ts`
+- `src/app/api/image/upload/route.ts`
+- `src/app/api/game/[gameId]/submission/analyze/route.ts`
+
+### 2. セキュリティ・本番対応（高優先度）
+
+- レート制限の実装
+- APIキーのセキュリティレビュー
+- デバッグログの削除
+
+### 3. パフォーマンス最適化（中優先度）
+
+- 画像最適化の強化
+- コード分割の改善
+- リアルタイム更新の最適化
