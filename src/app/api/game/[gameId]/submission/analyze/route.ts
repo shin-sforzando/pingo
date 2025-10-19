@@ -10,17 +10,16 @@ import {
   AdminGameParticipationService,
   AdminGameService,
   AdminPlayerBoardService,
-  AdminSubmissionService,
 } from "@/lib/firebase/admin-collections";
 import type { ApiResponse } from "@/types/common";
-import { AcceptanceStatus, ProcessingStatus } from "@/types/common";
+import { AcceptanceStatus } from "@/types/common";
 import type { AnalysisResult, Cell } from "@/types/schema";
 import { analysisResultSchema } from "@/types/schema";
 
 // Request body schema
 const analyzeRequestSchema = z.object({
   submissionId: z.ulid(),
-  imageUrl: z.url(),
+  imageUrl: z.string().url(),
 });
 
 // Gemini response schema for structured output
@@ -206,83 +205,11 @@ async function fetchImageAsBase64(imageUrl: string): Promise<string> {
 }
 
 /**
- * Update cell state to OPEN
- */
-async function updateCellState(
-  gameId: string,
-  userId: string,
-  cellId: string,
-  submissionId: string,
-): Promise<void> {
-  const playerBoard = await AdminPlayerBoardService.getPlayerBoard(
-    gameId,
-    userId,
-  );
-
-  if (!playerBoard) {
-    throw new Error("Player board not found");
-  }
-
-  // Update cell state
-  const updatedCellStates = {
-    ...playerBoard.cellStates,
-    [cellId]: {
-      isOpen: true,
-      openedAt: new Date(),
-      openedBySubmissionId: submissionId,
-    },
-  };
-
-  const updatedPlayerBoard = {
-    ...playerBoard,
-    cellStates: updatedCellStates,
-  };
-
-  await AdminPlayerBoardService.updatePlayerBoard(
-    gameId,
-    userId,
-    updatedPlayerBoard,
-  );
-}
-
-/**
- * Update submission with analysis results
- */
-async function updateSubmissionAnalysis(
-  gameId: string,
-  submissionId: string,
-  analysis: AnalysisResult,
-): Promise<void> {
-  const submission = await AdminSubmissionService.getSubmission(
-    gameId,
-    submissionId,
-  );
-
-  if (!submission) {
-    throw new Error("Submission not found");
-  }
-
-  const updatedSubmission = {
-    ...submission,
-    analyzedAt: new Date(),
-    critique_ja: analysis.critique_ja,
-    critique_en: analysis.critique_en,
-    matchedCellId: analysis.matchedCellId,
-    confidence: analysis.confidence,
-    processingStatus: ProcessingStatus.ANALYZED,
-    acceptanceStatus: analysis.acceptanceStatus,
-  };
-
-  await AdminSubmissionService.updateSubmission(
-    gameId,
-    submissionId,
-    updatedSubmission,
-  );
-}
-
-/**
  * POST /api/game/[gameId]/submission/analyze
  * Analyze uploaded image and determine if it matches any available cells
+ *
+ * Single Responsibility: Image analysis and bingo matching only
+ * Note: Does NOT update game state - state updates should be done via /api/game/[gameId]/submission
  */
 export async function POST(
   request: NextRequest,
@@ -348,8 +275,6 @@ export async function POST(
         acceptanceStatus: AcceptanceStatus.NO_MATCH,
       };
 
-      await updateSubmissionAnalysis(gameId, submissionId, analysis);
-
       return NextResponse.json({
         success: true,
         data: analysis,
@@ -414,46 +339,6 @@ export async function POST(
       confidenceThreshold: game.confidenceThreshold,
       meetsThreshold: game.confidenceThreshold <= analysis.confidence,
     });
-
-    // Check confidence threshold and update cell state if accepted
-    if (
-      analysis.matchedCellId &&
-      game.confidenceThreshold <= analysis.confidence &&
-      analysis.acceptanceStatus === AcceptanceStatus.ACCEPTED
-    ) {
-      console.log("ℹ️ XXX: ~ analyze/route.ts ~ Updating cell state", {
-        cellId: analysis.matchedCellId,
-        confidence: analysis.confidence,
-        threshold: game.confidenceThreshold,
-      });
-      await updateCellState(
-        gameId,
-        userId,
-        analysis.matchedCellId,
-        submissionId,
-      );
-      console.log(
-        "ℹ️ XXX: ~ analyze/route.ts ~ Cell state updated successfully",
-      );
-    } else {
-      console.log("ℹ️ XXX: ~ analyze/route.ts ~ Cell state not updated", {
-        reason: !analysis.matchedCellId
-          ? "no match"
-          : analysis.confidence < game.confidenceThreshold
-            ? "low confidence"
-            : "not accepted",
-        matchedCellId: analysis.matchedCellId,
-        confidence: analysis.confidence,
-        threshold: game.confidenceThreshold,
-        acceptanceStatus: analysis.acceptanceStatus,
-      });
-    }
-
-    // Update submission with analysis results
-    await updateSubmissionAnalysis(gameId, submissionId, analysis);
-    console.log(
-      "ℹ️ XXX: ~ analyze/route.ts ~ Submission updated with analysis results",
-    );
 
     return NextResponse.json({
       success: true,

@@ -246,8 +246,8 @@ describe("/api/game/[gameId]/submission/analyze", () => {
         AcceptanceStatus.ACCEPTED,
       );
 
-      // Verify cell state was updated
-      expect(AdminPlayerBoardService.updatePlayerBoard).toHaveBeenCalled();
+      // Note: State updates are handled by /api/game/[gameId]/submission endpoint
+      // This endpoint only performs analysis
     });
 
     it("should return bilingual critique when no cells match", async () => {
@@ -597,8 +597,8 @@ describe("/api/game/[gameId]/submission/analyze", () => {
         AcceptanceStatus.ACCEPTED,
       );
 
-      // Verify cell state was updated with the correct cell ID
-      expect(AdminPlayerBoardService.updatePlayerBoard).toHaveBeenCalled();
+      // Note: State updates are handled by /api/game/[gameId]/submission endpoint
+      // This endpoint only performs analysis and returns the resolved cell ID
     });
 
     it("should set matchedCellId to null when subject name is not found in available cells", async () => {

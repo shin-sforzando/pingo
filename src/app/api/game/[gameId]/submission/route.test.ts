@@ -12,9 +12,12 @@ import {
 } from "vitest";
 import { adminAuth } from "@/lib/firebase/admin";
 import {
+  AdminGameBoardService,
   AdminGameParticipationService,
   AdminGameService,
+  AdminPlayerBoardService,
   AdminSubmissionService,
+  AdminTransactionService,
 } from "@/lib/firebase/admin-collections";
 import {
   cleanupTestUsers,
@@ -25,8 +28,8 @@ import {
   generateTestGameTitle,
 } from "@/test/helpers/game-test-helpers";
 import type { ApiResponse } from "@/types/common";
-import { GameStatus, ProcessingStatus } from "@/types/common";
-import type { Game, Submission } from "@/types/schema";
+import { AcceptanceStatus, GameStatus, ProcessingStatus } from "@/types/common";
+import type { AnalysisResult, Game, Submission } from "@/types/schema";
 import { GET, POST } from "./route";
 
 // Mock Firebase Admin
@@ -49,9 +52,19 @@ vi.mock("@/lib/firebase/admin-collections", () => ({
     isParticipant: vi.fn(),
     getSubmissionCount: vi.fn(),
   },
+  AdminGameBoardService: {
+    getGameBoard: vi.fn(),
+  },
+  AdminPlayerBoardService: {
+    getPlayerBoard: vi.fn(),
+    updatePlayerBoard: vi.fn(),
+  },
   AdminSubmissionService: {
     createSubmission: vi.fn(),
     getSubmissions: vi.fn(),
+  },
+  AdminTransactionService: {
+    createSubmissionAndUpdateBoard: vi.fn(),
   },
 }));
 
@@ -124,18 +137,50 @@ describe("/api/game/[gameId]/submission", () => {
         notes: undefined,
       };
 
+      const mockGameBoard = {
+        cells: [
+          {
+            id: "cell-1",
+            subject: "赤い自転車",
+            position: { x: 0, y: 0 },
+            isFree: false,
+          },
+        ],
+      };
+
+      const mockPlayerBoard = {
+        userId: mockUserId,
+        cellStates: {},
+        completedLines: [],
+      };
+
       vi.mocked(AdminGameService.getGame).mockResolvedValue(mockGame);
       vi.mocked(AdminGameParticipationService.isParticipant).mockResolvedValue(
         true,
       );
+      vi.mocked(AdminGameBoardService.getGameBoard).mockResolvedValue(
+        mockGameBoard,
+      );
+      vi.mocked(AdminPlayerBoardService.getPlayerBoard).mockResolvedValue(
+        mockPlayerBoard,
+      );
       vi.mocked(
-        AdminGameParticipationService.getSubmissionCount,
-      ).mockResolvedValue(0);
-      vi.mocked(AdminSubmissionService.createSubmission).mockResolvedValue();
+        AdminTransactionService.createSubmissionAndUpdateBoard,
+      ).mockResolvedValue({ success: true });
+
+      const submissionId = ulid();
+      const analysisResult: AnalysisResult = {
+        matchedCellId: "cell-1",
+        confidence: 0.85,
+        critique_ja: "赤い自転車が写真にはっきりと写っています。",
+        critique_en: "A red bicycle is clearly visible in the photo.",
+        acceptanceStatus: AcceptanceStatus.ACCEPTED,
+      };
 
       const submissionData = {
+        submissionId,
         imageUrl: "https://example.com/test-image.jpg",
-        memo: "Test submission memo",
+        analysisResult,
       };
 
       const request = createApiRequest(
@@ -145,30 +190,60 @@ describe("/api/game/[gameId]/submission", () => {
         { authorization: "Bearer valid-token" },
       );
 
+      interface SubmissionResponse {
+        newlyCompletedLines: number;
+        totalCompletedLines: number;
+        requiredBingoLines: number;
+      }
+
       const response = (await POST(request, {
         params: Promise.resolve({ gameId: mockGameId }),
-      })) as NextResponse<ApiResponse<Submission>>;
+      })) as NextResponse<ApiResponse<SubmissionResponse>>;
 
       const responseData = await response.json();
 
       expect(response.status).toBe(200);
       expect(responseData.success).toBe(true);
       expect(responseData.data).toBeDefined();
-      expect(responseData.data?.userId).toBe(mockUserId);
-      expect(responseData.data?.imageUrl).toBe(submissionData.imageUrl);
-      expect(responseData.data?.memo).toBe(submissionData.memo);
-      expect(responseData.data?.processingStatus).toBe(
-        ProcessingStatus.UPLOADED,
+      expect(responseData.data?.requiredBingoLines).toBe(
+        mockGame.requiredBingoLines,
       );
-      expect(AdminSubmissionService.createSubmission).toHaveBeenCalledWith(
+      expect(
+        AdminTransactionService.createSubmissionAndUpdateBoard,
+      ).toHaveBeenCalledWith(
         mockGameId,
-        expect.any(Object),
+        expect.objectContaining({
+          id: submissionId,
+          userId: mockUserId,
+          imageUrl: submissionData.imageUrl,
+          acceptanceStatus: AcceptanceStatus.ACCEPTED,
+        }),
+        expect.objectContaining({
+          userId: mockUserId,
+          cellStates: expect.objectContaining({
+            "cell-1": expect.objectContaining({
+              isOpen: true,
+            }),
+          }),
+        }),
+        mockUserId,
       );
     });
 
     it("should return 401 for missing authorization", async () => {
+      const submissionId = ulid();
+      const analysisResult: AnalysisResult = {
+        matchedCellId: "cell-1",
+        confidence: 0.85,
+        critique_ja: "テスト",
+        critique_en: "Test",
+        acceptanceStatus: AcceptanceStatus.ACCEPTED,
+      };
+
       const submissionData = {
+        submissionId,
         imageUrl: "https://example.com/test-image.jpg",
+        analysisResult,
       };
 
       const request = createApiRequest(
@@ -177,15 +252,21 @@ describe("/api/game/[gameId]/submission", () => {
         submissionData,
       );
 
+      interface SubmissionResponse {
+        newlyCompletedLines: number;
+        totalCompletedLines: number;
+        requiredBingoLines: number;
+      }
+
       const response = (await POST(request, {
         params: Promise.resolve({ gameId: mockGameId }),
-      })) as NextResponse<ApiResponse<Submission>>;
+      })) as NextResponse<ApiResponse<SubmissionResponse>>;
 
       const responseData = await response.json();
 
       expect(response.status).toBe(401);
       expect(responseData.success).toBe(false);
-      expect(responseData.error?.code).toBe("UNAUTHORIZED");
+      expect(responseData.error?.code).toBe("MISSING_TOKEN");
     });
 
     it("should return 400 for invalid input data", async () => {
@@ -193,7 +274,15 @@ describe("/api/game/[gameId]/submission", () => {
       vi.mocked(adminAuth.verifyIdToken).mockResolvedValue(mockDecodedToken);
 
       const invalidSubmissionData = {
+        submissionId: ulid(),
         imageUrl: "invalid-url", // Should be valid URL
+        analysisResult: {
+          matchedCellId: "cell-1",
+          confidence: 0.85,
+          critique_ja: "テスト",
+          critique_en: "Test",
+          acceptanceStatus: AcceptanceStatus.ACCEPTED,
+        },
       };
 
       const request = createApiRequest(
@@ -203,25 +292,45 @@ describe("/api/game/[gameId]/submission", () => {
         { authorization: "Bearer valid-token" },
       );
 
+      interface SubmissionResponse {
+        newlyCompletedLines: number;
+        totalCompletedLines: number;
+        requiredBingoLines: number;
+      }
+
       const response = (await POST(request, {
         params: Promise.resolve({ gameId: mockGameId }),
-      })) as NextResponse<ApiResponse<Submission>>;
+      })) as NextResponse<ApiResponse<SubmissionResponse>>;
 
       const responseData = await response.json();
 
       expect(response.status).toBe(400);
       expect(responseData.success).toBe(false);
-      expect(responseData.error?.code).toBe("INVALID_INPUT");
+      expect(responseData.error?.code).toBe("VALIDATION_ERROR");
     });
 
     it("should return 404 for non-existent game", async () => {
       const mockDecodedToken = { uid: mockUserId } as DecodedIdToken;
       vi.mocked(adminAuth.verifyIdToken).mockResolvedValue(mockDecodedToken);
 
+      vi.mocked(AdminGameParticipationService.isParticipant).mockResolvedValue(
+        true,
+      );
       vi.mocked(AdminGameService.getGame).mockResolvedValue(null);
 
+      const submissionId = ulid();
+      const analysisResult: AnalysisResult = {
+        matchedCellId: "cell-1",
+        confidence: 0.85,
+        critique_ja: "テスト",
+        critique_en: "Test",
+        acceptanceStatus: AcceptanceStatus.ACCEPTED,
+      };
+
       const submissionData = {
+        submissionId,
         imageUrl: "https://example.com/test-image.jpg",
+        analysisResult,
       };
 
       const request = createApiRequest(
@@ -231,9 +340,15 @@ describe("/api/game/[gameId]/submission", () => {
         { authorization: "Bearer valid-token" },
       );
 
+      interface SubmissionResponse {
+        newlyCompletedLines: number;
+        totalCompletedLines: number;
+        requiredBingoLines: number;
+      }
+
       const response = (await POST(request, {
         params: Promise.resolve({ gameId: mockGameId }),
-      })) as NextResponse<ApiResponse<Submission>>;
+      })) as NextResponse<ApiResponse<SubmissionResponse>>;
 
       const responseData = await response.json();
 
@@ -246,30 +361,23 @@ describe("/api/game/[gameId]/submission", () => {
       const mockDecodedToken = { uid: mockUserId } as DecodedIdToken;
       vi.mocked(adminAuth.verifyIdToken).mockResolvedValue(mockDecodedToken);
 
-      const mockGame: Game = {
-        id: mockGameId,
-        title: generateTestGameTitle(),
-        theme: "Test Theme",
-        status: GameStatus.ACTIVE,
-        creatorId: mockUserId,
-        createdAt: new Date(),
-        updatedAt: null,
-        expiresAt: new Date(Date.now() + 86400000),
-        isPublic: true,
-        isPhotoSharingEnabled: true,
-        requiredBingoLines: 1,
-        confidenceThreshold: 0.7,
-        maxSubmissionsPerUser: 10,
-        notes: undefined,
-      };
-
-      vi.mocked(AdminGameService.getGame).mockResolvedValue(mockGame);
       vi.mocked(AdminGameParticipationService.isParticipant).mockResolvedValue(
         false,
       );
 
+      const submissionId = ulid();
+      const analysisResult: AnalysisResult = {
+        matchedCellId: "cell-1",
+        confidence: 0.85,
+        critique_ja: "テスト",
+        critique_en: "Test",
+        acceptanceStatus: AcceptanceStatus.ACCEPTED,
+      };
+
       const submissionData = {
+        submissionId,
         imageUrl: "https://example.com/test-image.jpg",
+        analysisResult,
       };
 
       const request = createApiRequest(
@@ -279,9 +387,15 @@ describe("/api/game/[gameId]/submission", () => {
         { authorization: "Bearer valid-token" },
       );
 
+      interface SubmissionResponse {
+        newlyCompletedLines: number;
+        totalCompletedLines: number;
+        requiredBingoLines: number;
+      }
+
       const response = (await POST(request, {
         params: Promise.resolve({ gameId: mockGameId }),
-      })) as NextResponse<ApiResponse<Submission>>;
+      })) as NextResponse<ApiResponse<SubmissionResponse>>;
 
       const responseData = await response.json();
 

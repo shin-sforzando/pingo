@@ -235,7 +235,7 @@ export const gameCreationSchema = z.object({
 export const submissionSchema = baseSchema.extend({
   id: z.ulid(), // ULID
   userId: z.ulid(),
-  imageUrl: z.url(),
+  imageUrl: z.string().url(),
   submittedAt: z.date(),
   analyzedAt: z.date().nullable(),
   critique_ja: z.string(),
@@ -353,7 +353,7 @@ export const imageSubmissionDataSchema = z.object({
  */
 export const imageSubmissionResultSchema = z.object({
   submissionId: z.ulid(),
-  imageUrl: z.url(),
+  imageUrl: z.string().url(),
   appropriate: z.boolean(),
   reason: z.string().optional(),
   confidence: z.number().min(0).max(1).optional(),

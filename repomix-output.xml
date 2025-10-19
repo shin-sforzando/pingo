@@ -277,6 +277,7 @@ src/
       admin.ts
       client.ts
     api-utils.ts
+    cell-utils.test.ts
     cell-utils.ts
     constants.ts
     image-utils.test.ts
@@ -453,9 +454,6 @@ export interface BingoCellProps {
 
   isPartOfCompletedLine?: boolean;
 }
-⋮----
-isInteractive
-? (e) =>
 </file>
 
 <file path="src/components/game/DndContextWrapper.tsx">
@@ -1767,28 +1765,35 @@ import {
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 ⋮----
-className={cn("size-4", className)}
-                {...props}
-              />
-            );
-⋮----
-function CalendarDayButton({
+function CalendarRoot({
   className,
-  day,
-  modifiers,
+  rootRef,
   ...props
-}: React.ComponentProps<typeof DayButton>)
+}: {
+  className?: string;
+  rootRef?: React.Ref<HTMLDivElement>;
+  children?: React.ReactNode;
+})
+⋮----
+function CalendarChevron({
+  className,
+  orientation,
+  ...props
+}: {
+  className?: string;
+  orientation?: "left" | "right" | "up" | "down";
+})
+⋮----
+function CalendarWeekNumber({
+  children,
+  ...props
+}: {
+  children?: React.ReactNode;
+})
 ⋮----
 data-day=
 ⋮----
-className={cn(
-        "flex aspect-square size-auto w-full min-w-(--cell-size) flex-col gap-1 font-normal leading-none data-[range-end=true]:rounded-md data-[range-middle=true]:rounded-none data-[range-start=true]:rounded-md data-[range-end=true]:rounded-r-md data-[range-start=true]:rounded-l-md data-[range-end=true]:bg-primary data-[range-middle=true]:bg-accent data-[range-start=true]:bg-primary data-[selected-single=true]:bg-primary data-[range-end=true]:text-primary-foreground data-[range-middle=true]:text-accent-foreground data-[range-start=true]:text-primary-foreground data-[selected-single=true]:text-primary-foreground group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:border-ring group-data-[focused=true]/day:ring-[3px] group-data-[focused=true]/day:ring-ring/50 dark:hover:text-accent-foreground [&>span]:text-xs [&>span]:opacity-70",
-        defaultClassNames.day,
-        className,
-      )}
-      {...props}
-    />
-  );
+className=
 </file>
 
 <file path="src/components/ui/Card.stories.tsx">
@@ -1959,6 +1964,12 @@ import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
 </file>
 
+<file path="src/lib/cell-utils.test.ts">
+import { describe, expect, it } from "vitest";
+import type { Cell } from "@/types/schema";
+import { getCellSubject, resolveCellId } from "./cell-utils";
+</file>
+
 <file path="src/lib/cell-utils.ts">
 import type { Cell } from "@/types/schema";
 ⋮----
@@ -1971,10 +1982,6 @@ export function getCellSubject(
   cellId: string | null,
   cells: Cell[],
 ): string | null
-</file>
-
-<file path="src/lib/constants.ts">
-
 </file>
 
 <file path="src/lib/image-utils.test.ts">
@@ -2504,6 +2511,10 @@ const fetchParticipatingGames = async () =>
 // Silently skip games that return 404 or other errors
 </file>
 
+<file path="src/lib/constants.ts">
+
+</file>
+
 <file path="src/test/helpers/api-test-helpers.ts">
 import { NextRequest } from "next/server";
 import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
@@ -2918,7 +2929,7 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import type { Locale } from "@/i18n/config";
-import { GEMINI_MODEL } from "@/lib/constants";
+import { GEMINI_MODEL, GEMINI_THINKING_BUDGET } from "@/lib/constants";
 import { getUserLocale } from "@/services/locale";
 ⋮----
 type CheckSubjectsRequest = z.infer<typeof checkSubjectsSchema>;
@@ -3174,31 +3185,6 @@ EXPOSE 8080
 CMD ["node", "server.js"]
 </file>
 
-<file path="vitest.config.mts">
-import react from "@vitejs/plugin-react";
-import tsconfigPaths from "vite-tsconfig-paths";
-import { coverageConfigDefaults, defineConfig } from "vitest/config";
-⋮----
-envDir: ".", // Load .env files from root directory
-⋮----
-setupFiles: ["./vitest.setup.ts"], // Add setup file
-testTimeout: 10000, // Increase timeout for Firebase operations
-⋮----
-setupFiles: ["./vitest.browser.setup.ts"], // Add browser setup file
-⋮----
-"**/*.stories.{ts,tsx}", // Exclude Storybook stories
-"**/stories/example/*.tsx", // Exclude example stories
-"next.config.ts", // Exclude Next.js config
-"playwright.config.ts", // Exclude Playwright config
-"postcss.config.mjs", // Exclude PostCSS config
-"scripts/**/*.ts", // Exclude scripts
-"src/app/debug/**/*", // Exclude debug pages
-"src/components/magicui/*.tsx", // Exclude Magic UI components
-"src/components/ui/*.tsx", // Exclude shadcn/ui components
-"src/i18n/*.ts", // Exclude i18n config
-"storybook-static/**", // Exclude Storybook static files
-</file>
-
 <file path="src/app/api/auth/me/route.test.ts">
 import bcrypt from "bcrypt";
 import type { NextResponse } from "next/server";
@@ -3344,9 +3330,12 @@ import {
 } from "vitest";
 import { adminAuth } from "@/lib/firebase/admin";
 import {
+  AdminGameBoardService,
   AdminGameParticipationService,
   AdminGameService,
+  AdminPlayerBoardService,
   AdminSubmissionService,
+  AdminTransactionService,
 } from "@/lib/firebase/admin-collections";
 import {
   cleanupTestUsers,
@@ -3357,9 +3346,15 @@ import {
   generateTestGameTitle,
 } from "@/test/helpers/game-test-helpers";
 import type { ApiResponse } from "@/types/common";
-import { GameStatus, ProcessingStatus } from "@/types/common";
-import type { Game, Submission } from "@/types/schema";
+import { AcceptanceStatus, GameStatus, ProcessingStatus } from "@/types/common";
+import type { AnalysisResult, Game, Submission } from "@/types/schema";
 import { GET, POST } from "./route";
+⋮----
+interface SubmissionResponse {
+        newlyCompletedLines: number;
+        totalCompletedLines: number;
+        requiredBingoLines: number;
+      }
 </file>
 
 <file path="src/app/api/game/[gameId]/route.test.ts">
@@ -3396,7 +3391,7 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import type { Locale } from "@/i18n/config";
-import { GEMINI_MODEL } from "@/lib/constants";
+import { GEMINI_MODEL, GEMINI_THINKING_BUDGET } from "@/lib/constants";
 import { getUserLocale } from "@/services/locale";
 ⋮----
 type GenerateSubjectsRequest = z.infer<typeof generateSubjectsSchema>;
@@ -3404,6 +3399,14 @@ type GenerateSubjectsRequest = z.infer<typeof generateSubjectsSchema>;
 const getPromptTemplate = (params: GenerateSubjectsRequest) =>
 ⋮----
 export async function POST(request: NextRequest)
+⋮----
+// Remove empty strings
+⋮----
+// Remove duplicates (case-insensitive)
+⋮----
+// Warn if we have fewer candidates than requested
+⋮----
+// This should be rare with structured output, but keep as fallback
 </file>
 
 <file path="src/app/debug/image-upload/page.tsx">
@@ -3512,6 +3515,8 @@ export async function submitImage(
   submissionData: ImageSubmissionData,
   authToken: string,
 ): Promise<ImageSubmissionResult>
+⋮----
+// Step 4: Analyze image for bingo matching
 </file>
 
 <file path="src/types/game.ts">
@@ -3676,6 +3681,34 @@ export function eventFromFirestore(doc: EventDocument): Event
 export function eventToFirestore(event: Event): EventDocument
 </file>
 
+<file path="vitest.config.mts">
+import react from "@vitejs/plugin-react";
+import tsconfigPaths from "vite-tsconfig-paths";
+import { coverageConfigDefaults, defineConfig } from "vitest/config";
+⋮----
+envDir: ".", // Load .env files from root directory
+⋮----
+// Limit concurrency to avoid Gemini API rate limits
+maxForks: 3, // Run at most 3 test files in parallel
+⋮----
+setupFiles: ["./vitest.setup.ts"], // Add setup file
+testTimeout: 30000, // Increase timeout for Gemini API operations
+⋮----
+setupFiles: ["./vitest.browser.setup.ts"], // Add browser setup file
+⋮----
+"**/*.stories.{ts,tsx}", // Exclude Storybook stories
+"**/stories/example/*.tsx", // Exclude example stories
+"next.config.ts", // Exclude Next.js config
+"playwright.config.ts", // Exclude Playwright config
+"postcss.config.mjs", // Exclude PostCSS config
+"scripts/**/*.ts", // Exclude scripts
+"src/app/debug/**/*", // Exclude debug pages
+"src/components/magicui/*.tsx", // Exclude Magic UI components
+"src/components/ui/*.tsx", // Exclude shadcn/ui components
+"src/i18n/*.ts", // Exclude i18n config
+"storybook-static/**", // Exclude Storybook static files
+</file>
+
 <file path="src/app/api/auth/login/route.ts">
 import bcrypt from "bcrypt";
 import { type NextRequest, NextResponse } from "next/server";
@@ -3788,6 +3821,19 @@ export async function POST(
 ): Promise<NextResponse<ApiResponse<
 ⋮----
 // Map specific transaction errors to appropriate response codes
+</file>
+
+<file path="src/app/api/image/check/route.test.ts">
+import type { DecodedIdToken } from "firebase-admin/auth";
+import type { NextRequest } from "next/server";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { adminAuth } from "@/lib/firebase/admin";
+import { POST } from "./route";
+⋮----
+const createMockRequest = (
+    body: unknown,
+    authHeader?: string,
+): NextRequest =>
 </file>
 
 <file path="src/app/game/[gameId]/hooks/useGameData.ts">
@@ -3981,63 +4027,6 @@ export async function PUT(
 ): Promise<NextResponse<ApiResponse<PlayerBoard>>>
 </file>
 
-<file path="src/app/api/game/[gameId]/submission/analyze/route.ts">
-import { GoogleGenAI, Type } from "@google/genai";
-import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
-import { z } from "zod";
-import { resolveCellId } from "@/lib/cell-utils";
-import { GEMINI_MODEL } from "@/lib/constants";
-import { adminAuth } from "@/lib/firebase/admin";
-import {
-  AdminGameBoardService,
-  AdminGameParticipationService,
-  AdminGameService,
-  AdminPlayerBoardService,
-  AdminSubmissionService,
-} from "@/lib/firebase/admin-collections";
-import type { ApiResponse } from "@/types/common";
-import { AcceptanceStatus, ProcessingStatus } from "@/types/common";
-import type { AnalysisResult, Cell } from "@/types/schema";
-import { analysisResultSchema } from "@/types/schema";
-⋮----
-async function authenticateUser(
-  request: NextRequest,
-): Promise<string | NextResponse<ApiResponse<never>>>
-⋮----
-async function verifyGameParticipant(
-  gameId: string,
-  userId: string,
-): Promise<NextResponse<ApiResponse<never>> | null>
-⋮----
-async function getAvailableCells(
-  gameId: string,
-  userId: string,
-): Promise<Cell[]>
-⋮----
-function getAnalysisPrompt(availableCells: Cell[], gameTheme: string): string
-⋮----
-async function fetchImageAsBase64(imageUrl: string): Promise<string>
-⋮----
-async function updateCellState(
-  gameId: string,
-  userId: string,
-  cellId: string,
-  submissionId: string,
-): Promise<void>
-⋮----
-async function updateSubmissionAnalysis(
-  gameId: string,
-  submissionId: string,
-  analysis: AnalysisResult,
-): Promise<void>
-⋮----
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ gameId: string }> },
-): Promise<NextResponse<ApiResponse<AnalysisResult>>>
-</file>
-
 <file path="src/app/api/game/[gameId]/route.ts">
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
@@ -4062,28 +4051,6 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ gameId: string }> },
 ): Promise<NextResponse<ApiResponse<Game>>>
-</file>
-
-<file path="src/app/api/image/check/route.test.ts">
-import { faker } from "@faker-js/faker";
-import type { DecodedIdToken } from "firebase-admin/auth";
-import type { NextRequest } from "next/server";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { adminAuth } from "@/lib/firebase/admin";
-import {
-  AdminGameBoardService,
-  AdminGameService,
-  AdminPlayerBoardService,
-  AdminSubmissionService,
-  AdminTransactionService,
-} from "@/lib/firebase/admin-collections";
-import { GameStatus } from "@/types/common";
-import { POST } from "./route";
-⋮----
-const createMockRequest = (
-    body: unknown,
-    authHeader?: string,
-): NextRequest =>
 </file>
 
 <file path="src/app/game/[gameId]/share/page.tsx">
@@ -4208,6 +4175,49 @@ export interface ParticipantsListProps {
 }
 ⋮----
 const getRoleBadge = (role?: Role) =>
+</file>
+
+<file path="src/app/api/game/[gameId]/submission/analyze/route.ts">
+import { GoogleGenAI, Type } from "@google/genai";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import { z } from "zod";
+import { resolveCellId } from "@/lib/cell-utils";
+import { GEMINI_MODEL, GEMINI_THINKING_BUDGET } from "@/lib/constants";
+import { adminAuth } from "@/lib/firebase/admin";
+import {
+  AdminGameBoardService,
+  AdminGameParticipationService,
+  AdminGameService,
+  AdminPlayerBoardService,
+} from "@/lib/firebase/admin-collections";
+import type { ApiResponse } from "@/types/common";
+import { AcceptanceStatus } from "@/types/common";
+import type { AnalysisResult, Cell } from "@/types/schema";
+import { analysisResultSchema } from "@/types/schema";
+⋮----
+async function authenticateUser(
+  request: NextRequest,
+): Promise<string | NextResponse<ApiResponse<never>>>
+⋮----
+async function verifyGameParticipant(
+  gameId: string,
+  userId: string,
+): Promise<NextResponse<ApiResponse<never>> | null>
+⋮----
+async function getAvailableCells(
+  gameId: string,
+  userId: string,
+): Promise<Cell[]>
+⋮----
+function getAnalysisPrompt(availableCells: Cell[], gameTheme: string): string
+⋮----
+async function fetchImageAsBase64(imageUrl: string): Promise<string>
+⋮----
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ gameId: string }> },
+): Promise<NextResponse<ApiResponse<AnalysisResult>>>
 </file>
 
 <file path="src/components/game/SubmissionResult.tsx">
@@ -4423,23 +4433,41 @@ Pingoは、AIによる画像判定を活用したビンゴゲームです。
 <file path="src/app/api/game/[gameId]/submission/route.ts">
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { ulid } from "ulid";
+import { z } from "zod";
 import { adminAuth } from "@/lib/firebase/admin";
 import {
+  AdminGameBoardService,
   AdminGameParticipationService,
   AdminGameService,
+  AdminPlayerBoardService,
   AdminSubmissionService,
+  AdminTransactionService,
 } from "@/lib/firebase/admin-collections";
 import type { ApiResponse } from "@/types/common";
-import { ProcessingStatus } from "@/types/common";
-import { type Submission, submissionSchema } from "@/types/schema";
+import { AcceptanceStatus, LineType, ProcessingStatus } from "@/types/common";
+import type {
+  Cell,
+  CompletedLine,
+  PlayerBoard,
+  Submission,
+} from "@/types/schema";
+import { analysisResultSchema } from "@/types/schema";
+⋮----
+interface SubmissionResponse {
+  newlyCompletedLines: number;
+  totalCompletedLines: number;
+  requiredBingoLines: number;
+}
+⋮----
+function detectCompletedLines(
+  gameBoard: { cells: Cell[] },
+  playerBoard: PlayerBoard,
+): CompletedLine[]
 ⋮----
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ gameId: string }> },
-): Promise<NextResponse<ApiResponse<Submission>>>
-⋮----
-// Save submission to Firestore using Admin service
+): Promise<NextResponse<ApiResponse<SubmissionResponse>>>
 ⋮----
 export async function GET(
   request: NextRequest,
@@ -4536,42 +4564,21 @@ const handleLogout = async (): Promise<void> =>
 import { GoogleGenAI, Type } from "@google/genai";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { resolveCellId } from "@/lib/cell-utils";
-import { GEMINI_MODEL } from "@/lib/constants";
+import { GEMINI_MODEL, GEMINI_THINKING_BUDGET } from "@/lib/constants";
 import { adminAuth } from "@/lib/firebase/admin";
-import {
-  AdminGameBoardService,
-  AdminGameService,
-  AdminPlayerBoardService,
-  AdminTransactionService,
-} from "@/lib/firebase/admin-collections";
-import { AcceptanceStatus, LineType, ProcessingStatus } from "@/types/common";
-import type {
-  Cell,
-  CompletedLine,
-  PlayerBoard,
-  Submission,
-} from "@/types/schema";
+import type { ApiResponse } from "@/types/common";
 ⋮----
-interface ImageCheckResponse {
-  appropriate: boolean;
-  confidence: number | null;
-  matchedCellId: string | null;
-  acceptanceStatus: AcceptanceStatus;
-  critique_ja: string;
-  critique_en: string;
-  newlyCompletedLines: number;
-  totalCompletedLines: number;
-  requiredBingoLines: number;
-  reason?: string;
-}
+async function authenticateUser(
+  request: NextRequest,
+): Promise<string | NextResponse<ApiResponse<never>>>
 ⋮----
-function detectCompletedLines(
-  gameBoard: { cells: Cell[] },
-  playerBoard: PlayerBoard,
-): CompletedLine[]
-⋮----
-export async function POST(request: NextRequest)
+export async function POST(
+  request: NextRequest,
+): Promise<
+  NextResponse<ApiResponse<{ appropriate: boolean; reason?: string }>>
+> {
+  try {
+    console.log("ℹ️ XXX: ~ image/check/route.ts ~ POST called");
 </file>
 
 <file path="src/types/schema.ts">
