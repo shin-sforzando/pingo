@@ -196,7 +196,8 @@ export default function GamePage() {
             <CardContent>
               <SubmissionResult
                 confidence={latestSubmission.confidence || 0}
-                critique={latestSubmission.critique || ""}
+                critique_ja={latestSubmission.critique_ja || ""}
+                critique_en={latestSubmission.critique_en || ""}
                 acceptanceStatus={
                   latestSubmission.acceptanceStatus || AcceptanceStatus.NO_MATCH
                 }

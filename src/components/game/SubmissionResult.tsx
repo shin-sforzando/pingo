@@ -1,7 +1,7 @@
 "use client";
 
 import { AlertTriangle, CheckCircle, XCircle } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -13,9 +13,13 @@ export interface SubmissionResultProps {
    */
   confidence: number;
   /**
-   * AI analysis critique
+   * AI analysis critique in Japanese
    */
-  critique: string;
+  critique_ja: string;
+  /**
+   * AI analysis critique in English
+   */
+  critique_en: string;
   /**
    * Final acceptance status
    */
@@ -48,7 +52,8 @@ export interface SubmissionResultProps {
  */
 export function SubmissionResult({
   confidence,
-  critique,
+  critique_ja,
+  critique_en,
   acceptanceStatus,
   // matchedCellId,
   matchedCellSubject,
@@ -57,6 +62,10 @@ export function SubmissionResult({
   className,
 }: SubmissionResultProps) {
   const t = useTranslations();
+  const locale = useLocale();
+
+  // Select critique based on current locale
+  const critique = locale === "ja" ? critique_ja : critique_en;
 
   // Determine status icon and color based on acceptance status
   const getStatusConfig = () => {
@@ -139,6 +148,16 @@ export function SubmissionResult({
           </div>
         )}
 
+        {/* Matched Cell Info (if accepted) */}
+        {acceptanceStatus === "accepted" && matchedCellSubject && (
+          <div className="rounded-md bg-green-100 p-3">
+            <p className="font-medium text-green-800 text-sm">
+              {t("Game.SubmissionResult.matchedCell")}
+            </p>
+            <p className="text-green-700 text-sm">{matchedCellSubject}</p>
+          </div>
+        )}
+
         {/* Status Badge */}
         <div className="flex items-center gap-2">
           <Badge
@@ -154,16 +173,6 @@ export function SubmissionResult({
             })}
           </span>
         </div>
-
-        {/* Matched Cell Info (if accepted) */}
-        {acceptanceStatus === "accepted" && matchedCellSubject && (
-          <div className="rounded-md bg-green-100 p-3">
-            <p className="font-medium text-green-800 text-sm">
-              {t("Game.SubmissionResult.matchedCell")}
-            </p>
-            <p className="text-green-700 text-sm">{matchedCellSubject}</p>
-          </div>
-        )}
 
         {/* AI Critique */}
         <div>

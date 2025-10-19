@@ -2,23 +2,24 @@ import { GoogleGenAI, Type } from "@google/genai";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { resolveCellId } from "@/lib/cell-utils";
+import { GEMINI_MODEL, GEMINI_THINKING_BUDGET } from "@/lib/constants";
 import { adminAuth } from "@/lib/firebase/admin";
 import {
   AdminGameBoardService,
   AdminGameParticipationService,
   AdminGameService,
   AdminPlayerBoardService,
-  AdminSubmissionService,
 } from "@/lib/firebase/admin-collections";
 import type { ApiResponse } from "@/types/common";
-import { AcceptanceStatus, ProcessingStatus } from "@/types/common";
+import { AcceptanceStatus } from "@/types/common";
 import type { AnalysisResult, Cell } from "@/types/schema";
 import { analysisResultSchema } from "@/types/schema";
 
 // Request body schema
 const analyzeRequestSchema = z.object({
   submissionId: z.ulid(),
-  imageUrl: z.url(),
+  imageUrl: z.string().url(),
 });
 
 // Gemini response schema for structured output
@@ -28,14 +29,21 @@ const responseSchema = {
     matchedCellId: {
       type: Type.STRING,
       description: "ID of the matched cell, null if no match",
+      nullable: true,
     },
     confidence: {
       type: Type.NUMBER,
-      description: "Confidence score between 0 and 1",
+      description: "Confidence score between 0.0 and 1.0",
     },
-    critique: {
+    critique_ja: {
       type: Type.STRING,
-      description: "Detailed analysis of the image and matching result",
+      description:
+        "Comprehensive analysis in Japanese (minimum 3-4 sentences): specific objects/scenes, visual characteristics, relation to bingo cells, thorough match/no-match explanation",
+    },
+    critique_en: {
+      type: Type.STRING,
+      description:
+        "Comprehensive analysis in English (minimum 3-4 sentences): specific objects/scenes, visual characteristics, relation to bingo cells, thorough match/no-match explanation",
     },
     acceptanceStatus: {
       type: Type.STRING,
@@ -176,7 +184,8 @@ Analysis Criteria:
 Provide:
 - matchedCellId: The ID of the best matching cell (null if no good match)
 - confidence: Confidence score from 0.0 to 1.0 (be conservative but fair)
-- critique: Detailed explanation of what you see and why it matches/doesn't match
+- critique_ja: Comprehensive explanation in Japanese (minimum 3-4 sentences). Describe in detail: what specific objects/scenes you see in the image, their visual characteristics and context, how they relate to each available bingo cell subject, and a thorough explanation of why they match or don't match. (日本語で最低3-4文の包括的な説明。画像内の具体的な物体・シーン、その視覚的特徴と文脈、各利用可能なビンゴセルの被写体との関連性、そしてマッチする/しない理由を詳しく説明してください。)
+- critique_en: Comprehensive explanation in English (minimum 3-4 sentences). Describe in detail: what specific objects/scenes you see in the image, their visual characteristics and context, how they relate to each available bingo cell subject, and a thorough explanation of why they match or don't match.
 - acceptanceStatus: "accepted" (good match), "no_match" (no suitable match), or "inappropriate_content" (inappropriate image)
 
 Be thorough in your analysis but conservative in matching. Only match if you're reasonably confident the image shows the requested subject.`;
@@ -197,82 +206,11 @@ async function fetchImageAsBase64(imageUrl: string): Promise<string> {
 }
 
 /**
- * Update cell state to OPEN
- */
-async function updateCellState(
-  gameId: string,
-  userId: string,
-  cellId: string,
-  submissionId: string,
-): Promise<void> {
-  const playerBoard = await AdminPlayerBoardService.getPlayerBoard(
-    gameId,
-    userId,
-  );
-
-  if (!playerBoard) {
-    throw new Error("Player board not found");
-  }
-
-  // Update cell state
-  const updatedCellStates = {
-    ...playerBoard.cellStates,
-    [cellId]: {
-      isOpen: true,
-      openedAt: new Date(),
-      openedBySubmissionId: submissionId,
-    },
-  };
-
-  const updatedPlayerBoard = {
-    ...playerBoard,
-    cellStates: updatedCellStates,
-  };
-
-  await AdminPlayerBoardService.updatePlayerBoard(
-    gameId,
-    userId,
-    updatedPlayerBoard,
-  );
-}
-
-/**
- * Update submission with analysis results
- */
-async function updateSubmissionAnalysis(
-  gameId: string,
-  submissionId: string,
-  analysis: AnalysisResult,
-): Promise<void> {
-  const submission = await AdminSubmissionService.getSubmission(
-    gameId,
-    submissionId,
-  );
-
-  if (!submission) {
-    throw new Error("Submission not found");
-  }
-
-  const updatedSubmission = {
-    ...submission,
-    analyzedAt: new Date(),
-    critique: analysis.critique,
-    matchedCellId: analysis.matchedCellId,
-    confidence: analysis.confidence,
-    processingStatus: ProcessingStatus.ANALYZED,
-    acceptanceStatus: analysis.acceptanceStatus,
-  };
-
-  await AdminSubmissionService.updateSubmission(
-    gameId,
-    submissionId,
-    updatedSubmission,
-  );
-}
-
-/**
  * POST /api/game/[gameId]/submission/analyze
  * Analyze uploaded image and determine if it matches any available cells
+ *
+ * Single Responsibility: Image analysis and bingo matching only
+ * Note: Does NOT update game state - state updates should be done via /api/game/[gameId]/submission
  */
 export async function POST(
   request: NextRequest,
@@ -333,11 +271,10 @@ export async function POST(
       const analysis: AnalysisResult = {
         matchedCellId: null,
         confidence: 0,
-        critique: "All cells are already opened. No analysis needed.",
+        critique_ja: "すべてのセルが開かれています。分析は不要です。",
+        critique_en: "All cells are already opened. No analysis needed.",
         acceptanceStatus: AcceptanceStatus.NO_MATCH,
       };
-
-      await updateSubmissionAnalysis(gameId, submissionId, analysis);
 
       return NextResponse.json({
         success: true,
@@ -356,7 +293,7 @@ export async function POST(
 
     // Analyze image with Gemini using structured output
     const result = await model({
-      model: "gemini-2.0-flash-001",
+      model: GEMINI_MODEL,
       contents: [
         prompt,
         {
@@ -369,6 +306,9 @@ export async function POST(
       config: {
         responseMimeType: "application/json",
         responseSchema,
+        thinkingConfig: {
+          thinkingBudget: GEMINI_THINKING_BUDGET,
+        },
       },
     });
 
@@ -382,53 +322,24 @@ export async function POST(
     const analysisData = JSON.parse(text);
 
     // Validate response with Zod
-    const analysis = analysisResultSchema.parse(analysisData);
+    const parsedAnalysis = analysisResultSchema.parse(analysisData);
+
+    // Resolve matchedCellId (fallback if AI returned subject name instead of cell ID)
+    const resolvedCellId = resolveCellId(
+      parsedAnalysis.matchedCellId,
+      availableCells,
+    );
+
+    const analysis = {
+      ...parsedAnalysis,
+      matchedCellId: resolvedCellId,
+    };
 
     console.log("ℹ️ XXX: ~ analyze/route.ts ~ Analysis completed", {
       analysis,
       confidenceThreshold: game.confidenceThreshold,
       meetsThreshold: game.confidenceThreshold <= analysis.confidence,
     });
-
-    // Check confidence threshold and update cell state if accepted
-    if (
-      analysis.matchedCellId &&
-      game.confidenceThreshold <= analysis.confidence &&
-      analysis.acceptanceStatus === AcceptanceStatus.ACCEPTED
-    ) {
-      console.log("ℹ️ XXX: ~ analyze/route.ts ~ Updating cell state", {
-        cellId: analysis.matchedCellId,
-        confidence: analysis.confidence,
-        threshold: game.confidenceThreshold,
-      });
-      await updateCellState(
-        gameId,
-        userId,
-        analysis.matchedCellId,
-        submissionId,
-      );
-      console.log(
-        "ℹ️ XXX: ~ analyze/route.ts ~ Cell state updated successfully",
-      );
-    } else {
-      console.log("ℹ️ XXX: ~ analyze/route.ts ~ Cell state not updated", {
-        reason: !analysis.matchedCellId
-          ? "no match"
-          : analysis.confidence < game.confidenceThreshold
-            ? "low confidence"
-            : "not accepted",
-        matchedCellId: analysis.matchedCellId,
-        confidence: analysis.confidence,
-        threshold: game.confidenceThreshold,
-        acceptanceStatus: analysis.acceptanceStatus,
-      });
-    }
-
-    // Update submission with analysis results
-    await updateSubmissionAnalysis(gameId, submissionId, analysis);
-    console.log(
-      "ℹ️ XXX: ~ analyze/route.ts ~ Submission updated with analysis results",
-    );
 
     return NextResponse.json({
       success: true,

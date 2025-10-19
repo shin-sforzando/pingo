@@ -7,6 +7,12 @@ export default defineConfig({
   envDir: ".", // Load .env files from root directory
   test: {
     pool: "forks",
+    poolOptions: {
+      forks: {
+        // Limit concurrency to avoid Gemini API rate limits
+        maxForks: 3, // Run at most 3 test files in parallel
+      },
+    },
     projects: [
       {
         extends: true,
@@ -16,7 +22,7 @@ export default defineConfig({
           include: ["src/**/*.{test,spec}.{js,ts,jsx,tsx}"],
           exclude: ["src/**/*.browser.{test,spec}.{js,ts,jsx,tsx}"],
           setupFiles: ["./vitest.setup.ts"], // Add setup file
-          testTimeout: 10000, // Increase timeout for Firebase operations
+          testTimeout: 30000, // Increase timeout for Gemini API operations
         },
       },
       {
@@ -46,6 +52,7 @@ export default defineConfig({
         "playwright.config.ts", // Exclude Playwright config
         "postcss.config.mjs", // Exclude PostCSS config
         "scripts/**/*.ts", // Exclude scripts
+        "src/app/debug/**/*", // Exclude debug pages
         "src/components/magicui/*.tsx", // Exclude Magic UI components
         "src/components/ui/*.tsx", // Exclude shadcn/ui components
         "src/i18n/*.ts", // Exclude i18n config

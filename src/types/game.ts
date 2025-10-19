@@ -113,7 +113,8 @@ export interface SubmissionDocument {
   imageUrl: string;
   submittedAt: TimestampInterface;
   analyzedAt: TimestampInterface | null;
-  critique: string | null;
+  critique_ja: string;
+  critique_en: string;
   matchedCellId: string | null;
   confidence: number | null;
   processingStatus: ProcessingStatus;
@@ -367,7 +368,8 @@ export function submissionFromFirestore(doc: SubmissionDocument): Submission {
     imageUrl: doc.imageUrl,
     submittedAt: timestampToDate(doc.submittedAt) as Date,
     analyzedAt: timestampToDate(doc.analyzedAt),
-    critique: doc.critique,
+    critique_ja: doc.critique_ja,
+    critique_en: doc.critique_en,
     matchedCellId: doc.matchedCellId,
     confidence: doc.confidence,
     processingStatus: doc.processingStatus,
@@ -393,7 +395,8 @@ export function submissionToFirestore(
     analyzedAt: submission.analyzedAt
       ? (dateToTimestamp(submission.analyzedAt) as TimestampInterface)
       : null,
-    critique: submission.critique,
+    critique_ja: submission.critique_ja,
+    critique_en: submission.critique_en,
     matchedCellId: submission.matchedCellId,
     confidence: submission.confidence,
     processingStatus: submission.processingStatus,

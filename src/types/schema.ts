@@ -235,10 +235,11 @@ export const gameCreationSchema = z.object({
 export const submissionSchema = baseSchema.extend({
   id: z.ulid(), // ULID
   userId: z.ulid(),
-  imageUrl: z.url(),
+  imageUrl: z.string().url(),
   submittedAt: z.date(),
   analyzedAt: z.date().nullable(),
-  critique: z.string().nullable(),
+  critique_ja: z.string(),
+  critique_en: z.string(),
   matchedCellId: z.string().nullable(),
   confidence: z.number().min(0).max(1).nullable(),
   processingStatus: z.enum(ProcessingStatus),
@@ -352,13 +353,14 @@ export const imageSubmissionDataSchema = z.object({
  */
 export const imageSubmissionResultSchema = z.object({
   submissionId: z.ulid(),
-  imageUrl: z.url(),
+  imageUrl: z.string().url(),
   appropriate: z.boolean(),
   reason: z.string().optional(),
   confidence: z.number().min(0).max(1).optional(),
   matchedCellId: z.string().nullable().optional(),
   acceptanceStatus: z.enum(AcceptanceStatus).optional(),
-  critique: z.string().optional(),
+  critique_ja: z.string().optional(),
+  critique_en: z.string().optional(),
   newlyCompletedLines: z.int().min(0).default(0),
   totalCompletedLines: z.int().min(0).default(0),
   requiredBingoLines: z.int().min(1).max(5).default(1),
@@ -370,7 +372,8 @@ export const imageSubmissionResultSchema = z.object({
 export const analysisResultSchema = z.object({
   matchedCellId: z.string().nullable(),
   confidence: z.number().min(0).max(1),
-  critique: z.string(),
+  critique_ja: z.string(),
+  critique_en: z.string(),
   acceptanceStatus: z.enum(AcceptanceStatus),
 });
 

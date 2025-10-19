@@ -54,14 +54,133 @@ pingo/
 ### データフロー
 
 ```plain
-クライアント → APIルート → サービス → Firebase/Firestore
-         ↖ リアルタイム ← Firestoreリスナー ← クライアント
+# 画像投稿フロー（3段階処理 - Single Responsibility Principle）
+クライアント
+  ↓ 1. Upload to GCS
+  POST /api/image/getUploadUrl
+  ↓
+  PUT to signed URL (GCS)
+  ↓
+  ↓ 2. Appropriateness Check
+  POST /api/image/check { imageUrl }
+  ↓ { appropriate: boolean, reason?: string }
+  ↓
+  ↓ 3. Bingo Matching Analysis
+  POST /api/game/[gameId]/submission/analyze { submissionId, imageUrl }
+  ↓ { matchedCellId, confidence, critique_ja, critique_en, acceptanceStatus }
+  ↓
+  ↓ 4. State Update
+  POST /api/game/[gameId]/submission { submissionId, imageUrl, analysisResult }
+  ↓ { newlyCompletedLines, totalCompletedLines, requiredBingoLines }
+  ↓
+クライアント（結果表示）
+
+# リアルタイム更新
+クライアント ← Firestoreリスナー ← ゲーム状態変更
 ```
+
+### 画像処理APIアーキテクチャ（Single Responsibility Principle）
+
+#### 1. `/api/image/check` - 適切性チェック専用
+
+**責任**: 画像が全年齢対象として適切かを検証
+
+```typescript
+// Request
+POST /api/image/check
+{
+  imageUrl: string
+}
+
+// Response
+{
+  success: true,
+  data: {
+    appropriate: boolean,
+    reason?: string  // AI生成の説明（適切/不適切の理由）
+  }
+}
+```
+
+**処理フロー**:
+
+1. 認証確認
+2. 画像URLの検証
+3. Gemini APIで適切性チェック
+4. 結果を返す（状態更新なし）
+
+#### 2. `/api/game/[gameId]/submission/analyze` - 分析専用
+
+**責任**: 画像とビンゴセルのマッチング分析
+
+```typescript
+// Request
+POST /api/game/[gameId]/submission/analyze
+{
+  submissionId: string,
+  imageUrl: string
+}
+
+// Response
+{
+  success: true,
+  data: {
+    matchedCellId: string | null,
+    confidence: number,
+    critique_ja: string,  // 日本語の詳細分析
+    critique_en: string,  // 英語の詳細分析
+    acceptanceStatus: "accepted" | "no_match" | "inappropriate_content"
+  }
+}
+```
+
+**処理フロー**:
+
+1. 認証＋参加者確認
+2. 利用可能なセル取得（未開封のみ）
+3. Gemini APIでマッチング分析（多言語critique生成）
+4. 分析結果を返す（状態更新なし）
+
+#### 3. `/api/game/[gameId]/submission` - 状態管理専用
+
+**責任**: Submission作成＋PlayerBoard更新＋ビンゴライン検出
+
+```typescript
+// Request
+POST /api/game/[gameId]/submission
+{
+  submissionId: string,
+  imageUrl: string,
+  analysisResult: AnalysisResult
+}
+
+// Response
+{
+  success: true,
+  data: {
+    newlyCompletedLines: number,
+    totalCompletedLines: number,
+    requiredBingoLines: number
+  }
+}
+```
+
+**処理フロー**:
+
+1. 認証＋参加者確認
+2. Submission レコード作成
+3. 受理された場合:
+   - PlayerBoard の cellStates 更新
+   - ビンゴライン検出
+   - completedLines 更新
+   - トランザクションで原子的に保存
+4. ライン完成情報を返す
 
 ### 型システム（src/types/）
 
 - `common.ts`: 共有enumsとユーティリティ型
 - `schema.ts`: バリデーション用Zodスキーマ
+  - `analysisResultSchema`: 分析結果のスキーマ（多言語critique含む）
 - `game.ts`, `user.ts`: ドメイン固有の型
 - `firestore.ts`: データベースドキュメントインターフェース
 - `index.ts`: 集約エクスポート
@@ -80,7 +199,7 @@ pingo/
 - `ImageUpload.tsx`: HEIC対応の写真アップロード
 - `BingoBoard.tsx`: インタラクティブなビンゴグリッド
 - `BingoCell.tsx`: オープン/クローズ状態の個別セル
-- `SubmissionResult.tsx`: AI解析結果の表示
+- `SubmissionResult.tsx`: AI解析結果の表示（多言語critique対応）
 - `GameInfo.tsx`: ゲーム詳細情報カード
 - `InfoCard.tsx`: 汎用情報カード（アイコン付き）
 - `ParticipantsList.tsx`: 参加者一覧表示
@@ -108,27 +227,57 @@ pingo/
 **ゲーム固有フック（src/app/game/[gameId]/hooks/）**:
 
 - `useGameData.ts`: ゲームデータ取得の統一インターフェース（Firestoreリスナー統合）
-- `useImageSubmission.ts`: 画像投稿処理
+- `useImageSubmission.ts`: 画像投稿処理（3段階API呼び出し）
 
 ### サービス層（src/services/）
 
+#### `image-upload.ts` - 画像投稿サービス（3段階処理）
+
+```typescript
+export async function submitImage(
+  processedImage: ProcessedImage,
+  submissionData: ImageSubmissionData,
+  authToken: string,
+): Promise<ImageSubmissionResult>
+```
+
+**処理フロー**:
+
+1. 署名付きURLを取得（`POST /api/image/getUploadUrl`）
+2. GCSに直接アップロード（`PUT` to signed URL）
+3. 適切性チェック（`POST /api/image/check`）
+   - 不適切な場合は早期リターン
+4. ビンゴマッチング分析（`POST /api/game/[gameId]/submission/analyze`）
+5. 状態更新（`POST /api/game/[gameId]/submission`）
+
+#### その他サービス
+
 - `game.ts`: ゲームビジネスロジック（Firestore操作、トランザクション処理）
-- `image-upload.ts`: 画像アップロードロジック（GCS署名付きURL、メタデータ管理）
 - `locale.ts`: ロケール管理とバリデーション
+
+**統合**:
+
 - Firebase Admin SDKによるデータベースアクセス
 - Google Cloud Storageとの統合
-- Google Gemini APIとのAI統合
+- Google Gemini APIとのAI統合（多言語critique生成）
 - 型安全なデータ変換ユーティリティ
 
 ### ユーティリティライブラリ（src/lib/）
 
 - `firebase/admin.ts`: Firebase Admin SDK初期化と設定
 - `firebase/admin-collections.ts`: Firestoreコレクション型安全アクセス
+  - `AdminTransactionService`: トランザクション処理
+    - `createSubmissionAndUpdateBoard()`: Submission作成とPlayerBoard更新をアトミックに実行
 - `firebase/client.ts`: Firebase Client SDK初期化（認証、Firestore）
 - `image-utils.ts`: 画像処理ユーティリティ（HEIC変換、リサイズ、圧縮）
+- `cell-utils.ts`: セルID処理ユーティリティ（LLM出力のフォールバック処理）
+  - `resolveCellId()`: LLMが件名を返した場合にセルIDに変換
+  - `getCellSubject()`: セルIDから件名を取得
 - `api-utils.ts`: APIレスポンスヘルパー、エラーハンドリング
 - `utils.ts`: 汎用ユーティリティ（cn、日付フォーマット、バリデーション）
-- `constants.ts`: アプリケーション定数（URL、制限値）
+- `constants.ts`: アプリケーション定数（URL、制限値、Gemini設定）
+  - `GEMINI_MODEL`: "gemini-2.5-flash"
+  - `GEMINI_THINKING_BUDGET`: 0
 
 ### 実装済みページ
 
@@ -154,7 +303,10 @@ pingo/
 - `users/`: ユーザープロフィールと認証
 - `games/`: ゲームメタデータと設定
 - `games/{id}/playerBoards/`: 個別プレイヤーの進行状況
-- `games/{id}/submissions/`: 写真投稿とAI解析結果
+- `games/{id}/submissions/`: 写真投稿とAI解析結果（多言語critique含む）
+  - `critique_ja`: 日本語の詳細分析
+  - `critique_en`: 英語の詳細分析
+  - `acceptanceStatus`: "accepted" | "no_match" | "inappropriate_content"
 
 ### ID規則
 
@@ -170,6 +322,7 @@ pingo/
 - `tsconfig.json`: TypeScript設定
 - `next.config.ts`: Next.jsビルド設定
 - `vitest.config.mts`: テスト設定
+  - `maxForks: 3`: Gemini APIレート制限対策
 
 ### エントリーポイント
 
@@ -180,12 +333,14 @@ pingo/
 
 ## 開発パターン
 
+- **Single Responsibility Principle**: 各APIエンドポイントは単一の責任のみを持つ
 - **モバイルファーストデザイン**: Tailwindレスポンシブクラス
 - **コンポーネント合成**: 再利用可能なUIビルディングブロック
 - **エラーバウンダリ**: 適切なエラーハンドリング
 - **ローディング状態**: スケルトンコンポーネントとスピナー
 - **アクセシビリティ**: ARIAラベル、キーボードナビゲーション
 - **パフォーマンス**: 画像最適化、コード分割
+- **AI品質保証**: プロンプトエンジニアリング + 内部検証で安定性向上
 
 ## 最新技術仕様
 
@@ -204,6 +359,8 @@ pingo/
 - **E2Eテスト**: Playwright 1.55.0
 - **ブラウザテスト**: @vitest/browser 3.2.4
 - **テストライブラリ**: @testing-library/react 16.3.0
+- **テスト並行度**: maxForks: 3（Gemini APIレート制限対策）
+- **リトライメカニズム**: AI依存テストは `{ retry: 2 }` で安定化
 
 ### 開発ツール
 

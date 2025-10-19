@@ -13,7 +13,8 @@ import { type Submission, submissionSchema } from "@/types/schema";
 // Schema for updating submission - reuse from schema.ts
 const updateSubmissionSchema = submissionSchema
   .pick({
-    critique: true,
+    critique_ja: true,
+    critique_en: true,
     matchedCellId: true,
     confidence: true,
     processingStatus: true,
@@ -278,8 +279,11 @@ export async function PUT(
     const now = new Date();
     const updatedSubmission: Submission = {
       ...currentSubmission,
-      ...(updateData.critique !== undefined && {
-        critique: updateData.critique,
+      ...(updateData.critique_ja !== undefined && {
+        critique_ja: updateData.critique_ja,
+      }),
+      ...(updateData.critique_en !== undefined && {
+        critique_en: updateData.critique_en,
       }),
       ...(updateData.matchedCellId !== undefined && {
         matchedCellId: updateData.matchedCellId,

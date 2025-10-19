@@ -61,7 +61,8 @@ describe("/api/game/[gameId]/submission/[submissionId]", () => {
       imageUrl: "https://example.com/image.jpg",
       submittedAt: new Date(),
       analyzedAt: null,
-      critique: null,
+      critique_ja: "",
+      critique_en: "",
       matchedCellId: null,
       confidence: null,
       processingStatus: ProcessingStatus.UPLOADED,
@@ -434,7 +435,8 @@ describe("/api/game/[gameId]/submission/[submissionId]", () => {
       });
 
       const updateData = {
-        critique: "AI analysis result",
+        critique_ja: "AI分析結果（日本語）",
+        critique_en: "AI analysis result",
         confidence: 0.85,
         processingStatus: ProcessingStatus.ANALYZED,
         acceptanceStatus: AcceptanceStatus.ACCEPTED,
@@ -460,7 +462,8 @@ describe("/api/game/[gameId]/submission/[submissionId]", () => {
       expect(response.status).toBe(200);
       expect(responseData.success).toBe(true);
       expect(responseData.data).toBeDefined();
-      expect(responseData.data?.critique).toBe(updateData.critique);
+      expect(responseData.data?.critique_ja).toBe(updateData.critique_ja);
+      expect(responseData.data?.critique_en).toBe(updateData.critique_en);
       expect(responseData.data?.confidence).toBe(updateData.confidence);
       expect(responseData.data?.processingStatus).toBe(
         updateData.processingStatus,
