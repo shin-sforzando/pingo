@@ -503,7 +503,10 @@ describe("/api/image/check", () => {
       expect(response.status).toBe(200);
       expect(data.appropriate).toBe(true);
       expect(data.acceptanceStatus).toBe("no_match");
-      expect(data.critique).toBe(
+      expect(data.critique_ja).toBe(
+        "すべての利用可能なセルが既に開かれています。これ以上のマッチは不可能です。",
+      );
+      expect(data.critique_en).toBe(
         "All available cells have already been opened. No more matches possible.",
       );
 

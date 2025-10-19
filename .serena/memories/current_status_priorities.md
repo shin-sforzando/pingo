@@ -12,6 +12,7 @@
 - **認証機能**: Firebase Authによるユーザー管理
 - **リアルタイム更新**: ゲーム状態のFirestoreリスナー
 - **ビンゴライン検出**: 行/列/斜めの自動完了検出
+- **多言語critique対応**: AI解析結果の日本語/英語双方向対応（Issue #129）
 
 #### ゲーム参加機能
 
@@ -46,6 +47,9 @@
 - **認証状態管理**: ログアウト時のリダイレクト最適化
   - ゲームページからログアウト時にトップページへ正しくリダイレクト
   - useEffect race conditionの解決
+- **SubmissionResult**: AI解析結果の多言語表示
+  - ロケールに応じてcritique_ja/critique_enを自動切替
+  - matchedCellSubjectの表示対応
 
 #### 型定義とコード品質
 
@@ -53,12 +57,15 @@
 - **翻訳構造の最適化**: 共通フィールドラベルの統合、重複削除、命名規則統一
 - **定数管理の改善**: マジックナンバー排除とDRY原則の徹底
 - **国際化対応**: next-intlによる日本語/英語サポート
+- **LLM出力処理**: フォールバック処理の実装（`cell-utils.ts`）
 
 #### テスト
 
-- **テストカバレッジ**: 281個のテスト（36ファイル）、主要APIエンドポイントのテスト実装済み
+- **テストカバレッジ**: 290個のテスト（37ファイル）、主要APIエンドポイントのテスト実装済み
+  - analyze/route.tsのテスト追加（9テストケース）
+  - LLM出力フォールバックのテスト追加
 - **ブラウザテスト**: Vitest Browserモード（Playwright + webkit）で11ファイル実装済み
-- **合格率**: 100%（281/281）
+- **合格率**: 100%（290/290）
 
 ## 開発コンテキストメモ
 
@@ -125,11 +132,11 @@
 - **画像管理**:
   - `/api/image/getUploadUrl` - GCS署名付きURL取得
   - `/api/image/upload` - 画像アップロード
-  - `/api/image/check` - 画像適切性チェック（AI）
+  - `/api/image/check` - 画像適切性チェック（AI、フォールバック処理含む）
 - **画像投稿**:
   - `/api/game/[gameId]/submission` - 投稿作成
   - `/api/game/[gameId]/submission/[submissionId]` - 投稿詳細
-  - `/api/game/[gameId]/submission/analyze` - AI画像解析
+  - `/api/game/[gameId]/submission/analyze` - AI画像解析（多言語critique、フォールバック処理、包括的テストあり）
 - **被写体管理**:
   - `/api/subjects/generate` - AI被写体生成
   - `/api/subjects/check` - 被写体チェック
@@ -186,10 +193,11 @@ export const GAME_ID_PATTERN = /^[A-Z0-9]{6}$/;
 
 ### テストカバレッジ現況
 
-- **テスト総数**: 281個（36ファイル）
-- **合格率**: 100%（281/281）
+- **テスト総数**: 290個（37ファイル）
+- **合格率**: 100%（290/290）
 - **API routes**: 大部分でテスト実装済み
-- **Components**: レイアウトコンポーネント、GameInfoCard等でテスト済み
+  - `/api/game/[gameId]/submission/analyze`: 9テストケース（認証、認可、多言語critique、フォールバック処理）
+- **Components**: レイアウトコンポーネント、GameInfoCard、SubmissionResult等でテスト済み
 - **Hooks**: useGameJoin、useGameParticipation、useGameData、useParticipatingGamesのテスト完了
 - **Services**: 一部のサービス層でテスト不足
 - **ブラウザテスト**: Vitest Browserモード（Playwright + webkit）で11ファイル実装済み
@@ -212,7 +220,6 @@ export const GAME_ID_PATTERN = /^[A-Z0-9]{6}$/;
 - `src/components/game/ImageUpload.tsx`
 - `src/services/image-upload.ts`
 - `src/app/api/image/upload/route.ts`
-- `src/app/api/game/[gameId]/submission/analyze/route.ts`
 
 ### 2. セキュリティ・本番対応（高優先度）
 

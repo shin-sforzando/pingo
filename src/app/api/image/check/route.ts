@@ -1,6 +1,7 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { resolveCellId } from "@/lib/cell-utils";
 import { adminAuth } from "@/lib/firebase/admin";
 import {
   AdminGameBoardService,
@@ -29,7 +30,8 @@ interface ImageCheckResponse {
   confidence: number | null;
   matchedCellId: string | null;
   acceptanceStatus: AcceptanceStatus;
-  critique: string | null;
+  critique_ja: string;
+  critique_en: string;
   newlyCompletedLines: number;
   totalCompletedLines: number;
   requiredBingoLines: number;
@@ -257,7 +259,8 @@ If the image is appropriate, provide a brief description of what the image shows
         imageUrl,
         submittedAt: now,
         analyzedAt: now,
-        critique: appropriatenessResponse.error,
+        critique_ja: "不適切なコンテンツが検出されました。",
+        critique_en: appropriatenessResponse.error,
         matchedCellId: null,
         confidence: null,
         processingStatus: ProcessingStatus.ANALYZED,
@@ -286,7 +289,8 @@ If the image is appropriate, provide a brief description of what the image shows
         confidence: null,
         matchedCellId: null,
         acceptanceStatus: AcceptanceStatus.INAPPROPRIATE_CONTENT,
-        critique: appropriatenessResponse.error,
+        critique_ja: "不適切なコンテンツが検出されました。",
+        critique_en: appropriatenessResponse.error,
         newlyCompletedLines: 0,
         totalCompletedLines: playerBoard.completedLines.length,
         requiredBingoLines: game.requiredBingoLines,
@@ -311,7 +315,9 @@ If the image is appropriate, provide a brief description of what the image shows
         imageUrl,
         submittedAt: now,
         analyzedAt: now,
-        critique:
+        critique_ja:
+          "すべての利用可能なセルが既に開かれています。これ以上のマッチは不可能です。",
+        critique_en:
           "All available cells have already been opened. No more matches possible.",
         matchedCellId: null,
         confidence: null,
@@ -341,7 +347,8 @@ If the image is appropriate, provide a brief description of what the image shows
         confidence: null,
         matchedCellId: null,
         acceptanceStatus: AcceptanceStatus.NO_MATCH,
-        critique: submission.critique,
+        critique_ja: submission.critique_ja,
+        critique_en: submission.critique_en,
         newlyCompletedLines: 0,
         totalCompletedLines: playerBoard.completedLines.length,
         requiredBingoLines: game.requiredBingoLines,
@@ -364,20 +371,16 @@ Please analyze the image and determine:
 3. Your confidence level (0.0 to 1.0) in the match
 
 Respond with a JSON object containing:
-- "description": A detailed description of what you see in the image
 - "matchedCellId": The ID of the matching cell (or null if no good match)
 - "confidence": Your confidence level (0.0 to 1.0)
-- "reasoning": Explanation of why you chose this match or why no match was found
+- "critique_ja": Detailed analysis in Japanese - describe what you see and why it matches/doesn't match (日本語で詳細な分析)
+- "critique_en": Detailed analysis in English - describe what you see and why it matches/doesn't match
 
 Be strict in your matching - only match if you're confident the image clearly shows the subject.`;
 
     const analysisResponseSchema = {
       type: Type.OBJECT,
       properties: {
-        description: {
-          type: Type.STRING,
-          description: "A detailed description of what you see in the image",
-        },
         matchedCellId: {
           type: Type.STRING,
           nullable: true,
@@ -387,13 +390,18 @@ Be strict in your matching - only match if you're confident the image clearly sh
           type: Type.NUMBER,
           description: "Your confidence level (0.0 to 1.0) in the match",
         },
-        reasoning: {
+        critique_ja: {
           type: Type.STRING,
           description:
-            "Explanation of why you chose this match or why no match was found",
+            "Detailed analysis in Japanese: what you see and why it matches/doesn't match (日本語で詳細な分析)",
+        },
+        critique_en: {
+          type: Type.STRING,
+          description:
+            "Detailed analysis in English: what you see and why it matches/doesn't match",
         },
       },
-      required: ["description", "matchedCellId", "confidence", "reasoning"],
+      required: ["matchedCellId", "confidence", "critique_ja", "critique_en"],
     };
 
     const analysisResult = await model({
@@ -415,10 +423,10 @@ Be strict in your matching - only match if you're confident the image clearly sh
 
     const analysisText = analysisResult.text || "";
     let analysisResponse: {
-      description: string;
       matchedCellId: string | null;
       confidence: number;
-      reasoning: string;
+      critique_ja: string;
+      critique_en: string;
     };
 
     try {
@@ -435,11 +443,16 @@ Be strict in your matching - only match if you're confident the image clearly sh
     }
 
     // Validate and provide defaults for missing fields
-    const description =
-      analysisResponse.description || "No description provided";
-    const reasoning = analysisResponse.reasoning || "No reasoning provided";
-    const matchedCellId = analysisResponse.matchedCellId ?? null;
+    const critique_ja =
+      analysisResponse.critique_ja || "分析結果がありません。";
+    const critique_en = analysisResponse.critique_en || "No analysis provided.";
     const confidence = analysisResponse.confidence ?? 0;
+
+    // Resolve matchedCellId (fallback if AI returned subject name instead of cell ID)
+    const matchedCellId = resolveCellId(
+      analysisResponse.matchedCellId,
+      closedCells,
+    );
 
     // Determine acceptance status based on confidence threshold
     const isAccepted = matchedCellId && game.confidenceThreshold <= confidence;
@@ -455,7 +468,8 @@ Be strict in your matching - only match if you're confident the image clearly sh
       imageUrl,
       submittedAt: now,
       analyzedAt: now,
-      critique: `${description}\n\n${reasoning}`,
+      critique_ja,
+      critique_en,
       matchedCellId,
       confidence,
       processingStatus: ProcessingStatus.ANALYZED,
@@ -548,7 +562,8 @@ Be strict in your matching - only match if you're confident the image clearly sh
             confidence,
             matchedCellId,
             acceptanceStatus: AcceptanceStatus.NO_MATCH, // Downgrade to NO_MATCH due to processing failure
-            critique: `Processing failed: ${transactionResult.error}. ${submission.critique}`,
+            critique_ja: `処理に失敗しました: ${transactionResult.error}。${submission.critique_ja}`,
+            critique_en: `Processing failed: ${transactionResult.error}. ${submission.critique_en}`,
             newlyCompletedLines: 0,
             totalCompletedLines:
               playerBoard.completedLines.length - freshlyCompletedLines.length,
@@ -571,7 +586,8 @@ Be strict in your matching - only match if you're confident the image clearly sh
           confidence,
           matchedCellId,
           acceptanceStatus,
-          critique: submission.critique,
+          critique_ja: submission.critique_ja,
+          critique_en: submission.critique_en,
           newlyCompletedLines: freshlyCompletedLines.length,
           totalCompletedLines: playerBoard.completedLines.length,
           requiredBingoLines: game.requiredBingoLines,
@@ -615,7 +631,8 @@ Be strict in your matching - only match if you're confident the image clearly sh
       confidence,
       matchedCellId,
       acceptanceStatus,
-      critique: submission.critique,
+      critique_ja: submission.critique_ja,
+      critique_en: submission.critique_en,
       newlyCompletedLines: 0,
       totalCompletedLines: playerBoard.completedLines.length,
       requiredBingoLines: game.requiredBingoLines,

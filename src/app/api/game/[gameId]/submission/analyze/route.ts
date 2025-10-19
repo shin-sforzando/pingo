@@ -2,6 +2,7 @@ import { GoogleGenAI, Type } from "@google/genai";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { resolveCellId } from "@/lib/cell-utils";
 import { adminAuth } from "@/lib/firebase/admin";
 import {
   AdminGameBoardService,
@@ -33,9 +34,15 @@ const responseSchema = {
       type: Type.NUMBER,
       description: "Confidence score between 0 and 1",
     },
-    critique: {
+    critique_ja: {
       type: Type.STRING,
-      description: "Detailed analysis of the image and matching result",
+      description:
+        "Detailed analysis of the image and matching result in Japanese",
+    },
+    critique_en: {
+      type: Type.STRING,
+      description:
+        "Detailed analysis of the image and matching result in English",
     },
     acceptanceStatus: {
       type: Type.STRING,
@@ -176,7 +183,8 @@ Analysis Criteria:
 Provide:
 - matchedCellId: The ID of the best matching cell (null if no good match)
 - confidence: Confidence score from 0.0 to 1.0 (be conservative but fair)
-- critique: Detailed explanation of what you see and why it matches/doesn't match
+- critique_ja: Detailed explanation in Japanese of what you see and why it matches/doesn't match (日本語で詳細な説明)
+- critique_en: Detailed explanation in English of what you see and why it matches/doesn't match
 - acceptanceStatus: "accepted" (good match), "no_match" (no suitable match), or "inappropriate_content" (inappropriate image)
 
 Be thorough in your analysis but conservative in matching. Only match if you're reasonably confident the image shows the requested subject.`;
@@ -256,7 +264,8 @@ async function updateSubmissionAnalysis(
   const updatedSubmission = {
     ...submission,
     analyzedAt: new Date(),
-    critique: analysis.critique,
+    critique_ja: analysis.critique_ja,
+    critique_en: analysis.critique_en,
     matchedCellId: analysis.matchedCellId,
     confidence: analysis.confidence,
     processingStatus: ProcessingStatus.ANALYZED,
@@ -333,7 +342,8 @@ export async function POST(
       const analysis: AnalysisResult = {
         matchedCellId: null,
         confidence: 0,
-        critique: "All cells are already opened. No analysis needed.",
+        critique_ja: "すべてのセルが開かれています。分析は不要です。",
+        critique_en: "All cells are already opened. No analysis needed.",
         acceptanceStatus: AcceptanceStatus.NO_MATCH,
       };
 
@@ -382,7 +392,18 @@ export async function POST(
     const analysisData = JSON.parse(text);
 
     // Validate response with Zod
-    const analysis = analysisResultSchema.parse(analysisData);
+    const parsedAnalysis = analysisResultSchema.parse(analysisData);
+
+    // Resolve matchedCellId (fallback if AI returned subject name instead of cell ID)
+    const resolvedCellId = resolveCellId(
+      parsedAnalysis.matchedCellId,
+      availableCells,
+    );
+
+    const analysis = {
+      ...parsedAnalysis,
+      matchedCellId: resolvedCellId,
+    };
 
     console.log("ℹ️ XXX: ~ analyze/route.ts ~ Analysis completed", {
       analysis,

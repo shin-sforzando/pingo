@@ -12,6 +12,108 @@
 8. **DRY原則を遵守** - 重複コードを避け、再利用可能なコンポーネント/型を作成
 9. **マジックナンバーを使用しない** - 定数として集約し、単一の真実の源を維持
 
+## LLM出力処理のベストプラクティス
+
+### 原則: LLMの出力は不完全であることを前提とする
+
+LLM（Google Gemini等）はスキーマを指定しても、期待と異なる形式で出力する場合がある。
+常にフォールバック処理を実装し、ユーザー体験を損なわないようにする。
+
+### 実例: セルID vs 件名の混同
+
+**問題**: Gemini APIに「セルIDを返してください」と指示しても、件名（subject）を返す場合がある
+
+```typescript
+// Gemini APIレスポンス例
+{
+  matchedCellId: "牛乳",  // ❌ セルID（"cell-xxx"）を期待したが、件名を返した
+  confidence: 0.85
+}
+```
+
+**解決策**: フォールバック処理を実装
+
+```typescript
+// src/lib/cell-utils.ts - 共有ユーティリティ
+export function resolveCellId(
+  matchedCellId: string | null,
+  availableCells: Cell[],
+): string | null {
+  if (!matchedCellId) return null;
+
+  // If it already looks like a cell ID, return as-is
+  if (matchedCellId.startsWith("cell")) {
+    return matchedCellId;
+  }
+
+  // Otherwise, treat it as a subject name and search for the cell
+  console.log(
+    "ℹ️ XXX: ~ cell-utils.ts ~ matchedCellId does not look like a cell ID, treating as subject name",
+    { matchedCellId },
+  );
+
+  const matchedCell = availableCells.find(
+    (cell) => cell.subject === matchedCellId || cell.id === matchedCellId,
+  );
+
+  if (matchedCell) {
+    console.log("ℹ️ XXX: ~ cell-utils.ts ~ Found matching cell by subject", {
+      originalMatchedCellId: matchedCellId,
+      correctedCellId: matchedCell.id,
+      subject: matchedCell.subject,
+    });
+    return matchedCell.id;
+  }
+
+  console.log("ℹ️ XXX: ~ cell-utils.ts ~ Could not find cell with subject", {
+    matchedCellId,
+  });
+  return null;
+}
+```
+
+**使用例**:
+
+```typescript
+// API routeで使用
+import { resolveCellId } from "@/lib/cell-utils";
+
+const analysisData = JSON.parse(geminiResponse.text);
+const parsedAnalysis = analysisResultSchema.parse(analysisData);
+
+// Geminiが件名を返した場合でも正しいセルIDに変換
+const resolvedCellId = resolveCellId(
+  parsedAnalysis.matchedCellId,
+  availableCells,
+);
+
+const analysis = {
+  ...parsedAnalysis,
+  matchedCellId: resolvedCellId,
+};
+```
+
+**改善点**:
+
+- ✅ LLMの不整合な出力に対応
+- ✅ デバッグログでフォールバック発生を追跡可能
+- ✅ 共有ユーティリティとして複数箇所で再利用
+- ✅ ユーザー体験を損なわない（正しいセルを開ける）
+
+### LLM統合の一般的なパターン
+
+1. **スキーマ定義 + フォールバック**
+   - Gemini APIにresponseSchemaを渡す
+   - フォールバック処理も実装（スキーマ違反時の対処）
+
+2. **デバッグログの追加**
+   - LLMの実際の出力を記録
+   - フォールバック発生時にログ出力
+
+3. **テストでフォールバックをカバー**
+   - LLMが件名を返すケース
+   - LLMが存在しない値を返すケース
+
 ## コードスタイル（Biome設定）
 
 ### フォーマット
@@ -184,7 +286,7 @@ export const BASE_URL =
 ### 定数配置のガイドライン
 
 | 定数の種類 | 配置場所 | 例 |
-|----------|---------|---|
+|----------|---------|------|
 | アプリケーション全体の設定 | `src/lib/constants.ts` | `GAME_ID_LENGTH`, `BASE_URL` |
 | 列挙型 | `src/types/common.ts` | `GameStatus`, `ProcessingStatus` |
 | バリデーション正規表現 | `src/lib/constants.ts` | `GAME_ID_PATTERN` |

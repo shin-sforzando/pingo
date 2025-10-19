@@ -46,6 +46,7 @@ export default defineConfig({
         "playwright.config.ts", // Exclude Playwright config
         "postcss.config.mjs", // Exclude PostCSS config
         "scripts/**/*.ts", // Exclude scripts
+        "src/app/debug/**/*", // Exclude debug pages
         "src/components/magicui/*.tsx", // Exclude Magic UI components
         "src/components/ui/*.tsx", // Exclude shadcn/ui components
         "src/i18n/*.ts", // Exclude i18n config

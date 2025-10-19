@@ -80,7 +80,7 @@ pingo/
 - `ImageUpload.tsx`: HEIC対応の写真アップロード
 - `BingoBoard.tsx`: インタラクティブなビンゴグリッド
 - `BingoCell.tsx`: オープン/クローズ状態の個別セル
-- `SubmissionResult.tsx`: AI解析結果の表示
+- `SubmissionResult.tsx`: AI解析結果の表示（多言語critique対応）
 - `GameInfo.tsx`: ゲーム詳細情報カード
 - `InfoCard.tsx`: 汎用情報カード（アイコン付き）
 - `ParticipantsList.tsx`: 参加者一覧表示
@@ -126,6 +126,9 @@ pingo/
 - `firebase/admin-collections.ts`: Firestoreコレクション型安全アクセス
 - `firebase/client.ts`: Firebase Client SDK初期化（認証、Firestore）
 - `image-utils.ts`: 画像処理ユーティリティ（HEIC変換、リサイズ、圧縮）
+- `cell-utils.ts`: セルID処理ユーティリティ（LLM出力のフォールバック処理）
+  - `resolveCellId()`: LLMが件名を返した場合にセルIDに変換
+  - `getCellSubject()`: セルIDから件名を取得
 - `api-utils.ts`: APIレスポンスヘルパー、エラーハンドリング
 - `utils.ts`: 汎用ユーティリティ（cn、日付フォーマット、バリデーション）
 - `constants.ts`: アプリケーション定数（URL、制限値）
@@ -154,7 +157,7 @@ pingo/
 - `users/`: ユーザープロフィールと認証
 - `games/`: ゲームメタデータと設定
 - `games/{id}/playerBoards/`: 個別プレイヤーの進行状況
-- `games/{id}/submissions/`: 写真投稿とAI解析結果
+- `games/{id}/submissions/`: 写真投稿とAI解析結果（多言語critique含む）
 
 ### ID規則
 
