@@ -29,6 +29,7 @@ const responseSchema = {
     matchedCellId: {
       type: Type.STRING,
       description: "ID of the matched cell, null if no match",
+      nullable: true,
     },
     confidence: {
       type: Type.NUMBER,
