@@ -93,6 +93,13 @@ export default function SharePage() {
 
   // Handle join button click using the custom hook
   const handleJoinClick = async () => {
+    // Check if user is logged in before allowing join/play
+    if (!user) {
+      // Redirect to login page with return URL
+      router.push(`/?redirect=${encodeURIComponent(`/game/${gameId}/share`)}`);
+      return;
+    }
+
     if (isParticipating) {
       // Already participating, just navigate to game page
       router.push(`/game/${gameId}`);

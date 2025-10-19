@@ -155,12 +155,15 @@ src/
           page.tsx
         utils/
           gameDataTransforms.ts
+        page.stories.tsx
         page.tsx
       create/
         page.browser.test.tsx
+        page.stories.tsx
         page.tsx
       join/
         page.browser.test.tsx
+        page.stories.tsx
         page.tsx
     favicon.ico
     globals.css
@@ -370,6 +373,32 @@ import ja from "../messages/ja.json";
 import { NextResponse } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { GET } from "./route";
+</file>
+
+<file path="src/app/game/[gameId]/page.stories.tsx">
+import { fakerJA as faker } from "@faker-js/faker";
+import type { Meta, StoryObj } from "@storybook/nextjs";
+import { AuthContext } from "@/contexts/AuthContext";
+import { AcceptanceStatus, GameStatus } from "@/types/common";
+import type { Cell } from "@/types/schema";
+import GamePage from "./page";
+⋮----
+const generateSampleCells = (): Cell[] =>
+⋮----
+import { auth } from "@/lib/firebase/client";
+⋮----
+type Story = StoryObj<typeof meta>;
+</file>
+
+<file path="src/app/game/join/page.stories.tsx">
+import { fakerJA as faker } from "@faker-js/faker";
+import type { Meta, StoryObj } from "@storybook/nextjs";
+import { AuthContext } from "@/contexts/AuthContext";
+import JoinGamePage from "./page";
+⋮----
+import { auth } from "@/lib/firebase/client";
+⋮----
+type Story = StoryObj<typeof meta>;
 </file>
 
 <file path="src/app/globals.css">
@@ -783,10 +812,6 @@ export async function withErrorHandling<T>(
 export function validateGameId(gameId: string | undefined)
 </file>
 
-<file path="src/lib/constants.ts">
-
-</file>
-
 <file path="src/lib/utils.ts">
 import { type ClassValue, clsx } from "clsx";
 import { format, formatRelative } from "date-fns";
@@ -974,6 +999,28 @@ export function notificationToFirestore(
 }
 </file>
 
+<file path="cors.json">
+[
+  {
+    "origin": [
+      "http://localhost:3000",
+      "http://localhost:6006",
+      "http://localhost:8080",
+      "https://pingo-456817.web.app",
+      "https://pingo-617969816285.asia-northeast1.run.app",
+      "https://pingo-lziscmbaca-an.a.run.app"
+    ],
+    "method": ["GET", "HEAD", "PUT", "POST", "DELETE"],
+    "responseHeader": [
+      "Content-Type",
+      "Access-Control-Allow-Origin",
+      "x-goog-resumable"
+    ],
+    "maxAgeSeconds": 3600
+  }
+]
+</file>
+
 <file path="playwright.config.ts">
 import { defineConfig, devices } from "@playwright/test";
 </file>
@@ -1053,6 +1100,20 @@ function parseArguments(args: string[]):
 async function main(): Promise<void>
 </file>
 
+<file path="src/app/api/image/getUploadUrl/route.test.ts">
+import type { DecodedIdToken } from "firebase-admin/auth";
+import { getStorage } from "firebase-admin/storage";
+import type { NextRequest } from "next/server";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { adminAuth } from "@/lib/firebase/admin";
+import { POST } from "./route";
+⋮----
+const createMockRequest = (
+    body: unknown,
+    authHeader?: string,
+): NextRequest =>
+</file>
+
 <file path="src/app/game/[gameId]/hooks/useGameData.test.ts">
 import { renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -1078,6 +1139,17 @@ export function findMatchedCellSubject(
   cellId: string | null | undefined,
   gameBoard: Array<{ id: string; subject: string }> | null,
 ): string | null
+</file>
+
+<file path="src/app/game/create/page.stories.tsx">
+import { fakerJA as faker } from "@faker-js/faker";
+import type { Meta, StoryObj } from "@storybook/nextjs";
+import { AuthContext } from "@/contexts/AuthContext";
+import CreateGamePage from "./page";
+⋮----
+import { auth } from "@/lib/firebase/client";
+⋮----
+type Story = StoryObj<typeof meta>;
 </file>
 
 <file path="src/app/game/join/page.browser.test.tsx">
@@ -1267,31 +1339,12 @@ import { GameInfoCard } from "./GameInfoCard";
 type Story = StoryObj<typeof meta>;
 </file>
 
-<file path="src/components/game/GameInfoCard.tsx">
-import { formatDistanceToNow } from "date-fns";
-import { enUS, ja } from "date-fns/locale";
-import { Calendar, Users } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import type { GameInfo } from "@/types/schema";
+<file path="src/components/game/ImageUpload.stories.tsx">
+import type { Meta, StoryObj } from "@storybook/nextjs";
+import { fn } from "storybook/test";
+import { ImageUpload } from "./ImageUpload";
 ⋮----
-export interface GameInfoCardProps {
-
-
-
-  game: GameInfo;
-
-
-
-  onClick: (game: GameInfo) => void;
-
-
-
-  locale: string;
-
-
-
-  className?: string;
-}
+type Story = StoryObj<typeof meta>;
 </file>
 
 <file path="src/components/game/QRCodeCard.stories.tsx">
@@ -1835,6 +1888,10 @@ import { describe, expect, it } from "vitest";
 import { adminAuth, adminFirestore } from "./admin";
 </file>
 
+<file path="src/lib/constants.ts">
+
+</file>
+
 <file path="src/services/game.ts">
 import type { ApiResponse } from "@/types/common";
 import type { Game, GameBoard } from "@/types/schema";
@@ -1890,33 +1947,16 @@ export function userToFirestoreForTest(
 
 </file>
 
-<file path="cors.json">
-[
-  {
-    "origin": [
-      "http://localhost:3000",
-      "http://localhost:6006",
-      "http://localhost:8080",
-      "https://pingo-456817.web.app",
-      "https://pingo-617969816285.asia-northeast1.run.app",
-      "https://pingo-lziscmbaca-an.a.run.app"
-    ],
-    "method": ["GET", "HEAD", "PUT", "POST", "DELETE"],
-    "responseHeader": [
-      "Content-Type",
-      "Access-Control-Allow-Origin",
-      "x-goog-resumable"
-    ],
-    "maxAgeSeconds": 3600
-  }
-]
-</file>
-
 <file path="middleware.ts">
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 ⋮----
 export function middleware(request: NextRequest)
+</file>
+
+<file path="next.config.ts">
+import type { NextConfig } from "next";
+import createNextIntlPlugin from "next-intl/plugin";
 </file>
 
 <file path="repomix.config.json">
@@ -1959,6 +1999,13 @@ export function middleware(request: NextRequest)
 }
 </file>
 
+<file path="tsconfig.build.json">
+{
+  "extends": "./tsconfig.json",
+  "exclude": ["node_modules", "**/*.test.tsx", "**/*.stories.tsx"]
+}
+</file>
+
 <file path="vitest.browser.setup.ts">
 
 </file>
@@ -1975,15 +2022,16 @@ testTimeout: 10000, // Increase timeout for Firebase operations
 ⋮----
 setupFiles: ["./vitest.browser.setup.ts"], // Add browser setup file
 ⋮----
+"**/*.stories.{ts,tsx}", // Exclude Storybook stories
+"**/stories/example/*.tsx", // Exclude example stories
 "next.config.ts", // Exclude Next.js config
 "playwright.config.ts", // Exclude Playwright config
 "postcss.config.mjs", // Exclude PostCSS config
 "scripts/**/*.ts", // Exclude scripts
-"src/components/ui/*.tsx", // Exclude shadcn/ui components
 "src/components/magicui/*.tsx", // Exclude Magic UI components
+"src/components/ui/*.tsx", // Exclude shadcn/ui components
 "src/i18n/*.ts", // Exclude i18n config
-"**/*.stories.{ts,tsx}", // Exclude Storybook stories
-"**/stories/example/*.tsx", // Exclude example stories
+"storybook-static/**", // Exclude Storybook static files
 </file>
 
 <file path="src/app/api/auth/logout/route.test.ts">
@@ -2051,20 +2099,6 @@ import { dateToISOString } from "@/types/firestore";
 export async function GET()
 </file>
 
-<file path="src/app/api/image/getUploadUrl/route.test.ts">
-import type { DecodedIdToken } from "firebase-admin/auth";
-import { getStorage } from "firebase-admin/storage";
-import type { NextRequest } from "next/server";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { adminAuth } from "@/lib/firebase/admin";
-import { POST } from "./route";
-⋮----
-const createMockRequest = (
-    body: unknown,
-    authHeader?: string,
-): NextRequest =>
-</file>
-
 <file path="src/app/api/subjects/generate/route.test.ts">
 import { beforeAll, describe, expect, it } from "vitest";
 import { createApiRequest } from "@/test/helpers/api-test-helpers";
@@ -2129,6 +2163,33 @@ interface AuthGuardProps {
 }
 ⋮----
 export function AuthGuard(
+</file>
+
+<file path="src/components/game/GameInfoCard.tsx">
+import { formatDistanceToNow } from "date-fns";
+import { enUS, ja } from "date-fns/locale";
+import { Calendar, Users } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import type { GameInfo } from "@/types/schema";
+⋮----
+export interface GameInfoCardProps {
+
+
+
+  game: GameInfo;
+
+
+
+  onClick: (game: GameInfo) => void;
+
+
+
+  locale: string;
+
+
+
+  className?: string;
+}
 </file>
 
 <file path="src/components/game/SubmissionResult.stories.tsx">
@@ -2582,18 +2643,6 @@ availableSecrets:
       env: "GEMINI_API_KEY"
 </file>
 
-<file path="next.config.ts">
-import type { NextConfig } from "next";
-import createNextIntlPlugin from "next-intl/plugin";
-</file>
-
-<file path="tsconfig.build.json">
-{
-  "extends": "./tsconfig.json",
-  "exclude": ["node_modules", "**/*.test.tsx", "**/*.stories.tsx"]
-}
-</file>
-
 <file path="src/app/api/auth/login/route.test.ts">
 import bcrypt from "bcrypt";
 import type { NextResponse } from "next/server";
@@ -2822,6 +2871,16 @@ import type { ApiResponse } from "@/types/common";
 import { POST } from "./route";
 </file>
 
+<file path="src/app/api/image/upload/route.ts">
+import type { DecodedIdToken } from "firebase-admin/auth";
+import { getStorage } from "firebase-admin/storage";
+import { type NextRequest, NextResponse } from "next/server";
+import { ulid } from "ulid";
+import { adminAuth } from "@/lib/firebase/admin";
+⋮----
+export async function POST(request: NextRequest)
+</file>
+
 <file path="src/app/api/subjects/check/route.test.ts">
 import { beforeAll, describe, expect, it } from "vitest";
 import { createApiRequest } from "@/test/helpers/api-test-helpers";
@@ -2936,14 +2995,6 @@ export interface GameInfoProps {
 const getStatusConfig = () =>
 </file>
 
-<file path="src/components/game/ImageUpload.stories.tsx">
-import type { Meta, StoryObj } from "@storybook/nextjs";
-import { fn } from "storybook/test";
-import { ImageUpload } from "./ImageUpload";
-⋮----
-type Story = StoryObj<typeof meta>;
-</file>
-
 <file path="src/components/game/SubmissionResult.browser.test.tsx">
 import { page } from "@vitest/browser/context";
 import { NextIntlClientProvider } from "next-intl";
@@ -3032,6 +3083,55 @@ const ConfettiButtonComponent = ({
 }: ConfettiButtonProps) =>
 ⋮----
 const handleClick = async (event: React.MouseEvent<HTMLButtonElement>) =>
+</file>
+
+<file path="src/lib/image-utils.test.ts">
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  createImagePreviewUrl,
+  DEFAULT_IMAGE_OPTIONS,
+  isValidFileSize,
+  isValidImageFile,
+  MAX_FILE_SIZE,
+  processImage,
+  revokeImagePreviewUrl,
+  SUPPORTED_IMAGE_TYPES,
+} from "./image-utils";
+⋮----
+// Mock document.createElement
+</file>
+
+<file path="src/lib/image-utils.ts">
+import type { ImageProcessingOptions, ProcessedImage } from "@/types/schema";
+⋮----
+async function getHeic2any()
+⋮----
+function getFileExtension(filename: string): string
+⋮----
+function isHeicFile(file: File): boolean
+⋮----
+async function convertHeicToJpeg(file: File): Promise<File>
+⋮----
+export function isValidImageFile(file: File): boolean
+⋮----
+export function isValidFileSize(file: File): boolean
+⋮----
+function createImageFromFile(file: File): Promise<HTMLImageElement>
+⋮----
+function calculateNewDimensions(
+  originalWidth: number,
+  originalHeight: number,
+  maxLongSide: number,
+):
+⋮----
+export async function processImage(
+  file: File,
+  options: ImageProcessingOptions = DEFAULT_IMAGE_OPTIONS,
+): Promise<ProcessedImage>
+⋮----
+export function createImagePreviewUrl(file: File): string
+⋮----
+export function revokeImagePreviewUrl(url: string): void
 </file>
 
 <file path="src/types/game.ts">
@@ -3320,12 +3420,15 @@ import type { Game } from "@/types/schema";
 import { PUT } from "./route";
 </file>
 
-<file path="src/app/api/image/upload/route.ts">
+<file path="src/app/api/image/getUploadUrl/route.ts">
 import type { DecodedIdToken } from "firebase-admin/auth";
 import { getStorage } from "firebase-admin/storage";
 import { type NextRequest, NextResponse } from "next/server";
 import { ulid } from "ulid";
+import { z } from "zod";
 import { adminAuth } from "@/lib/firebase/admin";
+import { dateToISOString } from "@/types/firestore";
+import { imageSubmissionDataSchema } from "@/types/schema";
 ⋮----
 export async function POST(request: NextRequest)
 </file>
@@ -3381,6 +3484,119 @@ import { ParticipantsList } from "./ParticipantsList";
 type Story = StoryObj<typeof meta>;
 ⋮----
 const generateParticipant = (role: Role, completedLines = 0) => (
+</file>
+
+<file path="src/services/image-upload.ts">
+import type {
+  ImageSubmissionData,
+  ImageSubmissionResult,
+  ProcessedImage,
+} from "@/types/schema";
+⋮----
+export async function submitImage(
+  processedImage: ProcessedImage,
+  submissionData: ImageSubmissionData,
+  authToken: string,
+): Promise<ImageSubmissionResult>
+</file>
+
+<file path="Dockerfile">
+# ---------------- Build Stage ----------------
+FROM node:lts-slim AS base
+
+# Define build arguments
+ARG FIREBASE_PROJECT_ID
+ARG FIREBASE_CLIENT_EMAIL
+ARG FIREBASE_PRIVATE_KEY
+ARG GEMINI_API_KEY
+ARG GOOGLE_CLOUD_STORAGE_BUCKET="pingo-456817-images"
+
+# Set non-public environment variables
+ENV FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID}
+ENV FIREBASE_CLIENT_EMAIL=${FIREBASE_CLIENT_EMAIL}
+ENV FIREBASE_PRIVATE_KEY=${FIREBASE_PRIVATE_KEY}
+ENV GEMINI_API_KEY=${GEMINI_API_KEY}
+
+# Set publishable environment variables
+ENV GOOGLE_CLOUD_STORAGE_BUCKET=${GOOGLE_CLOUD_STORAGE_BUCKET}
+ENV NEXT_PUBLIC_BASE_URL="http://localhost:8080"
+ENV NEXT_PUBLIC_FIREBASE_PROJECT_ID="pingo-456817"
+ENV NEXT_PUBLIC_FIREBASE_API_KEY="AIzaSyCYXPVHEMWgIXpDc2j-qFuvzD79eI24dws"
+ENV NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN="pingo-456817.firebaseapp.com"
+ENV NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET="pingo-456817.firebasestorage.app"
+ENV NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID="617969816285"
+ENV NEXT_PUBLIC_FIREBASE_APP_ID="1:617969816285:web:09a7ffe5ea531b45648134"
+
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Install necessary dependencies for Next.js standalone output
+# (This step might be adjusted based on actual standalone output needs)
+# RUN apt-get update && apt-get install -y --no-install-recommends openssl
+
+# Copy package.json and package-lock.json (or yarn.lock or pnpm-lock.yaml)
+COPY package*.json ./
+
+# Install dependencies
+# Use --frozen-lockfile to ensure reproducibility
+RUN npm ci
+
+# Copy the rest of the application code
+# Use .dockerignore to exclude unnecessary files
+COPY . .
+
+# Build the Next.js application
+# This will generate the .next directory with the production build
+RUN npm run build
+
+
+# ---------------- Production Stage ----------------
+FROM node:lts-slim AS production
+
+# Define build arguments for Firebase credentials in production stage
+ARG FIREBASE_PROJECT_ID
+ARG FIREBASE_CLIENT_EMAIL
+ARG FIREBASE_PRIVATE_KEY
+ARG GEMINI_API_KEY
+ARG GOOGLE_CLOUD_STORAGE_BUCKET="pingo-456817-images"
+
+ENV NODE_ENV=production
+
+# Next.js server runs on port 3000 by default, Cloud Run expects PORT env var
+ENV PORT=8080
+
+# Set non-public credentials for production stage
+ENV FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID}
+ENV FIREBASE_CLIENT_EMAIL=${FIREBASE_CLIENT_EMAIL}
+ENV FIREBASE_PRIVATE_KEY=${FIREBASE_PRIVATE_KEY}
+ENV GEMINI_API_KEY=${GEMINI_API_KEY}
+
+# Set publishable environment variables for production stage
+ENV GOOGLE_CLOUD_STORAGE_BUCKET=${GOOGLE_CLOUD_STORAGE_BUCKET}
+ENV NEXT_PUBLIC_BASE_URL=http://localhost:8080
+ENV NEXT_PUBLIC_FIREBASE_PROJECT_ID="pingo-456817"
+ENV NEXT_PUBLIC_FIREBASE_API_KEY="AIzaSyCYXPVHEMWgIXpDc2j-qFuvzD79eI24dws"
+ENV NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN="pingo-456817.firebaseapp.com"
+ENV NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET="pingo-456817.firebasestorage.app"
+ENV NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID="617969816285"
+ENV NEXT_PUBLIC_FIREBASE_APP_ID="1:617969816285:web:09a7ffe5ea531b45648134"
+
+# Set the working directory in the container
+WORKDIR /app
+
+COPY --from=base /app/next.config.ts ./
+COPY --from=base /app/messages ./messages
+COPY --from=base /app/public ./public
+COPY --from=base /app/.next/standalone ./
+COPY --from=base /app/.next/static ./.next/static
+
+# Expose the port the app runs on (defined by PORT env var)
+EXPOSE 8080
+
+# Command to run the application
+# Uses the Node.js server included in the standalone output
+CMD ["node", "server.js"]
 </file>
 
 <file path="src/app/api/auth/login/route.ts">
@@ -3552,6 +3768,47 @@ export async function POST(
 ): Promise<NextResponse<ApiResponse<AnalysisResult>>>
 </file>
 
+<file path="src/app/api/image/check/route.test.ts">
+import { faker } from "@faker-js/faker";
+import type { DecodedIdToken } from "firebase-admin/auth";
+import type { NextRequest } from "next/server";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { adminAuth } from "@/lib/firebase/admin";
+import {
+  AdminGameBoardService,
+  AdminGameService,
+  AdminPlayerBoardService,
+  AdminSubmissionService,
+  AdminTransactionService,
+} from "@/lib/firebase/admin-collections";
+import { GameStatus } from "@/types/common";
+import { POST } from "./route";
+⋮----
+const createMockRequest = (
+    body: unknown,
+    authHeader?: string,
+): NextRequest =>
+</file>
+
+<file path="src/app/debug/image-upload/page.tsx">
+import { useState } from "react";
+import { ImageUpload } from "@/components/game/ImageUpload";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { ImageSubmissionResult, ProcessedImage } from "@/types/schema";
+⋮----
+export default function ImageUploadDebugPage()
+⋮----
+const handleUploadStart = () =>
+⋮----
+const handleUploadComplete = (
+    success: boolean,
+    result?: ImageSubmissionResult,
+    error?: string,
+) =>
+⋮----
+const handleImageProcessed = (processedImage: ProcessedImage) =>
+</file>
+
 <file path="src/app/game/[gameId]/hooks/useGameData.ts">
 import { useCallback, useEffect, useState } from "react";
 import type { Participant } from "@/components/game/ParticipantsList";
@@ -3603,6 +3860,28 @@ import type { Game, GameBoard } from "@/types/schema";
 async function fetchData()
 ⋮----
 const handleJoinClick = async () =>
+⋮----
+// Already participating, just navigate to game page
+⋮----
+// Not participating yet, join the game first
+⋮----
+// Successfully joined or already participating, navigate to game page
+⋮----
+// Join failed, but still try to navigate (user might already be joined)
+⋮----
+// Get the current URL for QR code
+⋮----
+// Format game status for display
+⋮----
+{/* Game information header */}
+⋮----
+{/* Play/Join game button */}
+⋮----
+{/* QR code (public games only) or Game ID (private games) */}
+⋮----
+{/* Bingo board preview */}
+⋮----
+{/* Game settings information */}
 ⋮----
 title=
 value=
@@ -3669,179 +3948,6 @@ const onSubmit: SubmitHandler<GameCreateFormValues> = async (data) =>
 <CardTitle>
 ⋮----
 disabled=
-</file>
-
-<file path="src/components/game/GameInfo.stories.tsx">
-import { faker } from "@faker-js/faker";
-import type { Meta, StoryObj } from "@storybook/nextjs";
-import { GAME_ID_LENGTH } from "@/lib/constants";
-import { GameStatus } from "@/types/common";
-import type { Game } from "@/types/schema";
-import { GameInfo } from "./GameInfo";
-⋮----
-type Story = StoryObj<typeof meta>;
-</file>
-
-<file path="src/lib/image-utils.test.ts">
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  createImagePreviewUrl,
-  DEFAULT_IMAGE_OPTIONS,
-  isValidFileSize,
-  isValidImageFile,
-  MAX_FILE_SIZE,
-  processImage,
-  revokeImagePreviewUrl,
-  SUPPORTED_IMAGE_TYPES,
-} from "./image-utils";
-⋮----
-// Mock document.createElement
-</file>
-
-<file path="src/lib/image-utils.ts">
-import type { ImageProcessingOptions, ProcessedImage } from "@/types/schema";
-⋮----
-async function getHeic2any()
-⋮----
-function getFileExtension(filename: string): string
-⋮----
-function isHeicFile(file: File): boolean
-⋮----
-async function convertHeicToJpeg(file: File): Promise<File>
-⋮----
-export function isValidImageFile(file: File): boolean
-⋮----
-export function isValidFileSize(file: File): boolean
-⋮----
-function createImageFromFile(file: File): Promise<HTMLImageElement>
-⋮----
-function calculateNewDimensions(
-  originalWidth: number,
-  originalHeight: number,
-  maxLongSide: number,
-):
-⋮----
-export async function processImage(
-  file: File,
-  options: ImageProcessingOptions = DEFAULT_IMAGE_OPTIONS,
-): Promise<ProcessedImage>
-⋮----
-export function createImagePreviewUrl(file: File): string
-⋮----
-export function revokeImagePreviewUrl(url: string): void
-</file>
-
-<file path="src/services/image-upload.ts">
-import type {
-  ImageSubmissionData,
-  ImageSubmissionResult,
-  ProcessedImage,
-} from "@/types/schema";
-⋮----
-export async function submitImage(
-  processedImage: ProcessedImage,
-  submissionData: ImageSubmissionData,
-  authToken: string,
-): Promise<ImageSubmissionResult>
-</file>
-
-<file path="Dockerfile">
-# ---------------- Build Stage ----------------
-FROM node:lts-slim AS base
-
-# Define build arguments
-ARG FIREBASE_PROJECT_ID
-ARG FIREBASE_CLIENT_EMAIL
-ARG FIREBASE_PRIVATE_KEY
-ARG GEMINI_API_KEY
-ARG GOOGLE_CLOUD_STORAGE_BUCKET="pingo-456817-images"
-
-# Set non-public environment variables
-ENV FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID}
-ENV FIREBASE_CLIENT_EMAIL=${FIREBASE_CLIENT_EMAIL}
-ENV FIREBASE_PRIVATE_KEY=${FIREBASE_PRIVATE_KEY}
-ENV GEMINI_API_KEY=${GEMINI_API_KEY}
-
-# Set publishable environment variables
-ENV GOOGLE_CLOUD_STORAGE_BUCKET=${GOOGLE_CLOUD_STORAGE_BUCKET}
-ENV NEXT_PUBLIC_BASE_URL="http://localhost:8080"
-ENV NEXT_PUBLIC_FIREBASE_PROJECT_ID="pingo-456817"
-ENV NEXT_PUBLIC_FIREBASE_API_KEY="AIzaSyCYXPVHEMWgIXpDc2j-qFuvzD79eI24dws"
-ENV NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN="pingo-456817.firebaseapp.com"
-ENV NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET="pingo-456817.firebasestorage.app"
-ENV NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID="617969816285"
-ENV NEXT_PUBLIC_FIREBASE_APP_ID="1:617969816285:web:09a7ffe5ea531b45648134"
-
-
-# Set the working directory in the container
-WORKDIR /app
-
-# Install necessary dependencies for Next.js standalone output
-# (This step might be adjusted based on actual standalone output needs)
-# RUN apt-get update && apt-get install -y --no-install-recommends openssl
-
-# Copy package.json and package-lock.json (or yarn.lock or pnpm-lock.yaml)
-COPY package*.json ./
-
-# Install dependencies
-# Use --frozen-lockfile to ensure reproducibility
-RUN npm ci
-
-# Copy the rest of the application code
-# Use .dockerignore to exclude unnecessary files
-COPY . .
-
-# Build the Next.js application
-# This will generate the .next directory with the production build
-RUN npm run build
-
-
-# ---------------- Production Stage ----------------
-FROM node:lts-slim AS production
-
-# Define build arguments for Firebase credentials in production stage
-ARG FIREBASE_PROJECT_ID
-ARG FIREBASE_CLIENT_EMAIL
-ARG FIREBASE_PRIVATE_KEY
-ARG GEMINI_API_KEY
-ARG GOOGLE_CLOUD_STORAGE_BUCKET="pingo-456817-images"
-
-ENV NODE_ENV=production
-
-# Next.js server runs on port 3000 by default, Cloud Run expects PORT env var
-ENV PORT=8080
-
-# Set non-public credentials for production stage
-ENV FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID}
-ENV FIREBASE_CLIENT_EMAIL=${FIREBASE_CLIENT_EMAIL}
-ENV FIREBASE_PRIVATE_KEY=${FIREBASE_PRIVATE_KEY}
-ENV GEMINI_API_KEY=${GEMINI_API_KEY}
-
-# Set publishable environment variables for production stage
-ENV GOOGLE_CLOUD_STORAGE_BUCKET=${GOOGLE_CLOUD_STORAGE_BUCKET}
-ENV NEXT_PUBLIC_BASE_URL=http://localhost:8080
-ENV NEXT_PUBLIC_FIREBASE_PROJECT_ID="pingo-456817"
-ENV NEXT_PUBLIC_FIREBASE_API_KEY="AIzaSyCYXPVHEMWgIXpDc2j-qFuvzD79eI24dws"
-ENV NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN="pingo-456817.firebaseapp.com"
-ENV NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET="pingo-456817.firebasestorage.app"
-ENV NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID="617969816285"
-ENV NEXT_PUBLIC_FIREBASE_APP_ID="1:617969816285:web:09a7ffe5ea531b45648134"
-
-# Set the working directory in the container
-WORKDIR /app
-
-COPY --from=base /app/next.config.ts ./
-COPY --from=base /app/messages ./messages
-COPY --from=base /app/public ./public
-COPY --from=base /app/.next/standalone ./
-COPY --from=base /app/.next/static ./.next/static
-
-# Expose the port the app runs on (defined by PORT env var)
-EXPOSE 8080
-
-# Command to run the application
-# Uses the Node.js server included in the standalone output
-CMD ["node", "server.js"]
 </file>
 
 <file path="src/app/api/game/[gameId]/events/route.ts">
@@ -3931,58 +4037,15 @@ export async function PUT(
 ): Promise<NextResponse<ApiResponse<Game>>>
 </file>
 
-<file path="src/app/api/image/check/route.test.ts">
+<file path="src/components/game/GameInfo.stories.tsx">
 import { faker } from "@faker-js/faker";
-import type { DecodedIdToken } from "firebase-admin/auth";
-import type { NextRequest } from "next/server";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { adminAuth } from "@/lib/firebase/admin";
-import {
-  AdminGameBoardService,
-  AdminGameService,
-  AdminPlayerBoardService,
-  AdminSubmissionService,
-  AdminTransactionService,
-} from "@/lib/firebase/admin-collections";
+import type { Meta, StoryObj } from "@storybook/nextjs";
+import { GAME_ID_LENGTH } from "@/lib/constants";
 import { GameStatus } from "@/types/common";
-import { POST } from "./route";
+import type { Game } from "@/types/schema";
+import { GameInfo } from "./GameInfo";
 ⋮----
-const createMockRequest = (
-    body: unknown,
-    authHeader?: string,
-): NextRequest =>
-</file>
-
-<file path="src/app/api/image/getUploadUrl/route.ts">
-import type { DecodedIdToken } from "firebase-admin/auth";
-import { getStorage } from "firebase-admin/storage";
-import { type NextRequest, NextResponse } from "next/server";
-import { ulid } from "ulid";
-import { z } from "zod";
-import { adminAuth } from "@/lib/firebase/admin";
-import { dateToISOString } from "@/types/firestore";
-import { imageSubmissionDataSchema } from "@/types/schema";
-⋮----
-export async function POST(request: NextRequest)
-</file>
-
-<file path="src/app/debug/image-upload/page.tsx">
-import { useState } from "react";
-import { ImageUpload } from "@/components/game/ImageUpload";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { ImageSubmissionResult, ProcessedImage } from "@/types/schema";
-⋮----
-export default function ImageUploadDebugPage()
-⋮----
-const handleUploadStart = () =>
-⋮----
-const handleUploadComplete = (
-    success: boolean,
-    result?: ImageSubmissionResult,
-    error?: string,
-) =>
-⋮----
-const handleImageProcessed = (processedImage: ProcessedImage) =>
+type Story = StoryObj<typeof meta>;
 </file>
 
 <file path="src/components/game/ParticipantsList.tsx">
@@ -4113,6 +4176,50 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ gameId: string; submissionId: string }> },
 ): Promise<NextResponse<ApiResponse<Submission>>>
+</file>
+
+<file path="src/components/game/ImageUpload.tsx">
+import { Image as ImageIcon, Loader2, Upload, X } from "lucide-react";
+import Image from "next/image";
+import { useTranslations } from "next-intl";
+import { useCallback, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { useAuth } from "@/contexts/AuthContext";
+import {
+  createImagePreviewUrl,
+  isValidFileSize,
+  isValidImageFile,
+  processImage,
+  revokeImagePreviewUrl,
+} from "@/lib/image-utils";
+import { cn } from "@/lib/utils";
+import { submitImage } from "@/services/image-upload";
+import type {
+  ImageSubmissionResult,
+  ImageUploadProps,
+  ProcessedImage,
+} from "@/types/schema";
+⋮----
+interface ImagePreview {
+  file: File;
+  previewUrl: string;
+  processedImage?: ProcessedImage;
+  error?: string;
+}
+⋮----
+// Create preview URL from processed JPEG blob
+⋮----
+// For other formats, create preview first then process
+⋮----
+// Process image
+⋮----
+// Handle upload
+⋮----
+console.error("Image preview error:", error);
+⋮----
+e.stopPropagation();
+handleUpload();
 </file>
 
 <file path="src/app/api/game/create/route.ts">
@@ -4334,50 +4441,6 @@ const result = await joinGame(game.id);
 if (result.success)
 </file>
 
-<file path="src/components/game/ImageUpload.tsx">
-import { Image as ImageIcon, Loader2, Upload, X } from "lucide-react";
-import Image from "next/image";
-import { useTranslations } from "next-intl";
-import { useCallback, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { useAuth } from "@/contexts/AuthContext";
-import {
-  createImagePreviewUrl,
-  isValidFileSize,
-  isValidImageFile,
-  processImage,
-  revokeImagePreviewUrl,
-} from "@/lib/image-utils";
-import { cn } from "@/lib/utils";
-import { submitImage } from "@/services/image-upload";
-import type {
-  ImageSubmissionResult,
-  ImageUploadProps,
-  ProcessedImage,
-} from "@/types/schema";
-⋮----
-interface ImagePreview {
-  file: File;
-  previewUrl: string;
-  processedImage?: ProcessedImage;
-  error?: string;
-}
-⋮----
-// Create preview URL from processed JPEG blob
-⋮----
-// For other formats, create preview first then process
-⋮----
-// Process image
-⋮----
-// Handle upload
-⋮----
-console.error("Image preview error:", error);
-⋮----
-e.stopPropagation();
-handleUpload();
-</file>
-
 <file path="src/components/layout/UserMenu.tsx">
 import { Languages, LogOut, User as UserIcon } from "lucide-react";
 import Link from "next/link";
@@ -4545,38 +4608,6 @@ function detectCompletedLines(
 ): CompletedLine[]
 ⋮----
 export async function POST(request: NextRequest)
-</file>
-
-<file path="src/app/game/[gameId]/page.tsx">
-import { useParams, useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
-import { useEffect, useRef } from "react";
-import { AuthGuard } from "@/components/auth/AuthGuard";
-import { BingoBoard } from "@/components/game/BingoBoard";
-import { GameInfo } from "@/components/game/GameInfo";
-import { ImageUpload } from "@/components/game/ImageUpload";
-import { ParticipantsList } from "@/components/game/ParticipantsList";
-import { SubmissionResult } from "@/components/game/SubmissionResult";
-import { Confetti, type ConfettiRef } from "@/components/magicui/confetti";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useAuth } from "@/contexts/AuthContext";
-import { useGameParticipation } from "@/hooks/useGameParticipation";
-import { AcceptanceStatus } from "@/types/common";
-import { ErrorDisplay } from "./components/ErrorDisplay";
-import { GameHeader } from "./components/GameHeader";
-import { useGameData } from "./hooks/useGameData";
-import { useImageSubmission } from "./hooks/useImageSubmission";
-import {
-  convertCellStatesToBingoFormat,
-  convertCompletedLinesToIndices,
-  findMatchedCellSubject,
-  getLatestSubmission,
-} from "./utils/gameDataTransforms";
-⋮----
-{/* Game information */}
-⋮----
-{/* Participants list */}
 </file>
 
 <file path="src/lib/firebase/admin-collections.ts">
@@ -4788,6 +4819,38 @@ export async function joinGame(
 ): Promise<
 </file>
 
+<file path="src/app/game/[gameId]/page.tsx">
+import { useParams, useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useEffect, useRef } from "react";
+import { AuthGuard } from "@/components/auth/AuthGuard";
+import { BingoBoard } from "@/components/game/BingoBoard";
+import { GameInfo } from "@/components/game/GameInfo";
+import { ImageUpload } from "@/components/game/ImageUpload";
+import { ParticipantsList } from "@/components/game/ParticipantsList";
+import { SubmissionResult } from "@/components/game/SubmissionResult";
+import { Confetti, type ConfettiRef } from "@/components/magicui/confetti";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth } from "@/contexts/AuthContext";
+import { useGameParticipation } from "@/hooks/useGameParticipation";
+import { AcceptanceStatus } from "@/types/common";
+import { ErrorDisplay } from "./components/ErrorDisplay";
+import { GameHeader } from "./components/GameHeader";
+import { useGameData } from "./hooks/useGameData";
+import { useImageSubmission } from "./hooks/useImageSubmission";
+import {
+  convertCellStatesToBingoFormat,
+  convertCompletedLinesToIndices,
+  findMatchedCellSubject,
+  getLatestSubmission,
+} from "./utils/gameDataTransforms";
+⋮----
+{/* Game information */}
+⋮----
+{/* Participants list */}
+</file>
+
 <file path="package.json">
 {
   "name": "pingo",
@@ -4822,7 +4885,7 @@ export async function joinGame(
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
-    "@google/genai": "^1.19.0",
+    "@google/genai": "^1.25.0",
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-dialog": "^1.1.15",
@@ -4838,33 +4901,32 @@ export async function joinGame(
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
-    "firebase": "^12.2.1",
+    "firebase": "^12.4.0",
     "firebase-admin": "^13.5.0",
     "heic2any": "^0.0.4",
-    "lucide-react": "^0.544.0",
-    "motion": "^12.23.12",
-    "next": "^15.5.3",
-    "next-intl": "^4.3.8",
+    "lucide-react": "^0.546.0",
+    "motion": "^12.23.24",
+    "next": "^15.5.6",
+    "next-intl": "^4.3.12",
     "qrcode.react": "^4.2.0",
-    "react": "^19.1.1",
-    "react-day-picker": "^9.10.0",
-    "react-dom": "^19.1.1",
-    "react-hook-form": "^7.62.0",
+    "react": "^19.2.0",
+    "react-day-picker": "^9.11.1",
+    "react-dom": "^19.2.0",
+    "react-hook-form": "^7.65.0",
     "tailwind-merge": "^3.3.1",
     "ulid": "^3.0.1",
-    "uuid": "^13.0.0",
     "vaul": "^1.1.2",
-    "zod": "^4.1.8"
+    "zod": "^4.1.12"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.2.4",
-    "@faker-js/faker": "^10.0.0",
-    "@lingual/i18n-check": "^0.8.7",
-    "@playwright/test": "^1.55.0",
-    "@storybook/addon-a11y": "^9.1.6",
-    "@storybook/addon-docs": "^9.1.6",
-    "@storybook/addon-onboarding": "^9.1.6",
-    "@storybook/nextjs": "^9.1.6",
+    "@biomejs/biome": "2.2.6",
+    "@faker-js/faker": "^10.1.0",
+    "@lingual/i18n-check": "^0.8.12",
+    "@playwright/test": "^1.56.1",
+    "@storybook/addon-a11y": "^9.1.13",
+    "@storybook/addon-docs": "^9.1.13",
+    "@storybook/addon-onboarding": "^9.1.13",
+    "@storybook/nextjs": "^9.1.13",
     "@tailwindcss/postcss": "^4",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/react": "^16.3.0",
@@ -4873,20 +4935,19 @@ export async function joinGame(
     "@types/node": "^24",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@types/uuid": "^10.0.0",
-    "@vitejs/plugin-react": "^5.0.2",
+    "@vitejs/plugin-react": "^5.0.4",
     "@vitest/browser": "^3.2.4",
     "@vitest/coverage-istanbul": "^3.2.4",
-    "dotenv": "^17.2.2",
-    "jsdom": "^27.0.0",
-    "knip": "^5.63.1",
-    "lefthook": "^1.13.0",
-    "playwright": "^1.55.0",
-    "storybook": "^9.1.6",
+    "dotenv": "^17.2.3",
+    "jsdom": "^27.0.1",
+    "knip": "^5.66.0",
+    "lefthook": "^1.13.6",
+    "playwright": "^1.56.1",
+    "storybook": "^9.1.13",
     "storybook-next-intl": "^2.0.13",
     "tailwindcss": "^4",
-    "tsx": "^4.20.5",
-    "tw-animate-css": "^1.3.8",
+    "tsx": "^4.20.6",
+    "tw-animate-css": "^1.4.0",
     "typescript": "^5",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.2.4",

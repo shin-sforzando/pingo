@@ -65,12 +65,8 @@ export const Default: Story = {
       );
 
       // Mock fetch for participating games
-      const cleanup = mockFetchForParticipatingGames(gameIds);
-
-      // Cleanup when story unmounts
-      if (typeof window !== "undefined") {
-        window.addEventListener("beforeunload", cleanup);
-      }
+      // NOTE: Cleanup function is not automatically called in Storybook lifecycle
+      mockFetchForParticipatingGames(gameIds);
 
       return (
         <AuthContext.Provider
