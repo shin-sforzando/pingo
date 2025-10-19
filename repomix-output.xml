@@ -372,6 +372,25 @@ import ja from "../messages/ja.json";
 </svg>
 </file>
 
+<file path="scripts/docker-build.ts">
+import type { ExecSyncOptions } from "node:child_process";
+import { execSync } from "node:child_process";
+⋮----
+interface FirebaseCredentials {
+  projectId: string;
+  clientEmail: string;
+  privateKey: string;
+}
+⋮----
+async function extractFirebaseCredentials(
+  jsonFilePath: string,
+): Promise<FirebaseCredentials>
+⋮----
+function parseArguments(args: string[]):
+⋮----
+async function main(): Promise<void>
+</file>
+
 <file path="src/app/api/health/route.test.ts">
 import { NextResponse } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -424,36 +443,6 @@ interface LoginFormProps {
 async function onSubmit(values: UserLoginData)
 ⋮----
 <form onSubmit=
-</file>
-
-<file path="src/components/game/BingoCell.tsx">
-import { cn } from "@/lib/utils";
-import type { Cell } from "@/types/schema";
-⋮----
-export type BingoCellState = "CLOSE" | "OPEN" | "FREE";
-⋮----
-export interface BingoCellProps {
-
-
-
-  cell: Cell;
-
-
-
-  state?: BingoCellState;
-
-
-
-  className?: string;
-
-
-
-  onClick?: () => void;
-
-
-
-  isPartOfCompletedLine?: boolean;
-}
 </file>
 
 <file path="src/components/game/DndContextWrapper.tsx">
@@ -1095,64 +1084,6 @@ import { withMockAuthContext } from "./decorators";
 import nextIntl from "./next-intl";
 </file>
 
-<file path="scripts/docker-build.ts">
-import type { ExecSyncOptions } from "node:child_process";
-import { execSync } from "node:child_process";
-⋮----
-interface FirebaseCredentials {
-  projectId: string;
-  clientEmail: string;
-  privateKey: string;
-}
-⋮----
-async function extractFirebaseCredentials(
-  jsonFilePath: string,
-): Promise<FirebaseCredentials>
-⋮----
-function parseArguments(args: string[]):
-⋮----
-async function main(): Promise<void>
-</file>
-
-<file path="src/app/api/game/[gameId]/submission/analyze/route.test.ts">
-import type { DecodedIdToken } from "firebase-admin/auth";
-import type { NextResponse } from "next/server";
-import { ulid } from "ulid";
-import {
-  afterAll,
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from "vitest";
-import { adminAuth } from "@/lib/firebase/admin";
-import {
-  AdminGameBoardService,
-  AdminGameParticipationService,
-  AdminGameService,
-  AdminPlayerBoardService,
-  AdminSubmissionService,
-} from "@/lib/firebase/admin-collections";
-import {
-  cleanupTestUsers,
-  createApiRequest,
-} from "@/test/helpers/api-test-helpers";
-import {
-  cleanupTestGames,
-  generateTestGameTitle,
-} from "@/test/helpers/game-test-helpers";
-import type { ApiResponse } from "@/types/common";
-import { AcceptanceStatus, GameStatus, ProcessingStatus } from "@/types/common";
-import type { AnalysisResult, Cell, Game, Submission } from "@/types/schema";
-import { POST } from "./route";
-⋮----
-type MockedGenAI = typeof genAI & {
-      __getMockGenerateContent: () => ReturnType<typeof vi.fn>;
-    };
-</file>
-
 <file path="src/app/api/image/getUploadUrl/route.test.ts">
 import type { DecodedIdToken } from "firebase-admin/auth";
 import { getStorage } from "firebase-admin/storage";
@@ -1364,6 +1295,36 @@ import type { Meta, StoryObj } from "@storybook/nextjs";
 import { BingoCell } from "./BingoCell";
 ⋮----
 type Story = StoryObj<typeof meta>;
+</file>
+
+<file path="src/components/game/BingoCell.tsx">
+import { cn } from "@/lib/utils";
+import type { Cell } from "@/types/schema";
+⋮----
+export type BingoCellState = "CLOSE" | "OPEN" | "FREE";
+⋮----
+export interface BingoCellProps {
+
+
+
+  cell: Cell;
+
+
+
+  state?: BingoCellState;
+
+
+
+  className?: string;
+
+
+
+  onClick?: () => void;
+
+
+
+  isPartOfCompletedLine?: boolean;
+}
 </file>
 
 <file path="src/components/game/GameInfoCard.browser.test.tsx">
@@ -1749,53 +1710,6 @@ className={cn(badgeVariants({ variant }), className)}
   );
 </file>
 
-<file path="src/components/ui/calendar.tsx">
-import {
-  ChevronDownIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-} from "lucide-react";
-⋮----
-import {
-  type DayButton,
-  DayPicker,
-  getDefaultClassNames,
-} from "react-day-picker";
-⋮----
-import { Button, buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-⋮----
-function CalendarRoot({
-  className,
-  rootRef,
-  ...props
-}: {
-  className?: string;
-  rootRef?: React.Ref<HTMLDivElement>;
-  children?: React.ReactNode;
-})
-⋮----
-function CalendarChevron({
-  className,
-  orientation,
-  ...props
-}: {
-  className?: string;
-  orientation?: "left" | "right" | "up" | "down";
-})
-⋮----
-function CalendarWeekNumber({
-  children,
-  ...props
-}: {
-  children?: React.ReactNode;
-})
-⋮----
-data-day=
-⋮----
-className=
-</file>
-
 <file path="src/components/ui/Card.stories.tsx">
 import type { Meta, StoryObj } from "@storybook/nextjs";
 import { Button } from "./button";
@@ -2088,6 +2002,90 @@ export function userToFirestoreForTest(
 
 </file>
 
+<file path="cloudbuild.yaml">
+steps:
+
+  - name: gcr.io/cloud-builders/docker
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        docker build \
+          --no-cache \
+          -t $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA \
+          . \
+          -f Dockerfile \
+          --build-arg FIREBASE_PROJECT_ID="$$FIREBASE_PROJECT_ID" \
+          --build-arg FIREBASE_CLIENT_EMAIL="$$FIREBASE_CLIENT_EMAIL" \
+          --build-arg FIREBASE_PRIVATE_KEY="$$FIREBASE_PRIVATE_KEY" \
+          --build-arg GEMINI_API_KEY="$$GEMINI_API_KEY" \
+          --build-arg GOOGLE_CLOUD_STORAGE_BUCKET="pingo-456817-images"
+    secretEnv:
+      [
+        "FIREBASE_PROJECT_ID",
+        "FIREBASE_CLIENT_EMAIL",
+        "FIREBASE_PRIVATE_KEY",
+        "GEMINI_API_KEY",
+      ]
+    id: Build
+
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - >-
+        $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
+    id: Push
+
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk:slim"
+    args:
+      - run
+      - services
+      - update
+      - $_SERVICE_NAME
+      - "--platform=managed"
+      - >-
+        --image=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
+      - >-
+        --labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID,gcb-trigger-id=$_TRIGGER_ID
+      - "--region=$_DEPLOY_REGION"
+      - "--quiet"
+    id: Deploy
+    entrypoint: gcloud
+
+images:
+  - >-
+    $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
+
+options:
+  substitutionOption: ALLOW_LOOSE
+  logging: CLOUD_LOGGING_ONLY
+
+substitutions:
+  _AR_PROJECT_ID: pingo-456817
+  _PLATFORM: managed
+  _SERVICE_NAME: pingo
+  _TRIGGER_ID: ffafef4b-1470-4a85-9178-2f0b0adea3eb
+  _DEPLOY_REGION: asia-northeast1
+  _AR_HOSTNAME: asia-northeast1-docker.pkg.dev
+  _AR_REPOSITORY: cloud-run-source-deploy
+
+tags:
+  - gcp-cloud-build-deploy-cloud-run
+  - gcp-cloud-build-deploy-cloud-run-managed
+  - pingo
+
+availableSecrets:
+  secretManager:
+    - versionName: projects/pingo-456817/secrets/FIREBASE_PROJECT_ID/versions/latest
+      env: "FIREBASE_PROJECT_ID"
+    - versionName: projects/pingo-456817/secrets/FIREBASE_CLIENT_EMAIL/versions/latest
+      env: "FIREBASE_CLIENT_EMAIL"
+    - versionName: projects/pingo-456817/secrets/FIREBASE_PRIVATE_KEY/versions/latest
+      env: "FIREBASE_PRIVATE_KEY"
+    - versionName: projects/pingo-456817/secrets/GEMINI_API_KEY/versions/latest
+      env: "GEMINI_API_KEY"
+</file>
+
 <file path="middleware.ts">
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
@@ -2136,6 +2134,45 @@ import type { ApiResponse } from "@/types/common";
 import type { User } from "@/types/schema";
 ⋮----
 import { POST } from "./route";
+</file>
+
+<file path="src/app/api/game/[gameId]/submission/analyze/route.test.ts">
+import type { DecodedIdToken } from "firebase-admin/auth";
+import type { NextResponse } from "next/server";
+import { ulid } from "ulid";
+import {
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
+import { adminAuth } from "@/lib/firebase/admin";
+import {
+  AdminGameBoardService,
+  AdminGameParticipationService,
+  AdminGameService,
+  AdminPlayerBoardService,
+  AdminSubmissionService,
+} from "@/lib/firebase/admin-collections";
+import {
+  cleanupTestUsers,
+  createApiRequest,
+} from "@/test/helpers/api-test-helpers";
+import {
+  cleanupTestGames,
+  generateTestGameTitle,
+} from "@/test/helpers/game-test-helpers";
+import type { ApiResponse } from "@/types/common";
+import { AcceptanceStatus, GameStatus, ProcessingStatus } from "@/types/common";
+import type { AnalysisResult, Cell, Game, Submission } from "@/types/schema";
+import { POST } from "./route";
+⋮----
+type MockedGenAI = typeof genAI & {
+      __getMockGenerateContent: () => ReturnType<typeof vi.fn>;
+    };
 </file>
 
 <file path="src/app/api/game/public/route.ts">
@@ -2402,6 +2439,53 @@ type Story = StoryObj<typeof meta>;
 render: () => <Calendar disabled=
 </file>
 
+<file path="src/components/ui/calendar.tsx">
+import {
+  ChevronDownIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+} from "lucide-react";
+⋮----
+import {
+  type DayButton,
+  DayPicker,
+  getDefaultClassNames,
+} from "react-day-picker";
+⋮----
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+⋮----
+function CalendarRoot({
+  className,
+  rootRef,
+  ...props
+}: {
+  className?: string;
+  rootRef?: React.Ref<HTMLDivElement>;
+  children?: React.ReactNode;
+})
+⋮----
+function CalendarChevron({
+  className,
+  orientation,
+  ...props
+}: {
+  className?: string;
+  orientation?: "left" | "right" | "up" | "down";
+})
+⋮----
+function CalendarWeekNumber({
+  children,
+  ...props
+}: {
+  children?: React.ReactNode;
+})
+⋮----
+data-day=
+⋮----
+className=
+</file>
+
 <file path="src/components/ui/Form.stories.tsx">
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { Meta, StoryObj } from "@storybook/nextjs";
@@ -2654,88 +2738,103 @@ export function convertTimestampsToDate<T extends Record<string, unknown>>(
 }
 </file>
 
-<file path="cloudbuild.yaml">
-steps:
+<file path="Dockerfile">
+# ---------------- Build Stage ----------------
+FROM node:lts-slim AS base
 
-  - name: gcr.io/cloud-builders/docker
-    entrypoint: "bash"
-    args:
-      - "-c"
-      - |
-        docker build \
-          --no-cache \
-          -t $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA \
-          . \
-          -f Dockerfile \
-          --build-arg FIREBASE_PROJECT_ID="$$FIREBASE_PROJECT_ID" \
-          --build-arg FIREBASE_CLIENT_EMAIL="$$FIREBASE_CLIENT_EMAIL" \
-          --build-arg FIREBASE_PRIVATE_KEY="$$FIREBASE_PRIVATE_KEY" \
-          --build-arg GEMINI_API_KEY="$$GEMINI_API_KEY" \
-          --build-arg GOOGLE_CLOUD_STORAGE_BUCKET="pingo-456817-images"
-    secretEnv:
-      [
-        "FIREBASE_PROJECT_ID",
-        "FIREBASE_CLIENT_EMAIL",
-        "FIREBASE_PRIVATE_KEY",
-        "GEMINI_API_KEY",
-      ]
-    id: Build
+# Define build arguments
+ARG FIREBASE_PROJECT_ID
+ARG FIREBASE_CLIENT_EMAIL
+ARG FIREBASE_PRIVATE_KEY
+ARG GEMINI_API_KEY
+ARG GOOGLE_CLOUD_STORAGE_BUCKET="pingo-456817-images"
 
-  - name: gcr.io/cloud-builders/docker
-    args:
-      - push
-      - >-
-        $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
-    id: Push
+# Set non-public environment variables
+ENV FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID}
+ENV FIREBASE_CLIENT_EMAIL=${FIREBASE_CLIENT_EMAIL}
+ENV FIREBASE_PRIVATE_KEY=${FIREBASE_PRIVATE_KEY}
+ENV GEMINI_API_KEY=${GEMINI_API_KEY}
 
-  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk:slim"
-    args:
-      - run
-      - services
-      - update
-      - $_SERVICE_NAME
-      - "--platform=managed"
-      - >-
-        --image=$_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
-      - >-
-        --labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID,gcb-trigger-id=$_TRIGGER_ID
-      - "--region=$_DEPLOY_REGION"
-      - "--quiet"
-    id: Deploy
-    entrypoint: gcloud
+# Set publishable environment variables
+ENV GOOGLE_CLOUD_STORAGE_BUCKET=${GOOGLE_CLOUD_STORAGE_BUCKET}
+ENV NEXT_PUBLIC_BASE_URL="http://localhost:8080"
+ENV NEXT_PUBLIC_FIREBASE_PROJECT_ID="pingo-456817"
+ENV NEXT_PUBLIC_FIREBASE_API_KEY="AIzaSyCYXPVHEMWgIXpDc2j-qFuvzD79eI24dws"
+ENV NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN="pingo-456817.firebaseapp.com"
+ENV NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET="pingo-456817.firebasestorage.app"
+ENV NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID="617969816285"
+ENV NEXT_PUBLIC_FIREBASE_APP_ID="1:617969816285:web:09a7ffe5ea531b45648134"
 
-images:
-  - >-
-    $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$REPO_NAME/$_SERVICE_NAME:$COMMIT_SHA
 
-options:
-  substitutionOption: ALLOW_LOOSE
-  logging: CLOUD_LOGGING_ONLY
+# Set the working directory in the container
+WORKDIR /app
 
-substitutions:
-  _AR_PROJECT_ID: pingo-456817
-  _PLATFORM: managed
-  _SERVICE_NAME: pingo
-  _TRIGGER_ID: ffafef4b-1470-4a85-9178-2f0b0adea3eb
-  _DEPLOY_REGION: asia-northeast1
-  _AR_HOSTNAME: asia-northeast1-docker.pkg.dev
-  _AR_REPOSITORY: cloud-run-source-deploy
+# Install necessary dependencies for Next.js standalone output
+# (This step might be adjusted based on actual standalone output needs)
+# RUN apt-get update && apt-get install -y --no-install-recommends openssl
 
-tags:
-  - gcp-cloud-build-deploy-cloud-run
-  - gcp-cloud-build-deploy-cloud-run-managed
-  - pingo
+# Copy package.json and package-lock.json (or yarn.lock or pnpm-lock.yaml)
+COPY package*.json ./
 
-availableSecrets:
-  secretManager:
-    - versionName: projects/pingo-456817/secrets/FIREBASE_PROJECT_ID/versions/latest
-      env: "FIREBASE_PROJECT_ID"
-    - versionName: projects/pingo-456817/secrets/FIREBASE_CLIENT_EMAIL/versions/latest
-      env: "FIREBASE_CLIENT_EMAIL"
-    - versionName: projects/pingo-456817/secrets/FIREBASE_PRIVATE_KEY/versions/latest
-      env: "FIREBASE_PRIVATE_KEY"
-    - versionName: projects/pingo-456817/secrets/GEMINI_API_KEY/versions/latest
-      env: "GEMINI_API_KEY"
+# Install dependencies
+# Use --frozen-lockfile to ensure reproducibility
+RUN npm ci
+
+# Copy the rest of the application code
+# Use .dockerignore to exclude unnecessary files
+COPY . .
+
+# Build the Next.js application
+# This will generate the .next directory with the production build
+RUN npm run build
+
+
+# ---------------- Production Stage ----------------
+FROM node:lts-slim AS production
+
+# Define build arguments for Firebase credentials in production stage
+ARG FIREBASE_PROJECT_ID
+ARG FIREBASE_CLIENT_EMAIL
+ARG FIREBASE_PRIVATE_KEY
+ARG GEMINI_API_KEY
+ARG GOOGLE_CLOUD_STORAGE_BUCKET="pingo-456817-images"
+
+ENV NODE_ENV=production
+
+# Next.js server runs on port 3000 by default, Cloud Run expects PORT env var
+ENV PORT=8080
+
+# Set non-public credentials for production stage
+ENV FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID}
+ENV FIREBASE_CLIENT_EMAIL=${FIREBASE_CLIENT_EMAIL}
+ENV FIREBASE_PRIVATE_KEY=${FIREBASE_PRIVATE_KEY}
+ENV GEMINI_API_KEY=${GEMINI_API_KEY}
+
+# Set publishable environment variables for production stage
+ENV GOOGLE_CLOUD_STORAGE_BUCKET=${GOOGLE_CLOUD_STORAGE_BUCKET}
+ENV NEXT_PUBLIC_BASE_URL=http://localhost:8080
+ENV NEXT_PUBLIC_FIREBASE_PROJECT_ID="pingo-456817"
+ENV NEXT_PUBLIC_FIREBASE_API_KEY="AIzaSyCYXPVHEMWgIXpDc2j-qFuvzD79eI24dws"
+ENV NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN="pingo-456817.firebaseapp.com"
+ENV NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET="pingo-456817.firebasestorage.app"
+ENV NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID="617969816285"
+ENV NEXT_PUBLIC_FIREBASE_APP_ID="1:617969816285:web:09a7ffe5ea531b45648134"
+
+# Set the working directory in the container
+WORKDIR /app
+
+COPY --from=base /app/next.config.ts ./
+COPY --from=base /app/messages ./messages
+COPY --from=base /app/public ./public
+COPY --from=base /app/.next/standalone ./
+COPY --from=base /app/.next/static ./.next/static
+
+# Expose the port the app runs on (defined by PORT env var)
+EXPOSE 8080
+
+# Command to run the application
+# Uses the Node.js server included in the standalone output
+CMD ["node", "server.js"]
 </file>
 
 <file path="src/app/api/auth/login/route.test.ts">
@@ -2880,6 +2979,69 @@ import type { Event } from "@/types/schema";
 import { GET, POST } from "./route";
 </file>
 
+<file path="src/app/api/game/[gameId]/playerBoard/[userId]/route.test.ts">
+import type { DecodedIdToken } from "firebase-admin/auth";
+import type { NextResponse } from "next/server";
+import { ulid } from "ulid";
+import {
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
+import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
+import {
+  cleanupTestUsers,
+  createApiRequest,
+} from "@/test/helpers/api-test-helpers";
+import {
+  cleanupTestGames,
+  generateTestGameTitle,
+} from "@/test/helpers/game-test-helpers";
+import type { ApiResponse } from "@/types/common";
+import { GameStatus, LineType, Role } from "@/types/common";
+import { playerBoardToFirestore } from "@/types/game";
+import type { PlayerBoard } from "@/types/schema";
+import { GET, PUT } from "./route";
+</file>
+
+<file path="src/app/api/game/[gameId]/submission/[submissionId]/route.test.ts">
+import type { DecodedIdToken } from "firebase-admin/auth";
+import type { NextResponse } from "next/server";
+import { ulid } from "ulid";
+import {
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
+import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
+import {
+  cleanupTestUsers,
+  createApiRequest,
+} from "@/test/helpers/api-test-helpers";
+import {
+  cleanupTestGames,
+  generateTestGameTitle,
+} from "@/test/helpers/game-test-helpers";
+import type { ApiResponse } from "@/types/common";
+import {
+  AcceptanceStatus,
+  GameStatus,
+  ProcessingStatus,
+  Role,
+} from "@/types/common";
+import { submissionToFirestore } from "@/types/game";
+import type { Submission } from "@/types/schema";
+import { GET, PUT } from "./route";
+</file>
+
 <file path="src/app/api/game/create/route.test.ts">
 import type { NextResponse } from "next/server";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
@@ -2908,43 +3070,6 @@ import { z } from "zod";
 import { adminAuth } from "@/lib/firebase/admin";
 import { dateToISOString } from "@/types/firestore";
 import { imageSubmissionDataSchema } from "@/types/schema";
-⋮----
-export async function POST(request: NextRequest)
-</file>
-
-<file path="src/app/api/subjects/check/route.test.ts">
-import { beforeAll, describe, expect, it } from "vitest";
-import { createApiRequest } from "@/test/helpers/api-test-helpers";
-import { POST as generatePOST } from "../generate/route";
-import { POST } from "./route";
-⋮----
-interface CheckIssue {
-  subject: string;
-  reason: string;
-}
-</file>
-
-<file path="src/app/api/subjects/check/route.ts">
-import { GoogleGenAI, Type } from "@google/genai";
-import { type NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
-import type { Locale } from "@/i18n/config";
-import { GEMINI_MODEL, GEMINI_THINKING_BUDGET } from "@/lib/constants";
-import { getUserLocale } from "@/services/locale";
-⋮----
-type CheckSubjectsRequest = z.infer<typeof checkSubjectsSchema>;
-⋮----
-interface CheckIssue {
-  subject: string;
-  reason: string;
-}
-⋮----
-interface CheckResponse {
-  ok: boolean;
-  issues?: CheckIssue[];
-}
-⋮----
-const getPromptTemplate = (params: CheckSubjectsRequest) =>
 ⋮----
 export async function POST(request: NextRequest)
 </file>
@@ -3086,105 +3211,6 @@ const ConfettiButtonComponent = ({
 const handleClick = async (event: React.MouseEvent<HTMLButtonElement>) =>
 </file>
 
-<file path="Dockerfile">
-# ---------------- Build Stage ----------------
-FROM node:lts-slim AS base
-
-# Define build arguments
-ARG FIREBASE_PROJECT_ID
-ARG FIREBASE_CLIENT_EMAIL
-ARG FIREBASE_PRIVATE_KEY
-ARG GEMINI_API_KEY
-ARG GOOGLE_CLOUD_STORAGE_BUCKET="pingo-456817-images"
-
-# Set non-public environment variables
-ENV FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID}
-ENV FIREBASE_CLIENT_EMAIL=${FIREBASE_CLIENT_EMAIL}
-ENV FIREBASE_PRIVATE_KEY=${FIREBASE_PRIVATE_KEY}
-ENV GEMINI_API_KEY=${GEMINI_API_KEY}
-
-# Set publishable environment variables
-ENV GOOGLE_CLOUD_STORAGE_BUCKET=${GOOGLE_CLOUD_STORAGE_BUCKET}
-ENV NEXT_PUBLIC_BASE_URL="http://localhost:8080"
-ENV NEXT_PUBLIC_FIREBASE_PROJECT_ID="pingo-456817"
-ENV NEXT_PUBLIC_FIREBASE_API_KEY="AIzaSyCYXPVHEMWgIXpDc2j-qFuvzD79eI24dws"
-ENV NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN="pingo-456817.firebaseapp.com"
-ENV NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET="pingo-456817.firebasestorage.app"
-ENV NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID="617969816285"
-ENV NEXT_PUBLIC_FIREBASE_APP_ID="1:617969816285:web:09a7ffe5ea531b45648134"
-
-
-# Set the working directory in the container
-WORKDIR /app
-
-# Install necessary dependencies for Next.js standalone output
-# (This step might be adjusted based on actual standalone output needs)
-# RUN apt-get update && apt-get install -y --no-install-recommends openssl
-
-# Copy package.json and package-lock.json (or yarn.lock or pnpm-lock.yaml)
-COPY package*.json ./
-
-# Install dependencies
-# Use --frozen-lockfile to ensure reproducibility
-RUN npm ci
-
-# Copy the rest of the application code
-# Use .dockerignore to exclude unnecessary files
-COPY . .
-
-# Build the Next.js application
-# This will generate the .next directory with the production build
-RUN npm run build
-
-
-# ---------------- Production Stage ----------------
-FROM node:lts-slim AS production
-
-# Define build arguments for Firebase credentials in production stage
-ARG FIREBASE_PROJECT_ID
-ARG FIREBASE_CLIENT_EMAIL
-ARG FIREBASE_PRIVATE_KEY
-ARG GEMINI_API_KEY
-ARG GOOGLE_CLOUD_STORAGE_BUCKET="pingo-456817-images"
-
-ENV NODE_ENV=production
-
-# Next.js server runs on port 3000 by default, Cloud Run expects PORT env var
-ENV PORT=8080
-
-# Set non-public credentials for production stage
-ENV FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID}
-ENV FIREBASE_CLIENT_EMAIL=${FIREBASE_CLIENT_EMAIL}
-ENV FIREBASE_PRIVATE_KEY=${FIREBASE_PRIVATE_KEY}
-ENV GEMINI_API_KEY=${GEMINI_API_KEY}
-
-# Set publishable environment variables for production stage
-ENV GOOGLE_CLOUD_STORAGE_BUCKET=${GOOGLE_CLOUD_STORAGE_BUCKET}
-ENV NEXT_PUBLIC_BASE_URL=http://localhost:8080
-ENV NEXT_PUBLIC_FIREBASE_PROJECT_ID="pingo-456817"
-ENV NEXT_PUBLIC_FIREBASE_API_KEY="AIzaSyCYXPVHEMWgIXpDc2j-qFuvzD79eI24dws"
-ENV NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN="pingo-456817.firebaseapp.com"
-ENV NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET="pingo-456817.firebasestorage.app"
-ENV NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID="617969816285"
-ENV NEXT_PUBLIC_FIREBASE_APP_ID="1:617969816285:web:09a7ffe5ea531b45648134"
-
-# Set the working directory in the container
-WORKDIR /app
-
-COPY --from=base /app/next.config.ts ./
-COPY --from=base /app/messages ./messages
-COPY --from=base /app/public ./public
-COPY --from=base /app/.next/standalone ./
-COPY --from=base /app/.next/static ./.next/static
-
-# Expose the port the app runs on (defined by PORT env var)
-EXPOSE 8080
-
-# Command to run the application
-# Uses the Node.js server included in the standalone output
-CMD ["node", "server.js"]
-</file>
-
 <file path="src/app/api/auth/me/route.test.ts">
 import bcrypt from "bcrypt";
 import type { NextResponse } from "next/server";
@@ -3250,69 +3276,6 @@ export async function GET(
     const { gameId } = await params;
 
 if (!gameId)
-</file>
-
-<file path="src/app/api/game/[gameId]/playerBoard/[userId]/route.test.ts">
-import type { DecodedIdToken } from "firebase-admin/auth";
-import type { NextResponse } from "next/server";
-import { ulid } from "ulid";
-import {
-  afterAll,
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from "vitest";
-import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
-import {
-  cleanupTestUsers,
-  createApiRequest,
-} from "@/test/helpers/api-test-helpers";
-import {
-  cleanupTestGames,
-  generateTestGameTitle,
-} from "@/test/helpers/game-test-helpers";
-import type { ApiResponse } from "@/types/common";
-import { GameStatus, LineType, Role } from "@/types/common";
-import { playerBoardToFirestore } from "@/types/game";
-import type { PlayerBoard } from "@/types/schema";
-import { GET, PUT } from "./route";
-</file>
-
-<file path="src/app/api/game/[gameId]/submission/[submissionId]/route.test.ts">
-import type { DecodedIdToken } from "firebase-admin/auth";
-import type { NextResponse } from "next/server";
-import { ulid } from "ulid";
-import {
-  afterAll,
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from "vitest";
-import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
-import {
-  cleanupTestUsers,
-  createApiRequest,
-} from "@/test/helpers/api-test-helpers";
-import {
-  cleanupTestGames,
-  generateTestGameTitle,
-} from "@/test/helpers/game-test-helpers";
-import type { ApiResponse } from "@/types/common";
-import {
-  AcceptanceStatus,
-  GameStatus,
-  ProcessingStatus,
-  Role,
-} from "@/types/common";
-import { submissionToFirestore } from "@/types/game";
-import type { Submission } from "@/types/schema";
-import { GET, PUT } from "./route";
 </file>
 
 <file path="src/app/api/game/[gameId]/submission/route.test.ts">
@@ -3386,7 +3349,19 @@ import type { Game } from "@/types/schema";
 import { PUT } from "./route";
 </file>
 
-<file path="src/app/api/subjects/generate/route.ts">
+<file path="src/app/api/subjects/check/route.test.ts">
+import { beforeAll, describe, expect, it } from "vitest";
+import { createApiRequest } from "@/test/helpers/api-test-helpers";
+import { POST as generatePOST } from "../generate/route";
+import { POST } from "./route";
+⋮----
+interface CheckIssue {
+  subject: string;
+  reason: string;
+}
+</file>
+
+<file path="src/app/api/subjects/check/route.ts">
 import { GoogleGenAI, Type } from "@google/genai";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
@@ -3394,19 +3369,21 @@ import type { Locale } from "@/i18n/config";
 import { GEMINI_MODEL, GEMINI_THINKING_BUDGET } from "@/lib/constants";
 import { getUserLocale } from "@/services/locale";
 ⋮----
-type GenerateSubjectsRequest = z.infer<typeof generateSubjectsSchema>;
+type CheckSubjectsRequest = z.infer<typeof checkSubjectsSchema>;
 ⋮----
-const getPromptTemplate = (params: GenerateSubjectsRequest) =>
+interface CheckIssue {
+  subject: string;
+  reason: string;
+}
+⋮----
+interface CheckResponse {
+  ok: boolean;
+  issues?: CheckIssue[];
+}
+⋮----
+const getPromptTemplate = (params: CheckSubjectsRequest) =>
 ⋮----
 export async function POST(request: NextRequest)
-⋮----
-// Remove empty strings
-⋮----
-// Remove duplicates (case-insensitive)
-⋮----
-// Warn if we have fewer candidates than requested
-⋮----
-// This should be rare with structured output, but keep as fallback
 </file>
 
 <file path="src/app/debug/image-upload/page.tsx">
@@ -3503,22 +3480,6 @@ const mockFetchForParticipatingGames = (_gameIds: string[]) =>
 type Story = StoryObj<typeof meta>;
 </file>
 
-<file path="src/services/image-upload.ts">
-import type {
-  ImageSubmissionData,
-  ImageSubmissionResult,
-  ProcessedImage,
-} from "@/types/schema";
-⋮----
-export async function submitImage(
-  processedImage: ProcessedImage,
-  submissionData: ImageSubmissionData,
-  authToken: string,
-): Promise<ImageSubmissionResult>
-⋮----
-// Step 4: Analyze image for bingo matching
-</file>
-
 <file path="src/types/game.ts">
 import type {
   AcceptanceStatus,
@@ -3551,6 +3512,7 @@ export interface GameDocument {
   expiresAt: TimestampInterface;
   isPublic: boolean;
   isPhotoSharingEnabled: boolean;
+  skipImageCheck: boolean;
   requiredBingoLines: number;
   confidenceThreshold: number;
   maxSubmissionsPerUser: number;
@@ -3681,34 +3643,6 @@ export function eventFromFirestore(doc: EventDocument): Event
 export function eventToFirestore(event: Event): EventDocument
 </file>
 
-<file path="vitest.config.mts">
-import react from "@vitejs/plugin-react";
-import tsconfigPaths from "vite-tsconfig-paths";
-import { coverageConfigDefaults, defineConfig } from "vitest/config";
-⋮----
-envDir: ".", // Load .env files from root directory
-⋮----
-// Limit concurrency to avoid Gemini API rate limits
-maxForks: 3, // Run at most 3 test files in parallel
-⋮----
-setupFiles: ["./vitest.setup.ts"], // Add setup file
-testTimeout: 30000, // Increase timeout for Gemini API operations
-⋮----
-setupFiles: ["./vitest.browser.setup.ts"], // Add browser setup file
-⋮----
-"**/*.stories.{ts,tsx}", // Exclude Storybook stories
-"**/stories/example/*.tsx", // Exclude example stories
-"next.config.ts", // Exclude Next.js config
-"playwright.config.ts", // Exclude Playwright config
-"postcss.config.mjs", // Exclude PostCSS config
-"scripts/**/*.ts", // Exclude scripts
-"src/app/debug/**/*", // Exclude debug pages
-"src/components/magicui/*.tsx", // Exclude Magic UI components
-"src/components/ui/*.tsx", // Exclude shadcn/ui components
-"src/i18n/*.ts", // Exclude i18n config
-"storybook-static/**", // Exclude Storybook static files
-</file>
-
 <file path="src/app/api/auth/login/route.ts">
 import bcrypt from "bcrypt";
 import { type NextRequest, NextResponse } from "next/server";
@@ -3823,17 +3757,55 @@ export async function POST(
 // Map specific transaction errors to appropriate response codes
 </file>
 
-<file path="src/app/api/image/check/route.test.ts">
-import type { DecodedIdToken } from "firebase-admin/auth";
+<file path="src/app/api/game/[gameId]/playerBoard/[userId]/route.ts">
 import type { NextRequest } from "next/server";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { NextResponse } from "next/server";
+import { z } from "zod";
 import { adminAuth } from "@/lib/firebase/admin";
-import { POST } from "./route";
+import {
+  AdminGameParticipationService,
+  AdminGameService,
+  AdminPlayerBoardService,
+} from "@/lib/firebase/admin-collections";
+import type { ApiResponse } from "@/types/common";
+import {
+  cellStateApiSchema,
+  completedLineApiSchema,
+  type PlayerBoard,
+} from "@/types/schema";
 ⋮----
-const createMockRequest = (
-    body: unknown,
-    authHeader?: string,
-): NextRequest =>
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ gameId: string; userId: string }> },
+): Promise<NextResponse<ApiResponse<PlayerBoard>>>
+⋮----
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ gameId: string; userId: string }> },
+): Promise<NextResponse<ApiResponse<PlayerBoard>>>
+</file>
+
+<file path="src/app/api/subjects/generate/route.ts">
+import { GoogleGenAI, Type } from "@google/genai";
+import { type NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import type { Locale } from "@/i18n/config";
+import { GEMINI_MODEL, GEMINI_THINKING_BUDGET } from "@/lib/constants";
+import { getUserLocale } from "@/services/locale";
+⋮----
+type GenerateSubjectsRequest = z.infer<typeof generateSubjectsSchema>;
+⋮----
+const getPromptTemplate = (params: GenerateSubjectsRequest) =>
+⋮----
+export async function POST(request: NextRequest)
+⋮----
+// Remove empty strings
+⋮----
+// Remove duplicates (case-insensitive)
+⋮----
+// Warn if we have fewer candidates than requested
+⋮----
+// This should be rare with structured output, but keep as fallback
 </file>
 
 <file path="src/app/game/[gameId]/hooks/useGameData.ts">
@@ -3857,6 +3829,178 @@ interface GameDataState {
 export function useGameData(gameId: string)
 ⋮----
 const setupRealtimeListener = async () =>
+</file>
+
+<file path="src/services/image-upload.ts">
+import type {
+  ImageSubmissionData,
+  ImageSubmissionResult,
+  ProcessedImage,
+} from "@/types/schema";
+⋮----
+export async function submitImage(
+  processedImage: ProcessedImage,
+  submissionData: ImageSubmissionData,
+  authToken: string,
+): Promise<ImageSubmissionResult>
+⋮----
+// Step 4: Analyze image for bingo matching
+</file>
+
+<file path="vitest.config.mts">
+import react from "@vitejs/plugin-react";
+import tsconfigPaths from "vite-tsconfig-paths";
+import { coverageConfigDefaults, defineConfig } from "vitest/config";
+⋮----
+envDir: ".", // Load .env files from root directory
+⋮----
+// Limit concurrency to avoid Gemini API rate limits
+maxForks: 3, // Run at most 3 test files in parallel
+⋮----
+setupFiles: ["./vitest.setup.ts"], // Add setup file
+testTimeout: 30000, // Increase timeout for Gemini API operations
+⋮----
+setupFiles: ["./vitest.browser.setup.ts"], // Add browser setup file
+⋮----
+"**/*.stories.{ts,tsx}", // Exclude Storybook stories
+"**/stories/example/*.tsx", // Exclude example stories
+"next.config.ts", // Exclude Next.js config
+"playwright.config.ts", // Exclude Playwright config
+"postcss.config.mjs", // Exclude PostCSS config
+"scripts/**/*.ts", // Exclude scripts
+"src/app/debug/**/*", // Exclude debug pages
+"src/components/magicui/*.tsx", // Exclude Magic UI components
+"src/components/ui/*.tsx", // Exclude shadcn/ui components
+"src/i18n/*.ts", // Exclude i18n config
+"storybook-static/**", // Exclude Storybook static files
+</file>
+
+<file path="src/app/api/game/[gameId]/events/route.ts">
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import { ulid } from "ulid";
+import { adminAuth } from "@/lib/firebase/admin";
+import {
+  AdminEventService,
+  AdminGameParticipationService,
+  AdminGameService,
+} from "@/lib/firebase/admin-collections";
+import type { ApiResponse } from "@/types/common";
+import { type Event, eventSchema } from "@/types/schema";
+⋮----
+async function authenticateUser(
+  request: NextRequest,
+): Promise<string | NextResponse<ApiResponse<never>>>
+⋮----
+async function verifyGameParticipant(
+  gameId: string,
+  userId: string,
+): Promise<NextResponse<ApiResponse<never>> | null>
+⋮----
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ gameId: string }> },
+): Promise<NextResponse<ApiResponse<Event[]>>>
+⋮----
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ gameId: string }> },
+): Promise<NextResponse<ApiResponse<Event>>>
+</file>
+
+<file path="src/app/api/game/[gameId]/route.ts">
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import { z } from "zod";
+import { validateGameId } from "@/lib/api-utils";
+import { adminAuth } from "@/lib/firebase/admin";
+import {
+  AdminGameParticipationService,
+  AdminGameService,
+} from "@/lib/firebase/admin-collections";
+import type { ApiResponse } from "@/types/common";
+import { dateToISOString } from "@/types/firestore";
+import type { Game } from "@/types/schema";
+import { gameSchema } from "@/types/schema";
+⋮----
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ gameId: string }> },
+)
+⋮----
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ gameId: string }> },
+): Promise<NextResponse<ApiResponse<Game>>>
+</file>
+
+<file path="src/app/api/image/check/route.test.ts">
+import type { DecodedIdToken } from "firebase-admin/auth";
+import type { NextRequest } from "next/server";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { adminAuth } from "@/lib/firebase/admin";
+import { AdminGameService } from "@/lib/firebase/admin-collections";
+import { POST } from "./route";
+⋮----
+const createMockRequest = (
+    body: unknown,
+    authHeader?: string,
+): NextRequest =>
+</file>
+
+<file path="src/app/game/[gameId]/share/page.tsx">
+import {
+  ActivityIcon,
+  CalendarIcon,
+  PercentIcon,
+  PlayIcon,
+  TableIcon,
+} from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
+import { BingoBoard } from "@/components/game/BingoBoard";
+import { InfoCard } from "@/components/game/InfoCard";
+import { QRCodeCard } from "@/components/game/QRCodeCard";
+import { HyperText } from "@/components/magicui/hyper-text";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
+import { useGameJoin } from "@/hooks/useGameJoin";
+import { useGameParticipation } from "@/hooks/useGameParticipation";
+import { BASE_URL } from "@/lib/constants";
+import { formatDate } from "@/lib/utils";
+import { GameStatus } from "@/types/common";
+import type { Game, GameBoard } from "@/types/schema";
+⋮----
+async function fetchData()
+⋮----
+const handleJoinClick = async () =>
+⋮----
+// Already participating, just navigate to game page
+⋮----
+// Not participating yet, join the game first
+⋮----
+// Successfully joined or already participating, navigate to game page
+⋮----
+// Join failed, but still try to navigate (user might already be joined)
+⋮----
+// Get the current URL for QR code
+⋮----
+// Format game status for display
+⋮----
+{/* Game information header */}
+⋮----
+{/* Play/Join game button */}
+⋮----
+{/* QR code (public games only) or Game ID (private games) */}
+⋮----
+{/* Bingo board preview */}
+⋮----
+{/* Game settings information */}
+⋮----
+title=
+value=
 </file>
 
 <file path="src/app/game/create/page.tsx">
@@ -3922,6 +4066,17 @@ const onSubmit: SubmitHandler<GameCreateFormValues> = async (data) =>
 disabled=
 </file>
 
+<file path="src/components/game/GameInfo.stories.tsx">
+import { faker } from "@faker-js/faker";
+import type { Meta, StoryObj } from "@storybook/nextjs";
+import { GAME_ID_LENGTH } from "@/lib/constants";
+import { GameStatus } from "@/types/common";
+import type { Game } from "@/types/schema";
+import { GameInfo } from "./GameInfo";
+⋮----
+type Story = StoryObj<typeof meta>;
+</file>
+
 <file path="src/components/game/ImageUpload.tsx">
 import { Image as ImageIcon, Loader2, Upload, X } from "lucide-react";
 import Image from "next/image";
@@ -3964,159 +4119,6 @@ console.error("Image preview error:", error);
 ⋮----
 e.stopPropagation();
 handleUpload();
-</file>
-
-<file path="src/app/api/game/[gameId]/events/route.ts">
-import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
-import { ulid } from "ulid";
-import { adminAuth } from "@/lib/firebase/admin";
-import {
-  AdminEventService,
-  AdminGameParticipationService,
-  AdminGameService,
-} from "@/lib/firebase/admin-collections";
-import type { ApiResponse } from "@/types/common";
-import { type Event, eventSchema } from "@/types/schema";
-⋮----
-async function authenticateUser(
-  request: NextRequest,
-): Promise<string | NextResponse<ApiResponse<never>>>
-⋮----
-async function verifyGameParticipant(
-  gameId: string,
-  userId: string,
-): Promise<NextResponse<ApiResponse<never>> | null>
-⋮----
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ gameId: string }> },
-): Promise<NextResponse<ApiResponse<Event[]>>>
-⋮----
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ gameId: string }> },
-): Promise<NextResponse<ApiResponse<Event>>>
-</file>
-
-<file path="src/app/api/game/[gameId]/playerBoard/[userId]/route.ts">
-import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
-import { z } from "zod";
-import { adminAuth } from "@/lib/firebase/admin";
-import {
-  AdminGameParticipationService,
-  AdminGameService,
-  AdminPlayerBoardService,
-} from "@/lib/firebase/admin-collections";
-import type { ApiResponse } from "@/types/common";
-import {
-  cellStateApiSchema,
-  completedLineApiSchema,
-  type PlayerBoard,
-} from "@/types/schema";
-⋮----
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ gameId: string; userId: string }> },
-): Promise<NextResponse<ApiResponse<PlayerBoard>>>
-⋮----
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ gameId: string; userId: string }> },
-): Promise<NextResponse<ApiResponse<PlayerBoard>>>
-</file>
-
-<file path="src/app/api/game/[gameId]/route.ts">
-import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
-import { z } from "zod";
-import { validateGameId } from "@/lib/api-utils";
-import { adminAuth } from "@/lib/firebase/admin";
-import {
-  AdminGameParticipationService,
-  AdminGameService,
-} from "@/lib/firebase/admin-collections";
-import type { ApiResponse } from "@/types/common";
-import { dateToISOString } from "@/types/firestore";
-import type { Game } from "@/types/schema";
-import { gameSchema } from "@/types/schema";
-⋮----
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ gameId: string }> },
-)
-⋮----
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ gameId: string }> },
-): Promise<NextResponse<ApiResponse<Game>>>
-</file>
-
-<file path="src/app/game/[gameId]/share/page.tsx">
-import {
-  ActivityIcon,
-  CalendarIcon,
-  PercentIcon,
-  PlayIcon,
-  TableIcon,
-} from "lucide-react";
-import { useParams, useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
-import { BingoBoard } from "@/components/game/BingoBoard";
-import { InfoCard } from "@/components/game/InfoCard";
-import { QRCodeCard } from "@/components/game/QRCodeCard";
-import { HyperText } from "@/components/magicui/hyper-text";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { useAuth } from "@/contexts/AuthContext";
-import { useGameJoin } from "@/hooks/useGameJoin";
-import { useGameParticipation } from "@/hooks/useGameParticipation";
-import { BASE_URL } from "@/lib/constants";
-import { formatDate } from "@/lib/utils";
-import { GameStatus } from "@/types/common";
-import type { Game, GameBoard } from "@/types/schema";
-⋮----
-async function fetchData()
-⋮----
-const handleJoinClick = async () =>
-⋮----
-// Already participating, just navigate to game page
-⋮----
-// Not participating yet, join the game first
-⋮----
-// Successfully joined or already participating, navigate to game page
-⋮----
-// Join failed, but still try to navigate (user might already be joined)
-⋮----
-// Get the current URL for QR code
-⋮----
-// Format game status for display
-⋮----
-{/* Game information header */}
-⋮----
-{/* Play/Join game button */}
-⋮----
-{/* QR code (public games only) or Game ID (private games) */}
-⋮----
-{/* Bingo board preview */}
-⋮----
-{/* Game settings information */}
-⋮----
-title=
-value=
-</file>
-
-<file path="src/components/game/GameInfo.stories.tsx">
-import { faker } from "@faker-js/faker";
-import type { Meta, StoryObj } from "@storybook/nextjs";
-import { GAME_ID_LENGTH } from "@/lib/constants";
-import { GameStatus } from "@/types/common";
-import type { Game } from "@/types/schema";
-import { GameInfo } from "./GameInfo";
-⋮----
-type Story = StoryObj<typeof meta>;
 </file>
 
 <file path="src/components/game/ParticipantsList.tsx">
@@ -4177,47 +4179,28 @@ export interface ParticipantsListProps {
 const getRoleBadge = (role?: Role) =>
 </file>
 
-<file path="src/app/api/game/[gameId]/submission/analyze/route.ts">
-import { GoogleGenAI, Type } from "@google/genai";
+<file path="src/app/api/game/[gameId]/submission/[submissionId]/route.ts">
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { z } from "zod";
-import { resolveCellId } from "@/lib/cell-utils";
-import { GEMINI_MODEL, GEMINI_THINKING_BUDGET } from "@/lib/constants";
 import { adminAuth } from "@/lib/firebase/admin";
 import {
-  AdminGameBoardService,
+  AdminBatchService,
   AdminGameParticipationService,
-  AdminGameService,
-  AdminPlayerBoardService,
+  AdminSubmissionService,
 } from "@/lib/firebase/admin-collections";
 import type { ApiResponse } from "@/types/common";
-import { AcceptanceStatus } from "@/types/common";
-import type { AnalysisResult, Cell } from "@/types/schema";
-import { analysisResultSchema } from "@/types/schema";
+import { ProcessingStatus } from "@/types/common";
+import { type Submission, submissionSchema } from "@/types/schema";
 ⋮----
-async function authenticateUser(
+export async function GET(
   request: NextRequest,
-): Promise<string | NextResponse<ApiResponse<never>>>
+  { params }: { params: Promise<{ gameId: string; submissionId: string }> },
+): Promise<NextResponse<ApiResponse<Submission>>>
 ⋮----
-async function verifyGameParticipant(
-  gameId: string,
-  userId: string,
-): Promise<NextResponse<ApiResponse<never>> | null>
-⋮----
-async function getAvailableCells(
-  gameId: string,
-  userId: string,
-): Promise<Cell[]>
-⋮----
-function getAnalysisPrompt(availableCells: Cell[], gameTheme: string): string
-⋮----
-async function fetchImageAsBase64(imageUrl: string): Promise<string>
-⋮----
-export async function POST(
+export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ gameId: string }> },
-): Promise<NextResponse<ApiResponse<AnalysisResult>>>
+  { params }: { params: Promise<{ gameId: string; submissionId: string }> },
+): Promise<NextResponse<ApiResponse<Submission>>>
 </file>
 
 <file path="src/components/game/SubmissionResult.tsx">
@@ -4270,30 +4253,6 @@ export interface SubmissionResultProps {
 const getStatusConfig = () =>
 ⋮----
 <StatusIcon className=
-</file>
-
-<file path="src/app/api/game/[gameId]/submission/[submissionId]/route.ts">
-import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
-import { adminAuth } from "@/lib/firebase/admin";
-import {
-  AdminBatchService,
-  AdminGameParticipationService,
-  AdminSubmissionService,
-} from "@/lib/firebase/admin-collections";
-import type { ApiResponse } from "@/types/common";
-import { ProcessingStatus } from "@/types/common";
-import { type Submission, submissionSchema } from "@/types/schema";
-⋮----
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ gameId: string; submissionId: string }> },
-): Promise<NextResponse<ApiResponse<Submission>>>
-⋮----
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ gameId: string; submissionId: string }> },
-): Promise<NextResponse<ApiResponse<Submission>>>
 </file>
 
 <file path="src/app/api/game/create/route.ts">
@@ -4428,6 +4387,49 @@ Pingoは、AIによる画像判定を活用したビンゴゲームです。
 ## リファレンス
 
 - [Tailwind CSS](https://tailwindcss.com/docs/installation/using-vite)
+</file>
+
+<file path="src/app/api/game/[gameId]/submission/analyze/route.ts">
+import { GoogleGenAI, Type } from "@google/genai";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import { z } from "zod";
+import { resolveCellId } from "@/lib/cell-utils";
+import { GEMINI_MODEL, GEMINI_THINKING_BUDGET } from "@/lib/constants";
+import { adminAuth } from "@/lib/firebase/admin";
+import {
+  AdminGameBoardService,
+  AdminGameParticipationService,
+  AdminGameService,
+  AdminPlayerBoardService,
+} from "@/lib/firebase/admin-collections";
+import type { ApiResponse } from "@/types/common";
+import { AcceptanceStatus } from "@/types/common";
+import type { AnalysisResult, Cell } from "@/types/schema";
+import { analysisResultSchema } from "@/types/schema";
+⋮----
+async function authenticateUser(
+  request: NextRequest,
+): Promise<string | NextResponse<ApiResponse<never>>>
+⋮----
+async function verifyGameParticipant(
+  gameId: string,
+  userId: string,
+): Promise<NextResponse<ApiResponse<never>> | null>
+⋮----
+async function getAvailableCells(
+  gameId: string,
+  userId: string,
+): Promise<Cell[]>
+⋮----
+function getAnalysisPrompt(availableCells: Cell[], gameTheme: string): string
+⋮----
+async function fetchImageAsBase64(imageUrl: string): Promise<string>
+⋮----
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ gameId: string }> },
+): Promise<NextResponse<ApiResponse<AnalysisResult>>>
 </file>
 
 <file path="src/app/api/game/[gameId]/submission/route.ts">
@@ -4566,6 +4568,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { GEMINI_MODEL, GEMINI_THINKING_BUDGET } from "@/lib/constants";
 import { adminAuth } from "@/lib/firebase/admin";
+import { AdminGameService } from "@/lib/firebase/admin-collections";
 import type { ApiResponse } from "@/types/common";
 ⋮----
 async function authenticateUser(
@@ -4579,111 +4582,6 @@ export async function POST(
 > {
   try {
     console.log("ℹ️ XXX: ~ image/check/route.ts ~ POST called");
-</file>
-
-<file path="src/types/schema.ts">
-import { z } from "zod";
-import {
-  AcceptanceStatus,
-  GameStatus,
-  LineType,
-  NotificationDisplayType,
-  NotificationType,
-  ProcessingStatus,
-  Role,
-} from "./common";
-⋮----
-export interface ImageProcessingOptions {
-
-
-
-  maxLongSide: number;
-
-
-
-  quality: number;
-
-
-
-  format: "image/jpeg";
-}
-⋮----
-export interface ProcessedImage {
-
-
-
-  blob: Blob;
-
-
-
-  originalName: string;
-
-
-
-  originalSize: number;
-
-
-
-  processedSize: number;
-
-
-
-  originalDimensions: {
-    width: number;
-    height: number;
-  };
-
-
-
-  processedDimensions: {
-    width: number;
-    height: number;
-  };
-}
-⋮----
-export interface ImageUploadProps {
-  gameId: string;
-  onImageProcessed?: (processedImage: ProcessedImage) => void;
-  onUploadStart?: () => void;
-  onUploadComplete?: (
-    success: boolean,
-    result?: ImageSubmissionResult,
-    error?: string,
-  ) => void;
-  isUploading?: boolean;
-  className?: string;
-  disabled?: boolean;
-}
-⋮----
-export type User = z.infer<typeof userSchema>;
-export type UserCreationData = z.infer<typeof userCreationSchema>;
-export type UserLoginData = z.infer<typeof userLoginSchema>;
-export type Notification = z.infer<typeof notificationSchema>;
-export type GameParticipation = z.infer<typeof gameParticipationSchema>;
-export type Cell = z.infer<typeof cellSchema>;
-export type CellState = z.infer<typeof cellStateSchema>;
-export type CompletedLine = z.infer<typeof completedLineSchema>;
-export type PlayerBoard = z.infer<typeof playerBoardSchema>;
-export type GameBoard = z.infer<typeof gameBoardSchema>;
-export type Game = z.infer<typeof gameSchema>;
-export type GameCreationData = z.infer<typeof gameCreationSchema>;
-export type Submission = z.infer<typeof submissionSchema>;
-export type Event = z.infer<typeof eventSchema>;
-export type ImageSubmissionData = z.infer<typeof imageSubmissionDataSchema>;
-export type ImageSubmissionResult = z.infer<typeof imageSubmissionResultSchema>;
-export type AnalysisResult = z.infer<typeof analysisResultSchema>;
-⋮----
-export interface GameInfo {
-  id: string;
-  title: string;
-  theme: string;
-  notes?: string;
-  participantCount?: number;
-  createdAt: Date | null;
-  expiresAt: Date | null;
-  isPublic?: boolean;
-  isParticipating?: boolean;
-}
 </file>
 
 <file path="src/lib/firebase/admin-collections.ts">
@@ -4893,6 +4791,111 @@ export async function joinGame(
     userId: string,
     eventId: string,
 ): Promise<
+</file>
+
+<file path="src/types/schema.ts">
+import { z } from "zod";
+import {
+  AcceptanceStatus,
+  GameStatus,
+  LineType,
+  NotificationDisplayType,
+  NotificationType,
+  ProcessingStatus,
+  Role,
+} from "./common";
+⋮----
+export interface ImageProcessingOptions {
+
+
+
+  maxLongSide: number;
+
+
+
+  quality: number;
+
+
+
+  format: "image/jpeg";
+}
+⋮----
+export interface ProcessedImage {
+
+
+
+  blob: Blob;
+
+
+
+  originalName: string;
+
+
+
+  originalSize: number;
+
+
+
+  processedSize: number;
+
+
+
+  originalDimensions: {
+    width: number;
+    height: number;
+  };
+
+
+
+  processedDimensions: {
+    width: number;
+    height: number;
+  };
+}
+⋮----
+export interface ImageUploadProps {
+  gameId: string;
+  onImageProcessed?: (processedImage: ProcessedImage) => void;
+  onUploadStart?: () => void;
+  onUploadComplete?: (
+    success: boolean,
+    result?: ImageSubmissionResult,
+    error?: string,
+  ) => void;
+  isUploading?: boolean;
+  className?: string;
+  disabled?: boolean;
+}
+⋮----
+export type User = z.infer<typeof userSchema>;
+export type UserCreationData = z.infer<typeof userCreationSchema>;
+export type UserLoginData = z.infer<typeof userLoginSchema>;
+export type Notification = z.infer<typeof notificationSchema>;
+export type GameParticipation = z.infer<typeof gameParticipationSchema>;
+export type Cell = z.infer<typeof cellSchema>;
+export type CellState = z.infer<typeof cellStateSchema>;
+export type CompletedLine = z.infer<typeof completedLineSchema>;
+export type PlayerBoard = z.infer<typeof playerBoardSchema>;
+export type GameBoard = z.infer<typeof gameBoardSchema>;
+export type Game = z.infer<typeof gameSchema>;
+export type GameCreationData = z.infer<typeof gameCreationSchema>;
+export type Submission = z.infer<typeof submissionSchema>;
+export type Event = z.infer<typeof eventSchema>;
+export type ImageSubmissionData = z.infer<typeof imageSubmissionDataSchema>;
+export type ImageSubmissionResult = z.infer<typeof imageSubmissionResultSchema>;
+export type AnalysisResult = z.infer<typeof analysisResultSchema>;
+⋮----
+export interface GameInfo {
+  id: string;
+  title: string;
+  theme: string;
+  notes?: string;
+  participantCount?: number;
+  createdAt: Date | null;
+  expiresAt: Date | null;
+  isPublic?: boolean;
+  isParticipating?: boolean;
+}
 </file>
 
 <file path="src/app/game/[gameId]/page.tsx">

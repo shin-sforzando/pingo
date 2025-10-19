@@ -1,8 +1,81 @@
 # Current Status & Priorities
 
-**Last Updated**: 2025-10-19
+**Last Updated**: 2025-10-20
 
-## ✅ Recently Completed (2025-10-19)
+## ✅ Recently Completed
+
+### Skip Check Features Implementation
+
+開発・テスト環境向けに、公序良俗チェックをスキップする機能を実装しました。
+
+#### 実装内容
+
+#### 1. 被写体候補チェックのスキップ (skipSubjectsCheck)
+
+- **用途**: ゲーム作成時の被写体候補チェックをスキップ
+- **実装方法**: UIローカル状態（`useState`）のみ、データベース保存なし
+- **理由**: ゲーム作成後に使用されないため
+
+```typescript
+// src/app/game/create/page.tsx
+const [skipSubjectsCheck, setSkipSubjectsCheck] = useState(false);
+
+if (!skipSubjectsCheck) {
+  // Validate subjects...
+}
+```
+
+#### 2. 投稿画像チェックのスキップ (skipImageCheck)
+
+- **用途**: ゲーム中の投稿画像の適切性チェックをスキップ
+- **実装方法**: データベースに保存（ゲーム設定の一部）
+- **理由**: ゲームのライフサイクル全体で使用される
+
+#### 変更ファイル
+
+**型定義とスキーマ**:
+
+- `src/types/schema.ts` - `gameSchema`, `gameCreationSchema`に`skipImageCheck`を追加
+- `src/types/game.ts` - `GameDocument`, `gameFromFirestore`, `gameToFirestore`に`skipImageCheck`を追加
+
+**API実装**:
+
+- `src/app/api/game/create/route.ts` - ゲーム作成時に`skipImageCheck`を保存
+- `src/app/api/image/check/route.ts` - ゲーム設定を確認してチェックをスキップ
+  - リクエストに`gameId`パラメータを追加
+  - `AdminGameService.getGame()`でゲーム取得
+  - `game.skipImageCheck === true`の場合は早期リターン
+
+**UI実装**:
+
+- `src/app/game/create/page.tsx` - 両方のスイッチを追加
+- `src/services/image-upload.ts` - チェックAPIに`gameId`を渡す
+
+**i18n**:
+
+```json
+{
+  "skipSubjectsCheck": "被写体候補のチェックをスキップ",
+  "skipSubjectsCheckDescription": "ゲーム作成時の被写体候補のチェックをスキップします。",
+  "skipImageCheck": "投稿画像のチェックをスキップ",
+  "skipImageCheckDescription": "ゲーム中の投稿画像のチェックをスキップします。"
+}
+```
+
+**テスト更新**:
+
+- `src/app/api/game/create/route.test.ts` - テストデータに`skipImageCheck`を追加
+- `src/app/api/image/check/route.test.ts` - 完全リライト
+  - `AdminGameService`のモック追加
+  - 全リクエストに`gameId`を追加
+  - `skipImageCheck`機能の新規テストケース追加（2テスト）
+
+#### テスト結果
+
+- ✅ **全17テストが成功** (image/check: 13, game/create: 4)
+- ✅ **カバレッジ向上**: image/check API 98.07%
+
+## ✅ Previously Completed
 
 ### Major Architecture Refactoring - Single Responsibility Principle
 
@@ -18,6 +91,7 @@
 
 1. `/api/image/check` - **適切性チェックのみ**
    - Gemini APIで画像が全年齢対象として適切かを検証
+   - ゲーム設定によりチェックをスキップ可能（`skipImageCheck`） 🆕
    - Response: `{ appropriate: boolean, reason?: string }`
 
 2. `/api/game/[gameId]/submission/analyze` - **ビンゴマッチング分析のみ**
@@ -30,27 +104,6 @@
    - PlayerBoard更新
    - ビンゴライン検出
    - Response: `{ newlyCompletedLines, totalCompletedLines, requiredBingoLines }`
-
-#### Frontend Flow (3段階)
-
-`src/services/image-upload.ts`:
-
-```typescript
-// Step 3: Appropriateness check
-POST /api/image/check { imageUrl }
-
-// Step 4: Analysis
-POST /api/game/[gameId]/submission/analyze { submissionId, imageUrl }
-
-// Step 5: State update
-POST /api/game/[gameId]/submission { submissionId, imageUrl, analysisResult }
-```
-
-#### Test Updates
-
-- `/api/image/check/route.test.ts` - 完全に書き直し (7 tests)
-- `/api/game/[gameId]/submission/analyze/route.test.ts` - 状態更新アサーション削除 (9 tests)
-- `/api/game/[gameId]/submission/route.test.ts` - 新仕様に合わせて書き直し (8 tests)
 
 ### Generate API の品質向上とテスト安定化
 
@@ -118,7 +171,7 @@ POST /api/game/[gameId]/submission { submissionId, imageUrl, analysisResult }
 
 ## 📊 Test Status
 
-- **Total Tests**: 302 passed
-- **Test Files**: 38 passed
+- **Total Tests**: 302+ passed
+- **Test Files**: 38+ passed
 - **Duration**: ~28 seconds
 - **Coverage**: Good (主要機能は網羅)

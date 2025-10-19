@@ -62,7 +62,7 @@ pingo/
   PUT to signed URL (GCS)
   ↓
   ↓ 2. Appropriateness Check
-  POST /api/image/check { imageUrl }
+  POST /api/image/check { gameId, imageUrl }
   ↓ { appropriate: boolean, reason?: string }
   ↓
   ↓ 3. Bingo Matching Analysis
@@ -83,16 +83,17 @@ pingo/
 
 #### 1. `/api/image/check` - 適切性チェック専用
 
-**責任**: 画像が全年齢対象として適切かを検証
+**責任**: 画像が全年齢対象として適切かを検証（ゲーム設定によりスキップ可能）
 
 ```typescript
 // Request
 POST /api/image/check
 {
+  gameId: string,     // ゲーム設定を確認するために必要
   imageUrl: string
 }
 
-// Response
+// Response (skipImageCheck=false)
 {
   success: true,
   data: {
@@ -100,14 +101,26 @@ POST /api/image/check
     reason?: string  // AI生成の説明（適切/不適切の理由）
   }
 }
+
+// Response (skipImageCheck=true)
+{
+  success: true,
+  data: {
+    appropriate: true,
+    reason: "Check skipped per game settings"
+  }
+}
 ```
 
 **処理フロー**:
 
 1. 認証確認
-2. 画像URLの検証
-3. Gemini APIで適切性チェック
-4. 結果を返す（状態更新なし）
+2. リクエストの検証（`gameId`, `imageUrl`）
+3. ゲーム設定を取得（`AdminGameService.getGame()`）
+4. `game.skipImageCheck === true` の場合は早期リターン（AIチェックをスキップ）
+5. 画像をフェッチしてBase64エンコード
+6. Gemini APIで適切性チェック
+7. 結果を返す（状態更新なし）
 
 #### 2. `/api/game/[gameId]/submission/analyze` - 分析専用
 
@@ -180,8 +193,13 @@ POST /api/game/[gameId]/submission
 
 - `common.ts`: 共有enumsとユーティリティ型
 - `schema.ts`: バリデーション用Zodスキーマ
+  - `gameSchema`, `gameCreationSchema`: `skipImageCheck: boolean`を含む
   - `analysisResultSchema`: 分析結果のスキーマ（多言語critique含む）
-- `game.ts`, `user.ts`: ドメイン固有の型
+- `game.ts`: ドメイン固有の型
+  - `Game`: `skipImageCheck: boolean`を含む
+  - `GameDocument`: Firestore文書型、`skipImageCheck: boolean`を含む
+  - `gameFromFirestore()`, `gameToFirestore()`: 変換関数、`skipImageCheck`をマッピング
+- `user.ts`: ユーザー固有の型
 - `firestore.ts`: データベースドキュメントインターフェース
 - `index.ts`: 集約エクスポート
 
@@ -246,6 +264,8 @@ export async function submitImage(
 1. 署名付きURLを取得（`POST /api/image/getUploadUrl`）
 2. GCSに直接アップロード（`PUT` to signed URL）
 3. 適切性チェック（`POST /api/image/check`）
+   - `gameId`を含むリクエスト
+   - `skipImageCheck`が有効な場合は自動的にスキップ
    - 不適切な場合は早期リターン
 4. ビンゴマッチング分析（`POST /api/game/[gameId]/submission/analyze`）
 5. 状態更新（`POST /api/game/[gameId]/submission`）
@@ -268,6 +288,8 @@ export async function submitImage(
 - `firebase/admin-collections.ts`: Firestoreコレクション型安全アクセス
   - `AdminTransactionService`: トランザクション処理
     - `createSubmissionAndUpdateBoard()`: Submission作成とPlayerBoard更新をアトミックに実行
+  - `AdminGameService`: ゲーム操作
+    - `getGame()`: ゲーム設定を取得（`skipImageCheck`含む）
 - `firebase/client.ts`: Firebase Client SDK初期化（認証、Firestore）
 - `image-utils.ts`: 画像処理ユーティリティ（HEIC変換、リサイズ、圧縮）
 - `cell-utils.ts`: セルID処理ユーティリティ（LLM出力のフォールバック処理）
@@ -287,7 +309,11 @@ export async function submitImage(
 
 **認証必要**:
 
-- `/game/create` - ゲーム作成ページ（被写体生成、設定）
+- `/game/create` - ゲーム作成ページ
+  - 被写体生成、設定
+  - **スキップ機能**:
+    - `skipSubjectsCheck`: ローカル状態、被写体候補チェックをスキップ（UI専用）
+    - `skipImageCheck`: データベース保存、投稿画像チェックをスキップ（ゲーム設定）
 - `/game/join` - ゲーム参加ページ（ID入力、公開ゲーム一覧、参加中ゲーム一覧）
 - `/game/[gameId]` - ゲームメインページ（ビンゴボード、画像投稿、リアルタイム更新）
 - `/game/[gameId]/share` - ゲーム共有ページ（QRコード、参加者一覧）
@@ -302,6 +328,7 @@ export async function submitImage(
 
 - `users/`: ユーザープロフィールと認証
 - `games/`: ゲームメタデータと設定
+  - `skipImageCheck: boolean` - 投稿画像の適切性チェックをスキップするか
 - `games/{id}/playerBoards/`: 個別プレイヤーの進行状況
 - `games/{id}/submissions/`: 写真投稿とAI解析結果（多言語critique含む）
   - `critique_ja`: 日本語の詳細分析
@@ -341,6 +368,7 @@ export async function submitImage(
 - **アクセシビリティ**: ARIAラベル、キーボードナビゲーション
 - **パフォーマンス**: 画像最適化、コード分割
 - **AI品質保証**: プロンプトエンジニアリング + 内部検証で安定性向上
+- **開発環境最適化**: チェックスキップ機能で開発効率向上
 
 ## 最新技術仕様
 

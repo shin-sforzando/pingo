@@ -77,6 +77,7 @@ export async function submitImage(
       Authorization: `Bearer ${authToken}`,
     },
     body: JSON.stringify({
+      gameId: submissionData.gameId,
       imageUrl: publicUrl,
     }),
   });

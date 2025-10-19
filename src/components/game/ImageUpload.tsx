@@ -273,6 +273,25 @@ export function ImageUpload({
 
       console.log("ℹ️ XXX: ~ ImageUpload.tsx ~ Upload successful", { result });
 
+      // Check if image was deemed inappropriate
+      if (!result.appropriate) {
+        console.log(
+          "ℹ️ XXX: ~ ImageUpload.tsx ~ Image inappropriate, treating as failure",
+          {
+            reason: result.reason,
+          },
+        );
+        // Clear preview since upload technically succeeded, but content was rejected
+        handleRemove();
+        // Treat as failure from UI perspective
+        onUploadComplete?.(
+          false,
+          result,
+          result.reason || "Image content was deemed inappropriate",
+        );
+        return;
+      }
+
       // Clear preview after successful upload
       handleRemove();
 
