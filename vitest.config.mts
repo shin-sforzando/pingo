@@ -16,7 +16,7 @@ export default defineConfig({
           include: ["src/**/*.{test,spec}.{js,ts,jsx,tsx}"],
           exclude: ["src/**/*.browser.{test,spec}.{js,ts,jsx,tsx}"],
           setupFiles: ["./vitest.setup.ts"], // Add setup file
-          testTimeout: 10000, // Increase timeout for Firebase operations
+          testTimeout: 30000, // Increase timeout for Gemini API operations
         },
       },
       {

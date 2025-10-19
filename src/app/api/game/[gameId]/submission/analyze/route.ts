@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { resolveCellId } from "@/lib/cell-utils";
+import { GEMINI_MODEL, GEMINI_THINKING_BUDGET } from "@/lib/constants";
 import { adminAuth } from "@/lib/firebase/admin";
 import {
   AdminGameBoardService,
@@ -32,17 +33,17 @@ const responseSchema = {
     },
     confidence: {
       type: Type.NUMBER,
-      description: "Confidence score between 0 and 1",
+      description: "Confidence score between 0.0 and 1.0",
     },
     critique_ja: {
       type: Type.STRING,
       description:
-        "Detailed analysis of the image and matching result in Japanese",
+        "Comprehensive analysis in Japanese (minimum 3-4 sentences): specific objects/scenes, visual characteristics, relation to bingo cells, thorough match/no-match explanation",
     },
     critique_en: {
       type: Type.STRING,
       description:
-        "Detailed analysis of the image and matching result in English",
+        "Comprehensive analysis in English (minimum 3-4 sentences): specific objects/scenes, visual characteristics, relation to bingo cells, thorough match/no-match explanation",
     },
     acceptanceStatus: {
       type: Type.STRING,
@@ -183,8 +184,8 @@ Analysis Criteria:
 Provide:
 - matchedCellId: The ID of the best matching cell (null if no good match)
 - confidence: Confidence score from 0.0 to 1.0 (be conservative but fair)
-- critique_ja: Detailed explanation in Japanese of what you see and why it matches/doesn't match (日本語で詳細な説明)
-- critique_en: Detailed explanation in English of what you see and why it matches/doesn't match
+- critique_ja: Comprehensive explanation in Japanese (minimum 3-4 sentences). Describe in detail: what specific objects/scenes you see in the image, their visual characteristics and context, how they relate to each available bingo cell subject, and a thorough explanation of why they match or don't match. (日本語で最低3-4文の包括的な説明。画像内の具体的な物体・シーン、その視覚的特徴と文脈、各利用可能なビンゴセルの被写体との関連性、そしてマッチする/しない理由を詳しく説明してください。)
+- critique_en: Comprehensive explanation in English (minimum 3-4 sentences). Describe in detail: what specific objects/scenes you see in the image, their visual characteristics and context, how they relate to each available bingo cell subject, and a thorough explanation of why they match or don't match.
 - acceptanceStatus: "accepted" (good match), "no_match" (no suitable match), or "inappropriate_content" (inappropriate image)
 
 Be thorough in your analysis but conservative in matching. Only match if you're reasonably confident the image shows the requested subject.`;
@@ -366,7 +367,7 @@ export async function POST(
 
     // Analyze image with Gemini using structured output
     const result = await model({
-      model: "gemini-2.0-flash-001",
+      model: GEMINI_MODEL,
       contents: [
         prompt,
         {
@@ -379,6 +380,9 @@ export async function POST(
       config: {
         responseMimeType: "application/json",
         responseSchema,
+        thinkingConfig: {
+          thinkingBudget: GEMINI_THINKING_BUDGET,
+        },
       },
     });
 

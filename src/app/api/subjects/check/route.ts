@@ -2,6 +2,7 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import type { Locale } from "@/i18n/config";
+import { GEMINI_MODEL, GEMINI_THINKING_BUDGET } from "@/lib/constants";
 import { getUserLocale } from "@/services/locale";
 
 const checkSubjectsSchema = z.object({
@@ -110,11 +111,14 @@ export async function POST(request: NextRequest) {
 
     const prompt = getPromptTemplate(params);
     const result = await genAI.models.generateContent({
-      model: "gemini-2.0-flash-001",
+      model: GEMINI_MODEL,
       contents: [{ role: "user", parts: [{ text: prompt }] }],
       config: {
         responseMimeType: "application/json",
         responseSchema,
+        thinkingConfig: {
+          thinkingBudget: GEMINI_THINKING_BUDGET,
+        },
       },
     });
 

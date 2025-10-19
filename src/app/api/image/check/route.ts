@@ -2,6 +2,7 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { resolveCellId } from "@/lib/cell-utils";
+import { GEMINI_MODEL, GEMINI_THINKING_BUDGET } from "@/lib/constants";
 import { adminAuth } from "@/lib/firebase/admin";
 import {
   AdminGameBoardService,
@@ -198,7 +199,7 @@ If the image is appropriate, provide a brief description of what the image shows
 
     // Check appropriateness
     const appropriatenessResult = await model({
-      model: "gemini-2.0-flash-001",
+      model: GEMINI_MODEL,
       contents: [
         appropriatenessPrompt,
         {
@@ -211,6 +212,9 @@ If the image is appropriate, provide a brief description of what the image shows
       config: {
         responseMimeType: "application/json",
         responseSchema,
+        thinkingConfig: {
+          thinkingBudget: GEMINI_THINKING_BUDGET,
+        },
       },
     });
 
@@ -373,8 +377,8 @@ Please analyze the image and determine:
 Respond with a JSON object containing:
 - "matchedCellId": The ID of the matching cell (or null if no good match)
 - "confidence": Your confidence level (0.0 to 1.0)
-- "critique_ja": Detailed analysis in Japanese - describe what you see and why it matches/doesn't match (日本語で詳細な分析)
-- "critique_en": Detailed analysis in English - describe what you see and why it matches/doesn't match
+- "critique_ja": Comprehensive analysis in Japanese (minimum 3-4 sentences). Describe in detail: what specific objects/scenes you see, their visual characteristics, how they relate to each bingo subject, and a thorough explanation of why they match or don't match. (日本語で最低3-4文の包括的な分析。画像内の具体的な物体・シーン、その視覚的特徴、各ビンゴの被写体との関連性、そしてマッチする/しない理由を詳しく説明してください。)
+- "critique_en": Comprehensive analysis in English (minimum 3-4 sentences). Describe in detail: what specific objects/scenes you see, their visual characteristics, how they relate to each bingo subject, and a thorough explanation of why they match or don't match.
 
 Be strict in your matching - only match if you're confident the image clearly shows the subject.`;
 
@@ -393,19 +397,19 @@ Be strict in your matching - only match if you're confident the image clearly sh
         critique_ja: {
           type: Type.STRING,
           description:
-            "Detailed analysis in Japanese: what you see and why it matches/doesn't match (日本語で詳細な分析)",
+            "Comprehensive analysis in Japanese (minimum 3-4 sentences): specific objects/scenes, visual characteristics, relation to bingo subjects, and thorough match/no-match explanation (日本語で最低3-4文の包括的な分析)",
         },
         critique_en: {
           type: Type.STRING,
           description:
-            "Detailed analysis in English: what you see and why it matches/doesn't match",
+            "Comprehensive analysis in English (minimum 3-4 sentences): specific objects/scenes, visual characteristics, relation to bingo subjects, and thorough match/no-match explanation",
         },
       },
       required: ["matchedCellId", "confidence", "critique_ja", "critique_en"],
     };
 
     const analysisResult = await model({
-      model: "gemini-2.0-flash-001",
+      model: GEMINI_MODEL,
       contents: [
         analysisPrompt,
         {
@@ -418,6 +422,9 @@ Be strict in your matching - only match if you're confident the image clearly sh
       config: {
         responseMimeType: "application/json",
         responseSchema: analysisResponseSchema,
+        thinkingConfig: {
+          thinkingBudget: GEMINI_THINKING_BUDGET,
+        },
       },
     });
 

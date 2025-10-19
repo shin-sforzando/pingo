@@ -66,6 +66,7 @@
       "mcp__serena__think_about_task_adherence",
       "mcp__serena__think_about_whether_you_are_done",
       "mcp__serena__write_memory",
+      "WebFetch(domain:ai.google.dev)",
       "WebFetch(domain:docs.github.com)",
       "WebFetch(domain:github.com)",
       "WebFetch(domain:next-intl-docs.vercel.app)",
