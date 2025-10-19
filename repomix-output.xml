@@ -155,12 +155,15 @@ src/
           page.tsx
         utils/
           gameDataTransforms.ts
+        page.stories.tsx
         page.tsx
       create/
         page.browser.test.tsx
+        page.stories.tsx
         page.tsx
       join/
         page.browser.test.tsx
+        page.stories.tsx
         page.tsx
     favicon.ico
     globals.css
@@ -370,6 +373,32 @@ import ja from "../messages/ja.json";
 import { NextResponse } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { GET } from "./route";
+</file>
+
+<file path="src/app/game/[gameId]/page.stories.tsx">
+import { fakerJA as faker } from "@faker-js/faker";
+import type { Meta, StoryObj } from "@storybook/nextjs";
+import { AuthContext } from "@/contexts/AuthContext";
+import { AcceptanceStatus, GameStatus } from "@/types/common";
+import type { Cell } from "@/types/schema";
+import GamePage from "./page";
+⋮----
+const generateSampleCells = (): Cell[] =>
+⋮----
+import { auth } from "@/lib/firebase/client";
+⋮----
+type Story = StoryObj<typeof meta>;
+</file>
+
+<file path="src/app/game/join/page.stories.tsx">
+import { fakerJA as faker } from "@faker-js/faker";
+import type { Meta, StoryObj } from "@storybook/nextjs";
+import { AuthContext } from "@/contexts/AuthContext";
+import JoinGamePage from "./page";
+⋮----
+import { auth } from "@/lib/firebase/client";
+⋮----
+type Story = StoryObj<typeof meta>;
 </file>
 
 <file path="src/app/globals.css">
@@ -1110,6 +1139,17 @@ export function findMatchedCellSubject(
   cellId: string | null | undefined,
   gameBoard: Array<{ id: string; subject: string }> | null,
 ): string | null
+</file>
+
+<file path="src/app/game/create/page.stories.tsx">
+import { fakerJA as faker } from "@faker-js/faker";
+import type { Meta, StoryObj } from "@storybook/nextjs";
+import { AuthContext } from "@/contexts/AuthContext";
+import CreateGamePage from "./page";
+⋮----
+import { auth } from "@/lib/firebase/client";
+⋮----
+type Story = StoryObj<typeof meta>;
 </file>
 
 <file path="src/app/game/join/page.browser.test.tsx">
@@ -1982,15 +2022,16 @@ testTimeout: 10000, // Increase timeout for Firebase operations
 ⋮----
 setupFiles: ["./vitest.browser.setup.ts"], // Add browser setup file
 ⋮----
+"**/*.stories.{ts,tsx}", // Exclude Storybook stories
+"**/stories/example/*.tsx", // Exclude example stories
 "next.config.ts", // Exclude Next.js config
 "playwright.config.ts", // Exclude Playwright config
 "postcss.config.mjs", // Exclude PostCSS config
 "scripts/**/*.ts", // Exclude scripts
-"src/components/ui/*.tsx", // Exclude shadcn/ui components
 "src/components/magicui/*.tsx", // Exclude Magic UI components
+"src/components/ui/*.tsx", // Exclude shadcn/ui components
 "src/i18n/*.ts", // Exclude i18n config
-"**/*.stories.{ts,tsx}", // Exclude Storybook stories
-"**/stories/example/*.tsx", // Exclude example stories
+"storybook-static/**", // Exclude Storybook static files
 </file>
 
 <file path="src/app/api/auth/logout/route.test.ts">
@@ -3819,6 +3860,28 @@ import type { Game, GameBoard } from "@/types/schema";
 async function fetchData()
 ⋮----
 const handleJoinClick = async () =>
+⋮----
+// Already participating, just navigate to game page
+⋮----
+// Not participating yet, join the game first
+⋮----
+// Successfully joined or already participating, navigate to game page
+⋮----
+// Join failed, but still try to navigate (user might already be joined)
+⋮----
+// Get the current URL for QR code
+⋮----
+// Format game status for display
+⋮----
+{/* Game information header */}
+⋮----
+{/* Play/Join game button */}
+⋮----
+{/* QR code (public games only) or Game ID (private games) */}
+⋮----
+{/* Bingo board preview */}
+⋮----
+{/* Game settings information */}
 ⋮----
 title=
 value=

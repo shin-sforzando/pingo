@@ -26,3 +26,4 @@ package-lock.json
 README.md
 repomix-output.xml
 src/stories/example/
+storybook-static/
