@@ -185,6 +185,7 @@ export async function POST(
         expiresAt: expiresAt,
         isPublic: gameData.isPublic,
         isPhotoSharingEnabled: gameData.isPhotoSharingEnabled,
+        skipImageCheck: gameData.skipImageCheck,
         requiredBingoLines: gameData.requiredBingoLines,
         confidenceThreshold: gameData.confidenceThreshold,
         maxSubmissionsPerUser: gameData.maxSubmissionsPerUser,

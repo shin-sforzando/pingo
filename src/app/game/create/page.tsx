@@ -53,9 +53,8 @@ export default function CreateGamePage() {
   // State for cells (bingo board)
   const [cells, setCells] = useState<Cell[]>([]);
 
-  // State for skipping appropriateness check (UI-only, not persisted)
-  const [skipAppropriatenessCheck, setSkipAppropriatenessCheck] =
-    useState(false);
+  // State for skipping subjects check (UI-only, not persisted)
+  const [skipSubjectsCheck, setSkipSubjectsCheck] = useState(false);
 
   // Calculate default expiration date (1 day from now)
   const defaultExpiresAt = new Date();
@@ -71,6 +70,7 @@ export default function CreateGamePage() {
       expiresAt: defaultExpiresAt,
       isPublic: false,
       isPhotoSharingEnabled: true,
+      skipImageCheck: false,
       requiredBingoLines: 1,
       confidenceThreshold: 0.5,
       maxSubmissionsPerUser: 30,
@@ -251,8 +251,8 @@ export default function CreateGamePage() {
       const boardSubjects = subjects.slice(0, 24);
       const boardSubjectTexts = boardSubjects.map((subject) => subject.text);
 
-      // Skip appropriateness check if requested (for development/testing only)
-      if (!skipAppropriatenessCheck) {
+      // Skip subjects check if requested (for development/testing only)
+      if (!skipSubjectsCheck) {
         // Validate only the subjects that will be used in the bingo board
         console.log(
           "ℹ️ XXX: ~ page.tsx ~ /api/subjects/check for the first 24 subjects",
@@ -608,19 +608,41 @@ export default function CreateGamePage() {
                   )}
                 />
 
-                {/* Skip Appropriateness Check Setting (UI-only) */}
+                {/* Skip Subjects Check Setting (UI-only) */}
                 <div className="flex flex-row items-center justify-between rounded-lg border p-3">
                   <div className="space-y-0.5">
-                    <FormLabel>{t("Game.skipAppropriatenessCheck")}</FormLabel>
+                    <FormLabel>{t("Game.skipSubjectsCheck")}</FormLabel>
                     <FormDescription>
-                      {t("Game.skipAppropriatenessCheckDescription")}
+                      {t("Game.skipSubjectsCheckDescription")}
                     </FormDescription>
                   </div>
                   <Switch
-                    checked={skipAppropriatenessCheck}
-                    onCheckedChange={setSkipAppropriatenessCheck}
+                    checked={skipSubjectsCheck}
+                    onCheckedChange={setSkipSubjectsCheck}
                   />
                 </div>
+
+                {/* Skip Image Check Setting (saved to database) */}
+                <FormField
+                  control={form.control}
+                  name="skipImageCheck"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                      <div className="space-y-0.5">
+                        <FormLabel>{t("Game.skipImageCheck")}</FormLabel>
+                        <FormDescription>
+                          {t("Game.skipImageCheckDescription")}
+                        </FormDescription>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
 
                 {/* Required Bingo Lines Setting */}
                 <FormField

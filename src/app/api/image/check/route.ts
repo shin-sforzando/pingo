@@ -3,10 +3,12 @@ import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { GEMINI_MODEL, GEMINI_THINKING_BUDGET } from "@/lib/constants";
 import { adminAuth } from "@/lib/firebase/admin";
+import { AdminGameService } from "@/lib/firebase/admin-collections";
 import type { ApiResponse } from "@/types/common";
 
 // Request body schema
 const checkImageRequestSchema = z.object({
+  gameId: z.string().regex(/^[A-Z0-9]{6}$/, "Valid game ID is required"),
   imageUrl: z.string().url("Valid image URL is required"),
 });
 
@@ -97,10 +99,40 @@ export async function POST(
 
     // Parse request body
     const body = await request.json();
-    const { imageUrl } = checkImageRequestSchema.parse(body);
+    const { gameId, imageUrl } = checkImageRequestSchema.parse(body);
     console.log("ℹ️ XXX: ~ image/check/route.ts ~ Request parsed", {
+      gameId,
       imageUrl,
     });
+
+    // Get game settings to check if image check should be skipped
+    const game = await AdminGameService.getGame(gameId);
+    if (!game) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "GAME_NOT_FOUND",
+            message: "Game not found",
+          },
+        },
+        { status: 404 },
+      );
+    }
+
+    // Skip check if game setting allows it
+    if (game.skipImageCheck) {
+      console.log(
+        "ℹ️ XXX: ~ image/check/route.ts ~ Skipping check due to game settings",
+      );
+      return NextResponse.json({
+        success: true,
+        data: {
+          appropriate: true,
+          reason: "Check skipped per game settings",
+        },
+      });
+    }
 
     // Fetch image
     const imageResponse = await fetch(imageUrl);

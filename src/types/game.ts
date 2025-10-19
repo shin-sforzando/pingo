@@ -35,6 +35,7 @@ export interface GameDocument {
   expiresAt: TimestampInterface;
   isPublic: boolean;
   isPhotoSharingEnabled: boolean;
+  skipImageCheck: boolean;
   requiredBingoLines: number;
   confidenceThreshold: number;
   maxSubmissionsPerUser: number;
@@ -152,6 +153,7 @@ export function gameFromFirestore(doc: GameDocument): Game {
     expiresAt: timestampToDate(doc.expiresAt) as Date,
     isPublic: doc.isPublic,
     isPhotoSharingEnabled: doc.isPhotoSharingEnabled,
+    skipImageCheck: doc.skipImageCheck ?? false,
     requiredBingoLines: doc.requiredBingoLines,
     confidenceThreshold: doc.confidenceThreshold,
     maxSubmissionsPerUser: doc.maxSubmissionsPerUser,
@@ -176,6 +178,7 @@ export function gameToFirestore(game: Game): GameDocument {
     expiresAt: dateToTimestamp(game.expiresAt) as TimestampInterface,
     isPublic: game.isPublic,
     isPhotoSharingEnabled: game.isPhotoSharingEnabled,
+    skipImageCheck: game.skipImageCheck,
     requiredBingoLines: game.requiredBingoLines,
     confidenceThreshold: game.confidenceThreshold,
     maxSubmissionsPerUser: game.maxSubmissionsPerUser,

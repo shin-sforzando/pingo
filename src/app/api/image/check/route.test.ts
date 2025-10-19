@@ -2,12 +2,21 @@ import type { DecodedIdToken } from "firebase-admin/auth";
 import type { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { adminAuth } from "@/lib/firebase/admin";
+import { AdminGameService } from "@/lib/firebase/admin-collections";
+import type { Game } from "@/types/schema";
 import { POST } from "./route";
 
 // Mock Firebase Admin
 vi.mock("@/lib/firebase/admin", () => ({
   adminAuth: {
     verifyIdToken: vi.fn(),
+  },
+}));
+
+// Mock AdminGameService
+vi.mock("@/lib/firebase/admin-collections", () => ({
+  AdminGameService: {
+    getGame: vi.fn(),
   },
 }));
 
@@ -27,12 +36,19 @@ vi.mock("@google/genai", async (importOriginal) => {
 
 describe("/api/image/check", () => {
   const mockVerifyIdToken = vi.mocked(adminAuth.verifyIdToken);
+  const mockGetGame = vi.mocked(AdminGameService.getGame);
 
   beforeEach(() => {
     vi.clearAllMocks();
 
     // Set up environment variable
     process.env.GEMINI_API_KEY = "test-api-key";
+
+    // Mock getGame to return a game without skipImageCheck by default
+    mockGetGame.mockResolvedValue({
+      id: "TESTGM",
+      skipImageCheck: false,
+    } as Partial<Game> as Game);
   });
 
   const createMockRequest = (
@@ -100,7 +116,10 @@ describe("/api/image/check", () => {
     });
 
     it("should return 400 when imageUrl is missing", async () => {
-      const request = createMockRequest({}, "Bearer valid-token");
+      const request = createMockRequest(
+        { gameId: "TESTGM" },
+        "Bearer valid-token",
+      );
 
       const response = await POST(request);
       const data = await response.json();
@@ -113,6 +132,7 @@ describe("/api/image/check", () => {
     it("should return 400 when imageUrl is not a valid URL", async () => {
       const request = createMockRequest(
         {
+          gameId: "TESTGM",
           imageUrl: "not-a-url",
         },
         "Bearer valid-token",
@@ -152,6 +172,7 @@ describe("/api/image/check", () => {
 
       const request = createMockRequest(
         {
+          gameId: "TESTGM",
           imageUrl: "https://storage.googleapis.com/test-bucket/coffee-cup.jpg",
         },
         "Bearer valid-token",
@@ -177,6 +198,7 @@ describe("/api/image/check", () => {
 
       const request = createMockRequest(
         {
+          gameId: "TESTGM",
           imageUrl:
             "https://storage.googleapis.com/test-bucket/inappropriate.jpg",
         },
@@ -201,6 +223,7 @@ describe("/api/image/check", () => {
 
       const request = createMockRequest(
         {
+          gameId: "TESTGM",
           imageUrl: "https://storage.googleapis.com/test-bucket/test-image.jpg",
         },
         "Bearer valid-token",
@@ -222,6 +245,7 @@ describe("/api/image/check", () => {
 
       const request = createMockRequest(
         {
+          gameId: "TESTGM",
           imageUrl: "https://storage.googleapis.com/test-bucket/test-image.jpg",
         },
         "Bearer valid-token",
@@ -240,6 +264,7 @@ describe("/api/image/check", () => {
 
       const request = createMockRequest(
         {
+          gameId: "TESTGM",
           imageUrl: "https://storage.googleapis.com/test-bucket/test-image.jpg",
         },
         "Bearer valid-token",
@@ -275,6 +300,7 @@ describe("/api/image/check", () => {
 
       const request = createMockRequest(
         {
+          gameId: "TESTGM",
           imageUrl: "https://storage.googleapis.com/test-bucket/test-image.jpg",
         },
         "Bearer valid-token",
@@ -286,6 +312,61 @@ describe("/api/image/check", () => {
       expect(response.status).toBe(500);
       expect(data.success).toBe(false);
       expect(data.error?.code).toBe("INTERNAL_ERROR");
+    });
+  });
+
+  describe("Skip image check functionality", () => {
+    beforeEach(() => {
+      mockVerifyIdToken.mockResolvedValue({
+        uid: "test-user-id",
+      } as DecodedIdToken);
+    });
+
+    it("should skip check and return appropriate: true when game has skipImageCheck enabled", async () => {
+      // Mock getGame to return a game with skipImageCheck enabled
+      mockGetGame.mockResolvedValue({
+        id: "TESTGM",
+        skipImageCheck: true,
+      } as Partial<Game> as Game);
+
+      const request = createMockRequest(
+        {
+          gameId: "TESTGM",
+          imageUrl: "https://storage.googleapis.com/test-bucket/test-image.jpg",
+        },
+        "Bearer valid-token",
+      );
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(data.success).toBe(true);
+      expect(data.data?.appropriate).toBe(true);
+      expect(data.data?.reason).toBe("Check skipped per game settings");
+
+      // Verify that AI was not called
+      expect(mockGenerateContent).not.toHaveBeenCalled();
+    });
+
+    it("should return 404 when game is not found", async () => {
+      // Mock getGame to return null (game not found)
+      mockGetGame.mockResolvedValue(null);
+
+      const request = createMockRequest(
+        {
+          gameId: "NOTFND",
+          imageUrl: "https://storage.googleapis.com/test-bucket/test-image.jpg",
+        },
+        "Bearer valid-token",
+      );
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(404);
+      expect(data.success).toBe(false);
+      expect(data.error?.code).toBe("GAME_NOT_FOUND");
     });
   });
 });
