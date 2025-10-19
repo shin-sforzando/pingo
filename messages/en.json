@@ -117,6 +117,8 @@
     "isPhotoSharingEnabled": "Photo Sharing",
     "isPhotoSharingEnabledDescription": "Allow players to see each other's photos",
     "isPublic": "Public Game",
+    "skipAppropriatenessCheck": "Skip Appropriateness Check",
+    "skipAppropriatenessCheckDescription": "Skip the public order and morals check during game creation.",
     "isPublicDescription": "Make this game visible to everyone",
     "join": "Join",
     "joinGame": "Join Game",

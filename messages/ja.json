@@ -117,6 +117,8 @@
     "isPhotoSharingEnabled": "写真共有",
     "isPhotoSharingEnabledDescription": "プレイヤー同士で写真を共有できるようにする",
     "isPublic": "公開設定",
+    "skipAppropriatenessCheck": "公序良俗チェックをスキップ",
+    "skipAppropriatenessCheckDescription": "ゲーム作成時の公序良俗チェックをスキップします。",
     "isPublicDescription": "このゲームを全員に公開する",
     "join": "参加する",
     "joinGame": "ゲームに参加",

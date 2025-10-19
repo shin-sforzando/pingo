@@ -53,6 +53,10 @@ export default function CreateGamePage() {
   // State for cells (bingo board)
   const [cells, setCells] = useState<Cell[]>([]);
 
+  // State for skipping appropriateness check (UI-only, not persisted)
+  const [skipAppropriatenessCheck, setSkipAppropriatenessCheck] =
+    useState(false);
+
   // Calculate default expiration date (1 day from now)
   const defaultExpiresAt = new Date();
   defaultExpiresAt.setDate(defaultExpiresAt.getDate() + 1);
@@ -247,70 +251,73 @@ export default function CreateGamePage() {
       const boardSubjects = subjects.slice(0, 24);
       const boardSubjectTexts = boardSubjects.map((subject) => subject.text);
 
-      // Validate only the subjects that will be used in the bingo board
-      console.log(
-        "ℹ️ XXX: ~ page.tsx ~ /api/subjects/check for the first 24 subjects",
-      );
-      const checkResponse = await fetch("/api/subjects/check", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          subjects: boardSubjectTexts,
-        }),
-      });
-
-      const checkData = await checkResponse.json();
-      console.log("ℹ️ XXX: ~ page.tsx ~ Check API response:", checkData);
-
-      if (!checkResponse.ok) {
-        throw new Error(checkData.error || t("Game.errors.validationFailed"));
-      }
-
-      if (checkData.ok === false && checkData.issues) {
-        // Mark subjects with issues (only for the first 24 subjects)
-        const updatedSubjects = subjects.map((subject, index) => {
-          // Only check the first 24 subjects
-          if (index < 24) {
-            const issue = checkData.issues.find(
-              (issue: { subject: string; reason: string }) =>
-                issue.subject === subject.text,
-            );
-
-            if (issue) {
-              return { ...subject, error: issue.reason };
-            }
-
-            // Clear any previous errors for valid subjects
-            return { ...subject, error: undefined };
-          }
-
-          // Keep subjects beyond the first 24 unchanged
-          return subject;
+      // Skip appropriateness check if requested (for development/testing only)
+      if (!skipAppropriatenessCheck) {
+        // Validate only the subjects that will be used in the bingo board
+        console.log(
+          "ℹ️ XXX: ~ page.tsx ~ /api/subjects/check for the first 24 subjects",
+        );
+        const checkResponse = await fetch("/api/subjects/check", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            subjects: boardSubjectTexts,
+          }),
         });
 
-        // Count valid subjects (without errors)
-        const validSubjectsCount = updatedSubjects.filter(
-          (subject) => !subject.error,
-        ).length;
+        const checkData = await checkResponse.json();
+        console.log("ℹ️ XXX: ~ page.tsx ~ Check API response:", checkData);
 
-        if (validSubjectsCount < 24) {
-          setSubmissionError(t("Game.errors.notEnoughValidSubjects"));
+        if (!checkResponse.ok) {
+          throw new Error(checkData.error || t("Game.errors.validationFailed"));
+        }
+
+        if (checkData.ok === false && checkData.issues) {
+          // Mark subjects with issues (only for the first 24 subjects)
+          const updatedSubjects = subjects.map((subject, index) => {
+            // Only check the first 24 subjects
+            if (index < 24) {
+              const issue = checkData.issues.find(
+                (issue: { subject: string; reason: string }) =>
+                  issue.subject === subject.text,
+              );
+
+              if (issue) {
+                return { ...subject, error: issue.reason };
+              }
+
+              // Clear any previous errors for valid subjects
+              return { ...subject, error: undefined };
+            }
+
+            // Keep subjects beyond the first 24 unchanged
+            return subject;
+          });
+
+          // Count valid subjects (without errors)
+          const validSubjectsCount = updatedSubjects.filter(
+            (subject) => !subject.error,
+          ).length;
+
+          if (validSubjectsCount < 24) {
+            setSubmissionError(t("Game.errors.notEnoughValidSubjects"));
+
+            // Update subjects with error messages
+            setSubjects(updatedSubjects);
+            updateCells(updatedSubjects);
+
+            return;
+          }
+
+          // Show warning about subjects with issues
+          setSubmissionError(t("Game.someSubjectsFiltered"));
 
           // Update subjects with error messages
           setSubjects(updatedSubjects);
-          updateCells(updatedSubjects);
-
           return;
         }
-
-        // Show warning about subjects with issues
-        setSubmissionError(t("Game.someSubjectsFiltered"));
-
-        // Update subjects with error messages
-        setSubjects(updatedSubjects);
-        return;
       }
 
       // Prepare cells data from subjects
@@ -600,6 +607,20 @@ export default function CreateGamePage() {
                     </FormItem>
                   )}
                 />
+
+                {/* Skip Appropriateness Check Setting (UI-only) */}
+                <div className="flex flex-row items-center justify-between rounded-lg border p-3">
+                  <div className="space-y-0.5">
+                    <FormLabel>{t("Game.skipAppropriatenessCheck")}</FormLabel>
+                    <FormDescription>
+                      {t("Game.skipAppropriatenessCheckDescription")}
+                    </FormDescription>
+                  </div>
+                  <Switch
+                    checked={skipAppropriatenessCheck}
+                    onCheckedChange={setSkipAppropriatenessCheck}
+                  />
+                </div>
 
                 {/* Required Bingo Lines Setting */}
                 <FormField
