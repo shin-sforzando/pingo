@@ -71,6 +71,7 @@ export default function CreateGamePage() {
       isPublic: false,
       isPhotoSharingEnabled: true,
       skipImageCheck: false,
+      isShuffleEnabled: false,
       requiredBingoLines: 1,
       confidenceThreshold: 0.5,
       maxSubmissionsPerUser: 30,
@@ -632,6 +633,28 @@ export default function CreateGamePage() {
                         <FormLabel>{t("Game.skipImageCheck")}</FormLabel>
                         <FormDescription>
                           {t("Game.skipImageCheckDescription")}
+                        </FormDescription>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                {/* Shuffle Board Setting (saved to database) */}
+                <FormField
+                  control={form.control}
+                  name="isShuffleEnabled"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                      <div className="space-y-0.5">
+                        <FormLabel>{t("Game.isShuffleEnabled")}</FormLabel>
+                        <FormDescription>
+                          {t("Game.isShuffleEnabledDescription")}
                         </FormDescription>
                       </div>
                       <FormControl>

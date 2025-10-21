@@ -121,6 +121,8 @@
     "skipSubjectsCheckDescription": "Skip checking subject candidates during game creation.",
     "skipImageCheck": "Skip checking submitted images",
     "skipImageCheckDescription": "Skip checking submitted images during gameplay.",
+    "isShuffleEnabled": "Enable Board Shuffle",
+    "isShuffleEnabledDescription": "Shuffle the board layout for each participating player.",
     "isPublicDescription": "Make this game visible to everyone",
     "join": "Join",
     "joinGame": "Join Game",

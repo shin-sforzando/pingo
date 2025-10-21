@@ -29,6 +29,7 @@ pingo/
 ├── public/                   # 静的アセット
 ├── .storybook/              # Storybook設定
 ├── scripts/                 # ビルドとユーティリティスクリプト
+├── vitest.global-setup.ts   # Vitestグローバルセットアップとクリーンアップ
 └── middleware.ts            # Next.js認証ミドルウェア（ルート階層）
 ```
 
@@ -184,21 +185,103 @@ POST /api/game/[gameId]/submission
 2. Submission レコード作成
 3. 受理された場合:
    - PlayerBoard の cellStates 更新
-   - ビンゴライン検出
+   - **ビンゴライン検出** (`detectCompletedLines(playerBoard)`)
+     - **重要**: `playerBoard.cells` を使用（シャッフル対応）
+     - `gameBoard.cells` は使用しない（マスター配置のため）
    - completedLines 更新
    - トランザクションで原子的に保存
 4. ライン完成情報を返す
+
+### ボードシャッフル機能
+
+**概要**: ゲーム作成時に有効化すると、各プレイヤーに異なるボード配置を提供
+
+**設計方針**:
+
+- **cell_id と subject の対応は全プレイヤーで統一**: Issue #54（被写体ごとの写真閲覧）や管理者による被写体変更に対応
+- **FREEセルは常に中央(2,2)に配置**: シャッフル時も固定
+- **position のみをシャッフル、subject は固定**: マスターボード（GameBoard）の cell_id → subject マッピングを維持
+
+**データアーキテクチャ**:
+
+```plain
+GameBoard (games/{gameId}/board/board)
+├── cells[]: Cell[]  # マスターボード（全プレイヤー共通）
+    └── { id, position, subject, isFree }
+
+PlayerBoard (games/{gameId}/playerBoards/{userId})
+├── cells[]: Cell[]  # プレイヤー個別のボード（シャッフル時は異なる position）
+│   └── { id, position, subject, isFree }  # cell_id と subject は GameBoard と同じ
+├── cellStates: Record<cellId, CellState>
+└── completedLines: CompletedLine[]
+```
+
+**ビンゴライン検出の重要な注意点**:
+
+```typescript
+// ❌ BAD: gameBoard.cells を使用（マスター配置）
+function detectCompletedLines(gameBoard, playerBoard) {
+  for (const cell of gameBoard.cells) {
+    // シャッフル有効時、position が playerBoard と一致しない
+    grid[cell.position.y][cell.position.x] = playerBoard.cellStates[cell.id]?.isOpen;
+  }
+}
+
+// ✅ GOOD: playerBoard.cells を使用（プレイヤー固有の配置）
+function detectCompletedLines(playerBoard) {
+  for (const cell of playerBoard.cells) {
+    // プレイヤー固有の position を使用
+    grid[cell.position.y][cell.position.x] = playerBoard.cellStates[cell.id]?.isOpen;
+  }
+}
+```
+
+**Why**: シャッフル機能では各プレイヤーの `cells` 配列の `position` が異なるため、ビンゴライン判定は必ず `playerBoard.cells` を使用する必要がある。`gameBoard.cells` はマスター配置（シャッフル前）のため、シャッフル有効ゲームでは正しく判定できない。
+
+**処理フロー**:
+
+1. **ゲーム作成** (`POST /api/game/create`):
+   - `isShuffleEnabled: boolean` をゲーム設定に保存
+   - 作成者には元の（シャッフルされていない）ボード配置を保存
+
+2. **ゲーム参加** (`POST /api/game/[gameId]/join`):
+   - `game.isShuffleEnabled` をチェック
+   - `true` の場合: `shuffleBoardCells()` で position をシャッフル
+   - `false` の場合: 元のボード配置を使用
+   - PlayerBoard に `cells` 配列を保存（Firestore）
+
+3. **ボード表示** (`/game/[gameId]`):
+   - `playerBoard.cells` を優先表示（個別配置）
+   - フォールバック: `gameBoard.cells`（後方互換性）
+
+4. **ビンゴライン検出** (`/api/game/[gameId]/submission`):
+   - **必ず `playerBoard.cells` を使用**
+   - 各プレイヤーのシャッフルされた配置で正しく判定
+
+**実装ファイル**:
+
+- `src/lib/board-utils.ts`: シャッフルロジック（Fisher-Yates アルゴリズム）
+- `src/lib/board-utils.test.ts`: 単体テスト（13テスト、100%カバレッジ）
+- `src/types/schema.ts`: `Game` と `PlayerBoard` スキーマに `isShuffleEnabled` と `cells` 追加
+- `src/lib/firebase/admin-collections.ts`: `joinGame` トランザクションでシャッフル実行
+- `src/app/game/create/page.tsx`: シャッフル機能のトグルスイッチ
+- `src/app/game/[gameId]/page.tsx`: `playerBoard.cells` を表示
+- `src/app/api/game/[gameId]/submission/route.ts`: ビンゴライン検出（`detectCompletedLines(playerBoard)`）
 
 ### 型システム（src/types/）
 
 - `common.ts`: 共有enumsとユーティリティ型
 - `schema.ts`: バリデーション用Zodスキーマ
-  - `gameSchema`, `gameCreationSchema`: `skipImageCheck: boolean`を含む
+  - `gameSchema`, `gameCreationSchema`: `skipImageCheck: boolean`, `isShuffleEnabled: boolean` を含む
+  - `playerBoardSchema`: `cells: z.array(cellSchema)` を含む（各プレイヤー個別のボード配置）
   - `analysisResultSchema`: 分析結果のスキーマ（多言語critique含む）
 - `game.ts`: ドメイン固有の型
-  - `Game`: `skipImageCheck: boolean`を含む
-  - `GameDocument`: Firestore文書型、`skipImageCheck: boolean`を含む
-  - `gameFromFirestore()`, `gameToFirestore()`: 変換関数、`skipImageCheck`をマッピング
+  - `Game`: `skipImageCheck: boolean`, `isShuffleEnabled: boolean` を含む
+  - `GameDocument`: Firestore文書型、上記フィールドを含む
+  - `PlayerBoard`: `cells: Cell[]` を含む（プレイヤー個別のボード配置）
+  - `PlayerBoardDocument`: Firestore文書型、`cells: CellDocument[]` を含む
+  - `gameFromFirestore()`, `gameToFirestore()`: 変換関数、全フィールドをマッピング
+  - `playerBoardFromFirestore()`, `playerBoardToFirestore()`: `cells` 配列を含む変換
 - `user.ts`: ユーザー固有の型
 - `firestore.ts`: データベースドキュメントインターフェース
 - `index.ts`: 集約エクスポート
@@ -245,6 +328,7 @@ POST /api/game/[gameId]/submission
 **ゲーム固有フック（src/app/game/[gameId]/hooks/）**:
 
 - `useGameData.ts`: ゲームデータ取得の統一インターフェース（Firestoreリスナー統合）
+  - PlayerBoard の `cells` 配列を含む完全なデータ取得
 - `useImageSubmission.ts`: 画像投稿処理（3段階API呼び出し）
 
 ### サービス層（src/services/）
@@ -289,12 +373,18 @@ export async function submitImage(
   - `AdminTransactionService`: トランザクション処理
     - `createSubmissionAndUpdateBoard()`: Submission作成とPlayerBoard更新をアトミックに実行
   - `AdminGameService`: ゲーム操作
-    - `getGame()`: ゲーム設定を取得（`skipImageCheck`含む）
+    - `getGame()`: ゲーム設定を取得（`skipImageCheck`, `isShuffleEnabled` 含む）
+  - `AdminPlayerBoardService`: PlayerBoard操作
+    - `getPlayerBoard()`: プレイヤーのボード取得（`cells` 配列含む）
 - `firebase/client.ts`: Firebase Client SDK初期化（認証、Firestore）
 - `image-utils.ts`: 画像処理ユーティリティ（HEIC変換、リサイズ、圧縮）
 - `cell-utils.ts`: セルID処理ユーティリティ（LLM出力のフォールバック処理）
   - `resolveCellId()`: LLMが件名を返した場合にセルIDに変換
   - `getCellSubject()`: セルIDから件名を取得
+- `board-utils.ts`: ボード操作ユーティリティ
+  - `shuffleBoardCells()`: Fisher-Yates アルゴリズムで position をシャッフル
+    - FREE セル（中央）は常に (2,2) に配置
+    - cell_id と subject は変更しない（全プレイヤーで統一）
 - `api-utils.ts`: APIレスポンスヘルパー、エラーハンドリング
 - `utils.ts`: 汎用ユーティリティ（cn、日付フォーマット、バリデーション）
 - `constants.ts`: アプリケーション定数（URL、制限値、Gemini設定）
@@ -314,8 +404,11 @@ export async function submitImage(
   - **スキップ機能**:
     - `skipSubjectsCheck`: ローカル状態、被写体候補チェックをスキップ（UI専用）
     - `skipImageCheck`: データベース保存、投稿画像チェックをスキップ（ゲーム設定）
+  - **シャッフル機能**:
+    - `isShuffleEnabled`: データベース保存、参加者ごとに異なるボード配置（ゲーム設定）
 - `/game/join` - ゲーム参加ページ（ID入力、公開ゲーム一覧、参加中ゲーム一覧）
 - `/game/[gameId]` - ゲームメインページ（ビンゴボード、画像投稿、リアルタイム更新）
+  - `playerBoard.cells` を優先表示（個別配置、シャッフル対応）
 - `/game/[gameId]/share` - ゲーム共有ページ（QRコード、参加者一覧）
 
 **デバッグ**:
@@ -329,7 +422,13 @@ export async function submitImage(
 - `users/`: ユーザープロフィールと認証
 - `games/`: ゲームメタデータと設定
   - `skipImageCheck: boolean` - 投稿画像の適切性チェックをスキップするか
+  - `isShuffleEnabled: boolean` - 参加者ごとにボード配置をシャッフルするか
+- `games/{id}/board/`: ゲームのマスターボード
+  - `cells: Cell[]` - 全プレイヤー共通の cell_id → subject マッピング
 - `games/{id}/playerBoards/`: 個別プレイヤーの進行状況
+  - `cells: Cell[]` - プレイヤー個別のボード配置（シャッフル時は異なる position）
+  - `cellStates: Record<cellId, CellState>` - セルの開封状態
+  - `completedLines: CompletedLine[]` - 完成したビンゴライン
 - `games/{id}/submissions/`: 写真投稿とAI解析結果（多言語critique含む）
   - `critique_ja`: 日本語の詳細分析
   - `critique_en`: 英語の詳細分析
@@ -350,6 +449,13 @@ export async function submitImage(
 - `next.config.ts`: Next.jsビルド設定
 - `vitest.config.mts`: テスト設定
   - `maxForks: 3`: Gemini APIレート制限対策
+  - `globalSetup: ["./vitest.global-setup.ts"]`: 環境変数読み込みとテストデータクリーンアップ
+- `vitest.global-setup.ts`: Vitestグローバルセットアップとティアダウン
+  - `setup()`: テスト実行前に環境変数を読み込む（`.env`, `.env.local`）
+  - `teardown()`: 全テスト完了後にテストデータをクリーンアップ
+    - テストユーザー削除（`isTestUser=true` かつ `TEST_PREFIX` で始まるユーザー名）
+    - テストゲーム削除（`TEST_PREFIX}GAME_` で始まるゲームタイトル）
+    - サブコレクションも含めて完全削除（`board`, `playerBoards`, `participants`, `events`, `submissions`）
 
 ### エントリーポイント
 
@@ -389,6 +495,9 @@ export async function submitImage(
 - **テストライブラリ**: @testing-library/react 16.3.0
 - **テスト並行度**: maxForks: 3（Gemini APIレート制限対策）
 - **リトライメカニズム**: AI依存テストは `{ retry: 2 }` で安定化
+- **グローバルセットアップ**:
+  - 環境変数の動的読み込み（Firebase Admin初期化前）
+  - テストデータの自動クリーンアップ（全テスト完了後）
 
 ### 開発ツール
 

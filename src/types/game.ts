@@ -36,6 +36,7 @@ export interface GameDocument {
   isPublic: boolean;
   isPhotoSharingEnabled: boolean;
   skipImageCheck: boolean;
+  isShuffleEnabled: boolean;
   requiredBingoLines: number;
   confidenceThreshold: number;
   maxSubmissionsPerUser: number;
@@ -68,6 +69,7 @@ export interface CellDocument {
  */
 export interface PlayerBoardDocument {
   userId: string;
+  cells: CellDocument[]; // Each player's board layout (positions may be shuffled)
   cellStates: Record<string, CellStateDocument>; // Map of cell ID to cell state
   completedLines: CompletedLineDocument[];
 }
@@ -154,6 +156,7 @@ export function gameFromFirestore(doc: GameDocument): Game {
     isPublic: doc.isPublic,
     isPhotoSharingEnabled: doc.isPhotoSharingEnabled,
     skipImageCheck: doc.skipImageCheck ?? false,
+    isShuffleEnabled: doc.isShuffleEnabled ?? false,
     requiredBingoLines: doc.requiredBingoLines,
     confidenceThreshold: doc.confidenceThreshold,
     maxSubmissionsPerUser: doc.maxSubmissionsPerUser,
@@ -179,6 +182,7 @@ export function gameToFirestore(game: Game): GameDocument {
     isPublic: game.isPublic,
     isPhotoSharingEnabled: game.isPhotoSharingEnabled,
     skipImageCheck: game.skipImageCheck,
+    isShuffleEnabled: game.isShuffleEnabled,
     requiredBingoLines: game.requiredBingoLines,
     confidenceThreshold: game.confidenceThreshold,
     maxSubmissionsPerUser: game.maxSubmissionsPerUser,
@@ -244,6 +248,7 @@ export function playerBoardFromFirestore(
 
   return {
     userId: doc.userId,
+    cells: doc.cells.map(cellFromFirestore),
     cellStates,
     completedLines: doc.completedLines.map(completedLineFromFirestore),
   };
@@ -264,6 +269,7 @@ export function playerBoardToFirestore(
 
   return {
     userId: board.userId,
+    cells: board.cells.map(cellToFirestore),
     cellStates,
     completedLines: board.completedLines.map(completedLineToFirestore),
   };

@@ -228,11 +228,11 @@ npm run docker
 ## Test
 
 ```shell
-# Run Vitest watch mode
+# Run Vitest only once
 npm test
 
-# Run Vitest only once
-npm test:once
+# Run Vitest watch mode
+npm test:watch
 ```
 
 ## Deploy

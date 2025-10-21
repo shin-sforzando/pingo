@@ -121,6 +121,8 @@
     "skipSubjectsCheckDescription": "ゲーム作成時の被写体候補のチェックをスキップします。",
     "skipImageCheck": "投稿画像のチェックをスキップ",
     "skipImageCheckDescription": "ゲーム中の投稿画像のチェックをスキップします。",
+    "isShuffleEnabled": "ボードシャッフル機能",
+    "isShuffleEnabledDescription": "参加プレイヤーごとにボードの配置をシャッフルします。",
     "isPublicDescription": "このゲームを全員に公開する",
     "join": "参加する",
     "joinGame": "ゲームに参加",

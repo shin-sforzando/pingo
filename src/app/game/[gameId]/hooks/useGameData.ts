@@ -277,6 +277,7 @@ export function useGameData(gameId: string) {
 
               const playerBoard: PlayerBoard = {
                 userId: data.userId,
+                cells: data.cells || [], // Player's board layout (may be shuffled)
                 cellStates: data.cellStates || {},
                 completedLines: data.completedLines || [],
               };

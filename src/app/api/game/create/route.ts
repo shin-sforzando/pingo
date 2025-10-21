@@ -186,6 +186,7 @@ export async function POST(
         isPublic: gameData.isPublic,
         isPhotoSharingEnabled: gameData.isPhotoSharingEnabled,
         skipImageCheck: gameData.skipImageCheck,
+        isShuffleEnabled: gameData.isShuffleEnabled,
         requiredBingoLines: gameData.requiredBingoLines,
         confidenceThreshold: gameData.confidenceThreshold,
         maxSubmissionsPerUser: gameData.maxSubmissionsPerUser,
@@ -262,8 +263,10 @@ export async function POST(
       }
 
       // Create PlayerBoard model
+      // Creator gets the original (non-shuffled) board layout
       const playerBoard: PlayerBoard = {
         userId,
+        cells, // Store board layout for creator
         cellStates,
         completedLines: [] as CompletedLine[],
       };

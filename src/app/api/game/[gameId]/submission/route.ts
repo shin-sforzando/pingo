@@ -12,12 +12,7 @@ import {
 } from "@/lib/firebase/admin-collections";
 import type { ApiResponse } from "@/types/common";
 import { AcceptanceStatus, LineType, ProcessingStatus } from "@/types/common";
-import type {
-  Cell,
-  CompletedLine,
-  PlayerBoard,
-  Submission,
-} from "@/types/schema";
+import type { CompletedLine, PlayerBoard, Submission } from "@/types/schema";
 import { analysisResultSchema } from "@/types/schema";
 
 // Request body schema for state update
@@ -36,11 +31,9 @@ interface SubmissionResponse {
 
 /**
  * Helper function to detect completed bingo lines
+ * Uses playerBoard.cells to support shuffle feature (each player has different positions)
  */
-function detectCompletedLines(
-  gameBoard: { cells: Cell[] },
-  playerBoard: PlayerBoard,
-): CompletedLine[] {
+function detectCompletedLines(playerBoard: PlayerBoard): CompletedLine[] {
   const completedLines: CompletedLine[] = [];
   const BOARD_SIZE = 5;
 
@@ -50,7 +43,8 @@ function detectCompletedLines(
     .map(() => Array(BOARD_SIZE).fill(false));
 
   // Fill the grid with open cell states
-  for (const cell of gameBoard.cells) {
+  // Use playerBoard.cells for shuffle support (each player has different positions)
+  for (const cell of playerBoard.cells) {
     const cellState = playerBoard.cellStates[cell.id];
     const isOpen = cell.isFree || cellState?.isOpen || false;
     grid[cell.position.y][cell.position.x] = isOpen;
@@ -196,17 +190,22 @@ export async function POST(
       );
     }
 
-    // Get or create player board
-    let playerBoard = await AdminPlayerBoardService.getPlayerBoard(
+    // Get player board (should exist - created when user joined game)
+    const playerBoard = await AdminPlayerBoardService.getPlayerBoard(
       gameId,
       userId,
     );
     if (!playerBoard) {
-      playerBoard = {
-        userId,
-        cellStates: {},
-        completedLines: [],
-      };
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "game/player-board-not-found",
+            message: "Player board not found. Please join the game first.",
+          },
+        },
+        { status: 404 },
+      );
     }
 
     const now = new Date();
@@ -254,7 +253,7 @@ export async function POST(
         );
 
         // Detect completed bingo lines after opening the cell
-        const newCompletedLines = detectCompletedLines(gameBoard, playerBoard);
+        const newCompletedLines = detectCompletedLines(playerBoard);
         console.log("ℹ️ XXX: ~ submission/route.ts ~ Line detection completed", {
           totalDetectedLines: newCompletedLines.length,
           detectedLines: newCompletedLines.map((line) => ({

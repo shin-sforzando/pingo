@@ -15,7 +15,7 @@ npm run check
 ### 2. テスト実行
 
 ```bash
-npm run test:once
+npm run test
 ```
 
 - 全てのテストがパスすること
@@ -57,7 +57,7 @@ npm run storybook
 ### ブラウザテスト関連の変更時
 
 ```bash
-npm run test:once
+npm run test
 ```
 
 - 全ブラウザテスト（`*.browser.test.tsx`）がパスすること
@@ -65,7 +65,7 @@ npm run test:once
 - 主要なコンポーネント/ページが正常に動作すること
 
 **注**: 従来型Playwright E2Eテスト（`npm run test:e2e`）は設定済みですが、テストファイル（`e2e/*.spec.ts`）は未作成です。
-現在のブラウザベーステストはVitest Browser Modeで実装されており、 `npm run test:once` で実行されます。
+現在のブラウザベーステストはVitest Browser Modeで実装されており、 `npm run test` で実行されます。
 
 ### Docker関連の変更時
 

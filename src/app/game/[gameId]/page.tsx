@@ -163,7 +163,7 @@ export default function GamePage() {
           </CardHeader>
           <CardContent>
             <BingoBoard
-              cells={gameBoard || []}
+              cells={playerBoard?.cells || gameBoard || []}
               cellStates={cellStates}
               completedLines={completedCellIndices}
               className="mx-auto max-w-md"

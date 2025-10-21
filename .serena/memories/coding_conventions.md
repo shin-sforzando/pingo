@@ -100,10 +100,74 @@ const analysis = {
 - ✅ 共有ユーティリティとして複数箇所で再利用
 - ✅ ユーザー体験を損なわない（正しいセルを開ける）
 
+### Zodスキーマによるバリデーションとフォールバック
+
+#### nullable vs optional vs nullish
+
+**問題**: Gemini APIがフィールドを省略した場合、JSONパース後に`undefined`になる
+
+```typescript
+// Gemini APIレスポンス例（matchedCellIdフィールドが存在しない）
+{
+  confidence: 0.85,
+  critique_ja: "...",
+  critique_en: "...",
+  acceptanceStatus: "no_match"
+}
+// JSON.parse(response) → { confidence: 0.85, ... }
+// analysisData.matchedCellId → undefined
+```
+
+**Zodバリデーションの挙動**:
+
+```typescript
+// ❌ BAD: nullable()のみ（undefinedを受け入れない）
+z.string().nullable()
+// null → ✅ OK
+// undefined → ❌ Zodエラー
+
+// ✅ GOOD: nullable().optional()（既存パターン - src/types/schema.ts:365）
+z.string().nullable().optional()
+// null → ✅ OK
+// undefined → ✅ OK（デフォルト値として扱われる）
+
+// 参考: nullish()（プロジェクトでは未使用）
+z.string().nullish()  // nullable().optional()のショートハンド
+```
+
+**既存パターンに従う**:
+
+```typescript
+// src/types/schema.ts
+
+// 既存の実装例（365行目）
+export const imageCheckResponseSchema = z.object({
+  appropriate: z.boolean(),
+  reason: z.string().optional(),
+  confidence: z.number().min(0).max(1).optional(),
+  matchedCellId: z.string().nullable().optional(),  // ← 既存パターン
+  acceptanceStatus: z.enum(AcceptanceStatus).optional(),
+  critique_ja: z.string().optional(),
+  critique_en: z.string().optional(),
+});
+
+// 修正された実装（378行目）
+export const analysisResultSchema = z.object({
+  matchedCellId: z.string().nullable().optional(),  // ← 既存パターンに従う
+  confidence: z.number().min(0).max(1),
+  critique_ja: z.string(),
+  critique_en: z.string(),
+  acceptanceStatus: z.enum(AcceptanceStatus),
+});
+```
+
+**Why**: プロジェクト内では`.nullable().optional()`が標準パターン。一貫性のため、`.nullish()`は使用しない。
+
 ### LLM統合の一般的なパターン
 
 1. **スキーマ定義 + フォールバック**
    - Gemini APIにresponseSchemaを渡す
+   - Zodスキーマで`.nullable().optional()`を使用（undefinedも許容）
    - フォールバック処理も実装（スキーマ違反時の対処）
 
 2. **デバッグログの追加**
@@ -113,6 +177,7 @@ const analysis = {
 3. **テストでフォールバックをカバー**
    - LLMが件名を返すケース
    - LLMが存在しない値を返すケース
+   - LLMがフィールドを省略するケース
 
 ## コードスタイル（Biome設定）
 
@@ -781,6 +846,41 @@ expect(result.current.participatingGames[0]).toEqual({
 });
 ```
 
+#### テストモックデータの完全性
+
+テストモックは実際のデータ構造に合わせる
+
+```typescript
+// ❌ BAD: 不完全なモックデータ（シャッフル機能追加後）
+const mockPlayerBoard = {
+  userId: mockUserId,
+  cellStates: {},
+  completedLines: [],
+  // cells配列が欠落 → detectCompletedLines()でエラー
+};
+
+// ✅ GOOD: 完全なモックデータ
+const mockPlayerBoard = {
+  userId: mockUserId,
+  cells: [  // プレイヤー固有のボード配置
+    {
+      id: "cell-1",
+      subject: "赤い自転車",
+      position: { x: 0, y: 0 },
+      isFree: false,
+    },
+  ],
+  cellStates: {},
+  completedLines: [],
+};
+```
+
+**Why**:
+
+- 機能追加（シャッフル機能）でデータ構造が変更された場合、テストモックも更新が必要
+- `PlayerBoard`型に`cells`配列が追加されたため、テストでも同様に提供する
+- 不完全なモックデータはテスト失敗の原因になる
+
 ## Gitとブランチ規約
 
 - `main`ブランチで直接作業しない
@@ -807,7 +907,7 @@ git checkout -b 019_implement_game_join_ui
 npm run check
 
 # テスト実行
-npm run test:once
+npm run test
 
 # ビルド確認
 npm run build
@@ -825,7 +925,7 @@ git push -u origin 019_implement_game_join_ui
 ### タスク完了時
 
 1. `npm run check` - コード品質
-2. `npm run test:once` - テスト実行
+2. `npm run test` - テスト実行
 3. `npm run build` - ビルド確認
 4. `npm run check:i18n` - 国際化確認（i18n関連変更時）
 
