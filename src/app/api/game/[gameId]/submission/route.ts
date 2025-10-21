@@ -200,7 +200,7 @@ export async function POST(
         {
           success: false,
           error: {
-            code: "game/player-board-not-found",
+            code: "PLAYER_BOARD_NOT_FOUND",
             message: "Player board not found. Please join the game first.",
           },
         },
