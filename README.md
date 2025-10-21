@@ -30,6 +30,10 @@ Pingo: Bingo game where AI judges based on photos
   - [Local Docker](#local-docker)
 - [Test](#test)
 - [Deploy](#deploy)
+  - [Automated Deployment](#automated-deployment)
+  - [Required Secrets in Secret Manager](#required-secrets-in-secret-manager)
+  - [Manual Deployment](#manual-deployment)
+  - [Deployment Configuration](#deployment-configuration)
 - [Misc](#misc)
 
 ## Prerequisites
@@ -131,7 +135,21 @@ gsutil cors set gcs-pingo-cors-config.json gs://gcs-pingo
 
 #### Firebase
 
-T. B. D.
+Pingo uses Firebase for authentication and Firestore as the database.
+
+**Local Development**:
+
+Firebase Admin SDK is automatically initialized using the service account key specified in `GOOGLE_APPLICATION_CREDENTIALS` (`.env.local`).
+
+**Production (Cloud Run)**:
+
+Firebase credentials are retrieved from Google Cloud Secret Manager:
+
+- `FIREBASE_PROJECT_ID`
+- `FIREBASE_CLIENT_EMAIL`
+- `FIREBASE_PRIVATE_KEY`
+
+These secrets are automatically mounted as environment variables by Cloud Build (see `cloudbuild.yaml`).
 
 ### Development
 
@@ -151,7 +169,31 @@ npm run check
 
 #### i18n
 
-(T. B. D.)
+Pingo uses [next-intl](https://next-intl-docs.vercel.app/) for internationalization with support for Japanese (primary) and English.
+
+**Translation Files**:
+
+- `messages/ja.json` - Japanese translations
+- `messages/en.json` - English translations
+
+**Check for Missing or Unused Translations**:
+
+```shell
+# Verify translation completeness
+npm run check:i18n
+```
+
+**Adding New Translations**:
+
+1. Add new keys to both `messages/ja.json` and `messages/en.json`
+2. Use the `useTranslations()` hook in components:
+
+   ```tsx
+   const t = useTranslations();
+   <p>{t("YourSection.yourKey")}</p>
+   ```
+
+3. Run `npm run check:i18n` to verify
 
 ### Storybook
 
@@ -195,7 +237,49 @@ npm test:once
 
 ## Deploy
 
-(T. B. D.)
+Pingo is deployed to **Google Cloud Run** (asia-northeast1 region) using **Google Cloud Build**.
+
+### Automated Deployment
+
+Deployment is triggered automatically via Cloud Build when changes are pushed to the repository.
+
+**Build Configuration**: `cloudbuild.yaml`
+
+**Deployment Steps**:
+
+1. Build Docker image with secrets from Secret Manager
+2. Push image to Artifact Registry
+3. Deploy to Cloud Run service `pingo`
+
+### Required Secrets in Secret Manager
+
+The following secrets must be configured in Google Cloud Secret Manager:
+
+- `FIREBASE_PROJECT_ID` - Firebase project ID
+- `FIREBASE_CLIENT_EMAIL` - Service account email
+- `FIREBASE_PRIVATE_KEY` - Service account private key
+- `GEMINI_API_KEY` - Google Gemini API key
+
+### Manual Deployment
+
+To trigger a manual deployment:
+
+```shell
+# Trigger Cloud Build manually
+gcloud builds submit --config=cloudbuild.yaml
+
+# Or deploy using the Cloud Console
+# https://console.cloud.google.com/cloud-build/triggers
+```
+
+### Deployment Configuration
+
+- **Service Name**: `pingo`
+- **Region**: `asia-northeast1`
+- **Platform**: Cloud Run (managed)
+- **Image Registry**: Artifact Registry (`asia-northeast1-docker.pkg.dev`)
+
+For detailed configuration, see `cloudbuild.yaml` and `Dockerfile`.
 
 ## Misc
 

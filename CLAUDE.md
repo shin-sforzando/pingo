@@ -124,4 +124,26 @@ Pingoは、AIによる画像判定を活用したビンゴゲームです。
 
 ## リファレンス
 
-- [Tailwind CSS](https://tailwindcss.com/docs/installation/using-vite)
+外部サービス統合や最新機能実装時は、必ず公式ドキュメントを確認すること。
+
+### フレームワーク・ライブラリ
+
+- [Next.js 15](https://nextjs.org/docs) - App Router、Server Components
+- [React 19](https://react.dev/reference/react) - Hooks、Server Components
+- [TypeScript](https://www.typescriptlang.org/docs/)
+- [Tailwind CSS 4](https://tailwindcss.com/docs)
+- [shadcn/ui](https://ui.shadcn.com/) - UIコンポーネント
+- [next-intl](https://next-intl-docs.vercel.app/) - 多言語対応
+
+### バックエンド・AI
+
+- [Firebase Admin SDK](https://firebase.google.com/docs/admin/setup) - サーバーサイド操作
+- [Firestore](https://firebase.google.com/docs/firestore) - データベース
+- [Google Cloud Storage](https://cloud.google.com/storage/docs)
+- [Google Gemini API](https://ai.google.dev/gemini-api/docs) - AI統合
+
+### テスト
+
+- [Vitest](https://vitest.dev/) - 単体テスト
+- [Playwright](https://playwright.dev/) - E2Eテスト
+- [Testing Library](https://testing-library.com/docs/react-testing-library/intro/)
