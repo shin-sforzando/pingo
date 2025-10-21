@@ -10,6 +10,7 @@ import { customAlphabet } from "nanoid";
 import { type NextRequest, NextResponse } from "next/server";
 import { ulid } from "ulid";
 import { z } from "zod";
+import { GAME_ID_LENGTH } from "../../../../lib/constants";
 import { adminAuth, adminFirestore } from "../../../../lib/firebase/admin";
 import { AdminGameService } from "../../../../lib/firebase/admin-collections";
 import { type ApiResponse, GameStatus, Role } from "../../../../types/common";
@@ -24,18 +25,17 @@ import {
 import {
   type Cell,
   type CompletedLine,
+  cellSchema,
   type Event,
   type Game,
   type GameParticipation,
-  type PlayerBoard,
-  cellSchema,
   gameCreationSchema,
+  type PlayerBoard,
 } from "../../../../types/schema";
 
 // Constants
 const PROD_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const TEST_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-const GAME_ID_LENGTH = 6;
 
 // Schema for game creation request with cells
 const gameCreateSchema = gameCreationSchema.extend({
@@ -149,7 +149,7 @@ export async function POST(
           error: {
             code: "validation/invalid-input",
             message: "Invalid input data",
-            details: validationResult.error.format(),
+            details: validationResult.error.issues,
           },
         },
         { status: 400 },
@@ -185,6 +185,7 @@ export async function POST(
         expiresAt: expiresAt,
         isPublic: gameData.isPublic,
         isPhotoSharingEnabled: gameData.isPhotoSharingEnabled,
+        skipImageCheck: gameData.skipImageCheck,
         requiredBingoLines: gameData.requiredBingoLines,
         confidenceThreshold: gameData.confidenceThreshold,
         maxSubmissionsPerUser: gameData.maxSubmissionsPerUser,
@@ -237,13 +238,7 @@ export async function POST(
       const participantDoc = gameParticipationToFirestore(participation);
       transaction.set(participantDocRef, participantDoc);
 
-      // 4. Create a game participation record
-      const participationDocRef = adminFirestore
-        .collection("game_participations")
-        .doc(`${gameId}_${userId}`);
-      transaction.set(participationDocRef, participantDoc);
-
-      // 5. Create an initial player board for the creator
+      // 4. Create an initial player board for the creator
       const playerBoardDocRef = adminFirestore
         .collection(`games/${gameId}/playerBoards`)
         .doc(userId);
@@ -277,7 +272,7 @@ export async function POST(
       const playerBoardDoc = playerBoardToFirestore(playerBoard);
       transaction.set(playerBoardDocRef, playerBoardDoc);
 
-      // 6. Record a game creation event
+      // 5. Record a game creation event
       const eventId = ulid();
       const eventDocRef = adminFirestore
         .collection(`games/${gameId}/events`)

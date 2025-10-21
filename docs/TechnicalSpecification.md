@@ -68,7 +68,7 @@ flowchart TD
 
 ### データモデルの実装
 
-データモデルは以下のアプローチで実装されています：
+データモデルは以下のアプローチで実装されています:
 
 1. 型定義とバリデーション
    - Zodスキーマを使用した型定義とバリデーション
@@ -79,12 +79,12 @@ flowchart TD
    - Firestoreドキュメントインターフェースの定義
    - クライアント/サーバー間のタイムスタンプ変換
    - 型安全な変換関数の実装
-   - `withConverter`を使用した型変換の自動化
+   - `withConverter` を使用した型変換の自動化
    - コレクション参照関数による型安全なアクセス
 
 3. タイムスタンプの扱い
-   - `firebase/firestore`と`firebase-admin/firestore`の両方に対応
-   - 共通インターフェース`TimestampInterface`の定義
+   - `firebase/firestore` と `firebase-admin/firestore` の両方に対応
+   - 共通インターフェース `TimestampInterface` の定義
    - 型ガード関数による安全な型変換
 
 4. ディレクトリ構造
@@ -124,20 +124,6 @@ src/types/
         - read: boolean (既読フラグ)
         - relatedGameId: string (関連ゲームID、該当する場合)
         - details: map (通知タイプに応じた追加情報)
-```
-
-### ゲーム参加(game_participations)
-
-```yaml
-/game_participations/
-  /{participationId}/
-    - userId: string (ULID)
-    - gameId: string (ゲームID)
-    - role: string ("creator", "admin", "participant")
-    - joinedAt: timestamp
-    - completedLines: number (達成した列数)
-    - lastCompletedAt: timestamp (最後に列を完成させた時間)
-    - submissionCount: number (画像提出回数、最大30)
 ```
 
 ### ゲーム(games)
@@ -217,13 +203,13 @@ src/types/
 ### データアクセス層アーキテクチャ
 
 12個のAPIファイルを直接Firestore操作からデータアクセス層経由に移行しました。
-`game/create`APIは複雑なトランザクション処理のため直接Firestore操作を維持しています。
+`game/create` APIは複雑なトランザクション処理のため直接Firestore操作を維持しています。
 
 #### データアクセス層の実装
 
 ファイル: `src/lib/firebase/admin-collections.ts`
 
-データアクセス層は以下のサービス名前空間で構成されています：
+データアクセス層は以下のサービス名前空間で構成されています:
 
 - `AdminGameService`: ゲームCRUD操作
 - `AdminGameParticipationService`: 参加者管理
@@ -236,7 +222,7 @@ src/types/
 
 #### Firebase Admin SDKの制約と対応
 
-Firebase Admin SDKでは`.withConverter()`がサポートされていないため、手動での型変換を実装：
+Firebase Admin SDKでは `.withConverter()` がサポートされていないため、手動での型変換を実装:
 
 ```typescript
 // データアクセス層パターン
@@ -251,7 +237,7 @@ export namespace AdminGameService {
 
 #### APIレスポンス形式の統一
 
-全APIで統一されたレスポンス形式を採用：
+全APIで統一されたレスポンス形式を採用:
 
 ```typescript
 // 成功レスポンス
@@ -306,7 +292,7 @@ return NextResponse.json({
 技術的実装:
 
 - Google GenAI構造化出力機能を使用
-- `responseMimeType: "application/json"`と`responseSchema`を設定
+- `responseMimeType: "application/json"` と `responseSchema` を設定
 - プロンプトからJSONフォーマット指定を削除し、約50%短縮
 
 responseSchema:
@@ -360,7 +346,7 @@ If the given title or theme is offensive to public order and morals, respond wit
 技術的実装:
 
 - Google GenAI構造化出力機能を使用
-- `responseMimeType: "application/json"`と`responseSchema`を設定
+- `responseMimeType: "application/json"` と `responseSchema` を設定
 - プロンプトからJSONフォーマット指定を削除
 
 responseSchema:
@@ -426,23 +412,22 @@ Ensure reasons clearly explain which criteria were not met.
 
 #### ビンゴライン検出機能
 
-画像受け入れ時に自動的にビンゴライン（行、列、対角線）の完成を検出する機能を実装：
+画像受け入れ時に自動的にビンゴライン（行、列、対角線）の完成を検出する機能を実装:
 
 技術実装:
 
-- `detectCompletedLines`関数：5x5グリッドで行、列、対角線の完成を検出
-- セル開放時に自動実行され、新しく完成したラインのみを`playerBoard.completedLines`に追加
+- `detectCompletedLines` 関数: 5x5グリッドで行、列、対角線の完成を検出
+- セル開放時に自動実行され、新しく完成したラインのみを `playerBoard.completedLines` に追加
 - 重複検出を防ぐため、既存の完成ラインとの比較を実装
 
 データ更新:
 
-- プレイヤーボード：`completedLines`配列に新しく完成したラインを追加
-- 参加者統計：`game_participations`コレクションの`completedLines`数と`lastCompletedAt`を自動更新
-- トランザクション処理：サブミッション作成、プレイヤーボード更新、参加者統計更新をアトミックに実行
+- プレイヤーボード: `completedLines` 配列に新しく完成したラインを追加
+- トランザクション処理: サブミッション作成、プレイヤーボード更新、参加者統計更新をアトミックに実行
 
 Firestoreトランザクション最適化:
 
-- すべての読み取り操作を`Promise.all()`で並列実行後、書き込み操作を順次実行
+- すべての読み取り操作を `Promise.all()` で並列実行後、書き込み操作を順次実行
 - "Firestore transactions require all reads to be executed before all writes"制約に対応
 
 #### 画像のチェックプロンプト（構造化出力対応）
@@ -450,7 +435,7 @@ Firestoreトランザクション最適化:
 技術的実装:
 
 - Google GenAI構造化出力機能を使用
-- `responseMimeType: "application/json"`と`responseSchema`を設定
+- `responseMimeType: "application/json"` と `responseSchema` を設定
 - プロンプトからJSONフォーマット指定を削除
 
 responseSchema:
@@ -508,7 +493,7 @@ sequenceDiagram
 
 ## リアルタイム機能
 
-Firestoreリアルタイムリスナーを使用して、以下の機能をクライアント側で実装：
+Firestoreリアルタイムリスナーを使用して、以下の機能をクライアント側で実装:
 
 - ゲーム状態更新の監視（ビンゴボードの状態変化）
 - 新規参加者の監視
@@ -537,7 +522,7 @@ Google Cloud Storageの階層機能を活用し、ゲームIDごとにフォル�
 
 #### カラーパレット
 
-基本構成色として以下の4色を使用する：
+基本構成色として以下の4色を使用する:
 
 - #08d9d6 = `oklch(0.8 0.1365 192.99)` (プライマリ)
 - #252a34 = `oklch(0.28 0.0198 264.19)` (フォアグラウンド)
@@ -558,13 +543,13 @@ Google Cloud Storageの階層機能を活用し、ゲームIDごとにフォル�
 
 #### アクセシビリティ
 
-- スクリーンリーダー対応：適切なaria属性を使用
+- スクリーンリーダー対応: 適切なaria属性を使用
 - タッチターゲットは最低44x44pxを確保し、操作性を向上
-- 色覚異常者への配慮：選定した4色のコントラスト比を確認し、WCAG AAレベルを満たす
+- 色覚異常者への配慮: 選定した4色のコントラスト比を確認し、WCAG AAレベルを満たす
 
 ### 画面設計
 
-主要な画面は以下の通り：
+主要な画面は以下の通り:
 
 1. トップページ (`/`)
 2. ユーザー情報画面 (`/[userId]`)
@@ -589,7 +574,7 @@ Google Cloud Storageの階層機能を活用し、ゲームIDごとにフォル�
 
 ##### Header
 
-モバイルファーストで設計されたヘッダーコンポーネント。以下の機能を含む：
+モバイルファーストで設計されたヘッダーコンポーネント。以下の機能を含む:
 
 - 中央配置されたシステム名「Pingo」（クリックでホームページに遷移）
 - 認証状態に応じた表示切り替え
@@ -598,7 +583,7 @@ Google Cloud Storageの階層機能を活用し、ゲームIDごとにフォル�
 
 ##### UserMenu
 
-ユーザーメニューコンポーネント。以下の機能を含む：
+ユーザーメニューコンポーネント。以下の機能を含む:
 
 - ユーザー名の1文字目を丸く囲ったAvatarを表示
 - クリックするとドロップダウンメニューを表示
@@ -610,7 +595,7 @@ Google Cloud Storageの階層機能を活用し、ゲームIDごとにフォル�
 
 ##### NotificationIcon
 
-通知アイコンコンポーネント。以下の機能を含む：
+通知アイコンコンポーネント。以下の機能を含む:
 
 - 鐘アイコンを表示
 - 未読通知がある場合は右上に赤いドットでハイライト
@@ -618,7 +603,7 @@ Google Cloud Storageの階層機能を活用し、ゲームIDごとにフォル�
 
 ##### NotificationDrawer
 
-通知ドロワーコンポーネント。以下の機能を含む：
+通知ドロワーコンポーネント。以下の機能を含む:
 
 - 画面下部から表示されるドロワー
 - 通知一覧の表示
@@ -630,7 +615,7 @@ Google Cloud Storageの階層機能を活用し、ゲームIDごとにフォル�
 
 ##### Footer
 
-画面下部に固定されたフッターコンポーネント。以下の機能を含む：
+画面下部に固定されたフッターコンポーネント。以下の機能を含む:
 
 - サービス利用規約へのリンク（上部に配置）
 - Hacking Papa画像（[はっきんぐパパ](https://hacking-papa.com)へのリンク付き）
@@ -698,15 +683,15 @@ View Transition APIを活用したトランジションを実装する。
 - 言語切り替えはヘッダーに配置し、選択した言語設定はCookieに保存
 - 初回アクセス時はブラウザの言語設定を検出し、対応する言語があればそれを適用
 - next-intlを使用した実装
-  - `messages/ja.json`と`messages/en.json`に翻訳リソースを格納
-  - `useTranslations`フックを使用してコンポーネント内で翻訳を取得
+  - `messages/ja.json` と `messages/en.json` に翻訳リソースを格納
+  - `useTranslations` フックを使用してコンポーネント内で翻訳を取得
   - Storybookでも多言語対応が設定済み
 
 ## ID形式の統一（ULIDへの移行）
 
 ### ULIDの採用理由
 
-ゲームID以外のすべてのIDをULIDに統一しました。ULIDを採用した理由は以下の通りです：
+ゲームID以外のすべてのIDをULIDに統一しました。ULIDを採用した理由は以下の通りです:
 
 1. 時間的にソート可能: ULIDは時間的に単調増加するため、データベースのインデックス効率が向上し、時系列での取得が容易になります
 2. 人間にとって読みやすい: UUIDに比べて読みやすい形式です（大文字と数字のみを使用）
@@ -716,9 +701,9 @@ View Transition APIを活用したトランジションを実装する。
 
 ### 実装アプローチ
 
-1. スキーマ定義: Zodスキーマで`z.string().ulid()`を使用してバリデーション
-2. ID生成: `ulid()`関数を使用してIDを生成
-3. スキーマの再利用: `userSchema.shape.id`などを使用して、一貫性のあるバリデーションを実現
+1. スキーマ定義: Zodスキーマで `z.string().ulid()` を使用してバリデーション
+2. ID生成: `ulid()` 関数を使用してIDを生成
+3. スキーマの再利用: `userSchema.shape.id` などを使用して、一貫性のあるバリデーションを実現
 
 ### ゲームIDの例外
 
@@ -770,15 +755,15 @@ View Transition APIを活用したトランジションを実装する。
 
 ### Google Cloud Buildでの環境変数と秘密情報の扱い
 
-Google Cloud Buildでは、Secret Managerと連携して機密情報を安全に扱います。特にFirebase Admin SDKの初期化に必要な認証情報（秘密鍵など）は、以下の方法で管理しています：
+Google Cloud Buildでは、Secret Managerと連携して機密情報を安全に扱います。特にFirebase Admin SDKの初期化に必要な認証情報（秘密鍵など）は、以下の方法で管理しています:
 
 1. Secret Managerでの保存
-   - `FIREBASE_PROJECT_ID`、`FIREBASE_CLIENT_EMAIL`、`FIREBASE_PRIVATE_KEY`をSecret Managerに保存
-   - 各シークレットは最新バージョン（`versions/latest`）を参照
+   - `FIREBASE_PROJECT_ID` 、 `FIREBASE_CLIENT_EMAIL` 、 `FIREBASE_PRIVATE_KEY` をSecret Managerに保存
+   - 各シークレットは最新バージョン（ `versions/latest` ）を参照
 
 2. cloudbuild.yamlでの参照
-   - `secretEnv`フィールドで使用するシークレットを指定
-   - `availableSecrets`セクションでSecret Managerからシークレットを取得する設定
+   - `secretEnv` フィールドで使用するシークレットを指定
+   - `availableSecrets` セクションでSecret Managerからシークレットを取得する設定
    - bashスクリプトを使用して環境変数を適切に処理（特に改行や特殊文字を含む秘密鍵）
 
 3. Dockerfileでの設定

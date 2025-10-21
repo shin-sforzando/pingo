@@ -2,10 +2,9 @@ import { page, userEvent } from "@vitest/browser/context";
 import { NextIntlClientProvider } from "next-intl";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render } from "vitest-browser-react";
-import { NotificationDrawer } from "./NotificationDrawer";
-
 import enMessages from "../../../messages/en.json";
 import jaMessages from "../../../messages/ja.json";
+import { NotificationDrawer } from "./NotificationDrawer";
 
 describe("NotificationDrawer", () => {
   const mockOnOpenChange = vi.fn();

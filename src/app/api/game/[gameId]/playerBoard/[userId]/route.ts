@@ -1,3 +1,6 @@
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import { z } from "zod";
 import { adminAuth } from "@/lib/firebase/admin";
 import {
   AdminGameParticipationService,
@@ -6,13 +9,10 @@ import {
 } from "@/lib/firebase/admin-collections";
 import type { ApiResponse } from "@/types/common";
 import {
-  type PlayerBoard,
   cellStateApiSchema,
   completedLineApiSchema,
+  type PlayerBoard,
 } from "@/types/schema";
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-import { z } from "zod";
 
 /**
  * Get player board for a specific user in a game
@@ -228,7 +228,7 @@ export async function PUT(
           error: {
             code: "INVALID_INPUT",
             message: "Invalid input data",
-            details: validationResult.error.errors,
+            details: validationResult.error.issues,
           },
         },
         { status: 400 },

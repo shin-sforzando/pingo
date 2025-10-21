@@ -1,25 +1,27 @@
 {
-  "editor.defaultFormatter": "biomejs.biome",
-  "editor.quickSuggestions": {
-    "strings": "on"
+  "[html]": {
+    "editor.defaultFormatter": "vscode.html-language-features"
   },
-  "files.associations": {
-    "*.css": "tailwindcss"
+  "[markdown]": {
+    "editor.codeActionsOnSave": {
+      "source.fixAll.markdownlint": "explicit"
+    }
   },
-  "i18n-ally.localesPaths": [
-    "messages",
-    "src/i18n"
-  ],
-  "i18n-ally.displayLanguage": "ja",
-  "i18n-ally.keystyle": "nested",
+  "[xml]": {
+    "editor.defaultFormatter": "DotJoshJohnson.xml"
+  },
+  "[yaml]": {
+    "editor.defaultFormatter": "redhat.vscode-yaml"
+  },
   "cSpell.words": [
     "adminsdk",
+    "anthropics",
     "autodocs",
     "biomejs",
-    "clinerules",
     "cloudbuild",
     "cloudsdktool",
     "clsx",
+    "coderabbit",
     "Commitizen",
     "Dasharray",
     "dont",
@@ -41,6 +43,7 @@
     "lucide",
     "magicui",
     "manualstart",
+    "Mcpjson",
     "Millis",
     "miterlimit",
     "murecho",
@@ -50,10 +53,12 @@
     "pingo",
     "qrcode",
     "Repomix",
+    "repomixignore",
     "secretmanager",
     "shadcn",
     "subcollection",
     "subcollections",
+    "testuser",
     "turbopack",
     "vaul",
     "VIEWPORTS",
@@ -63,10 +68,18 @@
     "WCAG",
     "xlink"
   ],
-  "cSpell.ignoreWords": [
-    "AIzaSyCYXPVHEMWgIXpDc2j-qFuvzD79eI24dws"
-  ],
-  "[yaml]": {
-    "editor.defaultFormatter": "redhat.vscode-yaml"
-  }
+  "editor.codeActionsOnSave": {
+    "source.fixAll.biome": "explicit",
+    "source.organizeImports.biome": "explicit"
+  },
+  "editor.defaultFormatter": "biomejs.biome",
+  "editor.quickSuggestions": {
+    "strings": "on"
+  },
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
+  "i18n-ally.displayLanguage": "ja",
+  "i18n-ally.keystyle": "nested",
+  "i18n-ally.localesPaths": ["messages", "src/i18n"]
 }

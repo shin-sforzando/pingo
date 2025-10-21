@@ -1,14 +1,19 @@
-import type { Locale } from "@/i18n/config";
-import { getUserLocale } from "@/services/locale";
 import { GoogleGenAI, Type } from "@google/genai";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import type { Locale } from "@/i18n/config";
+import { GEMINI_MODEL, GEMINI_THINKING_BUDGET } from "@/lib/constants";
+import { getUserLocale } from "@/services/locale";
 
 const generateSubjectsSchema = z.object({
-  title: z.string().min(1, { message: "Title is required" }),
-  theme: z.string().min(1, { message: "Theme is required" }),
+  title: z.string().min(1, {
+    error: "Title is required",
+  }),
+  theme: z.string().min(1, {
+    error: "Theme is required",
+  }),
   language: z.enum(["ja", "en"] as const).optional(),
-  numberOfCandidates: z.number().int().min(1).max(30).default(25),
+  numberOfCandidates: z.int().min(1).max(30).default(25),
 });
 
 type GenerateSubjectsRequest = z.infer<typeof generateSubjectsSchema>;
@@ -39,13 +44,15 @@ Suggest **${numberOfCandidates}** distinct objects or subjects that can be photo
 Focus on concrete nouns or short descriptive phrases that clearly identify the target for a photo.
 Google Cloud Vision AI will be used to determine if a photo matches the suggested object/subject, so ensure the suggestions are visually identifiable and relatively unambiguous.
 
-Each subject must meet ALL of the following criteria:
-- Be a concrete noun or short descriptive phrase that clearly identifies a photo target
-- Be visually identifiable in a photograph
-- Be suitable for recognition by Google Cloud Vision AI
-- Be unambiguous and specific enough for players to understand what to photograph
-- Be appropriate for all ages (no offensive content, harmful elements, adult themes, violence, or illegal activities)
-- Be unique within the list (not duplicated or too similar to other subjects)
+IMPORTANT: Each subject must meet ALL of the following criteria STRICTLY:
+- Be a concrete noun or short descriptive phrase that clearly identifies a photo target (NOT abstract concepts like "happiness", "beauty", "peace")
+- Be visually identifiable in a photograph (things you can actually see and photograph)
+- Be suitable for recognition by Google Cloud Vision AI (specific objects, not vague descriptions)
+- Be unambiguous and specific enough for players to understand what to photograph (avoid "something beautiful", "anything red", etc.)
+- Be appropriate for all ages (no offensive content, harmful elements, adult themes, violence, weapons, or illegal activities)
+- Be unique within the list (absolutely NO duplicates or very similar items)
+
+CRITICAL: Before finalizing your response, verify that EVERY candidate meets ALL criteria above. Remove any that do not.
 
 Candidates must be in ${language}.
 
@@ -64,7 +71,7 @@ export async function POST(request: NextRequest) {
 
     if (!validationResult.success) {
       return NextResponse.json(
-        { error: validationResult.error.format() },
+        { error: validationResult.error.issues },
         { status: 400 },
       );
     }
@@ -95,11 +102,14 @@ export async function POST(request: NextRequest) {
 
     const prompt = getPromptTemplate(params);
     const result = await genAI.models.generateContent({
-      model: "gemini-2.0-flash-001",
+      model: GEMINI_MODEL,
       contents: [{ role: "user", parts: [{ text: prompt }] }],
       config: {
         responseMimeType: "application/json",
         responseSchema,
+        thinkingConfig: {
+          thinkingBudget: GEMINI_THINKING_BUDGET,
+        },
       },
     });
 
@@ -122,6 +132,40 @@ export async function POST(request: NextRequest) {
           { error: jsonResponse.error },
           { status: 400 },
         );
+      }
+
+      // Clean and validate candidates
+      if (jsonResponse.candidates && Array.isArray(jsonResponse.candidates)) {
+        // Remove control characters and trim
+        let candidates = jsonResponse.candidates.map((candidate: string) =>
+          candidate.replace(/[\b\n\r\t\f\v]/g, "").trim(),
+        );
+
+        // Remove empty strings
+        candidates = candidates.filter((c: string) => c.length > 0);
+
+        // Remove duplicates (case-insensitive)
+        const seen = new Set<string>();
+        candidates = candidates.filter((candidate: string) => {
+          const lower = candidate.toLowerCase();
+          if (seen.has(lower)) {
+            console.warn(
+              `Removing duplicate candidate: "${candidate}" (duplicate of existing)`,
+            );
+            return false;
+          }
+          seen.add(lower);
+          return true;
+        });
+
+        jsonResponse.candidates = candidates;
+
+        // Warn if we have fewer candidates than requested
+        if (candidates.length < params.numberOfCandidates) {
+          console.warn(
+            `Generated only ${candidates.length} valid candidates (requested ${params.numberOfCandidates})`,
+          );
+        }
       }
 
       return NextResponse.json(jsonResponse);

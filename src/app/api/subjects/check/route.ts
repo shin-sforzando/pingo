@@ -1,13 +1,14 @@
-import type { Locale } from "@/i18n/config";
-import { getUserLocale } from "@/services/locale";
 import { GoogleGenAI, Type } from "@google/genai";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import type { Locale } from "@/i18n/config";
+import { GEMINI_MODEL, GEMINI_THINKING_BUDGET } from "@/lib/constants";
+import { getUserLocale } from "@/services/locale";
 
 const checkSubjectsSchema = z.object({
-  subjects: z
-    .array(z.string())
-    .min(1, { message: "At least one subject is required" }),
+  subjects: z.array(z.string()).min(1, {
+    error: "At least one subject is required",
+  }),
   language: z.enum(["ja", "en"] as const).optional(),
 });
 
@@ -53,13 +54,13 @@ const getPromptTemplate = (params: CheckSubjectsRequest) => {
   const { subjects, language } = params;
   console.log("ℹ️ XXX: ~ route.ts ~ getPromptTemplate ~ params:", params);
 
-  return `You are a content moderator for a family-friendly photo bingo game.
+  return `You are a content moderator for photo bingo game.
 Please check if the following subjects are appropriate for the game.
 
 Each subject must meet ALL of the following criteria:
 - Be a concrete noun or short descriptive phrase that clearly identifies a photo target
 - Be visually identifiable in a photograph
-- Be suitable for recognition by Google Cloud Vision AI
+- Be suitable for recognition by AI
 - Be unambiguous and specific enough for players to understand what to photograph
 - Be appropriate for all ages (no offensive content, harmful elements, adult themes, violence, or illegal activities)
 - Be unique within the list (not duplicated or too similar to other subjects)
@@ -79,7 +80,7 @@ export async function POST(request: NextRequest) {
 
     if (!validationResult.success) {
       return NextResponse.json(
-        { error: validationResult.error.format() },
+        { error: validationResult.error.issues },
         { status: 400 },
       );
     }
@@ -110,11 +111,14 @@ export async function POST(request: NextRequest) {
 
     const prompt = getPromptTemplate(params);
     const result = await genAI.models.generateContent({
-      model: "gemini-2.0-flash-001",
+      model: GEMINI_MODEL,
       contents: [{ role: "user", parts: [{ text: prompt }] }],
       config: {
         responseMimeType: "application/json",
         responseSchema,
+        thinkingConfig: {
+          thinkingBudget: GEMINI_THINKING_BUDGET,
+        },
       },
     });
 

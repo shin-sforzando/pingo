@@ -23,12 +23,12 @@ pre-commit:
       glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx}"
       run: npm run knip -- --production --no-exit-code
 
-post-checkout:
-  commands:
-    reveal:
-      interactive: true
-      run: git secret reveal -v
-    install:
-      run: npm install
-    adc:
-      run: gcloud auth application-default login
+# post-checkout:
+#   commands:
+#     reveal:
+#       interactive: true
+#       run: git secret reveal -v
+#     install:
+#       run: npm install && npx playwright install --with-deps
+#     adc:
+#       run: gcloud auth application-default login

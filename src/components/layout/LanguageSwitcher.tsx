@@ -1,10 +1,10 @@
 "use client";
 
+import { Languages } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { setUserLocale } from "@/services/locale";
-import { Languages } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
 
 export function LanguageSwitcher() {
   const router = useRouter();
@@ -13,7 +13,7 @@ export function LanguageSwitcher() {
   const LOCALE_JA = "ja";
   const LOCALE_EN = "en";
 
-  const t = useTranslations("Common");
+  const t = useTranslations();
 
   const toggleLocale = async () => {
     try {
@@ -35,7 +35,7 @@ export function LanguageSwitcher() {
       onClick={toggleLocale}
     >
       <Languages className="mr-2 h-4 w-4" />
-      {t("toLanguage")}
+      {t("Common.toLanguage")}
     </Button>
   );
 }

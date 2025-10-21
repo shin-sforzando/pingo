@@ -5,8 +5,8 @@ import { ulid } from "ulid";
 import { adminAuth } from "@/lib/firebase/admin";
 import { AdminUserService } from "@/lib/firebase/admin-collections";
 import type { ApiResponse } from "@/types/common";
-import { userCreationSchema } from "@/types/schema";
 import type { User } from "@/types/schema";
+import { userCreationSchema } from "@/types/schema";
 
 /**
  * User registration API
@@ -28,7 +28,7 @@ export async function POST(
           error: {
             code: "VALIDATION_ERROR",
             message: "Auth.errors.invalidInput",
-            details: validationResult.error.format(),
+            details: validationResult.error.issues,
           },
         },
         { status: 400 },

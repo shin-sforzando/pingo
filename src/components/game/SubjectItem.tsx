@@ -1,11 +1,11 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
 import { GripVertical, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 export interface SubjectItemProps {
   /**
@@ -97,13 +97,14 @@ export function SubjectItem({
         )}
       >
         {/* Drag handle */}
-        <div
-          className="cursor-grab touch-none"
+        <button
+          type="button"
+          className="cursor-grab touch-none border-none bg-transparent p-1"
           {...dragHandleProps}
           aria-label="Drag to reorder"
         >
           <GripVertical className="h-5 w-5 text-muted-foreground" />
-        </div>
+        </button>
 
         {/* Subject input */}
         <div className="relative flex-1">

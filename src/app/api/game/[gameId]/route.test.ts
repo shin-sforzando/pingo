@@ -1,3 +1,15 @@
+import type { DecodedIdToken } from "firebase-admin/auth";
+import type { NextResponse } from "next/server";
+import { ulid } from "ulid";
+import {
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
 import {
   cleanupTestUsers,
@@ -11,18 +23,6 @@ import type { ApiResponse } from "@/types/common";
 import { GameStatus, Role } from "@/types/common";
 import { gameToFirestore } from "@/types/game";
 import type { Game } from "@/types/schema";
-import type { DecodedIdToken } from "firebase-admin/auth";
-import type { NextResponse } from "next/server";
-import { ulid } from "ulid";
-import {
-  afterAll,
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from "vitest";
 import { PUT } from "./route";
 
 // Mock Firebase Admin
@@ -165,22 +165,18 @@ describe("/api/game/[gameId] PUT", () => {
     (
       vi.mocked(adminFirestore.collection) as ReturnType<typeof vi.fn>
     ).mockImplementation((path: string) => {
-      if (path === "game_participations") {
-        return {
-          where: () => ({
-            where: () => ({
-              where: () => ({
-                get: () => Promise.resolve(mockAdminParticipationSnapshot),
-              }),
-            }),
-          }),
-        };
-      }
       if (path === "games") {
         return {
           doc: () => ({
             get: () => Promise.resolve(mockGameDoc),
             set: mockSet,
+            collection: () => ({
+              where: () => ({
+                where: () => ({
+                  get: () => Promise.resolve(mockAdminParticipationSnapshot),
+                }),
+              }),
+            }),
           }),
         };
       }
@@ -237,21 +233,17 @@ describe("/api/game/[gameId] PUT", () => {
     (
       vi.mocked(adminFirestore.collection) as ReturnType<typeof vi.fn>
     ).mockImplementation((path: string) => {
-      if (path === "game_participations") {
-        return {
-          where: () => ({
-            where: () => ({
-              where: () => ({
-                get: () => Promise.resolve(mockEmptyParticipationSnapshot),
-              }),
-            }),
-          }),
-        };
-      }
       if (path === "games") {
         return {
           doc: () => ({
             get: () => Promise.resolve(mockGameDoc),
+            collection: () => ({
+              where: () => ({
+                where: () => ({
+                  get: () => Promise.resolve(mockEmptyParticipationSnapshot),
+                }),
+              }),
+            }),
           }),
         };
       }

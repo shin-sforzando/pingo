@@ -1,7 +1,8 @@
+import { faker } from "@faker-js/faker";
+import type { Meta, StoryObj } from "@storybook/nextjs";
+import { GAME_ID_LENGTH } from "@/lib/constants";
 import { GameStatus } from "@/types/common";
 import type { Game } from "@/types/schema";
-import { faker } from "@faker-js/faker";
-import type { Meta, StoryObj } from "@storybook/react";
 import { GameInfo } from "./GameInfo";
 
 const meta: Meta<typeof GameInfo> = {
@@ -22,7 +23,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const baseGame: Game = {
-  id: faker.string.alphanumeric(6).toUpperCase(), // 6桁英数
+  id: faker.string.alphanumeric(GAME_ID_LENGTH).toUpperCase(),
   title: "Nature Photography Bingo",
   theme: "Nature and Wildlife",
   creatorId: faker.string.ulid(), // ULID

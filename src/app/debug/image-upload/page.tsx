@@ -1,9 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { ImageUpload } from "@/components/game/ImageUpload";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { ImageSubmissionResult, ProcessedImage } from "@/types/schema";
-import { useState } from "react";
 
 /**
  * Debug page for testing ImageUpload component functionality

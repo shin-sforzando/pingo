@@ -1,12 +1,11 @@
-import { AcceptanceStatus } from "@/types/common";
 import { page } from "@vitest/browser/context";
 import { NextIntlClientProvider } from "next-intl";
 import { describe, expect, it } from "vitest";
 import { render } from "vitest-browser-react";
-import { SubmissionResult } from "./SubmissionResult";
-
+import { AcceptanceStatus } from "@/types/common";
 import enMessages from "../../../messages/en.json";
 import jaMessages from "../../../messages/ja.json";
+import { SubmissionResult } from "./SubmissionResult";
 
 const renderWithIntl = (component: React.ReactElement, locale: "en" | "ja") => {
   const messages = locale === "en" ? enMessages : jaMessages;
@@ -20,7 +19,8 @@ const renderWithIntl = (component: React.ReactElement, locale: "en" | "ja") => {
 describe("SubmissionResult", () => {
   const defaultProps = {
     confidence: 0.85,
-    critique: "Test critique message",
+    critique_ja: "テスト用の分析メッセージ",
+    critique_en: "Test critique message",
     acceptanceStatus: AcceptanceStatus.ACCEPTED,
     confidenceThreshold: 0.7,
   };
@@ -40,7 +40,7 @@ describe("SubmissionResult", () => {
         )
         .toBeVisible();
       await expect
-        .element(page.getByText("Test critique message"))
+        .element(page.getByText("テスト用の分析メッセージ"))
         .toBeVisible();
     });
 

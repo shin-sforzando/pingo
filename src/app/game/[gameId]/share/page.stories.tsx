@@ -1,7 +1,7 @@
+import { fakerJA as faker } from "@faker-js/faker";
+import type { Meta, StoryObj } from "@storybook/nextjs";
 import { GameStatus } from "@/types/common";
 import type { Cell, Game } from "@/types/schema";
-import { fakerJA as faker } from "@faker-js/faker";
-import type { Meta, StoryObj } from "@storybook/react";
 import SharePage from "./page";
 
 // Generate sample cells for a 5x5 board
@@ -56,57 +56,62 @@ const mockParticipants = Array.from({ length: 5 }, (_, i) => ({
   username: faker.person.fullName(),
 }));
 
-// Mock next/navigation for Storybook
-import * as nextNavigation from "next/navigation";
-
-// Create a mock function for useParams
-const mockUseParams = () => ({ gameId: "VALID1" });
-
-// Override the useParams function if possible
-try {
-  // @ts-ignore - This is a mock for Storybook
-  nextNavigation.useParams = mockUseParams;
-} catch (error) {
-  console.warn("Could not mock useParams:", error);
-}
-
 // Mock fetch for all stories
-if (typeof window !== "undefined") {
-  const originalFetch = window.fetch;
-  window.fetch = async (input, init) => {
-    const url = input.toString();
-    console.log(`Mocked fetch: ${url}`);
+const originalFetch = global.fetch;
+global.fetch = ((url: string | URL | Request, init?: RequestInit) => {
+  const urlString = url.toString();
+  console.log(`Mocked fetch (share): ${urlString}`);
 
-    // Always return success for any game ID to avoid "game not found" error
-    if (url.includes("/api/game/")) {
-      if (url.endsWith("/board")) {
-        return {
-          ok: true,
-          json: async () => mockBoard,
-        } as Response;
-      }
-      if (url.endsWith("/participants")) {
-        return {
-          ok: true,
-          json: async () => mockParticipants,
-        } as Response;
-      }
-      return {
-        ok: true,
-        json: async () => mockGame,
-      } as Response;
-    }
+  // Mock game API (exact match, not sub-paths like /board or /participants)
+  if (urlString.match(/\/api\/game\/VALID1$/)) {
+    return Promise.resolve({
+      ok: true,
+      json: async () => ({
+        success: true,
+        data: mockGame,
+      }),
+    } as Response);
+  }
 
-    // Default to original fetch for other requests
-    return originalFetch(input, init);
-  };
-}
+  // Mock board API
+  if (urlString.includes("/api/game/VALID1/board")) {
+    return Promise.resolve({
+      ok: true,
+      json: async () => ({
+        success: true,
+        data: mockBoard,
+      }),
+    } as Response);
+  }
+
+  // Mock participants API
+  if (urlString.includes("/api/game/VALID1/participants")) {
+    return Promise.resolve({
+      ok: true,
+      json: async () => ({
+        success: true,
+        data: mockParticipants,
+      }),
+    } as Response);
+  }
+
+  // Default to original fetch for other requests
+  return originalFetch(url as RequestInfo | URL, init);
+}) as typeof fetch;
 
 const meta = {
   title: "Pages/Game/Share",
   component: SharePage,
   parameters: {
     layout: "fullscreen",
+    nextjs: {
+      appDirectory: true,
+      navigation: {
+        pathname: "/game/VALID1/share",
+        query: {},
+        segments: [["gameId", "VALID1"]],
+      },
+    },
   },
   tags: ["autodocs"],
 } satisfies Meta<typeof SharePage>;
@@ -120,41 +125,51 @@ export const PrivateGame: Story = {
   decorators: [
     (Story) => {
       // Mock fetch to return a private game
-      if (typeof window !== "undefined") {
-        const originalFetch = window.fetch;
-        // Override fetch for this story
-        window.fetch = async (input, init) => {
-          const url = input.toString();
-          console.log(`Mocked fetch: ${url}`);
+      const storyOriginalFetch = global.fetch;
+      global.fetch = ((url: string | URL | Request, init?: RequestInit) => {
+        const urlString = url.toString();
+        console.log(`Mocked fetch (private): ${urlString}`);
 
-          // Always return success for any game ID to avoid "game not found" error
-          if (url.includes("/api/game/")) {
-            if (url.endsWith("/board")) {
-              return {
-                ok: true,
-                json: async () => mockBoard,
-              } as Response;
-            }
-            if (url.endsWith("/participants")) {
-              return {
-                ok: true,
-                json: async () => mockParticipants,
-              } as Response;
-            }
-            // Return a private game
-            return {
-              ok: true,
-              json: async () => ({
+        // Mock game API with private game (exact match)
+        if (urlString.match(/\/api\/game\/VALID1$/)) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({
+              success: true,
+              data: {
                 ...mockGame,
                 isPublic: false,
-              }),
-            } as Response;
-          }
+              },
+            }),
+          } as Response);
+        }
 
-          // Default to original fetch for other requests
-          return originalFetch(input, init);
-        };
-      }
+        // Mock board API
+        if (urlString.includes("/api/game/VALID1/board")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({
+              success: true,
+              data: mockBoard,
+            }),
+          } as Response);
+        }
+
+        // Mock participants API
+        if (urlString.includes("/api/game/VALID1/participants")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({
+              success: true,
+              data: mockParticipants,
+            }),
+          } as Response);
+        }
+
+        // Default to original fetch
+        return storyOriginalFetch(url as RequestInfo | URL, init);
+      }) as typeof fetch;
+
       return <Story />;
     },
   ],
@@ -164,10 +179,7 @@ export const Loading: Story = {
   decorators: [
     (Story) => {
       // Mock fetch to return a pending promise for loading state
-      if (typeof window !== "undefined") {
-        // Override fetch for this story
-        window.fetch = async () => new Promise(() => {});
-      }
+      global.fetch = (() => new Promise(() => {})) as typeof fetch;
       return <Story />;
     },
   ],
@@ -177,15 +189,12 @@ export const GameNotFound: Story = {
   decorators: [
     (Story) => {
       // Mock fetch to return a 404 response
-      if (typeof window !== "undefined") {
-        // Override fetch for this story
-        window.fetch = async () =>
-          ({
-            ok: false,
-            status: 404,
-            json: async () => ({ error: "Game not found" }),
-          }) as Response;
-      }
+      global.fetch = (() =>
+        Promise.resolve({
+          ok: false,
+          status: 404,
+          json: async () => ({ error: "Game not found" }),
+        } as Response)) as typeof fetch;
       return <Story />;
     },
   ],

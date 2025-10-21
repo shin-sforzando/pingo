@@ -2,9 +2,8 @@ import { page, userEvent } from "@vitest/browser/context";
 import { NextIntlClientProvider } from "next-intl";
 import { describe, expect, it, vi } from "vitest";
 import { render } from "vitest-browser-react";
-import { NotificationIcon } from "./NotificationIcon";
-
 import jaMessages from "../../../messages/ja.json";
+import { NotificationIcon } from "./NotificationIcon";
 
 // Mock the NotificationDrawer component
 vi.mock("./NotificationDrawer", () => ({

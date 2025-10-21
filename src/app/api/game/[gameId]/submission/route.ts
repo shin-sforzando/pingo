@@ -1,46 +1,117 @@
-import { adminAuth } from "@/lib/firebase/admin";
-import {
-  AdminGameParticipationService,
-  AdminGameService,
-  AdminSubmissionService,
-} from "@/lib/firebase/admin-collections";
-import type { ApiResponse } from "@/types/common";
-import { ProcessingStatus } from "@/types/common";
-import { type Submission, submissionSchema } from "@/types/schema";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { ulid } from "ulid";
+import { z } from "zod";
+import { adminAuth } from "@/lib/firebase/admin";
+import {
+  AdminGameBoardService,
+  AdminGameParticipationService,
+  AdminGameService,
+  AdminPlayerBoardService,
+  AdminSubmissionService,
+  AdminTransactionService,
+} from "@/lib/firebase/admin-collections";
+import type { ApiResponse } from "@/types/common";
+import { AcceptanceStatus, LineType, ProcessingStatus } from "@/types/common";
+import type {
+  Cell,
+  CompletedLine,
+  PlayerBoard,
+  Submission,
+} from "@/types/schema";
+import { analysisResultSchema } from "@/types/schema";
 
-// Schema for creating submission - reuse from schema.ts
-const createSubmissionSchema = submissionSchema.pick({
-  imageUrl: true,
-  memo: true,
+// Request body schema for state update
+const submissionRequestSchema = z.object({
+  submissionId: z.string(),
+  imageUrl: z.string().url(),
+  analysisResult: analysisResultSchema,
 });
 
+// Response data schema
+interface SubmissionResponse {
+  newlyCompletedLines: number;
+  totalCompletedLines: number;
+  requiredBingoLines: number;
+}
+
 /**
- * Create a new submission for a game
- * Only allows participants to submit
+ * Helper function to detect completed bingo lines
+ */
+function detectCompletedLines(
+  gameBoard: { cells: Cell[] },
+  playerBoard: PlayerBoard,
+): CompletedLine[] {
+  const completedLines: CompletedLine[] = [];
+  const BOARD_SIZE = 5;
+
+  // Create a 5x5 grid mapping for easier line checking
+  const grid: boolean[][] = Array(BOARD_SIZE)
+    .fill(null)
+    .map(() => Array(BOARD_SIZE).fill(false));
+
+  // Fill the grid with open cell states
+  for (const cell of gameBoard.cells) {
+    const cellState = playerBoard.cellStates[cell.id];
+    const isOpen = cell.isFree || cellState?.isOpen || false;
+    grid[cell.position.y][cell.position.x] = isOpen;
+  }
+
+  // Check rows
+  for (let row = 0; row < BOARD_SIZE; row++) {
+    if (grid[row].every((cell) => cell)) {
+      completedLines.push({
+        type: LineType.ROW,
+        index: row,
+        completedAt: new Date(),
+      });
+    }
+  }
+
+  // Check columns
+  for (let col = 0; col < BOARD_SIZE; col++) {
+    if (grid.every((row) => row[col])) {
+      completedLines.push({
+        type: LineType.COLUMN,
+        index: col,
+        completedAt: new Date(),
+      });
+    }
+  }
+
+  // Check main diagonal (top-left to bottom-right)
+  if (grid.every((row, index) => row[index])) {
+    completedLines.push({
+      type: LineType.DIAGONAL,
+      index: 0,
+      completedAt: new Date(),
+    });
+  }
+
+  // Check anti-diagonal (top-right to bottom-left)
+  if (grid.every((row, index) => row[BOARD_SIZE - 1 - index])) {
+    completedLines.push({
+      type: LineType.DIAGONAL,
+      index: 1,
+      completedAt: new Date(),
+    });
+  }
+
+  return completedLines;
+}
+
+/**
+ * POST /api/game/[gameId]/submission
+ * Create submission record and update game state
+ *
+ * Single Responsibility: State management (submission creation, board updates, line detection)
  */
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ gameId: string }> },
-): Promise<NextResponse<ApiResponse<Submission>>> {
+): Promise<NextResponse<ApiResponse<SubmissionResponse>>> {
   try {
     const { gameId } = await params;
-
-    // Validate parameters
-    if (!gameId) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: "INVALID_PARAMS",
-            message: "Game ID is required",
-          },
-        },
-        { status: 400 },
-      );
-    }
+    console.log("ℹ️ XXX: ~ submission/route.ts ~ POST called", { gameId });
 
     // Verify authentication
     const authHeader = request.headers.get("authorization");
@@ -49,7 +120,7 @@ export async function POST(
         {
           success: false,
           error: {
-            code: "UNAUTHORIZED",
+            code: "MISSING_TOKEN",
             message: "Missing authentication token",
           },
         },
@@ -60,42 +131,21 @@ export async function POST(
     const token = authHeader.substring(7);
     const decodedToken = await adminAuth.verifyIdToken(token);
     const userId = decodedToken.uid;
+    console.log("ℹ️ XXX: ~ submission/route.ts ~ User authenticated", {
+      userId,
+    });
 
     // Parse request body
     const body = await request.json();
-    const validationResult = createSubmissionSchema.safeParse(body);
+    const { submissionId, imageUrl, analysisResult } =
+      submissionRequestSchema.parse(body);
+    console.log("ℹ️ XXX: ~ submission/route.ts ~ Request parsed", {
+      submissionId,
+      imageUrl,
+      analysisResult,
+    });
 
-    if (!validationResult.success) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: "INVALID_INPUT",
-            message: "Invalid input data",
-            details: validationResult.error.errors,
-          },
-        },
-        { status: 400 },
-      );
-    }
-
-    const { imageUrl, memo } = validationResult.data;
-
-    // Check if game exists and get game data
-    const game = await AdminGameService.getGame(gameId);
-    if (!game) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: "GAME_NOT_FOUND",
-            message: "Game not found",
-          },
-        },
-        { status: 404 },
-      );
-    }
-
+    // Verify user is game participant
     const isParticipant = await AdminGameParticipationService.isParticipant(
       gameId,
       userId,
@@ -114,64 +164,254 @@ export async function POST(
       );
     }
 
-    // Check submission limit
-    const currentSubmissionCount =
-      await AdminGameParticipationService.getSubmissionCount(gameId, userId);
+    // Get game and game board
+    const [game, gameBoard] = await Promise.all([
+      AdminGameService.getGame(gameId),
+      AdminGameBoardService.getGameBoard(gameId),
+    ]);
 
-    if (game.maxSubmissionsPerUser <= currentSubmissionCount) {
+    if (!game) {
       return NextResponse.json(
         {
           success: false,
           error: {
-            code: "SUBMISSION_LIMIT_EXCEEDED",
-            message: `Maximum ${game.maxSubmissionsPerUser} submissions allowed`,
+            code: "GAME_NOT_FOUND",
+            message: "Game not found",
           },
         },
-        { status: 429 },
+        { status: 404 },
       );
     }
 
-    // Create submission
-    const submissionId = ulid();
+    if (!gameBoard) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "GAME_BOARD_NOT_FOUND",
+            message: "Game board not found",
+          },
+        },
+        { status: 404 },
+      );
+    }
+
+    // Get or create player board
+    let playerBoard = await AdminPlayerBoardService.getPlayerBoard(
+      gameId,
+      userId,
+    );
+    if (!playerBoard) {
+      playerBoard = {
+        userId,
+        cellStates: {},
+        completedLines: [],
+      };
+    }
+
     const now = new Date();
 
+    // Create submission record
     const submission: Submission = {
       id: submissionId,
       userId,
       imageUrl,
       submittedAt: now,
-      analyzedAt: null,
-      critique: null,
-      matchedCellId: null,
-      confidence: null,
-      processingStatus: ProcessingStatus.UPLOADED,
-      acceptanceStatus: null,
+      analyzedAt: now,
+      critique_ja: analysisResult.critique_ja,
+      critique_en: analysisResult.critique_en,
+      matchedCellId: analysisResult.matchedCellId,
+      confidence: analysisResult.confidence,
+      processingStatus: ProcessingStatus.ANALYZED,
+      acceptanceStatus: analysisResult.acceptanceStatus,
       errorMessage: null,
       createdAt: now,
       updatedAt: null,
-      memo,
     };
 
-    // Save submission to Firestore using Admin service
-    await AdminSubmissionService.createSubmission(gameId, submission);
+    // Check if submission is accepted and should update board
+    const isAccepted =
+      analysisResult.matchedCellId &&
+      analysisResult.acceptanceStatus === AcceptanceStatus.ACCEPTED &&
+      game.confidenceThreshold <= analysisResult.confidence;
 
-    console.log(
-      `ℹ️ XXX: ~ route.ts ~ Created submission: ${submissionId} for game: ${gameId} by user: ${userId}`,
-    );
+    if (isAccepted && analysisResult.matchedCellId) {
+      // Check if cell is not already open (prevent race conditions)
+      if (!playerBoard.cellStates[analysisResult.matchedCellId]?.isOpen) {
+        // Update cell state
+        playerBoard.cellStates[analysisResult.matchedCellId] = {
+          isOpen: true,
+          openedAt: now,
+          openedBySubmissionId: submissionId,
+        };
+
+        console.log(
+          "ℹ️ XXX: ~ submission/route.ts ~ Cell opened, detecting lines",
+          {
+            openedCellId: analysisResult.matchedCellId,
+            previousCompletedLines: playerBoard.completedLines.length,
+          },
+        );
+
+        // Detect completed bingo lines after opening the cell
+        const newCompletedLines = detectCompletedLines(gameBoard, playerBoard);
+        console.log("ℹ️ XXX: ~ submission/route.ts ~ Line detection completed", {
+          totalDetectedLines: newCompletedLines.length,
+          detectedLines: newCompletedLines.map((line) => ({
+            type: line.type,
+            index: line.index,
+          })),
+        });
+
+        // Only add newly completed lines (not already in playerBoard.completedLines)
+        const existingLineKeys = new Set(
+          playerBoard.completedLines.map(
+            (line) => `${line.type}-${line.index}`,
+          ),
+        );
+
+        const freshlyCompletedLines = newCompletedLines.filter(
+          (line) => !existingLineKeys.has(`${line.type}-${line.index}`),
+        );
+
+        console.log("ℹ️ XXX: ~ submission/route.ts ~ Newly completed lines", {
+          existingLinesCount: playerBoard.completedLines.length,
+          freshlyCompletedCount: freshlyCompletedLines.length,
+          freshlyCompletedLines: freshlyCompletedLines.map((line) => ({
+            type: line.type,
+            index: line.index,
+          })),
+        });
+
+        // Add newly completed lines to player board
+        playerBoard.completedLines = [
+          ...playerBoard.completedLines,
+          ...freshlyCompletedLines,
+        ];
+
+        console.log("ℹ️ XXX: ~ submission/route.ts ~ Updated player board", {
+          totalCompletedLines: playerBoard.completedLines.length,
+          allCompletedLines: playerBoard.completedLines.map((line) => ({
+            type: line.type,
+            index: line.index,
+          })),
+        });
+
+        // Use transaction to ensure atomicity between submission creation and board update
+        const transactionResult =
+          await AdminTransactionService.createSubmissionAndUpdateBoard(
+            gameId,
+            submission,
+            playerBoard,
+            userId,
+          );
+
+        if (!transactionResult.success) {
+          console.error("Transaction failed:", transactionResult.error);
+          return NextResponse.json(
+            {
+              success: false,
+              error: {
+                code: "TRANSACTION_FAILED",
+                message: "Failed to update game state",
+                details: transactionResult.error,
+              },
+            },
+            { status: 500 },
+          );
+        }
+
+        // Return success response with line completion information
+        return NextResponse.json({
+          success: true,
+          data: {
+            newlyCompletedLines: freshlyCompletedLines.length,
+            totalCompletedLines: playerBoard.completedLines.length,
+            requiredBingoLines: game.requiredBingoLines,
+          },
+        });
+      }
+
+      // Cell is already open, just create submission without board update
+      const transactionResult =
+        await AdminTransactionService.createSubmissionOnly(gameId, submission);
+
+      if (!transactionResult.success) {
+        console.error("Failed to create submission:", transactionResult.error);
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              code: "SUBMISSION_CREATION_FAILED",
+              message: "Failed to create submission",
+              details: transactionResult.error,
+            },
+          },
+          { status: 500 },
+        );
+      }
+
+      return NextResponse.json({
+        success: true,
+        data: {
+          newlyCompletedLines: 0,
+          totalCompletedLines: playerBoard.completedLines.length,
+          requiredBingoLines: game.requiredBingoLines,
+        },
+      });
+    }
+
+    // Not accepted or no matched cell, just create submission
+    const transactionResult =
+      await AdminTransactionService.createSubmissionOnly(gameId, submission);
+
+    if (!transactionResult.success) {
+      console.error("Failed to create submission:", transactionResult.error);
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "SUBMISSION_CREATION_FAILED",
+            message: "Failed to create submission",
+            details: transactionResult.error,
+          },
+        },
+        { status: 500 },
+      );
+    }
 
     return NextResponse.json({
       success: true,
-      data: submission,
+      data: {
+        newlyCompletedLines: 0,
+        totalCompletedLines: playerBoard.completedLines.length,
+        requiredBingoLines: game.requiredBingoLines,
+      },
     });
   } catch (error) {
-    console.error("Create submission error:", error);
+    console.error("Failed to process submission:", error);
+
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "VALIDATION_ERROR",
+            message: "Invalid request data",
+            details: error.issues,
+          },
+        },
+        { status: 400 },
+      );
+    }
+
     return NextResponse.json(
       {
         success: false,
         error: {
-          code: "SERVER_ERROR",
-          message: "Failed to create submission",
-          details: error instanceof Error ? error.message : String(error),
+          code: "PROCESSING_FAILED",
+          message: "Failed to process submission",
+          details: error instanceof Error ? error.message : "Unknown error",
         },
       },
       { status: 500 },

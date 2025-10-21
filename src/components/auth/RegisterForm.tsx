@@ -23,9 +23,9 @@ import { userCreationSchema } from "@/types/schema";
 
 // Extended schema with password confirmation
 const confirmPasswordSchema = z.object({
-  confirmPassword: z
-    .string()
-    .min(1, { message: "Auth.errors.passwordRequired" }),
+  confirmPassword: z.string().min(1, {
+    error: "Auth.errors.passwordRequired",
+  }),
 });
 
 const extendedUserCreationSchema = userCreationSchema

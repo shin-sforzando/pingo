@@ -1,5 +1,9 @@
 "use client";
 
+import { Image as ImageIcon, Loader2, Upload, X } from "lucide-react";
+import Image from "next/image";
+import { useTranslations } from "next-intl";
+import { useCallback, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
@@ -17,9 +21,6 @@ import type {
   ImageUploadProps,
   ProcessedImage,
 } from "@/types/schema";
-import { Image as ImageIcon, Loader2, Upload, X } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useCallback, useRef, useState } from "react";
 
 interface ImagePreview {
   file: File;
@@ -41,7 +42,7 @@ export function ImageUpload({
   className,
   disabled = false,
 }: ImageUploadProps) {
-  const t = useTranslations("imageUpload");
+  const t = useTranslations();
   const { user } = useAuth();
   const [preview, setPreview] = useState<ImagePreview | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -68,7 +69,7 @@ export function ImageUpload({
         setPreview({
           file,
           previewUrl: "",
-          error: t("errors.unsupportedFileType"),
+          error: t("ImageUpload.errors.unsupportedFileType"),
         });
         return;
       }
@@ -77,7 +78,7 @@ export function ImageUpload({
         setPreview({
           file,
           previewUrl: "",
-          error: t("errors.fileTooLarge"),
+          error: t("ImageUpload.errors.fileTooLarge"),
         });
         return;
       }
@@ -112,7 +113,7 @@ export function ImageUpload({
           const errorMessage =
             error instanceof Error
               ? error.message
-              : t("errors.processingFailed");
+              : t("ImageUpload.errors.processingFailed");
           setPreview({
             file,
             previewUrl: "",
@@ -146,7 +147,7 @@ export function ImageUpload({
           const errorMessage =
             error instanceof Error
               ? error.message
-              : t("errors.processingFailed");
+              : t("ImageUpload.errors.processingFailed");
           setPreview((prev) =>
             prev
               ? {
@@ -272,6 +273,25 @@ export function ImageUpload({
 
       console.log("ℹ️ XXX: ~ ImageUpload.tsx ~ Upload successful", { result });
 
+      // Check if image was deemed inappropriate
+      if (!result.appropriate) {
+        console.log(
+          "ℹ️ XXX: ~ ImageUpload.tsx ~ Image inappropriate, treating as failure",
+          {
+            reason: result.reason,
+          },
+        );
+        // Clear preview since upload technically succeeded, but content was rejected
+        handleRemove();
+        // Treat as failure from UI perspective
+        onUploadComplete?.(
+          false,
+          result,
+          result.reason || "Image content was deemed inappropriate",
+        );
+        return;
+      }
+
       // Clear preview after successful upload
       handleRemove();
 
@@ -329,18 +349,22 @@ export function ImageUpload({
           {isProcessing ? (
             <>
               <Loader2 className="mb-4 h-12 w-12 animate-spin text-primary" />
-              <p className="text-muted-foreground text-sm">{t("processing")}</p>
+              <p className="text-muted-foreground text-sm">
+                {t("ImageUpload.processing")}
+              </p>
             </>
           ) : preview ? (
             <div className="w-full space-y-4">
               {/* Image preview */}
               {preview.previewUrl && (
                 <div className="relative mx-auto max-w-xs">
-                  <img
+                  <Image
                     src={preview.previewUrl}
                     alt="Preview"
+                    width={320}
+                    height={240}
                     className="h-auto w-full rounded-lg shadow-sm"
-                    loading="lazy"
+                    unoptimized={true}
                     onError={(error) => {
                       console.error("Image preview error:", error);
                       error.currentTarget.style.display = "none";
@@ -406,12 +430,12 @@ export function ImageUpload({
                   {isUploading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      {t("uploading")}
+                      {t("ImageUpload.uploading")}
                     </>
                   ) : (
                     <>
                       <Upload className="mr-2 h-4 w-4" />
-                      {t("uploadButton")}
+                      {t("ImageUpload.uploadButton")}
                     </>
                   )}
                 </Button>
@@ -420,9 +444,11 @@ export function ImageUpload({
           ) : (
             <>
               <ImageIcon className="mb-4 h-12 w-12 text-muted-foreground" />
-              <p className="mb-2 font-medium text-lg">{t("dropZone.title")}</p>
+              <p className="mb-2 font-medium text-lg">
+                {t("ImageUpload.dropZone.title")}
+              </p>
               <p className="text-muted-foreground text-sm">
-                {t("dropZone.description")}
+                {t("ImageUpload.dropZone.description")}
               </p>
             </>
           )}

@@ -1,10 +1,10 @@
+import type { Metadata } from "next";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getTranslations } from "next-intl/server";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { AnimatedGridPattern } from "@/components/magicui/animated-grid-pattern";
 import { AuthProvider } from "@/contexts/AuthContext";
-import type { Metadata } from "next";
-import { NextIntlClientProvider } from "next-intl";
-import { getLocale, getTranslations } from "next-intl/server";
 import "./globals.css";
 
 export async function generateMetadata(): Promise<Metadata> {

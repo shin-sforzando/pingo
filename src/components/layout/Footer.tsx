@@ -1,9 +1,9 @@
-import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 export function Footer() {
-  const t = useTranslations("Footer");
+  const t = useTranslations();
 
   return (
     <footer className="fixed bottom-0 w-full bg-background/70 py-4 backdrop-invert">
@@ -12,12 +12,12 @@ export function Footer() {
           href="/terms"
           className="text-foreground text-sm transition-colors hover:text-primary"
         >
-          {t("termsOfService")}
+          {t("Footer.termsOfService")}
         </Link>
 
         <div className="flex items-center gap-2">
           <p className="text-foreground text-sm">
-            {t("copyright", { year: 2025 })}
+            {t("Footer.copyright", { year: 2025 })}
           </p>
           <p className="text-xs">produced by</p>
           <Link

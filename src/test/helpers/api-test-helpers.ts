@@ -1,5 +1,5 @@
-import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
 import { NextRequest } from "next/server";
+import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
 
 // Constants
 export const TEST_PREFIX = "vitest_";

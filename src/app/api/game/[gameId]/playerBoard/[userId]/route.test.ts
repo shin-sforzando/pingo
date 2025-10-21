@@ -1,3 +1,15 @@
+import type { DecodedIdToken } from "firebase-admin/auth";
+import type { NextResponse } from "next/server";
+import { ulid } from "ulid";
+import {
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
 import {
   cleanupTestUsers,
@@ -11,18 +23,6 @@ import type { ApiResponse } from "@/types/common";
 import { GameStatus, LineType, Role } from "@/types/common";
 import { playerBoardToFirestore } from "@/types/game";
 import type { PlayerBoard } from "@/types/schema";
-import type { DecodedIdToken } from "firebase-admin/auth";
-import type { NextResponse } from "next/server";
-import { ulid } from "ulid";
-import {
-  afterAll,
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from "vitest";
 import { GET, PUT } from "./route";
 
 // Mock Firebase Admin
@@ -273,6 +273,15 @@ describe("/api/game/[gameId]/playerBoard/[userId]", () => {
                     doc: () => ({
                       get: () => Promise.resolve(mockParticipantDoc),
                     }),
+                    where: () => ({
+                      limit: () => ({
+                        get: () =>
+                          Promise.resolve({
+                            empty: true, // No participants found for query
+                            docs: [],
+                          }),
+                      }),
+                    }),
                   };
                 }
               },
@@ -350,17 +359,6 @@ describe("/api/game/[gameId]/playerBoard/[userId]", () => {
       (
         vi.mocked(adminFirestore.collection) as ReturnType<typeof vi.fn>
       ).mockImplementation((path: string) => {
-        if (path === "game_participations") {
-          return {
-            where: () => ({
-              where: () => ({
-                where: () => ({
-                  get: () => Promise.resolve(mockAdminParticipationSnapshot),
-                }),
-              }),
-            }),
-          };
-        }
         if (path === "games") {
           return {
             doc: () => ({
@@ -370,6 +368,12 @@ describe("/api/game/[gameId]/playerBoard/[userId]", () => {
                   return {
                     doc: () => ({
                       get: () => Promise.resolve(mockParticipantDoc),
+                    }),
+                    where: () => ({
+                      where: () => ({
+                        get: () =>
+                          Promise.resolve(mockAdminParticipationSnapshot),
+                      }),
                     }),
                   };
                 }

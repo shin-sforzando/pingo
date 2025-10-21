@@ -1,15 +1,3 @@
-import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
-import {
-  cleanupTestUsers,
-  createApiRequest,
-} from "@/test/helpers/api-test-helpers";
-import {
-  cleanupTestGames,
-  generateTestGameTitle,
-} from "@/test/helpers/game-test-helpers";
-import type { ApiResponse } from "@/types/common";
-import { GameStatus, Role } from "@/types/common";
-import type { Event } from "@/types/schema";
 import type { DecodedIdToken } from "firebase-admin/auth";
 import type { NextResponse } from "next/server";
 import { ulid } from "ulid";
@@ -22,6 +10,18 @@ import {
   it,
   vi,
 } from "vitest";
+import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
+import {
+  cleanupTestUsers,
+  createApiRequest,
+} from "@/test/helpers/api-test-helpers";
+import {
+  cleanupTestGames,
+  generateTestGameTitle,
+} from "@/test/helpers/game-test-helpers";
+import type { ApiResponse } from "@/types/common";
+import { GameStatus, Role } from "@/types/common";
+import type { Event } from "@/types/schema";
 import { GET, POST } from "./route";
 
 // Mock Firebase Admin
@@ -207,6 +207,15 @@ describe("/api/game/[gameId]/events", () => {
                   return {
                     doc: () => ({
                       get: () => Promise.resolve(mockParticipantDoc),
+                    }),
+                    where: () => ({
+                      limit: () => ({
+                        get: () =>
+                          Promise.resolve({
+                            empty: true, // No participants found
+                            docs: [],
+                          }),
+                      }),
                     }),
                   };
                 }

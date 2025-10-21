@@ -1,12 +1,12 @@
 "use client";
 
+import { Crown, Trophy, Users } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatRelativeDate } from "@/lib/utils";
 import { Role } from "@/types/common";
-import { Crown, Trophy, Users } from "lucide-react";
-import { useTranslations } from "next-intl";
 
 export interface Participant {
   /**
@@ -63,8 +63,7 @@ export function ParticipantsList({
   currentUserId,
   className,
 }: ParticipantsListProps) {
-  const t = useTranslations("Game.Share");
-  const tParticipants = useTranslations("ParticipantsList");
+  const t = useTranslations();
 
   // Sort participants by completed lines (descending), then by submission count
   const sortedParticipants = [...participants].sort((a, b) => {
@@ -80,7 +79,7 @@ export function ParticipantsList({
     if (!role) {
       return {
         icon: null,
-        label: tParticipants("role.participant"),
+        label: t("ParticipantsList.role.participant"),
         variant: "outline" as const,
         color: "bg-gray-100 text-gray-800",
       };
@@ -89,21 +88,21 @@ export function ParticipantsList({
       case Role.CREATOR:
         return {
           icon: Crown,
-          label: tParticipants("role.creator"),
+          label: t("ParticipantsList.role.creator"),
           variant: "default" as const,
           color: "bg-yellow-100 text-yellow-800",
         };
       case Role.ADMIN:
         return {
           icon: Crown,
-          label: tParticipants("role.admin"),
+          label: t("ParticipantsList.role.admin"),
           variant: "secondary" as const,
           color: "bg-blue-100 text-blue-800",
         };
       case Role.PARTICIPANT:
         return {
           icon: null,
-          label: tParticipants("role.participant"),
+          label: t("ParticipantsList.role.participant"),
           variant: "outline" as const,
           color: "bg-gray-100 text-gray-800",
         };
@@ -122,13 +121,13 @@ export function ParticipantsList({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Users className="h-5 w-5" />
-          {t("participants")} ({participants.length})
+          {t("Game.Share.participants")} ({participants.length})
         </CardTitle>
       </CardHeader>
       <CardContent>
         {participants.length === 0 ? (
           <p className="text-center text-muted-foreground text-sm">
-            {tParticipants("noParticipants")}
+            {t("ParticipantsList.noParticipants")}
           </p>
         ) : (
           <div className="space-y-3">
@@ -184,7 +183,7 @@ export function ParticipantsList({
                         )}
                       <span className="text-muted-foreground text-xs">
                         {participant.submissionCount}{" "}
-                        {tParticipants("submissions")}
+                        {t("ParticipantsList.submissions")}
                       </span>
                     </div>
                   </div>
@@ -192,11 +191,11 @@ export function ParticipantsList({
                   {/* Completion Status */}
                   <div className="text-right">
                     <p className="font-medium text-sm">
-                      {participant.completedLines} {tParticipants("lines")}
+                      {participant.completedLines} {t("ParticipantsList.lines")}
                     </p>
                     {participant.lastCompletedAt && (
                       <p className="text-muted-foreground text-xs">
-                        {tParticipants("last")}:{" "}
+                        {t("ParticipantsList.last")}:{" "}
                         {formatRelativeDate(participant.lastCompletedAt)}
                       </p>
                     )}

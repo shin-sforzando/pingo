@@ -1,11 +1,11 @@
 "use client";
 
+import { AlertTriangle, CheckCircle, XCircle } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import type { AcceptanceStatus } from "@/types/common";
-import { AlertTriangle, CheckCircle, XCircle } from "lucide-react";
-import { useTranslations } from "next-intl";
 
 export interface SubmissionResultProps {
   /**
@@ -13,9 +13,13 @@ export interface SubmissionResultProps {
    */
   confidence: number;
   /**
-   * AI analysis critique
+   * AI analysis critique in Japanese
    */
-  critique: string;
+  critique_ja: string;
+  /**
+   * AI analysis critique in English
+   */
+  critique_en: string;
   /**
    * Final acceptance status
    */
@@ -48,7 +52,8 @@ export interface SubmissionResultProps {
  */
 export function SubmissionResult({
   confidence,
-  critique,
+  critique_ja,
+  critique_en,
   acceptanceStatus,
   // matchedCellId,
   matchedCellSubject,
@@ -56,7 +61,11 @@ export function SubmissionResult({
   imageUrl,
   className,
 }: SubmissionResultProps) {
-  const t = useTranslations("Game.SubmissionResult");
+  const t = useTranslations();
+  const locale = useLocale();
+
+  // Select critique based on current locale
+  const critique = locale === "ja" ? critique_ja : critique_en;
 
   // Determine status icon and color based on acceptance status
   const getStatusConfig = () => {
@@ -119,13 +128,14 @@ export function SubmissionResult({
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-lg">
           <StatusIcon className={cn("h-5 w-5", statusConfig.color)} />
-          {t("title")}
+          {t("Game.SubmissionResult.title")}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Image Preview */}
         {imageUrl && (
           <div className="flex justify-center">
+            {/* biome-ignore lint/performance/noImgElement: External URLs require <img> for browser test compatibility */}
             <img
               src={imageUrl}
               alt="Submitted content for analysis"
@@ -138,35 +148,37 @@ export function SubmissionResult({
           </div>
         )}
 
+        {/* Matched Cell Info (if accepted) */}
+        {acceptanceStatus === "accepted" && matchedCellSubject && (
+          <div className="rounded-md bg-green-100 p-3">
+            <p className="font-medium text-green-800 text-sm">
+              {t("Game.SubmissionResult.matchedCell")}
+            </p>
+            <p className="text-green-700 text-sm">{matchedCellSubject}</p>
+          </div>
+        )}
+
         {/* Status Badge */}
         <div className="flex items-center gap-2">
           <Badge
             variant={statusConfig.badgeVariant}
             className={statusConfig.badgeColor}
           >
-            {t(`status.${acceptanceStatus}`)}
+            {t(`Game.SubmissionResult.status.${acceptanceStatus}`)}
           </Badge>
           <span className="text-muted-foreground text-sm">
-            {t("confidence", {
+            {t("Game.SubmissionResult.confidence", {
               confidence: confidencePercentage,
               threshold: thresholdPercentage,
             })}
           </span>
         </div>
 
-        {/* Matched Cell Info (if accepted) */}
-        {acceptanceStatus === "accepted" && matchedCellSubject && (
-          <div className="rounded-md bg-green-100 p-3">
-            <p className="font-medium text-green-800 text-sm">
-              {t("matchedCell")}
-            </p>
-            <p className="text-green-700 text-sm">{matchedCellSubject}</p>
-          </div>
-        )}
-
         {/* AI Critique */}
         <div>
-          <p className="mb-2 font-medium text-sm">{t("analysis")}</p>
+          <p className="mb-2 font-medium text-sm">
+            {t("Game.SubmissionResult.analysis")}
+          </p>
           <p className="text-muted-foreground text-sm leading-relaxed">
             {critique}
           </p>
@@ -175,7 +187,7 @@ export function SubmissionResult({
         {/* Confidence Bar */}
         <div>
           <div className="mb-2 flex justify-between text-sm">
-            <span>{t("confidenceLabel")}</span>
+            <span>{t("Game.SubmissionResult.confidenceLabel")}</span>
             <span>{confidencePercentage}%</span>
           </div>
           <div className="h-2 w-full rounded-full bg-gray-200">
@@ -190,7 +202,9 @@ export function SubmissionResult({
             />
           </div>
           <div className="mt-1 text-muted-foreground text-xs">
-            {t("thresholdNote", { threshold: thresholdPercentage })}
+            {t("Game.SubmissionResult.thresholdNote", {
+              threshold: thresholdPercentage,
+            })}
           </div>
         </div>
       </CardContent>

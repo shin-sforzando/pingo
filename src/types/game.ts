@@ -35,6 +35,7 @@ export interface GameDocument {
   expiresAt: TimestampInterface;
   isPublic: boolean;
   isPhotoSharingEnabled: boolean;
+  skipImageCheck: boolean;
   requiredBingoLines: number;
   confidenceThreshold: number;
   maxSubmissionsPerUser: number;
@@ -113,7 +114,8 @@ export interface SubmissionDocument {
   imageUrl: string;
   submittedAt: TimestampInterface;
   analyzedAt: TimestampInterface | null;
-  critique: string | null;
+  critique_ja: string;
+  critique_en: string;
   matchedCellId: string | null;
   confidence: number | null;
   processingStatus: ProcessingStatus;
@@ -151,6 +153,7 @@ export function gameFromFirestore(doc: GameDocument): Game {
     expiresAt: timestampToDate(doc.expiresAt) as Date,
     isPublic: doc.isPublic,
     isPhotoSharingEnabled: doc.isPhotoSharingEnabled,
+    skipImageCheck: doc.skipImageCheck ?? false,
     requiredBingoLines: doc.requiredBingoLines,
     confidenceThreshold: doc.confidenceThreshold,
     maxSubmissionsPerUser: doc.maxSubmissionsPerUser,
@@ -175,6 +178,7 @@ export function gameToFirestore(game: Game): GameDocument {
     expiresAt: dateToTimestamp(game.expiresAt) as TimestampInterface,
     isPublic: game.isPublic,
     isPhotoSharingEnabled: game.isPhotoSharingEnabled,
+    skipImageCheck: game.skipImageCheck,
     requiredBingoLines: game.requiredBingoLines,
     confidenceThreshold: game.confidenceThreshold,
     maxSubmissionsPerUser: game.maxSubmissionsPerUser,
@@ -367,7 +371,8 @@ export function submissionFromFirestore(doc: SubmissionDocument): Submission {
     imageUrl: doc.imageUrl,
     submittedAt: timestampToDate(doc.submittedAt) as Date,
     analyzedAt: timestampToDate(doc.analyzedAt),
-    critique: doc.critique,
+    critique_ja: doc.critique_ja,
+    critique_en: doc.critique_en,
     matchedCellId: doc.matchedCellId,
     confidence: doc.confidence,
     processingStatus: doc.processingStatus,
@@ -393,7 +398,8 @@ export function submissionToFirestore(
     analyzedAt: submission.analyzedAt
       ? (dateToTimestamp(submission.analyzedAt) as TimestampInterface)
       : null,
-    critique: submission.critique,
+    critique_ja: submission.critique_ja,
+    critique_en: submission.critique_en,
     matchedCellId: submission.matchedCellId,
     confidence: submission.confidence,
     processingStatus: submission.processingStatus,

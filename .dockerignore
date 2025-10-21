@@ -12,9 +12,9 @@ Thumbs.db
 .vscode
 .idea
 
-# Cline documentation
-cline_docs/
-.clinerules
+# Documentation
+docs/
+CLAUDE.md
 
 # Lefthook configuration
 .lefthook/
@@ -34,8 +34,12 @@ yarn-error.log*
 .pnp/
 .pnp.js
 
+# Test files
+coverage/
+
 # Storybook files
 .storybook
+storybook-static
 
 # Environment files
 .env*.local

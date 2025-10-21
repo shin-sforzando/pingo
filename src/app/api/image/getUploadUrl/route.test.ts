@@ -1,8 +1,8 @@
-import { adminAuth } from "@/lib/firebase/admin";
 import type { DecodedIdToken } from "firebase-admin/auth";
 import { getStorage } from "firebase-admin/storage";
 import type { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { adminAuth } from "@/lib/firebase/admin";
 import { POST } from "./route";
 
 // Mock Firebase Admin

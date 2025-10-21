@@ -1,3 +1,5 @@
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { adminAuth } from "@/lib/firebase/admin";
 import {
   AdminBatchService,
@@ -7,13 +9,12 @@ import {
 import type { ApiResponse } from "@/types/common";
 import { ProcessingStatus } from "@/types/common";
 import { type Submission, submissionSchema } from "@/types/schema";
-import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
 
 // Schema for updating submission - reuse from schema.ts
 const updateSubmissionSchema = submissionSchema
   .pick({
-    critique: true,
+    critique_ja: true,
+    critique_en: true,
     matchedCellId: true,
     confidence: true,
     processingStatus: true,
@@ -189,7 +190,7 @@ export async function PUT(
           error: {
             code: "INVALID_INPUT",
             message: "Invalid input data",
-            details: validationResult.error.errors,
+            details: validationResult.error.issues,
           },
         },
         { status: 400 },
@@ -278,8 +279,11 @@ export async function PUT(
     const now = new Date();
     const updatedSubmission: Submission = {
       ...currentSubmission,
-      ...(updateData.critique !== undefined && {
-        critique: updateData.critique,
+      ...(updateData.critique_ja !== undefined && {
+        critique_ja: updateData.critique_ja,
+      }),
+      ...(updateData.critique_en !== undefined && {
+        critique_en: updateData.critique_en,
       }),
       ...(updateData.matchedCellId !== undefined && {
         matchedCellId: updateData.matchedCellId,

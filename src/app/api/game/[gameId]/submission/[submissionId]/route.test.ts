@@ -1,3 +1,15 @@
+import type { DecodedIdToken } from "firebase-admin/auth";
+import type { NextResponse } from "next/server";
+import { ulid } from "ulid";
+import {
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
 import {
   cleanupTestUsers,
@@ -16,18 +28,6 @@ import {
 } from "@/types/common";
 import { submissionToFirestore } from "@/types/game";
 import type { Submission } from "@/types/schema";
-import type { DecodedIdToken } from "firebase-admin/auth";
-import type { NextResponse } from "next/server";
-import { ulid } from "ulid";
-import {
-  afterAll,
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from "vitest";
 import { GET, PUT } from "./route";
 
 // Mock Firebase Admin
@@ -61,7 +61,8 @@ describe("/api/game/[gameId]/submission/[submissionId]", () => {
       imageUrl: "https://example.com/image.jpg",
       submittedAt: new Date(),
       analyzedAt: null,
-      critique: null,
+      critique_ja: "",
+      critique_en: "",
       matchedCellId: null,
       confidence: null,
       processingStatus: ProcessingStatus.UPLOADED,
@@ -400,17 +401,6 @@ describe("/api/game/[gameId]/submission/[submissionId]", () => {
       (
         vi.mocked(adminFirestore.collection) as ReturnType<typeof vi.fn>
       ).mockImplementation((path: string) => {
-        if (path === "game_participations") {
-          return {
-            where: () => ({
-              where: () => ({
-                where: () => ({
-                  get: () => Promise.resolve(mockAdminParticipationSnapshot),
-                }),
-              }),
-            }),
-          };
-        }
         if (path === "games") {
           return {
             doc: () => ({
@@ -420,6 +410,12 @@ describe("/api/game/[gameId]/submission/[submissionId]", () => {
                   return {
                     doc: () => ({
                       get: () => Promise.resolve(mockParticipantDoc),
+                    }),
+                    where: () => ({
+                      where: () => ({
+                        get: () =>
+                          Promise.resolve(mockAdminParticipationSnapshot),
+                      }),
                     }),
                   };
                 }
@@ -439,7 +435,8 @@ describe("/api/game/[gameId]/submission/[submissionId]", () => {
       });
 
       const updateData = {
-        critique: "AI analysis result",
+        critique_ja: "AI分析結果（日本語）",
+        critique_en: "AI analysis result",
         confidence: 0.85,
         processingStatus: ProcessingStatus.ANALYZED,
         acceptanceStatus: AcceptanceStatus.ACCEPTED,
@@ -465,7 +462,8 @@ describe("/api/game/[gameId]/submission/[submissionId]", () => {
       expect(response.status).toBe(200);
       expect(responseData.success).toBe(true);
       expect(responseData.data).toBeDefined();
-      expect(responseData.data?.critique).toBe(updateData.critique);
+      expect(responseData.data?.critique_ja).toBe(updateData.critique_ja);
+      expect(responseData.data?.critique_en).toBe(updateData.critique_en);
       expect(responseData.data?.confidence).toBe(updateData.confidence);
       expect(responseData.data?.processingStatus).toBe(
         updateData.processingStatus,
@@ -515,17 +513,6 @@ describe("/api/game/[gameId]/submission/[submissionId]", () => {
       (
         vi.mocked(adminFirestore.collection) as ReturnType<typeof vi.fn>
       ).mockImplementation((path: string) => {
-        if (path === "game_participations") {
-          return {
-            where: () => ({
-              where: () => ({
-                where: () => ({
-                  get: () => Promise.resolve(mockEmptyParticipationSnapshot),
-                }),
-              }),
-            }),
-          };
-        }
         if (path === "games") {
           return {
             doc: () => ({
@@ -535,6 +522,12 @@ describe("/api/game/[gameId]/submission/[submissionId]", () => {
                   return {
                     doc: () => ({
                       get: () => Promise.resolve(mockParticipantDoc),
+                    }),
+                    where: () => ({
+                      where: () => ({
+                        get: () =>
+                          Promise.resolve(mockEmptyParticipationSnapshot),
+                      }),
                     }),
                   };
                 }

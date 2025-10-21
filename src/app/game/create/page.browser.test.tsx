@@ -1,8 +1,8 @@
-import { mockAuthGuard } from "@/test/helpers/auth-test-helpers";
 import { page, userEvent } from "@vitest/browser/context";
 import { NextIntlClientProvider } from "next-intl";
 import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { render } from "vitest-browser-react";
+import { mockAuthGuard } from "@/test/helpers/auth-test-helpers";
 import enMessages from "../../../../messages/en.json";
 import jaMessages from "../../../../messages/ja.json";
 

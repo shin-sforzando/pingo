@@ -106,8 +106,15 @@ GOOGLE_CLOUD_STORAGE_BUCKET=XXXXXXXXXXXXXXXX
 
 For most server-side operations interacting with Google Cloud (like Firestore access from API routes, or operations on Cloud Run), ADC is used. Set it up for local development:
 
-```shell
-gcloud auth application-default login
+```bash
+# Create gcloud named configuration
+gcloud config configurations create pingo-456817
+
+# Initialize and Authorize
+gcloud init
+
+# Authenticate with Google Cloud
+gcloud auth application-default login --disable-quota-project
 ```
 
 > [!IMPORTANT]

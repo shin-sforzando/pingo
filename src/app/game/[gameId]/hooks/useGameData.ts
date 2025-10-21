@@ -1,7 +1,8 @@
+import { useCallback, useEffect, useState } from "react";
 import type { Participant } from "@/components/game/ParticipantsList";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAuthenticatedFetch } from "@/hooks/useAuthenticatedFetch";
 import type { Cell, Game, PlayerBoard, Submission } from "@/types/schema";
-import { useCallback, useEffect, useState } from "react";
 
 interface GameDataState {
   game: Game | null;
@@ -20,6 +21,7 @@ interface GameDataState {
  */
 export function useGameData(gameId: string) {
   const { user } = useAuth();
+  const { authenticatedFetch } = useAuthenticatedFetch();
   const [state, setState] = useState<GameDataState>({
     game: null,
     gameBoard: null,
@@ -32,130 +34,6 @@ export function useGameData(gameId: string) {
   });
 
   /**
-   * Fetches authentication token for API calls
-   * Centralized token management to avoid repetition
-   */
-  const getAuthToken = useCallback(async (): Promise<string | null> => {
-    try {
-      const { auth } = await import("@/lib/firebase/client");
-      return (await auth.currentUser?.getIdToken()) || null;
-    } catch (error) {
-      console.error("Failed to get auth token:", error);
-      return null;
-    }
-  }, []);
-
-  /**
-   * Loads initial game data from multiple API endpoints
-   * Fetches game info, board layout, and player board state
-   */
-  const loadGameData = useCallback(async () => {
-    console.log("ℹ️ XXX: ~ useGameData.ts ~ loadGameData called", {
-      userExists: !!user,
-      gameId,
-      userId: user?.id,
-    });
-
-    if (!user || !gameId) {
-      console.log(
-        "ℹ️ XXX: ~ useGameData.ts ~ Skipping loadGameData - missing user or gameId",
-      );
-      return;
-    }
-
-    try {
-      console.log("ℹ️ XXX: ~ useGameData.ts ~ Starting game data load");
-      setState((prev) => ({ ...prev, isLoading: true, error: null }));
-
-      const authToken = await getAuthToken();
-      if (!authToken) {
-        throw new Error("Authentication token not available");
-      }
-
-      const headers = { Authorization: `Bearer ${authToken}` };
-
-      // Fetch game data
-      console.log("ℹ️ XXX: ~ useGameData.ts ~ Fetching game data");
-      const gameResponse = await fetch(`/api/game/${gameId}`, { headers });
-      if (!gameResponse.ok) {
-        const errorData = await gameResponse.json();
-        throw new Error(errorData.error?.message || "Failed to load game");
-      }
-      const gameData = await gameResponse.json();
-      const game: Game = gameData.data;
-      console.log("ℹ️ XXX: ~ useGameData.ts ~ Game data loaded", {
-        gameTitle: game.title,
-        requiredBingoLines: game.requiredBingoLines,
-      });
-
-      // Fetch game board
-      console.log("ℹ️ XXX: ~ useGameData.ts ~ Fetching game board");
-      const gameBoardResponse = await fetch(`/api/game/${gameId}/board`, {
-        headers,
-      });
-      let gameBoard: Cell[] | null = null;
-      if (gameBoardResponse.ok) {
-        const gameBoardData = await gameBoardResponse.json();
-        gameBoard = gameBoardData.data?.cells || [];
-        console.log("ℹ️ XXX: ~ useGameData.ts ~ Game board loaded", {
-          cellCount: gameBoard?.length || 0,
-        });
-      } else {
-        console.warn("ℹ️ XXX: ~ useGameData.ts ~ Failed to load game board", {
-          status: gameBoardResponse.status,
-        });
-      }
-
-      // Fetch player board
-      console.log("ℹ️ XXX: ~ useGameData.ts ~ Fetching player board");
-      const boardResponse = await fetch(
-        `/api/game/${gameId}/playerBoard/${user.id}`,
-        { headers },
-      );
-      let playerBoard: PlayerBoard | null = null;
-      if (boardResponse.ok) {
-        const boardData = await boardResponse.json();
-        playerBoard = boardData.data;
-        console.log("ℹ️ XXX: ~ useGameData.ts ~ Player board loaded", {
-          playerBoard,
-          completedLinesCount: playerBoard?.completedLines?.length || 0,
-          cellStatesCount: Object.keys(playerBoard?.cellStates || {}).length,
-        });
-      } else {
-        console.warn("ℹ️ XXX: ~ useGameData.ts ~ Failed to load player board", {
-          status: boardResponse.status,
-        });
-      }
-
-      console.log("ℹ️ XXX: ~ useGameData.ts ~ Setting initial state");
-      setState((prev) => ({
-        ...prev,
-        game,
-        gameBoard,
-        playerBoard,
-        isLoading: false,
-      }));
-
-      // Load additional data in parallel
-      console.log("ℹ️ XXX: ~ useGameData.ts ~ Loading additional data");
-      await Promise.all([refreshParticipants(), refreshSubmissions()]);
-      console.log("ℹ️ XXX: ~ useGameData.ts ~ All data loaded successfully");
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to load game data";
-      console.error("ℹ️ XXX: ~ useGameData.ts ~ Error loading game data:", {
-        error,
-        errorMessage,
-      });
-      setState((prev) => ({
-        ...prev,
-        error: errorMessage,
-        isLoading: false,
-      }));
-    }
-  }, [user, gameId, getAuthToken]);
-
-  /**
    * Refreshes participants data from API
    * Called after successful image submissions to update completion stats
    */
@@ -163,12 +41,9 @@ export function useGameData(gameId: string) {
     if (!user || !gameId) return;
 
     try {
-      const authToken = await getAuthToken();
-      if (!authToken) return;
-
-      const response = await fetch(`/api/game/${gameId}/participants`, {
-        headers: { Authorization: `Bearer ${authToken}` },
-      });
+      const response = await authenticatedFetch(
+        `/api/game/${gameId}/participants`,
+      );
 
       if (response.ok) {
         const data = await response.json();
@@ -180,7 +55,7 @@ export function useGameData(gameId: string) {
     } catch (error) {
       console.error("Failed to refresh participants:", error);
     }
-  }, [user, gameId, getAuthToken]);
+  }, [user, gameId, authenticatedFetch]);
 
   /**
    * Refreshes user's submissions data from API
@@ -190,14 +65,8 @@ export function useGameData(gameId: string) {
     if (!user || !gameId) return;
 
     try {
-      const authToken = await getAuthToken();
-      if (!authToken) return;
-
-      const response = await fetch(
+      const response = await authenticatedFetch(
         `/api/game/${gameId}/submission?userId=${user.id}&limit=10`,
-        {
-          headers: { Authorization: `Bearer ${authToken}` },
-        },
       );
 
       if (response.ok) {
@@ -225,7 +94,122 @@ export function useGameData(gameId: string) {
         submissions: [],
       }));
     }
-  }, [user, gameId, getAuthToken]);
+  }, [user, gameId, authenticatedFetch]);
+
+  /**
+   * Loads initial game data from multiple API endpoints
+   * Fetches game info, board layout, and player board state
+   */
+  const loadGameData = useCallback(async () => {
+    console.log("ℹ️ XXX: ~ useGameData.ts ~ loadGameData called", {
+      userExists: !!user,
+      gameId,
+      userId: user?.id,
+    });
+
+    if (!user || !gameId) {
+      console.log(
+        "ℹ️ XXX: ~ useGameData.ts ~ Skipping loadGameData - missing user or gameId",
+      );
+      return;
+    }
+
+    try {
+      console.log("ℹ️ XXX: ~ useGameData.ts ~ Starting game data load");
+      setState((prev) => ({ ...prev, isLoading: true, error: null }));
+
+      // Fetch game data
+      console.log("ℹ️ XXX: ~ useGameData.ts ~ Fetching game data");
+      const gameResponse = await authenticatedFetch(`/api/game/${gameId}`);
+      if (!gameResponse.ok) {
+        const errorData = await gameResponse.json();
+        throw new Error(errorData.error?.message || "Failed to load game");
+      }
+      const gameData = await gameResponse.json();
+      const game: Game = gameData.data;
+      console.log("ℹ️ XXX: ~ useGameData.ts ~ Game data loaded", {
+        gameTitle: game.title,
+        requiredBingoLines: game.requiredBingoLines,
+      });
+
+      // Fetch game board
+      console.log("ℹ️ XXX: ~ useGameData.ts ~ Fetching game board");
+      const gameBoardResponse = await authenticatedFetch(
+        `/api/game/${gameId}/board`,
+      );
+      let gameBoard: Cell[] | null = null;
+      if (gameBoardResponse.ok) {
+        const gameBoardData = await gameBoardResponse.json();
+        gameBoard = gameBoardData.data?.cells || [];
+        console.log("ℹ️ XXX: ~ useGameData.ts ~ Game board loaded", {
+          cellCount: gameBoard?.length || 0,
+        });
+      } else {
+        console.warn("ℹ️ XXX: ~ useGameData.ts ~ Failed to load game board", {
+          status: gameBoardResponse.status,
+        });
+      }
+
+      // Fetch player board
+      console.log("ℹ️ XXX: ~ useGameData.ts ~ Fetching player board");
+      const boardResponse = await authenticatedFetch(
+        `/api/game/${gameId}/playerBoard/${user.id}`,
+      );
+      let playerBoard: PlayerBoard | null = null;
+      if (boardResponse.ok) {
+        const boardData = await boardResponse.json();
+        playerBoard = boardData.data;
+        console.log("ℹ️ XXX: ~ useGameData.ts ~ Player board loaded", {
+          playerBoard,
+          completedLinesCount: playerBoard?.completedLines?.length || 0,
+          cellStatesCount: Object.keys(playerBoard?.cellStates || {}).length,
+        });
+      } else {
+        console.warn("ℹ️ XXX: ~ useGameData.ts ~ Failed to load player board", {
+          status: boardResponse.status,
+        });
+      }
+
+      console.log("ℹ️ XXX: ~ useGameData.ts ~ Setting initial state");
+      setState((prev) => ({
+        ...prev,
+        game,
+        gameBoard,
+        playerBoard,
+        isLoading: false,
+      }));
+
+      // Load additional data in parallel
+      // Only fetch submissions if user is participating in the game
+      console.log("ℹ️ XXX: ~ useGameData.ts ~ Loading additional data");
+      const isParticipating = user.participatingGames?.includes(gameId);
+      if (isParticipating) {
+        await Promise.all([refreshParticipants(), refreshSubmissions()]);
+      } else {
+        // Non-participants can see participants but not submissions
+        await refreshParticipants();
+      }
+      console.log("ℹ️ XXX: ~ useGameData.ts ~ All data loaded successfully");
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to load game data";
+      console.error("ℹ️ XXX: ~ useGameData.ts ~ Error loading game data:", {
+        error,
+        errorMessage,
+      });
+      setState((prev) => ({
+        ...prev,
+        error: errorMessage,
+        isLoading: false,
+      }));
+    }
+  }, [
+    user,
+    gameId,
+    authenticatedFetch,
+    refreshParticipants,
+    refreshSubmissions,
+  ]);
 
   /**
    * Sets up real-time Firestore listener for player board updates

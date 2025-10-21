@@ -1,8 +1,9 @@
 /**
  * Common type definitions for Firestore
  */
-import { Timestamp as AdminTimestamp } from "firebase-admin/firestore";
+
 import { Timestamp as ClientTimestamp } from "firebase/firestore";
+import { Timestamp as AdminTimestamp } from "firebase-admin/firestore";
 
 /**
  * Common interface for both client and admin Timestamp
