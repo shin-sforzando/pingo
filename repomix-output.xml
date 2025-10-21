@@ -277,6 +277,8 @@ src/
       admin.ts
       client.ts
     api-utils.ts
+    bingo-logic.test.ts
+    bingo-logic.ts
     board-utils.test.ts
     board-utils.ts
     cell-utils.test.ts
@@ -778,6 +780,40 @@ export async function withErrorHandling<T>(
 export function validateGameId(gameId: string | undefined)
 </file>
 
+<file path="src/lib/bingo-logic.test.ts">
+import { describe, expect, it } from "vitest";
+import {
+  BOARD_CENTER_COORD,
+  BOARD_SIZE,
+  CENTER_CELL_INDEX,
+} from "@/lib/constants";
+import { LineType } from "@/types/common";
+import type { Cell, CellState, PlayerBoard } from "@/types/schema";
+import { detectCompletedLines } from "./bingo-logic";
+import { shuffleBoardCells } from "./board-utils";
+⋮----
+function createTestPlayerBoard(): PlayerBoard
+⋮----
+function createShuffledPlayerBoard(): PlayerBoard
+⋮----
+function openCellsAtPositions(
+  playerBoard: PlayerBoard,
+  positions: Array<{ x: number; y: number }>,
+): void
+⋮----
+function openCellsByIds(playerBoard: PlayerBoard, cellIds: string[]): void
+</file>
+
+<file path="src/lib/bingo-logic.ts">
+import { BOARD_SIZE } from "@/lib/constants";
+import { LineType } from "@/types/common";
+import type { CompletedLine, PlayerBoard } from "@/types/schema";
+⋮----
+export function detectCompletedLines(
+  playerBoard: PlayerBoard,
+): CompletedLine[]
+</file>
+
 <file path="src/lib/utils.ts">
 import { type ClassValue, clsx } from "clsx";
 import { format, formatRelative } from "date-fns";
@@ -1256,61 +1292,6 @@ interface RegisterFormProps {
 async function onSubmit(values: ExtendedUserCreationData)
 ⋮----
 <form onSubmit=
-</file>
-
-<file path="src/components/game/BingoBoard.tsx">
-import { BOARD_SIZE, CENTER_CELL_INDEX, TOTAL_CELLS } from "@/lib/constants";
-import { cn } from "@/lib/utils";
-import type { Cell } from "@/types/schema";
-import { BingoCell, type BingoCellState } from "./BingoCell";
-⋮----
-export interface BingoBoardProps {
-
-
-
-  cells: Cell[];
-
-
-
-  cellStates?: Record<string, BingoCellState>;
-
-
-
-
-  completedLines?: number[][];
-
-
-
-  className?: string;
-
-
-
-  onCellClick?: (cellId: string) => void;
-}
-⋮----
-// Sort cells by position
-⋮----
-// Create a flat array of all cell indices that are part of completed lines
-⋮----
-// Check if a cell is part of a completed line
-const isCellInCompletedLine = (index: number) =>
-⋮----
-// Get the state for a cell
-const getCellState = (cell: Cell, index: number): BingoCellState =>
-⋮----
-// Center cell is always FREE
-⋮----
-state=
-isPartOfCompletedLine=
-</file>
-
-<file path="src/components/game/BingoCell.stories.tsx">
-import { fakerJA as faker } from "@faker-js/faker";
-import type { Meta, StoryObj } from "@storybook/nextjs";
-import { BOARD_CENTER_COORD } from "@/lib/constants";
-import { BingoCell } from "./BingoCell";
-⋮----
-type Story = StoryObj<typeof meta>;
 </file>
 
 <file path="src/components/game/BingoCell.tsx">
@@ -1894,19 +1875,6 @@ import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
 </file>
 
-<file path="src/lib/board-utils.test.ts">
-import { describe, expect, it } from "vitest";
-import { BOARD_CENTER_COORD, BOARD_SIZE, TOTAL_CELLS } from "@/lib/constants";
-import type { Cell } from "@/types/schema";
-import {
-  getCellAtPosition,
-  isValidBoardStructure,
-  shuffleBoardCells,
-} from "./board-utils";
-⋮----
-function createTestBoard(): Cell[]
-</file>
-
 <file path="src/lib/cell-utils.test.ts">
 import { describe, expect, it } from "vitest";
 import type { Cell } from "@/types/schema";
@@ -2393,22 +2361,6 @@ interface ErrorDisplayProps {
 export function ErrorDisplay(
 </file>
 
-<file path="src/app/game/[gameId]/page.stories.tsx">
-import { fakerJA as faker } from "@faker-js/faker";
-import type { Meta, StoryObj } from "@storybook/nextjs";
-import { AuthContext } from "@/contexts/AuthContext";
-import { BOARD_SIZE, CENTER_CELL_INDEX } from "@/lib/constants";
-import { AcceptanceStatus, GameStatus } from "@/types/common";
-import type { Cell } from "@/types/schema";
-import GamePage from "./page";
-⋮----
-const generateSampleCells = (): Cell[] =>
-⋮----
-import { auth } from "@/lib/firebase/client";
-⋮----
-type Story = StoryObj<typeof meta>;
-</file>
-
 <file path="src/app/game/create/page.browser.test.tsx">
 import { page, userEvent } from "@vitest/browser/context";
 import { NextIntlClientProvider } from "next-intl";
@@ -2468,6 +2420,61 @@ interface AuthGuardProps {
 }
 ⋮----
 export function AuthGuard(
+</file>
+
+<file path="src/components/game/BingoBoard.tsx">
+import { BOARD_SIZE, CENTER_CELL_INDEX, TOTAL_CELLS } from "@/lib/constants";
+import { cn } from "@/lib/utils";
+import type { Cell } from "@/types/schema";
+import { BingoCell, type BingoCellState } from "./BingoCell";
+⋮----
+export interface BingoBoardProps {
+
+
+
+  cells: Cell[];
+
+
+
+  cellStates?: Record<string, BingoCellState>;
+
+
+
+
+  completedLines?: number[][];
+
+
+
+  className?: string;
+
+
+
+  onCellClick?: (cellId: string) => void;
+}
+⋮----
+// Sort cells by position
+⋮----
+// Create a flat array of all cell indices that are part of completed lines
+⋮----
+// Check if a cell is part of a completed line
+const isCellInCompletedLine = (index: number) =>
+⋮----
+// Get the state for a cell
+const getCellState = (cell: Cell, index: number): BingoCellState =>
+⋮----
+// Center cell is always FREE
+⋮----
+state=
+isPartOfCompletedLine=
+</file>
+
+<file path="src/components/game/BingoCell.stories.tsx">
+import { fakerJA as faker } from "@faker-js/faker";
+import type { Meta, StoryObj } from "@storybook/nextjs";
+import { BOARD_CENTER_COORD } from "@/lib/constants";
+import { BingoCell } from "./BingoCell";
+⋮----
+type Story = StoryObj<typeof meta>;
 </file>
 
 <file path="src/components/game/GameInfoCard.tsx">
@@ -2759,23 +2766,17 @@ const fetchParticipatingGames = async () =>
 // Silently skip games that return 404 or other errors
 </file>
 
-<file path="src/lib/board-utils.ts">
+<file path="src/lib/board-utils.test.ts">
+import { describe, expect, it } from "vitest";
 import { BOARD_CENTER_COORD, BOARD_SIZE, TOTAL_CELLS } from "@/lib/constants";
 import type { Cell } from "@/types/schema";
+import {
+  getCellAtPosition,
+  isValidBoardStructure,
+  shuffleBoardCells,
+} from "./board-utils";
 ⋮----
-export function shuffleBoardCells(cells: Cell[]): Cell[]
-⋮----
-export function getCellAtPosition(
-  cells: Cell[],
-  x: number,
-  y: number,
-): Cell | undefined
-⋮----
-export function isValidBoardStructure(cells: Cell[]): boolean
-</file>
-
-<file path="src/lib/constants.ts">
-
+function createTestBoard(): Cell[]
 </file>
 
 <file path="src/test/helpers/auth-test-helpers.ts">
@@ -3203,25 +3204,20 @@ interface GameHeaderProps {
 }
 </file>
 
-<file path="src/components/game/BingoBoard.stories.tsx">
+<file path="src/app/game/[gameId]/page.stories.tsx">
 import { fakerJA as faker } from "@faker-js/faker";
 import type { Meta, StoryObj } from "@storybook/nextjs";
-import { BOARD_SIZE, CENTER_CELL_INDEX, NON_FREE_CELLS } from "@/lib/constants";
+import { AuthContext } from "@/contexts/AuthContext";
+import { BOARD_SIZE, CENTER_CELL_INDEX } from "@/lib/constants";
+import { AcceptanceStatus, GameStatus } from "@/types/common";
 import type { Cell } from "@/types/schema";
-import { BingoBoard } from "./BingoBoard";
-import type { BingoCellState } from "./BingoCell";
-⋮----
-type Story = StoryObj<typeof meta>;
+import GamePage from "./page";
 ⋮----
 const generateSampleCells = (): Cell[] =>
 ⋮----
-const generateSampleCellStates = (
-  pattern: "none" | "random" | "row" | "column" | "diagonal" | "all",
-): Record<string, BingoCellState> =>
+import { auth } from "@/lib/firebase/client";
 ⋮----
-const generateCompletedLines = (
-  pattern: "none" | "row" | "column" | "diagonal" | "multiple",
-): number[][] =>
+type Story = StoryObj<typeof meta>;
 </file>
 
 <file path="src/components/game/GameInfo.tsx">
@@ -3328,6 +3324,25 @@ const ConfettiButtonComponent = ({
 }: ConfettiButtonProps) =>
 ⋮----
 const handleClick = async (event: React.MouseEvent<HTMLButtonElement>) =>
+</file>
+
+<file path="src/lib/board-utils.ts">
+import { BOARD_CENTER_COORD, BOARD_SIZE, TOTAL_CELLS } from "@/lib/constants";
+import type { Cell } from "@/types/schema";
+⋮----
+export function shuffleBoardCells(cells: Cell[]): Cell[]
+⋮----
+export function getCellAtPosition(
+  cells: Cell[],
+  x: number,
+  y: number,
+): Cell | undefined
+⋮----
+export function isValidBoardStructure(cells: Cell[]): boolean
+</file>
+
+<file path="src/lib/constants.ts">
+
 </file>
 
 <file path="src/test/helpers/game-test-helpers.ts">
@@ -3515,17 +3530,25 @@ export function useImageSubmission({
 const randomInRange = (min: number, max: number)
 </file>
 
-<file path="src/app/game/[gameId]/share/page.stories.tsx">
+<file path="src/components/game/BingoBoard.stories.tsx">
 import { fakerJA as faker } from "@faker-js/faker";
 import type { Meta, StoryObj } from "@storybook/nextjs";
 import { BOARD_SIZE, CENTER_CELL_INDEX, NON_FREE_CELLS } from "@/lib/constants";
-import { GameStatus } from "@/types/common";
-import type { Cell, Game } from "@/types/schema";
-import SharePage from "./page";
+import type { Cell } from "@/types/schema";
+import { BingoBoard } from "./BingoBoard";
+import type { BingoCellState } from "./BingoCell";
+⋮----
+type Story = StoryObj<typeof meta>;
 ⋮----
 const generateSampleCells = (): Cell[] =>
 ⋮----
-type Story = StoryObj<typeof meta>;
+const generateSampleCellStates = (
+  pattern: "none" | "random" | "row" | "column" | "diagonal" | "all",
+): Record<string, BingoCellState> =>
+⋮----
+const generateCompletedLines = (
+  pattern: "none" | "row" | "column" | "diagonal" | "multiple",
+): number[][] =>
 </file>
 
 <file path="src/components/game/ParticipantsList.stories.tsx">
@@ -3752,6 +3775,19 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ gameId: string }> },
 ): Promise<NextResponse<ApiResponse<Game>>>
+</file>
+
+<file path="src/app/game/[gameId]/share/page.stories.tsx">
+import { fakerJA as faker } from "@faker-js/faker";
+import type { Meta, StoryObj } from "@storybook/nextjs";
+import { BOARD_SIZE, CENTER_CELL_INDEX, NON_FREE_CELLS } from "@/lib/constants";
+import { GameStatus } from "@/types/common";
+import type { Cell, Game } from "@/types/schema";
+import SharePage from "./page";
+⋮----
+const generateSampleCells = (): Cell[] =>
+⋮----
+type Story = StoryObj<typeof meta>;
 </file>
 
 <file path="vitest.config.mts">
@@ -4281,6 +4317,49 @@ export async function POST(
 ): Promise<NextResponse<ApiResponse<
 </file>
 
+<file path="src/app/api/game/[gameId]/submission/analyze/route.ts">
+import { GoogleGenAI, Type } from "@google/genai";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import { z } from "zod";
+import { resolveCellId } from "@/lib/cell-utils";
+import { GEMINI_MODEL, GEMINI_THINKING_BUDGET } from "@/lib/constants";
+import { adminAuth } from "@/lib/firebase/admin";
+import {
+  AdminGameBoardService,
+  AdminGameParticipationService,
+  AdminGameService,
+  AdminPlayerBoardService,
+} from "@/lib/firebase/admin-collections";
+import type { ApiResponse } from "@/types/common";
+import { AcceptanceStatus } from "@/types/common";
+import type { AnalysisResult, Cell } from "@/types/schema";
+import { analysisResultSchema } from "@/types/schema";
+⋮----
+async function authenticateUser(
+  request: NextRequest,
+): Promise<string | NextResponse<ApiResponse<never>>>
+⋮----
+async function verifyGameParticipant(
+  gameId: string,
+  userId: string,
+): Promise<NextResponse<ApiResponse<never>> | null>
+⋮----
+async function getAvailableCells(
+  gameId: string,
+  userId: string,
+): Promise<Cell[]>
+⋮----
+function getAnalysisPrompt(availableCells: Cell[], gameTheme: string): string
+⋮----
+async function fetchImageAsBase64(imageUrl: string): Promise<string>
+⋮----
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ gameId: string }> },
+): Promise<NextResponse<ApiResponse<AnalysisResult>>>
+</file>
+
 <file path="src/app/game/create/page.tsx">
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
@@ -4348,87 +4427,6 @@ const onSubmit: SubmitHandler<GameCreateFormValues> = async (data) =>
 <CardTitle>
 ⋮----
 disabled=
-</file>
-
-<file path="src/app/api/game/[gameId]/submission/analyze/route.ts">
-import { GoogleGenAI, Type } from "@google/genai";
-import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
-import { z } from "zod";
-import { resolveCellId } from "@/lib/cell-utils";
-import { GEMINI_MODEL, GEMINI_THINKING_BUDGET } from "@/lib/constants";
-import { adminAuth } from "@/lib/firebase/admin";
-import {
-  AdminGameBoardService,
-  AdminGameParticipationService,
-  AdminGameService,
-  AdminPlayerBoardService,
-} from "@/lib/firebase/admin-collections";
-import type { ApiResponse } from "@/types/common";
-import { AcceptanceStatus } from "@/types/common";
-import type { AnalysisResult, Cell } from "@/types/schema";
-import { analysisResultSchema } from "@/types/schema";
-⋮----
-async function authenticateUser(
-  request: NextRequest,
-): Promise<string | NextResponse<ApiResponse<never>>>
-⋮----
-async function verifyGameParticipant(
-  gameId: string,
-  userId: string,
-): Promise<NextResponse<ApiResponse<never>> | null>
-⋮----
-async function getAvailableCells(
-  gameId: string,
-  userId: string,
-): Promise<Cell[]>
-⋮----
-function getAnalysisPrompt(availableCells: Cell[], gameTheme: string): string
-⋮----
-async function fetchImageAsBase64(imageUrl: string): Promise<string>
-⋮----
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ gameId: string }> },
-): Promise<NextResponse<ApiResponse<AnalysisResult>>>
-</file>
-
-<file path="src/app/api/game/[gameId]/submission/route.ts">
-import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
-import { z } from "zod";
-import { BOARD_SIZE } from "@/lib/constants";
-import { adminAuth } from "@/lib/firebase/admin";
-import {
-  AdminGameBoardService,
-  AdminGameParticipationService,
-  AdminGameService,
-  AdminPlayerBoardService,
-  AdminSubmissionService,
-  AdminTransactionService,
-} from "@/lib/firebase/admin-collections";
-import type { ApiResponse } from "@/types/common";
-import { AcceptanceStatus, LineType, ProcessingStatus } from "@/types/common";
-import type { CompletedLine, PlayerBoard, Submission } from "@/types/schema";
-import { analysisResultSchema } from "@/types/schema";
-⋮----
-interface SubmissionResponse {
-  newlyCompletedLines: number;
-  totalCompletedLines: number;
-  requiredBingoLines: number;
-}
-⋮----
-function detectCompletedLines(playerBoard: PlayerBoard): CompletedLine[]
-⋮----
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ gameId: string }> },
-): Promise<NextResponse<ApiResponse<SubmissionResponse>>>
-⋮----
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ gameId: string }> },
-): Promise<NextResponse<ApiResponse<Submission[]>>>
 </file>
 
 <file path="src/app/game/join/page.tsx">
@@ -4514,6 +4512,42 @@ import { setUserLocale } from "@/services/locale";
 const toggleLocale = async (): Promise<void> =>
 ⋮----
 const handleLogout = async (): Promise<void> =>
+</file>
+
+<file path="src/app/api/game/[gameId]/submission/route.ts">
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import { z } from "zod";
+import { detectCompletedLines } from "@/lib/bingo-logic";
+import { adminAuth } from "@/lib/firebase/admin";
+import {
+  AdminGameBoardService,
+  AdminGameParticipationService,
+  AdminGameService,
+  AdminPlayerBoardService,
+  AdminSubmissionService,
+  AdminTransactionService,
+} from "@/lib/firebase/admin-collections";
+import type { ApiResponse } from "@/types/common";
+import { AcceptanceStatus, ProcessingStatus } from "@/types/common";
+import type { Submission } from "@/types/schema";
+import { analysisResultSchema } from "@/types/schema";
+⋮----
+interface SubmissionResponse {
+  newlyCompletedLines: number;
+  totalCompletedLines: number;
+  requiredBingoLines: number;
+}
+⋮----
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ gameId: string }> },
+): Promise<NextResponse<ApiResponse<SubmissionResponse>>>
+⋮----
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ gameId: string }> },
+): Promise<NextResponse<ApiResponse<Submission[]>>>
 </file>
 
 <file path="CLAUDE.md">
@@ -5059,6 +5093,7 @@ import {
     "start": "next start",
     "check": "biome check --write --unsafe --verbose",
     "check:i18n": "i18n-check --source ja --locales messages && i18n-check --source en --locales messages",
+    "pretest": "npm run check",
     "test": "vitest run",
     "test:watch": "vitest --no-coverage",
     "test:e2e": "playwright test",

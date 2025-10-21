@@ -295,6 +295,19 @@ t("Game.gameIdDescription", { gameIdLength: GAME_ID_LENGTH })
 - ✅ IDE補完とリファクタリング対応
 - ✅ 翻訳文字列も定数から値を取得
 - ✅ コード全体で一貫した値
+- ✅ 算出可能な値は計算式で定義（`TOTAL_CELLS = BOARD_SIZE * BOARD_SIZE`）
+- ✅ 将来的なボードサイズ変更（4x4、6x6への拡張）が容易
+- ✅ 定数名が自己説明的（`CENTER_CELL_INDEX`は「12」より意図が明確）
+- ✅ すべての使用箇所（プロダクションコード、テスト、Storybook）で一貫して適用
+
+**Tailwind CSSの制約**:
+
+Tailwind CSSは動的クラス名をサポートしていないため、`grid-cols-5`などのユーティリティクラスは定数化できません。このような箇所にはコメントで明記します。
+
+```typescript
+// Note: grid-cols-5 is hardcoded in Tailwind (dynamic classes not supported)
+<div className={cn("grid grid-cols-5 gap-1 md:gap-2", className)}>
+```
 
 ### 翻訳ファイルでの定数使用（next-intl）
 
@@ -352,7 +365,7 @@ export const BASE_URL =
 
 | 定数の種類 | 配置場所 | 例 |
 |----------|---------|------|
-| アプリケーション全体の設定 | `src/lib/constants.ts` | `GAME_ID_LENGTH`, `BASE_URL` |
+| アプリケーション全体の設定 | `src/lib/constants.ts` | `GAME_ID_LENGTH`, `BASE_URL`, `BOARD_SIZE` |
 | 列挙型 | `src/types/common.ts` | `GameStatus`, `ProcessingStatus` |
 | バリデーション正規表現 | `src/lib/constants.ts` | `GAME_ID_PATTERN` |
 | Firebase設定 | `src/lib/firebase/config.ts` | `firebaseConfig` |
@@ -681,6 +694,263 @@ export function ComponentName({ prop }: ComponentNameProps) {
   )
 }
 ```
+
+## ビジネスロジックの分離
+
+### 原則: ビジネスロジックをAPIルートから独立させる
+
+複雑なビジネスロジック（ゲームルール、計算、判定等）は**独立した純粋関数**として`src/lib/`に配置し、APIルートやコンポーネントから分離する。
+
+**理由**:
+
+- ✅ **テスト容易性** - 純粋関数は単体テストが簡単
+- ✅ **再利用性** - 複数のAPIルートやコンポーネントで共有可能
+- ✅ **保守性** - ビジネスロジックとインフラ層（APIルーティング、DB操作）の分離
+- ✅ **型安全性** - ビジネスロジックの入出力を明確に定義
+
+### 実例: ビンゴライン判定ロジックの抽出
+
+#### Before（問題あり）
+
+```typescript
+// src/app/api/game/[gameId]/submission/route.ts
+
+/**
+ * Helper function to detect completed bingo lines
+ * Uses playerBoard.cells to support shuffle feature (each player has different positions)
+ */
+function detectCompletedLines(playerBoard: PlayerBoard): CompletedLine[] {
+  const completedLines: CompletedLine[] = [];
+
+  // Create a 5x5 grid mapping for easier line checking
+  const grid: boolean[][] = Array(BOARD_SIZE)
+    .fill(null)
+    .map(() => Array(BOARD_SIZE).fill(false));
+
+  // Fill the grid with open cell states
+  for (const cell of playerBoard.cells) {
+    const cellState = playerBoard.cellStates[cell.id];
+    const isOpen = cell.isFree || cellState?.isOpen || false;
+    grid[cell.position.y][cell.position.x] = isOpen;
+  }
+
+  // Check rows, columns, and diagonals...
+  // (58行のロジック)
+
+  return completedLines;
+}
+
+export async function POST(request: NextRequest, { params }: ...) {
+  // APIルート内でdetectCompletedLinesを呼び出し
+  const newCompletedLines = detectCompletedLines(playerBoard);
+  // ...
+}
+```
+
+**問題点**:
+
+- ❌ 関数がプライベート（エクスポートされていない） → テスト不可能
+- ❌ APIルートファイル内に配置 → ビジネスロジックとインフラ層の混在
+- ❌ 単体テストが存在しない → シャッフル機能追加後も動作保証なし
+- ❌ 再利用が困難 → 他のAPIルートで使いたい場合にコピペが必要
+
+#### After（改善版）
+
+```typescript
+// src/lib/bingo-logic.ts - ビジネスロジック層
+
+/**
+ * Detect completed bingo lines on a player's board
+ *
+ * Algorithm:
+ * 1. Create a 5x5 boolean grid from player board cells and their states
+ * 2. Mark cells as open if they are FREE or have isOpen: true
+ * 3. Check all rows, columns, and diagonals for completion
+ * 4. Return array of completed lines with type, index, and timestamp
+ *
+ * Why use playerBoard.cells instead of a fixed grid:
+ * - Supports shuffle feature where each player has different cell positions
+ * - Cell positions are stored in each Cell object, allowing position-independent logic
+ *
+ * @param playerBoard The player's board with cells and their states
+ * @returns Array of completed bingo lines
+ */
+export function detectCompletedLines(playerBoard: PlayerBoard): CompletedLine[] {
+  const completedLines: CompletedLine[] = [];
+
+  const grid: boolean[][] = Array(BOARD_SIZE)
+    .fill(null)
+    .map(() => Array(BOARD_SIZE).fill(false));
+
+  for (const cell of playerBoard.cells) {
+    const cellState = playerBoard.cellStates[cell.id];
+    const isOpen = cell.isFree || cellState?.isOpen || false;
+    grid[cell.position.y][cell.position.x] = isOpen;
+  }
+
+  // Check rows
+  for (let row = 0; row < BOARD_SIZE; row++) {
+    if (grid[row].every((cell) => cell)) {
+      completedLines.push({
+        type: LineType.ROW,
+        index: row,
+        completedAt: new Date(),
+      });
+    }
+  }
+
+  // Check columns, diagonals...
+  // (同様のロジック)
+
+  return completedLines;
+}
+```
+
+```typescript
+// src/app/api/game/[gameId]/submission/route.ts - インフラ層
+
+import { detectCompletedLines } from "@/lib/bingo-logic";
+
+export async function POST(request: NextRequest, { params }: ...) {
+  // ビジネスロジックをインポートして使用
+  const newCompletedLines = detectCompletedLines(playerBoard);
+  // ...
+}
+```
+
+```typescript
+// src/lib/bingo-logic.test.ts - 包括的なテスト
+
+describe("detectCompletedLines", () => {
+  describe("Empty board (no completed lines)", () => {
+    it("should return empty array for fresh board with only FREE cell", () => {
+      const playerBoard = createTestPlayerBoard();
+      const result = detectCompletedLines(playerBoard);
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe("Row completion", () => {
+    it.each([0, 1, 2, 3, 4])("should detect completed row %i", (rowIndex) => {
+      const playerBoard = createTestPlayerBoard();
+      openCellsAtPositions(playerBoard, [/* row cells */]);
+      const result = detectCompletedLines(playerBoard);
+      expect(result).toHaveLength(1);
+      expect(result[0].type).toBe(LineType.ROW);
+      expect(result[0].index).toBe(rowIndex);
+    });
+  });
+
+  describe("Shuffle support", () => {
+    it("should correctly detect lines on shuffled board", () => {
+      const playerBoard = createShuffledPlayerBoard();
+      openCellsAtPositions(playerBoard, [/* diagonal cells */]);
+      const result = detectCompletedLines(playerBoard);
+      expect(result).toHaveLength(1);
+      expect(result[0].type).toBe(LineType.DIAGONAL);
+    });
+  });
+
+  // ... 合計27テストケース
+});
+```
+
+**改善結果**:
+
+- ✅ **エクスポート** → 単体テスト可能
+- ✅ **`src/lib/`配置** → ビジネスロジックとインフラ層を分離
+- ✅ **27テストケース** → 全ライン種類（行・列・対角線）、複数ライン同時完成、シャッフル対応を検証
+- ✅ **100%カバレッジ** → コードカバレッジ100%達成
+- ✅ **再利用可能** → 他のAPIルートでも`import`で使用可能
+- ✅ **型安全** → `PlayerBoard` → `CompletedLine[]`の入出力が明確
+
+### ビジネスロジック分離の一般的なパターン
+
+#### 配置場所
+
+| ロジックの種類 | 配置場所 | 例 |
+|-------------|---------|------|
+| ゲームルール | `src/lib/bingo-logic.ts` | `detectCompletedLines()` |
+| ボード操作 | `src/lib/board-utils.ts` | `shuffleBoardCells()`, `getCellAtPosition()` |
+| セル解決 | `src/lib/cell-utils.ts` | `resolveCellId()` |
+| 画像処理 | `src/lib/image-utils.ts` | `validateImageFile()`, `getImageDimensions()` |
+| 日付計算 | `src/lib/date-utils.ts` | `calculateExpirationDate()` |
+
+#### 純粋関数の設計指針
+
+1. **入力と出力を明確にする**
+   - 引数で全ての必要な情報を受け取る
+   - 副作用なし（グローバル変数の変更、API呼び出し、DBアクセスなし）
+   - 同じ入力に対して常に同じ出力を返す
+
+2. **型定義を厳密にする**
+   - 引数と戻り値の型を明示
+   - オプショナル引数は`?`または`= defaultValue`で明示
+
+3. **エラーハンドリングを明確にする**
+   - 無効な入力に対して適切にエラーをスローする
+   - エラーメッセージは具体的に
+
+4. **テストしやすい設計**
+   - 複雑なロジックは小さな関数に分割
+   - テストヘルパー関数を提供（例: `createTestPlayerBoard()`）
+
+#### テストパターン
+
+```typescript
+// src/lib/bingo-logic.test.ts
+
+/**
+ * Test helper: Create a test player board with standard 5x5 layout
+ */
+function createTestPlayerBoard(): PlayerBoard {
+  // 標準的なテストデータ生成
+}
+
+/**
+ * Test helper: Open cells at specific positions
+ */
+function openCellsAtPositions(
+  playerBoard: PlayerBoard,
+  positions: Array<{ x: number; y: number }>,
+): void {
+  // テストデータ操作ヘルパー
+}
+
+describe("detectCompletedLines", () => {
+  describe("Empty board", () => {
+    it("should return empty array for fresh board", () => {
+      // 初期状態のテスト
+    });
+  });
+
+  describe("Row completion", () => {
+    it.each([0, 1, 2, 3, 4])("should detect completed row %i", (rowIndex) => {
+      // パラメタライズドテスト
+    });
+  });
+
+  describe("Shuffle support", () => {
+    it("should correctly detect lines on shuffled board", () => {
+      // シャッフル機能との互換性テスト
+    });
+  });
+
+  describe("Edge cases", () => {
+    it("should handle all cells open (multiple lines)", () => {
+      // エッジケースのテスト
+    });
+  });
+});
+```
+
+**テストのベストプラクティス**:
+
+- ✅ **テストヘルパー関数を提供** - テストデータ生成を再利用可能に
+- ✅ **パラメタライズドテスト** - `it.each()`で同様のテストを簡潔に
+- ✅ **カテゴリ分け** - `describe()`でテストケースをグループ化
+- ✅ **エッジケースを網羅** - 空のボード、全セルオープン、シャッフル対応等
+- ✅ **実装の詳細ではなく動作を検証** - 内部実装に依存しないテスト
 
 ## React Hooks最適化
 
