@@ -30,6 +30,12 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { TranslatedFormMessage } from "@/components/ui/translated-form-message";
+import {
+  BOARD_CENTER_COORD,
+  BOARD_SIZE,
+  CENTER_CELL_INDEX,
+  NON_FREE_CELLS,
+} from "@/lib/constants";
 import { auth } from "@/lib/firebase/client";
 import { cn } from "@/lib/utils";
 import type { Cell, GameCreationData } from "@/types/schema";
@@ -172,17 +178,18 @@ export default function CreateGamePage() {
    * Update cells for the bingo board based on subjects
    */
   const updateCells = (subjectList: Subject[]) => {
-    // Take the first 24 subjects (or fewer if not enough)
-    const boardSubjects = subjectList.slice(0, 24);
+    // Take the first NON_FREE_CELLS subjects (or fewer if not enough)
+    const boardSubjects = subjectList.slice(0, NON_FREE_CELLS);
 
     // Create cells array
     const newCells: Cell[] = [];
 
     // Add cells in row-major order
-    for (let y = 0; y < 5; y++) {
-      for (let x = 0; x < 5; x++) {
-        const index = y * 5 + x;
-        const isCenterCell = x === 2 && y === 2;
+    for (let y = 0; y < BOARD_SIZE; y++) {
+      for (let x = 0; x < BOARD_SIZE; x++) {
+        const index = y * BOARD_SIZE + x;
+        const isCenterCell =
+          x === BOARD_CENTER_COORD && y === BOARD_CENTER_COORD;
 
         // Center cell is always FREE
         if (isCenterCell) {
@@ -196,7 +203,7 @@ export default function CreateGamePage() {
         }
 
         // Calculate the subject index (accounting for the FREE cell)
-        const subjectIndex = index < 12 ? index : index - 1;
+        const subjectIndex = index < CENTER_CELL_INDEX ? index : index - 1;
 
         // Add the cell with the subject (if available)
         if (subjectIndex < boardSubjects.length) {
@@ -239,7 +246,7 @@ export default function CreateGamePage() {
   const onSubmit: SubmitHandler<GameCreateFormValues> = async (data) => {
     console.log("ℹ️ XXX: ~ page.tsx ~ onSubmit called");
     // Validate that we have enough subjects
-    if (subjects.length < 24) {
+    if (subjects.length < NON_FREE_CELLS) {
       setSubmissionError(t("Game.errors.notEnoughValidSubjects"));
       return;
     }
@@ -248,15 +255,15 @@ export default function CreateGamePage() {
     setSubmissionError(null);
 
     try {
-      // Extract subject texts from the first 24 subjects (those used in the bingo board)
-      const boardSubjects = subjects.slice(0, 24);
+      // Extract subject texts from the first NON_FREE_CELLS subjects (those used in the bingo board)
+      const boardSubjects = subjects.slice(0, NON_FREE_CELLS);
       const boardSubjectTexts = boardSubjects.map((subject) => subject.text);
 
       // Skip subjects check if requested (for development/testing only)
       if (!skipSubjectsCheck) {
         // Validate only the subjects that will be used in the bingo board
         console.log(
-          "ℹ️ XXX: ~ page.tsx ~ /api/subjects/check for the first 24 subjects",
+          `ℹ️ XXX: ~ page.tsx ~ /api/subjects/check for the first ${NON_FREE_CELLS} subjects`,
         );
         const checkResponse = await fetch("/api/subjects/check", {
           method: "POST",
@@ -276,10 +283,10 @@ export default function CreateGamePage() {
         }
 
         if (checkData.ok === false && checkData.issues) {
-          // Mark subjects with issues (only for the first 24 subjects)
+          // Mark subjects with issues (only for the first NON_FREE_CELLS subjects)
           const updatedSubjects = subjects.map((subject, index) => {
-            // Only check the first 24 subjects
-            if (index < 24) {
+            // Only check the first NON_FREE_CELLS subjects
+            if (index < NON_FREE_CELLS) {
               const issue = checkData.issues.find(
                 (issue: { subject: string; reason: string }) =>
                   issue.subject === subject.text,
@@ -293,7 +300,7 @@ export default function CreateGamePage() {
               return { ...subject, error: undefined };
             }
 
-            // Keep subjects beyond the first 24 unchanged
+            // Keep subjects beyond the first NON_FREE_CELLS unchanged
             return subject;
           });
 
@@ -302,7 +309,7 @@ export default function CreateGamePage() {
             (subject) => !subject.error,
           ).length;
 
-          if (validSubjectsCount < 24) {
+          if (validSubjectsCount < NON_FREE_CELLS) {
             setSubmissionError(t("Game.errors.notEnoughValidSubjects"));
 
             // Update subjects with error messages
@@ -506,7 +513,7 @@ export default function CreateGamePage() {
               <CardHeader>
                 <CardTitle>{t("Game.boardPreview")}</CardTitle>
                 <p className="mt-4 text-muted-foreground text-xs">
-                  {t("Game.boardDescription", { 0: 24 })}
+                  {t("Game.boardDescription", { 0: NON_FREE_CELLS })}
                 </p>
               </CardHeader>
               <CardContent>
@@ -797,7 +804,10 @@ export default function CreateGamePage() {
               type="submit"
               className="w-full"
               disabled={
-                isSubmitting || !title || !theme || subjects.length < 24
+                isSubmitting ||
+                !title ||
+                !theme ||
+                subjects.length < NON_FREE_CELLS
               }
             >
               {isSubmitting ? t("Game.creating") : t("Game.create")}

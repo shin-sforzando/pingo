@@ -1,6 +1,7 @@
 /**
  * Board utility functions
  */
+import { BOARD_CENTER_COORD, BOARD_SIZE, TOTAL_CELLS } from "@/lib/constants";
 import type { Cell } from "@/types/schema";
 
 /**
@@ -17,8 +18,8 @@ import type { Cell } from "@/types/schema";
  */
 export function shuffleBoardCells(cells: Cell[]): Cell[] {
   // Validate input
-  if (cells.length !== 25) {
-    throw new Error("Board must have exactly 25 cells");
+  if (cells.length !== TOTAL_CELLS) {
+    throw new Error(`Board must have exactly ${TOTAL_CELLS} cells`);
   }
 
   // Find the FREE cell (should be at center position in master board)
@@ -47,10 +48,10 @@ export function shuffleBoardCells(cells: Cell[]): Cell[] {
   let positionIndex = 0;
   for (let i = 0; i < cells.length; i++) {
     if (i === freeCellIndex) {
-      // FREE cell always goes to center position (2,2)
+      // FREE cell always goes to center position
       shuffledCells.push({
         ...cells[i],
-        position: { x: 2, y: 2 },
+        position: { x: BOARD_CENTER_COORD, y: BOARD_CENTER_COORD },
       });
     } else {
       // Other cells get shuffled positions
@@ -88,8 +89,8 @@ export function getCellAtPosition(
  * @returns True if board structure is valid
  */
 export function isValidBoardStructure(cells: Cell[]): boolean {
-  // Must have exactly 25 cells
-  if (cells.length !== 25) {
+  // Must have exactly TOTAL_CELLS cells
+  if (cells.length !== TOTAL_CELLS) {
     return false;
   }
 
@@ -105,9 +106,9 @@ export function isValidBoardStructure(cells: Cell[]): boolean {
     positionMap.set(key, cell);
   }
 
-  // Check that all positions 0-4 x 0-4 are present
-  for (let x = 0; x < 5; x++) {
-    for (let y = 0; y < 5; y++) {
+  // Check that all positions are present
+  for (let x = 0; x < BOARD_SIZE; x++) {
+    for (let y = 0; y < BOARD_SIZE; y++) {
       if (!positionMap.has(`${x},${y}`)) {
         return false;
       }
@@ -115,7 +116,9 @@ export function isValidBoardStructure(cells: Cell[]): boolean {
   }
 
   // Check that center cell is FREE
-  const centerCell = positionMap.get("2,2");
+  const centerCell = positionMap.get(
+    `${BOARD_CENTER_COORD},${BOARD_CENTER_COORD}`,
+  );
   if (!centerCell || !centerCell.isFree) {
     return false;
   }

@@ -1065,6 +1065,10 @@ import { defineConfig, devices } from "@playwright/test";
 }
 </file>
 
+<file path="vitest.browser.setup.ts">
+
+</file>
+
 <file path="vitest.setup.ts">
 import { resolve } from "node:path";
 import { config } from "dotenv";
@@ -1255,6 +1259,7 @@ async function onSubmit(values: ExtendedUserCreationData)
 </file>
 
 <file path="src/components/game/BingoBoard.tsx">
+import { BOARD_SIZE, CENTER_CELL_INDEX, TOTAL_CELLS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import type { Cell } from "@/types/schema";
 import { BingoCell, type BingoCellState } from "./BingoCell";
@@ -1293,7 +1298,7 @@ const isCellInCompletedLine = (index: number) =>
 // Get the state for a cell
 const getCellState = (cell: Cell, index: number): BingoCellState =>
 ⋮----
-// Center cell (index 12) is always FREE
+// Center cell is always FREE
 ⋮----
 state=
 isPartOfCompletedLine=
@@ -1302,6 +1307,7 @@ isPartOfCompletedLine=
 <file path="src/components/game/BingoCell.stories.tsx">
 import { fakerJA as faker } from "@faker-js/faker";
 import type { Meta, StoryObj } from "@storybook/nextjs";
+import { BOARD_CENTER_COORD } from "@/lib/constants";
 import { BingoCell } from "./BingoCell";
 ⋮----
 type Story = StoryObj<typeof meta>;
@@ -1890,6 +1896,7 @@ import { getFirestore } from "firebase-admin/firestore";
 
 <file path="src/lib/board-utils.test.ts">
 import { describe, expect, it } from "vitest";
+import { BOARD_CENTER_COORD, BOARD_SIZE, TOTAL_CELLS } from "@/lib/constants";
 import type { Cell } from "@/types/schema";
 import {
   getCellAtPosition,
@@ -2194,10 +2201,6 @@ import createNextIntlPlugin from "next-intl/plugin";
 }
 </file>
 
-<file path="vitest.browser.setup.ts">
-
-</file>
-
 <file path="vitest.global-setup.ts">
 import type { Firestore } from "firebase-admin/firestore";
 ⋮----
@@ -2394,6 +2397,7 @@ export function ErrorDisplay(
 import { fakerJA as faker } from "@faker-js/faker";
 import type { Meta, StoryObj } from "@storybook/nextjs";
 import { AuthContext } from "@/contexts/AuthContext";
+import { BOARD_SIZE, CENTER_CELL_INDEX } from "@/lib/constants";
 import { AcceptanceStatus, GameStatus } from "@/types/common";
 import type { Cell } from "@/types/schema";
 import GamePage from "./page";
@@ -2756,6 +2760,7 @@ const fetchParticipatingGames = async () =>
 </file>
 
 <file path="src/lib/board-utils.ts">
+import { BOARD_CENTER_COORD, BOARD_SIZE, TOTAL_CELLS } from "@/lib/constants";
 import type { Cell } from "@/types/schema";
 ⋮----
 export function shuffleBoardCells(cells: Cell[]): Cell[]
@@ -3168,6 +3173,25 @@ import type { Game } from "@/types/schema";
 import { PUT } from "./route";
 </file>
 
+<file path="src/app/debug/image-upload/page.tsx">
+import { useState } from "react";
+import { ImageUpload } from "@/components/game/ImageUpload";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { ImageSubmissionResult, ProcessedImage } from "@/types/schema";
+⋮----
+export default function ImageUploadDebugPage()
+⋮----
+const handleUploadStart = () =>
+⋮----
+const handleUploadComplete = (
+    success: boolean,
+    result?: ImageSubmissionResult,
+    error?: string,
+) =>
+⋮----
+const handleImageProcessed = (processedImage: ProcessedImage) =>
+</file>
+
 <file path="src/app/game/[gameId]/components/GameHeader.tsx">
 import { useTranslations } from "next-intl";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
@@ -3182,6 +3206,7 @@ interface GameHeaderProps {
 <file path="src/components/game/BingoBoard.stories.tsx">
 import { fakerJA as faker } from "@faker-js/faker";
 import type { Meta, StoryObj } from "@storybook/nextjs";
+import { BOARD_SIZE, CENTER_CELL_INDEX, NON_FREE_CELLS } from "@/lib/constants";
 import type { Cell } from "@/types/schema";
 import { BingoBoard } from "./BingoBoard";
 import type { BingoCellState } from "./BingoCell";
@@ -3462,25 +3487,6 @@ const getPromptTemplate = (params: CheckSubjectsRequest) =>
 export async function POST(request: NextRequest)
 </file>
 
-<file path="src/app/debug/image-upload/page.tsx">
-import { useState } from "react";
-import { ImageUpload } from "@/components/game/ImageUpload";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { ImageSubmissionResult, ProcessedImage } from "@/types/schema";
-⋮----
-export default function ImageUploadDebugPage()
-⋮----
-const handleUploadStart = () =>
-⋮----
-const handleUploadComplete = (
-    success: boolean,
-    result?: ImageSubmissionResult,
-    error?: string,
-) =>
-⋮----
-const handleImageProcessed = (processedImage: ProcessedImage) =>
-</file>
-
 <file path="src/app/game/[gameId]/hooks/useImageSubmission.ts">
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ConfettiRef } from "@/components/magicui/confetti";
@@ -3512,6 +3518,7 @@ const randomInRange = (min: number, max: number)
 <file path="src/app/game/[gameId]/share/page.stories.tsx">
 import { fakerJA as faker } from "@faker-js/faker";
 import type { Meta, StoryObj } from "@storybook/nextjs";
+import { BOARD_SIZE, CENTER_CELL_INDEX, NON_FREE_CELLS } from "@/lib/constants";
 import { GameStatus } from "@/types/common";
 import type { Cell, Game } from "@/types/schema";
 import SharePage from "./page";
@@ -3745,6 +3752,31 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ gameId: string }> },
 ): Promise<NextResponse<ApiResponse<Game>>>
+</file>
+
+<file path="vitest.config.mts">
+import react from "@vitejs/plugin-react";
+import tsconfigPaths from "vite-tsconfig-paths";
+import { coverageConfigDefaults, defineConfig } from "vitest/config";
+⋮----
+envDir: ".", // Load .env files from root directory
+⋮----
+// Limit concurrency to avoid Gemini API rate limits
+maxForks: 3, // Run at most 3 test files in parallel
+⋮----
+testTimeout: 30000, // Increase timeout for Gemini API operations
+⋮----
+"**/*.stories.{ts,tsx}", // Exclude Storybook stories
+"**/stories/example/*.tsx", // Exclude example stories
+"next.config.ts", // Exclude Next.js config
+"playwright.config.ts", // Exclude Playwright config
+"postcss.config.mjs", // Exclude PostCSS config
+"scripts/**/*.ts", // Exclude scripts
+"src/app/debug/**/*", // Exclude debug pages
+"src/components/magicui/*.tsx", // Exclude Magic UI components
+"src/components/ui/*.tsx", // Exclude shadcn/ui components
+"src/i18n/*.ts", // Exclude i18n config
+"storybook-static/**", // Exclude Storybook static files
 </file>
 
 <file path="src/app/api/subjects/generate/route.ts">
@@ -4142,31 +4174,6 @@ export function eventFromFirestore(doc: EventDocument): Event
 export function eventToFirestore(event: Event): EventDocument
 </file>
 
-<file path="vitest.config.mts">
-import react from "@vitejs/plugin-react";
-import tsconfigPaths from "vite-tsconfig-paths";
-import { coverageConfigDefaults, defineConfig } from "vitest/config";
-⋮----
-envDir: ".", // Load .env files from root directory
-⋮----
-// Limit concurrency to avoid Gemini API rate limits
-maxForks: 3, // Run at most 3 test files in parallel
-⋮----
-testTimeout: 30000, // Increase timeout for Gemini API operations
-⋮----
-"**/*.stories.{ts,tsx}", // Exclude Storybook stories
-"**/stories/example/*.tsx", // Exclude example stories
-"next.config.ts", // Exclude Next.js config
-"playwright.config.ts", // Exclude Playwright config
-"postcss.config.mjs", // Exclude PostCSS config
-"scripts/**/*.ts", // Exclude scripts
-"src/app/debug/**/*", // Exclude debug pages
-"src/components/magicui/*.tsx", // Exclude Magic UI components
-"src/components/ui/*.tsx", // Exclude shadcn/ui components
-"src/i18n/*.ts", // Exclude i18n config
-"storybook-static/**", // Exclude Storybook static files
-</file>
-
 <file path="src/app/api/image/check/route.test.ts">
 import type { DecodedIdToken } from "firebase-admin/auth";
 import type { NextRequest } from "next/server";
@@ -4305,6 +4312,12 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { TranslatedFormMessage } from "@/components/ui/translated-form-message";
+import {
+  BOARD_CENTER_COORD,
+  BOARD_SIZE,
+  CENTER_CELL_INDEX,
+  NON_FREE_CELLS,
+} from "@/lib/constants";
 import { auth } from "@/lib/firebase/client";
 import { cn } from "@/lib/utils";
 import type { Cell, GameCreationData } from "@/types/schema";
@@ -4384,6 +4397,7 @@ export async function POST(
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { BOARD_SIZE } from "@/lib/constants";
 import { adminAuth } from "@/lib/firebase/admin";
 import {
   AdminGameBoardService,

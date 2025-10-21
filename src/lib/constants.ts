@@ -29,3 +29,12 @@ export const GEMINI_MODEL = "gemini-2.5-flash";
  * For Pingo's image analysis use case, speed is prioritized over deep reasoning
  */
 export const GEMINI_THINKING_BUDGET = 0;
+
+/**
+ * Bingo board configuration
+ */
+export const BOARD_SIZE = 5;
+export const TOTAL_CELLS = BOARD_SIZE * BOARD_SIZE; // 25
+export const BOARD_CENTER_COORD = Math.floor(BOARD_SIZE / 2); // 2 (center of [0,1,2,3,4])
+export const CENTER_CELL_INDEX = Math.floor(TOTAL_CELLS / 2); // 12 (center of 0-24 array)
+export const NON_FREE_CELLS = TOTAL_CELLS - 1; // 24 (excluding center FREE cell)

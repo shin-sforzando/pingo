@@ -1,6 +1,7 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { BOARD_SIZE } from "@/lib/constants";
 import { adminAuth } from "@/lib/firebase/admin";
 import {
   AdminGameBoardService,
@@ -35,7 +36,6 @@ interface SubmissionResponse {
  */
 function detectCompletedLines(playerBoard: PlayerBoard): CompletedLine[] {
   const completedLines: CompletedLine[] = [];
-  const BOARD_SIZE = 5;
 
   // Create a 5x5 grid mapping for easier line checking
   const grid: boolean[][] = Array(BOARD_SIZE)

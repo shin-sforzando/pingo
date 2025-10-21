@@ -1,11 +1,12 @@
 import { fakerJA as faker } from "@faker-js/faker";
 import type { Meta, StoryObj } from "@storybook/nextjs";
 import { AuthContext } from "@/contexts/AuthContext";
+import { BOARD_SIZE, CENTER_CELL_INDEX } from "@/lib/constants";
 import { AcceptanceStatus, GameStatus } from "@/types/common";
 import type { Cell } from "@/types/schema";
 import GamePage from "./page";
 
-// Generate sample cells for a 5x5 board
+// Generate sample cells for a BOARD_SIZE x BOARD_SIZE board
 const generateSampleCells = (): Cell[] => {
   const cells: Cell[] = [];
   const subjects = [
@@ -35,15 +36,17 @@ const generateSampleCells = (): Cell[] => {
     "森",
   ];
 
-  for (let y = 0; y < 5; y++) {
-    for (let x = 0; x < 5; x++) {
-      const index = y * 5 + x;
-      const isFree = index === 12; // Center cell is FREE
+  for (let y = 0; y < BOARD_SIZE; y++) {
+    for (let x = 0; x < BOARD_SIZE; x++) {
+      const index = y * BOARD_SIZE + x;
+      const isFree = index === CENTER_CELL_INDEX; // Center cell is FREE
 
       cells.push({
         id: `cell-${index}`,
         position: { x, y },
-        subject: isFree ? "FREE" : subjects[12 < index ? index - 1 : index],
+        subject: isFree
+          ? "FREE"
+          : subjects[CENTER_CELL_INDEX < index ? index - 1 : index],
         isFree,
       });
     }

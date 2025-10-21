@@ -2,6 +2,7 @@
  * Tests for board utility functions
  */
 import { describe, expect, it } from "vitest";
+import { BOARD_CENTER_COORD, BOARD_SIZE, TOTAL_CELLS } from "@/lib/constants";
 import type { Cell } from "@/types/schema";
 import {
   getCellAtPosition,
@@ -10,18 +11,18 @@ import {
 } from "./board-utils";
 
 /**
- * Create a test board with 25 cells
+ * Create a test board with TOTAL_CELLS cells
  */
 function createTestBoard(): Cell[] {
   const cells: Cell[] = [];
-  for (let y = 0; y < 5; y++) {
-    for (let x = 0; x < 5; x++) {
-      const index = y * 5 + x;
+  for (let y = 0; y < BOARD_SIZE; y++) {
+    for (let x = 0; x < BOARD_SIZE; x++) {
+      const index = y * BOARD_SIZE + x;
       cells.push({
         id: `cell_${index}`,
         position: { x, y },
         subject: `Subject ${index}`,
-        isFree: x === 2 && y === 2, // Center cell is FREE
+        isFree: x === BOARD_CENTER_COORD && y === BOARD_CENTER_COORD, // Center cell is FREE
       });
     }
   }
@@ -29,10 +30,10 @@ function createTestBoard(): Cell[] {
 }
 
 describe("shuffleBoardCells", () => {
-  it("should return 25 cells", () => {
+  it("should return TOTAL_CELLS cells", () => {
     const originalCells = createTestBoard();
     const shuffledCells = shuffleBoardCells(originalCells);
-    expect(shuffledCells).toHaveLength(25);
+    expect(shuffledCells).toHaveLength(TOTAL_CELLS);
   });
 
   it("should preserve cell IDs and subjects", () => {
@@ -53,7 +54,7 @@ describe("shuffleBoardCells", () => {
     }
   });
 
-  it("should keep FREE cell at center position (2,2)", () => {
+  it("should keep FREE cell at center position", () => {
     const originalCells = createTestBoard();
     const freeCell = originalCells.find((c) => c.isFree);
     expect(freeCell).toBeDefined();
@@ -63,7 +64,10 @@ describe("shuffleBoardCells", () => {
 
     // FREE cell should be at center position after shuffle
     expect(shuffledFreeCell).toBeDefined();
-    expect(shuffledFreeCell?.position).toEqual({ x: 2, y: 2 });
+    expect(shuffledFreeCell?.position).toEqual({
+      x: BOARD_CENTER_COORD,
+      y: BOARD_CENTER_COORD,
+    });
     expect(shuffledFreeCell?.id).toBe(freeCell?.id);
     expect(shuffledFreeCell?.subject).toBe(freeCell?.subject);
   });
@@ -103,9 +107,9 @@ describe("shuffleBoardCells", () => {
   });
 
   it("should throw error for invalid cell count", () => {
-    const invalidCells = createTestBoard().slice(0, 24);
+    const invalidCells = createTestBoard().slice(0, TOTAL_CELLS - 1);
     expect(() => shuffleBoardCells(invalidCells)).toThrow(
-      "Board must have exactly 25 cells",
+      `Board must have exactly ${TOTAL_CELLS} cells`,
     );
   });
 
@@ -134,10 +138,17 @@ describe("shuffleBoardCells", () => {
 describe("getCellAtPosition", () => {
   it("should return cell at specified position", () => {
     const cells = createTestBoard();
-    const cell = getCellAtPosition(cells, 2, 2);
+    const cell = getCellAtPosition(
+      cells,
+      BOARD_CENTER_COORD,
+      BOARD_CENTER_COORD,
+    );
 
     expect(cell).toBeDefined();
-    expect(cell?.position).toEqual({ x: 2, y: 2 });
+    expect(cell?.position).toEqual({
+      x: BOARD_CENTER_COORD,
+      y: BOARD_CENTER_COORD,
+    });
   });
 
   it("should return undefined for non-existent position", () => {
@@ -155,7 +166,7 @@ describe("isValidBoardStructure", () => {
   });
 
   it("should return false for board with wrong cell count", () => {
-    const cells = createTestBoard().slice(0, 24);
+    const cells = createTestBoard().slice(0, TOTAL_CELLS - 1);
     expect(isValidBoardStructure(cells)).toBe(false);
   });
 
@@ -176,7 +187,9 @@ describe("isValidBoardStructure", () => {
   it("should return false for board without FREE center cell", () => {
     const cells = createTestBoard();
     const centerCell = cells.find(
-      (c) => c.position.x === 2 && c.position.y === 2,
+      (c) =>
+        c.position.x === BOARD_CENTER_COORD &&
+        c.position.y === BOARD_CENTER_COORD,
     );
     if (centerCell) {
       centerCell.isFree = false; // Make center cell not FREE

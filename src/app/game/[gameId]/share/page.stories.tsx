@@ -1,25 +1,28 @@
 import { fakerJA as faker } from "@faker-js/faker";
 import type { Meta, StoryObj } from "@storybook/nextjs";
+import { BOARD_SIZE, CENTER_CELL_INDEX, NON_FREE_CELLS } from "@/lib/constants";
 import { GameStatus } from "@/types/common";
 import type { Cell, Game } from "@/types/schema";
 import SharePage from "./page";
 
-// Generate sample cells for a 5x5 board
+// Generate sample cells for a BOARD_SIZE x BOARD_SIZE board
 const generateSampleCells = (): Cell[] => {
   const cells: Cell[] = [];
   const subjects = faker.helpers.multiple(() => faker.lorem.word(), {
-    count: 24,
+    count: NON_FREE_CELLS,
   });
 
-  for (let y = 0; y < 5; y++) {
-    for (let x = 0; x < 5; x++) {
-      const index = y * 5 + x;
-      const isFree = index === 12; // Center cell is FREE
+  for (let y = 0; y < BOARD_SIZE; y++) {
+    for (let x = 0; x < BOARD_SIZE; x++) {
+      const index = y * BOARD_SIZE + x;
+      const isFree = index === CENTER_CELL_INDEX; // Center cell is FREE
 
       cells.push({
         id: `cell-${index}`,
         position: { x, y },
-        subject: isFree ? "FREE" : subjects[12 < index ? index - 1 : index],
+        subject: isFree
+          ? "FREE"
+          : subjects[CENTER_CELL_INDEX < index ? index - 1 : index],
         isFree,
       });
     }
@@ -38,11 +41,14 @@ const mockGame: Game = {
   creatorId: faker.string.ulid(),
   isPublic: true,
   isPhotoSharingEnabled: true,
+  skipImageCheck: false,
+  isShuffleEnabled: false,
   requiredBingoLines: 3,
   confidenceThreshold: 0.7,
   maxSubmissionsPerUser: 30,
   status: GameStatus.ACTIVE,
   notes: "これは夏休みの宿題ビンゴです。",
+  updatedAt: null,
 };
 
 // Mock board data
