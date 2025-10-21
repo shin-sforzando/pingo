@@ -18,6 +18,10 @@
         "/Users/suzuki/Workspace/github.com/shin-sforzando/pingo"
       ],
       "env": {}
+    },
+    "shadcn": {
+      "command": "npx",
+      "args": ["shadcn@latest", "mcp"]
     }
   }
 }
