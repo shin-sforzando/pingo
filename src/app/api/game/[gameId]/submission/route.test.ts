@@ -131,6 +131,8 @@ describe("/api/game/[gameId]/submission", () => {
         expiresAt: new Date(Date.now() + 86400000), // 1 day from now
         isPublic: true,
         isPhotoSharingEnabled: true,
+        skipImageCheck: false,
+        isShuffleEnabled: false,
         requiredBingoLines: 1,
         confidenceThreshold: 0.7,
         maxSubmissionsPerUser: 10,
@@ -150,6 +152,14 @@ describe("/api/game/[gameId]/submission", () => {
 
       const mockPlayerBoard = {
         userId: mockUserId,
+        cells: [
+          {
+            id: "cell-1",
+            subject: "赤い自転車",
+            position: { x: 0, y: 0 },
+            isFree: false,
+          },
+        ],
         cellStates: {},
         completedLines: [],
       };

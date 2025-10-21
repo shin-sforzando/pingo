@@ -1,6 +1,7 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { detectCompletedLines } from "@/lib/bingo-logic";
 import { adminAuth } from "@/lib/firebase/admin";
 import {
   AdminGameBoardService,
@@ -11,13 +12,8 @@ import {
   AdminTransactionService,
 } from "@/lib/firebase/admin-collections";
 import type { ApiResponse } from "@/types/common";
-import { AcceptanceStatus, LineType, ProcessingStatus } from "@/types/common";
-import type {
-  Cell,
-  CompletedLine,
-  PlayerBoard,
-  Submission,
-} from "@/types/schema";
+import { AcceptanceStatus, ProcessingStatus } from "@/types/common";
+import type { Submission } from "@/types/schema";
 import { analysisResultSchema } from "@/types/schema";
 
 // Request body schema for state update
@@ -32,71 +28,6 @@ interface SubmissionResponse {
   newlyCompletedLines: number;
   totalCompletedLines: number;
   requiredBingoLines: number;
-}
-
-/**
- * Helper function to detect completed bingo lines
- */
-function detectCompletedLines(
-  gameBoard: { cells: Cell[] },
-  playerBoard: PlayerBoard,
-): CompletedLine[] {
-  const completedLines: CompletedLine[] = [];
-  const BOARD_SIZE = 5;
-
-  // Create a 5x5 grid mapping for easier line checking
-  const grid: boolean[][] = Array(BOARD_SIZE)
-    .fill(null)
-    .map(() => Array(BOARD_SIZE).fill(false));
-
-  // Fill the grid with open cell states
-  for (const cell of gameBoard.cells) {
-    const cellState = playerBoard.cellStates[cell.id];
-    const isOpen = cell.isFree || cellState?.isOpen || false;
-    grid[cell.position.y][cell.position.x] = isOpen;
-  }
-
-  // Check rows
-  for (let row = 0; row < BOARD_SIZE; row++) {
-    if (grid[row].every((cell) => cell)) {
-      completedLines.push({
-        type: LineType.ROW,
-        index: row,
-        completedAt: new Date(),
-      });
-    }
-  }
-
-  // Check columns
-  for (let col = 0; col < BOARD_SIZE; col++) {
-    if (grid.every((row) => row[col])) {
-      completedLines.push({
-        type: LineType.COLUMN,
-        index: col,
-        completedAt: new Date(),
-      });
-    }
-  }
-
-  // Check main diagonal (top-left to bottom-right)
-  if (grid.every((row, index) => row[index])) {
-    completedLines.push({
-      type: LineType.DIAGONAL,
-      index: 0,
-      completedAt: new Date(),
-    });
-  }
-
-  // Check anti-diagonal (top-right to bottom-left)
-  if (grid.every((row, index) => row[BOARD_SIZE - 1 - index])) {
-    completedLines.push({
-      type: LineType.DIAGONAL,
-      index: 1,
-      completedAt: new Date(),
-    });
-  }
-
-  return completedLines;
 }
 
 /**
@@ -196,17 +127,22 @@ export async function POST(
       );
     }
 
-    // Get or create player board
-    let playerBoard = await AdminPlayerBoardService.getPlayerBoard(
+    // Get player board (should exist - created when user joined game)
+    const playerBoard = await AdminPlayerBoardService.getPlayerBoard(
       gameId,
       userId,
     );
     if (!playerBoard) {
-      playerBoard = {
-        userId,
-        cellStates: {},
-        completedLines: [],
-      };
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "PLAYER_BOARD_NOT_FOUND",
+            message: "Player board not found. Please join the game first.",
+          },
+        },
+        { status: 404 },
+      );
     }
 
     const now = new Date();
@@ -254,7 +190,7 @@ export async function POST(
         );
 
         // Detect completed bingo lines after opening the cell
-        const newCompletedLines = detectCompletedLines(gameBoard, playerBoard);
+        const newCompletedLines = detectCompletedLines(playerBoard);
         console.log("ℹ️ XXX: ~ submission/route.ts ~ Line detection completed", {
           totalDetectedLines: newCompletedLines.length,
           detectedLines: newCompletedLines.map((line) => ({

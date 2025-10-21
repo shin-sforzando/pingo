@@ -56,8 +56,6 @@ CRITICAL: Before finalizing your response, verify that EVERY candidate meets ALL
 
 Candidates must be in ${language}.
 
-If the given title or theme is offensive to public order and morals, respond with an error message explaining the reason.
-
 # Conditions
 
 - Title: ${title}

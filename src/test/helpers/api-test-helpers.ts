@@ -7,14 +7,19 @@ export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000";
 
 /**
- * Generate a unique test username
- * Ensures the username is within the 20 character limit
+ * Generate a unique test username with date and time format
+ * Format: vitest_MMDD_HHMMSS (e.g., vitest_1022143052)
+ * Ensures the username is within the 20 character limit (20 chars total)
  */
 export const generateTestUsername = (prefix = TEST_PREFIX) => {
-  // Use a shorter timestamp (last 6 digits of timestamp) to keep the username under 20 chars
-  const shortTimestamp = Date.now() % 1000000;
-  const randomNum = Math.floor(Math.random() * 100);
-  const testUsername = `${prefix}${shortTimestamp}${randomNum}`;
+  const now = new Date();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  const hours = String(now.getHours()).padStart(2, "0");
+  const minutes = String(now.getMinutes()).padStart(2, "0");
+  const seconds = String(now.getSeconds()).padStart(2, "0");
+
+  const testUsername = `${prefix}${month}${day}_${hours}${minutes}${seconds}`;
   console.log(
     "ℹ️ XXX: ~ api-test-helpers.ts ~ generateTestUsername ~ testUsername:",
     testUsername,

@@ -50,6 +50,20 @@ describe("/api/game/[gameId]/playerBoard/[userId]", () => {
     // Create mock player board
     mockPlayerBoard = {
       userId: mockUserId,
+      cells: [
+        {
+          id: "cell1",
+          position: { x: 0, y: 0 },
+          subject: "Test Subject 1",
+          isFree: false,
+        },
+        {
+          id: "cell2",
+          position: { x: 1, y: 0 },
+          subject: "Test Subject 2",
+          isFree: false,
+        },
+      ],
       cellStates: {
         cell1: {
           isOpen: true,

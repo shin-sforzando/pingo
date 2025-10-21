@@ -32,7 +32,7 @@ npm run check:i18n
 npm test
 
 # Vitestテスト（単回実行）- 単体テスト（jsdom）とブラウザテスト（webkit）を実行
-npm run test:once
+npm run test
 
 # Vitest（ウォッチモード、カバレッジなし）
 npm run test:watch
@@ -117,7 +117,7 @@ gsutil cors set gcs-pingo-cors-config.json gs://gcs-pingo
 2. **テスト実行**
 
    ```bash
-   npm run test:once
+   npm run test
    ```
 
 3. **ビルド確認**
@@ -135,5 +135,5 @@ gsutil cors set gcs-pingo-cors-config.json gs://gcs-pingo
 ## 注意事項
 
 - lefthookによるpre-commitフックが設定されているため、コミット時に自動でチェックが実行される
-- テストは必ず　`npm run test:once`　で実行（ウォッチモードは使用しない）
+- テストは必ず　`npm run test`　で実行（ウォッチモードは使用しない）
 - プライベートデータは必ずgit-secretで暗号化する

@@ -1,5 +1,6 @@
 "use client";
 
+import { BOARD_SIZE, CENTER_CELL_INDEX, TOTAL_CELLS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import type { Cell } from "@/types/schema";
 import { BingoCell, type BingoCellState } from "./BingoCell";
@@ -52,16 +53,16 @@ export function BingoBoard({
     );
   }
 
-  // Ensure we have exactly 25 cells
-  const boardCells = cells.slice(0, 25);
+  // Ensure we have exactly TOTAL_CELLS cells
+  const boardCells = cells.slice(0, TOTAL_CELLS);
 
-  // If we have fewer than 25 cells, fill the rest with empty cells
-  while (boardCells.length < 25) {
+  // If we have fewer than TOTAL_CELLS cells, fill the rest with empty cells
+  while (boardCells.length < TOTAL_CELLS) {
     boardCells.push({
       id: `empty-${boardCells.length}`,
       position: {
-        x: boardCells.length % 5,
-        y: Math.floor(boardCells.length / 5),
+        x: boardCells.length % BOARD_SIZE,
+        y: Math.floor(boardCells.length / BOARD_SIZE),
       },
       subject: "",
       isFree: false,
@@ -86,8 +87,8 @@ export function BingoBoard({
 
   // Get the state for a cell
   const getCellState = (cell: Cell, index: number): BingoCellState => {
-    // Center cell (index 12) is always FREE
-    if (index === 12 || cell.isFree) {
+    // Center cell is always FREE
+    if (index === CENTER_CELL_INDEX || cell.isFree) {
       return "FREE";
     }
 
@@ -96,6 +97,7 @@ export function BingoBoard({
   };
 
   return (
+    // Note: grid-cols-5 is hardcoded in Tailwind (dynamic classes not supported)
     <div className={cn("grid grid-cols-5 gap-1 md:gap-2", className)}>
       {sortedCells.map((cell, index) => (
         <BingoCell

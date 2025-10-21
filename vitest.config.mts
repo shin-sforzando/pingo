@@ -21,7 +21,8 @@ export default defineConfig({
           environment: "jsdom",
           include: ["src/**/*.{test,spec}.{js,ts,jsx,tsx}"],
           exclude: ["src/**/*.browser.{test,spec}.{js,ts,jsx,tsx}"],
-          setupFiles: ["./vitest.setup.ts"], // Add setup file
+          setupFiles: ["./vitest.setup.ts"],
+          globalSetup: ["./vitest.global-setup.ts"],
           testTimeout: 30000, // Increase timeout for Gemini API operations
         },
       },
@@ -36,7 +37,8 @@ export default defineConfig({
             provider: "playwright",
             instances: [{ browser: "webkit" }],
           },
-          setupFiles: ["./vitest.browser.setup.ts"], // Add browser setup file
+          setupFiles: ["./vitest.browser.setup.ts"],
+          globalSetup: ["./vitest.global-setup.ts"],
         },
       },
     ],

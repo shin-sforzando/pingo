@@ -1,5 +1,6 @@
 import { fakerJA as faker } from "@faker-js/faker";
 import type { Meta, StoryObj } from "@storybook/nextjs";
+import { BOARD_CENTER_COORD } from "@/lib/constants";
 import { BingoCell } from "./BingoCell";
 
 const meta = {
@@ -44,7 +45,7 @@ const longTextCell = {
 
 const freeCell = {
   id: "cell-3",
-  position: { x: 2, y: 2 },
+  position: { x: BOARD_CENTER_COORD, y: BOARD_CENTER_COORD },
   subject: "FREE",
   isFree: true,
 };

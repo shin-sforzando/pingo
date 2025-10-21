@@ -169,6 +169,7 @@ export const completedLineApiSchema = z.object({
  */
 export const playerBoardSchema = z.object({
   userId: z.ulid(),
+  cells: z.array(cellSchema).length(25), // Each player's board layout (positions may be shuffled) - must be exactly 25 cells
   cellStates: z.record(z.string(), cellStateSchema),
   completedLines: z.array(completedLineSchema),
 });
@@ -177,7 +178,7 @@ export const playerBoardSchema = z.object({
  * Game board schema
  */
 export const gameBoardSchema = z.object({
-  cells: z.array(cellSchema),
+  cells: z.array(cellSchema).length(25), // Must be exactly 25 cells (5x5 grid)
 });
 
 /**
@@ -192,6 +193,7 @@ export const gameSchema = baseSchema.extend({
   isPublic: z.boolean().default(false),
   isPhotoSharingEnabled: z.boolean().default(true),
   skipImageCheck: z.boolean().default(false),
+  isShuffleEnabled: z.boolean().default(false),
   requiredBingoLines: z.int().min(1).max(5).default(1),
   confidenceThreshold: z.number().min(0).max(1).default(0.5),
   maxSubmissionsPerUser: z.int().min(1).max(100).default(30),
@@ -225,6 +227,7 @@ export const gameCreationSchema = z.object({
   isPublic: z.boolean().default(false),
   isPhotoSharingEnabled: z.boolean().default(true),
   skipImageCheck: z.boolean().default(false),
+  isShuffleEnabled: z.boolean().default(false),
   requiredBingoLines: z.int().min(1).max(5).default(1),
   confidenceThreshold: z.number().min(0).max(1).default(0.5),
   maxSubmissionsPerUser: z.int().min(1).max(100).default(30),
@@ -372,7 +375,11 @@ export const imageSubmissionResultSchema = z.object({
  * Image analysis result schema
  */
 export const analysisResultSchema = z.object({
-  matchedCellId: z.string().nullable(),
+  matchedCellId: z
+    .string()
+    .nullable()
+    .optional()
+    .transform((val) => val ?? null),
   confidence: z.number().min(0).max(1),
   critique_ja: z.string(),
   critique_en: z.string(),

@@ -2,12 +2,19 @@ import { adminFirestore } from "@/lib/firebase/admin";
 import { TEST_PREFIX } from "./api-test-helpers";
 
 /**
- * Generate a test game title
+ * Generate a test game title with date and time format
+ * Format: vitest_GAME_MMDDHHMMSS_RR (e.g., vitest_GAME_1022143052_01)
  */
 export const generateTestGameTitle = (prefix = TEST_PREFIX) => {
-  const shortTimestamp = Date.now() % 1000000;
-  const randomNum = Math.floor(Math.random() * 100);
-  return `${prefix}GAME_${shortTimestamp}${randomNum}`;
+  const now = new Date();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  const hours = String(now.getHours()).padStart(2, "0");
+  const minutes = String(now.getMinutes()).padStart(2, "0");
+  const seconds = String(now.getSeconds()).padStart(2, "0");
+  const randomNum = String(Math.floor(Math.random() * 100)).padStart(2, "0");
+
+  return `${prefix}GAME_${month}${day}${hours}${minutes}${seconds}_${randomNum}`;
 };
 
 /**

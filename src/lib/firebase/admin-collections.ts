@@ -783,19 +783,14 @@ export namespace AdminTransactionService {
         }
 
         // Get current player board state to check for race conditions
-        let currentPlayerBoard: PlayerBoard;
-        if (currentPlayerBoardDoc.exists) {
-          currentPlayerBoard = playerBoardFromFirestore(
-            currentPlayerBoardDoc.data() as PlayerBoardDocument,
-          );
-        } else {
-          // Create new player board if it doesn't exist
-          currentPlayerBoard = {
-            userId,
-            cellStates: {},
-            completedLines: [],
-          };
+        // PlayerBoard should always exist (created when user joins game)
+        if (!currentPlayerBoardDoc.exists) {
+          throw new Error("Player board not found");
         }
+
+        const currentPlayerBoard = playerBoardFromFirestore(
+          currentPlayerBoardDoc.data() as PlayerBoardDocument,
+        );
 
         // Check if the cell is already open (race condition protection)
         if (
@@ -939,6 +934,7 @@ export namespace AdminTransactionService {
 
       await adminFirestore.runTransaction(async (transaction) => {
         // Define all document references
+        const gameRef = adminFirestore.collection("games").doc(gameId);
         const participantRef = adminFirestore
           .collection("games")
           .doc(gameId)
@@ -962,12 +958,18 @@ export namespace AdminTransactionService {
           .doc(eventId);
 
         // IMPORTANT: All reads must be executed before any writes in Firestore transactions
-        const [participantDoc, gameBoardDoc, playerBoardDoc] =
+        const [gameDoc, participantDoc, gameBoardDoc, playerBoardDoc] =
           await Promise.all([
+            transaction.get(gameRef),
             transaction.get(participantRef),
             transaction.get(gameBoardRef),
             transaction.get(playerBoardRef),
           ]);
+
+        // Verify game exists
+        if (!gameDoc.exists) {
+          throw new Error("Game not found");
+        }
 
         // Double-check participation (race condition protection)
         if (participantDoc.exists) {
@@ -984,11 +986,19 @@ export namespace AdminTransactionService {
           throw new Error("Player board already exists");
         }
 
+        const game = gameFromFirestore(gameDoc.data() as GameDocument);
         const gameBoard = gameBoardFromFirestore(
           gameBoardDoc.data() as GameBoardDocument,
         );
         const now = new Date();
         const timestamp = dateToTimestamp(now) as TimestampInterface;
+
+        // Shuffle board cells if enabled
+        // Why: Each player gets a unique board arrangement when shuffle is enabled
+        const { shuffleBoardCells } = await import("../board-utils");
+        const cellsForPlayer = game.isShuffleEnabled
+          ? shuffleBoardCells(gameBoard.cells)
+          : gameBoard.cells;
 
         // Prepare participation record
         const participation: GameParticipationDocument = {
@@ -1012,7 +1022,7 @@ export namespace AdminTransactionService {
         > = {};
 
         // Initialize all cell states as not opened
-        gameBoard.cells.forEach((cell) => {
+        cellsForPlayer.forEach((cell) => {
           cellStates[cell.id] = {
             isOpen: cell.isFree || false, // Free cells start as open
             openedAt: cell.isFree ? now : null,
@@ -1022,6 +1032,7 @@ export namespace AdminTransactionService {
 
         const playerBoard: PlayerBoard = {
           userId,
+          cells: cellsForPlayer, // Store shuffled cells for this player
           cellStates,
           completedLines: [],
         };
