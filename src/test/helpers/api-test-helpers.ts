@@ -8,7 +8,7 @@ export const API_BASE_URL =
 
 /**
  * Generate a unique test username with date and time format
- * Format: vitest_MMDDHHMMSS_RR (e.g., vitest_1022143052_01)
+ * Format: vitest_MMDD_HHMMSS (e.g., vitest_1022143052)
  * Ensures the username is within the 20 character limit (20 chars total)
  */
 export const generateTestUsername = (prefix = TEST_PREFIX) => {
@@ -18,9 +18,8 @@ export const generateTestUsername = (prefix = TEST_PREFIX) => {
   const hours = String(now.getHours()).padStart(2, "0");
   const minutes = String(now.getMinutes()).padStart(2, "0");
   const seconds = String(now.getSeconds()).padStart(2, "0");
-  const randomNum = String(Math.floor(Math.random() * 100)).padStart(2, "0");
 
-  const testUsername = `${prefix}${month}${day}${hours}${minutes}${seconds}_${randomNum}`;
+  const testUsername = `${prefix}${month}${day}_${hours}${minutes}${seconds}`;
   console.log(
     "ℹ️ XXX: ~ api-test-helpers.ts ~ generateTestUsername ~ testUsername:",
     testUsername,

@@ -93,18 +93,29 @@ export function isValidBoardStructure(cells: Cell[]): boolean {
     return false;
   }
 
+  // Create position map for O(1) lookups (instead of O(n) with getCellAtPosition)
+  // Why: Optimizes O(n²) → O(n) by building the map once and reusing it
+  const positionMap = new Map<string, Cell>();
+  for (const cell of cells) {
+    const key = `${cell.position.x},${cell.position.y}`;
+    // Check for duplicate positions
+    if (positionMap.has(key)) {
+      return false;
+    }
+    positionMap.set(key, cell);
+  }
+
   // Check that all positions 0-4 x 0-4 are present
   for (let x = 0; x < 5; x++) {
     for (let y = 0; y < 5; y++) {
-      const cell = getCellAtPosition(cells, x, y);
-      if (!cell) {
+      if (!positionMap.has(`${x},${y}`)) {
         return false;
       }
     }
   }
 
   // Check that center cell is FREE
-  const centerCell = getCellAtPosition(cells, 2, 2);
+  const centerCell = positionMap.get("2,2");
   if (!centerCell || !centerCell.isFree) {
     return false;
   }

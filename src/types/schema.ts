@@ -169,7 +169,7 @@ export const completedLineApiSchema = z.object({
  */
 export const playerBoardSchema = z.object({
   userId: z.ulid(),
-  cells: z.array(cellSchema), // Each player's board layout (positions may be shuffled)
+  cells: z.array(cellSchema).length(25), // Each player's board layout (positions may be shuffled) - must be exactly 25 cells
   cellStates: z.record(z.string(), cellStateSchema),
   completedLines: z.array(completedLineSchema),
 });
@@ -178,7 +178,7 @@ export const playerBoardSchema = z.object({
  * Game board schema
  */
 export const gameBoardSchema = z.object({
-  cells: z.array(cellSchema),
+  cells: z.array(cellSchema).length(25), // Must be exactly 25 cells (5x5 grid)
 });
 
 /**
