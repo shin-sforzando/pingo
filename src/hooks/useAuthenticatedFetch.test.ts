@@ -3,6 +3,20 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as firebaseClient from "@/lib/firebase/client";
 import { useAuthenticatedFetch } from "./useAuthenticatedFetch";
 
+// Mock AuthContext (not used by this hook but imported by dependencies)
+vi.mock("@/contexts/AuthContext", () => ({
+  useAuth: () => ({
+    user: null,
+    loading: false,
+    error: null,
+    login: vi.fn(),
+    register: vi.fn(),
+    logout: vi.fn(),
+    updateUser: vi.fn(),
+    refreshUser: vi.fn(),
+  }),
+}));
+
 // Mock Firebase client auth
 vi.mock("@/lib/firebase/client", () => ({
   auth: {

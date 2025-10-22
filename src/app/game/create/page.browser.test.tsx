@@ -13,6 +13,29 @@ const originalFetch = globalThis.fetch;
 const mockFetch = vi.fn();
 window.fetch = mockFetch;
 
+// Mock AuthContext
+vi.mock("@/contexts/AuthContext", () => ({
+  useAuth: () => ({
+    user: {
+      id: "test-user-id",
+      username: "testuser",
+      participatingGames: [],
+      gameHistory: [],
+      createdAt: new Date(),
+      lastLoginAt: new Date(),
+      updatedAt: null,
+      isTestUser: true,
+    },
+    loading: false,
+    error: null,
+    login: vi.fn(),
+    register: vi.fn(),
+    logout: vi.fn(),
+    updateUser: vi.fn(),
+    refreshUser: vi.fn(),
+  }),
+}));
+
 // Mock Firebase auth
 vi.mock("@/lib/firebase/client", () => ({
   auth: {
