@@ -2,6 +2,14 @@ import { renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useGameJoin } from "./useGameJoin";
 
+// Mock AuthContext
+const mockRefreshUser = vi.fn();
+vi.mock("@/contexts/AuthContext", () => ({
+  useAuth: () => ({
+    refreshUser: mockRefreshUser,
+  }),
+}));
+
 // Mock useAuthenticatedFetch hook
 const mockAuthenticatedFetch = vi.fn();
 vi.mock("./useAuthenticatedFetch", () => ({
@@ -41,6 +49,7 @@ describe("useGameJoin", () => {
         ok: true,
         json: async () => mockResponse,
       });
+      mockRefreshUser.mockResolvedValue(undefined);
 
       const { result } = renderHook(() => useGameJoin());
 
@@ -58,6 +67,7 @@ describe("useGameJoin", () => {
           },
         },
       );
+      expect(mockRefreshUser).toHaveBeenCalledTimes(1);
     });
 
     it("should handle already participating response", async () => {
@@ -73,6 +83,7 @@ describe("useGameJoin", () => {
         ok: true,
         json: async () => mockResponse,
       });
+      mockRefreshUser.mockResolvedValue(undefined);
 
       const { result } = renderHook(() => useGameJoin());
 
@@ -80,6 +91,40 @@ describe("useGameJoin", () => {
 
       expect(joinResult).toEqual(mockResponse);
       expect(result.current.error).toBeNull();
+      expect(mockRefreshUser).toHaveBeenCalledTimes(1);
+    });
+
+    it("should succeed even if refreshUser fails", async () => {
+      const consoleSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
+      const mockResponse = {
+        success: true,
+        data: {
+          participationId: "participation-123",
+        },
+      };
+
+      mockAuthenticatedFetch.mockResolvedValue({
+        ok: true,
+        json: async () => mockResponse,
+      });
+      mockRefreshUser.mockRejectedValue(new Error("Refresh failed"));
+
+      const { result } = renderHook(() => useGameJoin());
+
+      const joinResult = await result.current.joinGame(mockGameId);
+
+      // Join should still succeed even if refresh fails
+      expect(joinResult).toEqual(mockResponse);
+      expect(result.current.error).toBeNull();
+      expect(mockRefreshUser).toHaveBeenCalledTimes(1);
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "Failed to refresh user after game join:",
+        new Error("Refresh failed"),
+      );
+
+      consoleSpy.mockRestore();
     });
   });
 
@@ -279,6 +324,8 @@ describe("useGameJoin", () => {
       await waitFor(() => {
         expect(result.current.error).toBe("First error");
       });
+      // refreshUser should not be called on failure
+      expect(mockRefreshUser).not.toHaveBeenCalled();
 
       // Second call succeeds
       mockAuthenticatedFetch.mockResolvedValueOnce({
@@ -290,6 +337,7 @@ describe("useGameJoin", () => {
           },
         }),
       });
+      mockRefreshUser.mockResolvedValue(undefined);
 
       await result.current.joinGame(mockGameId);
 
@@ -297,6 +345,8 @@ describe("useGameJoin", () => {
         // Error should be cleared
         expect(result.current.error).toBeNull();
       });
+      // refreshUser should be called on success
+      expect(mockRefreshUser).toHaveBeenCalledTimes(1);
     });
   });
 

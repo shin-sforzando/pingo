@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import { useAuthenticatedFetch } from "./useAuthenticatedFetch";
 
 interface GameJoinResult {
@@ -51,6 +52,7 @@ interface UseGameJoinReturn {
  * };
  */
 export function useGameJoin(): UseGameJoinReturn {
+  const { refreshUser } = useAuth();
   const { authenticatedFetch } = useAuthenticatedFetch();
   const [isJoining, setIsJoining] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -116,6 +118,16 @@ export function useGameJoin(): UseGameJoinReturn {
         }
 
         // Successfully joined the game
+        // Refresh user data to update participatingGames array
+        // Why: The join operation updates user's participatingGames in Firestore,
+        // but AuthContext cache is not automatically invalidated
+        try {
+          await refreshUser();
+        } catch (refreshErr) {
+          // Log but don't fail the join operation if refresh fails
+          console.error("Failed to refresh user after game join:", refreshErr);
+        }
+
         return {
           success: true,
           data: responseData.data,
@@ -138,7 +150,7 @@ export function useGameJoin(): UseGameJoinReturn {
         setIsJoining(false);
       }
     },
-    [authenticatedFetch],
+    [authenticatedFetch, refreshUser],
   );
 
   return {

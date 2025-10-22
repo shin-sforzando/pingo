@@ -26,6 +26,7 @@ export interface AuthContextType {
   ) => Promise<void>;
   logout: () => Promise<void>;
   updateUser: (userData: Partial<User>) => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
 
 // Create the auth context with a default value
@@ -265,6 +266,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [user],
   );
 
+  // Refresh user function
+  // Why: Invalidate cache and fetch latest user data from Firestore
+  // Use cases: After game creation, game join, or other operations that modify participatingGames
+  const refreshUser = useCallback(async () => {
+    if (!user) {
+      return;
+    }
+
+    setError(null);
+    try {
+      const token = await auth.currentUser?.getIdToken();
+      if (!token) {
+        throw new Error("Not authenticated");
+      }
+
+      const response = await fetch("/api/auth/me", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch user data");
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        setUser(data.data.user);
+      } else {
+        throw new Error(data.error.message);
+      }
+    } catch (err) {
+      console.error("Refresh user error:", err);
+      setError(err instanceof Error ? err : new Error(String(err)));
+      throw err;
+    }
+  }, [user]);
+
   // Memoize the context value
   const value = useMemo(
     () => ({
@@ -275,8 +314,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       register,
       logout,
       updateUser,
+      refreshUser,
     }),
-    [user, loading, error, login, register, logout, updateUser],
+    [user, loading, error, login, register, logout, updateUser, refreshUser],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

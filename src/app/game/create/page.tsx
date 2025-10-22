@@ -30,6 +30,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { TranslatedFormMessage } from "@/components/ui/translated-form-message";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   BOARD_CENTER_COORD,
   BOARD_SIZE,
@@ -48,6 +49,7 @@ type GameCreateFormValues = GameCreationData;
  * Game creation page component
  */
 export default function CreateGamePage() {
+  const { refreshUser } = useAuth();
   const t = useTranslations();
   const idPrefix = useId();
 
@@ -371,6 +373,19 @@ export default function CreateGamePage() {
       if (!responseData.success) {
         throw new Error(
           responseData.error?.message || t("Game.errors.creationFailed"),
+        );
+      }
+
+      // Refresh user data to update participatingGames array
+      // Why: Game creation automatically adds the creator as a participant,
+      // but AuthContext cache is not automatically invalidated
+      try {
+        await refreshUser();
+      } catch (refreshErr) {
+        // Log but don't fail the creation operation if refresh fails
+        console.error(
+          "Failed to refresh user after game creation:",
+          refreshErr,
         );
       }
 
