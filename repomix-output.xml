@@ -1242,18 +1242,6 @@ export function findMatchedCellSubject(
 ): string | null
 </file>
 
-<file path="src/app/game/create/page.browser.test.tsx">
-import { page, userEvent } from "@vitest/browser/context";
-import { NextIntlClientProvider } from "next-intl";
-import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
-import { render } from "vitest-browser-react";
-import { mockAuthGuard } from "@/test/helpers/auth-test-helpers";
-import enMessages from "../../../../messages/en.json";
-import jaMessages from "../../../../messages/ja.json";
-⋮----
-import CreateGamePage from "./page";
-</file>
-
 <file path="src/app/game/join/page.browser.test.tsx">
 import { faker } from "@faker-js/faker";
 import { page, userEvent } from "@vitest/browser/context";
@@ -1865,13 +1853,6 @@ export function TranslatedFormMessage({
 className=
 </file>
 
-<file path="src/hooks/useAuthenticatedFetch.test.ts">
-import { renderHook } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-⋮----
-import { useAuthenticatedFetch } from "./useAuthenticatedFetch";
-</file>
-
 <file path="src/hooks/useAuthenticatedFetch.ts">
 import { useCallback } from "react";
 import { auth } from "@/lib/firebase/client";
@@ -1889,13 +1870,6 @@ interface UseAuthenticatedFetchReturn {
 }
 ⋮----
 export function useAuthenticatedFetch(): UseAuthenticatedFetchReturn
-</file>
-
-<file path="src/hooks/useGameParticipation.test.ts">
-import { renderHook, waitFor } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { User } from "@/types/schema";
-import { useGameParticipation } from "./useGameParticipation";
 </file>
 
 <file path="src/hooks/useGameParticipation.ts">
@@ -1929,17 +1903,6 @@ export function useGameParticipation(
   gameId: string,
   user: User | null,
 ): UseGameParticipationReturn
-</file>
-
-<file path="src/hooks/useParticipatingGames.test.ts">
-import { renderHook, waitFor } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { User } from "@/types/schema";
-import { useParticipatingGames } from "./useParticipatingGames";
-⋮----
-// No notes field when fetchDetails is false
-⋮----
-// Should only call game API, not participants API
 </file>
 
 <file path="src/i18n/request.ts">
@@ -2037,25 +2000,6 @@ export async function getUserLocale()
 export async function setUserLocale(locale: Locale)
 ⋮----
 export async function clearUserLocale()
-</file>
-
-<file path="src/test/helpers/auth-test-helpers.ts">
-import { ulid } from "ulid";
-import { vi } from "vitest";
-import type { AuthContextType } from "@/contexts/AuthContext";
-import type { User } from "@/types/schema";
-⋮----
-export function createMockUser(overrides: Partial<User> =
-⋮----
-export function mockAuthGuard()
-⋮----
-export function mockAuthenticatedUser(
-  userOverrides: Partial<User> = {},
-): AuthContextType
-⋮----
-export function mockUnauthenticatedUser(): AuthContextType
-⋮----
-export function mockLoadingAuthState(): AuthContextType
 </file>
 
 <file path="src/test/helpers/firebase-test-helpers.ts">
@@ -2505,6 +2449,18 @@ interface ErrorDisplayProps {
 export function ErrorDisplay(
 </file>
 
+<file path="src/app/game/create/page.browser.test.tsx">
+import { page, userEvent } from "@vitest/browser/context";
+import { NextIntlClientProvider } from "next-intl";
+import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { render } from "vitest-browser-react";
+import { mockAuthGuard } from "@/test/helpers/auth-test-helpers";
+import enMessages from "../../../../messages/en.json";
+import jaMessages from "../../../../messages/ja.json";
+⋮----
+import CreateGamePage from "./page";
+</file>
+
 <file path="src/app/game/create/page.stories.tsx">
 import { fakerJA as faker } from "@faker-js/faker";
 import type { Meta, StoryObj } from "@storybook/nextjs";
@@ -2803,6 +2759,13 @@ export function useAuth()
 export function AuthProvider(
 </file>
 
+<file path="src/hooks/useAuthenticatedFetch.test.ts">
+import { renderHook } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+⋮----
+import { useAuthenticatedFetch } from "./useAuthenticatedFetch";
+</file>
+
 <file path="src/hooks/useGameJoin.test.ts">
 import { renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -2848,6 +2811,24 @@ interface UseGameJoinReturn {
 }
 ⋮----
 export function useGameJoin(): UseGameJoinReturn
+</file>
+
+<file path="src/hooks/useGameParticipation.test.ts">
+import { renderHook, waitFor } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { User } from "@/types/schema";
+import { useGameParticipation } from "./useGameParticipation";
+</file>
+
+<file path="src/hooks/useParticipatingGames.test.ts">
+import { renderHook, waitFor } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { User } from "@/types/schema";
+import { useParticipatingGames } from "./useParticipatingGames";
+⋮----
+// No notes field when fetchDetails is false
+⋮----
+// Should only call game API, not participants API
 </file>
 
 <file path="src/hooks/useParticipatingGames.ts">
@@ -2897,6 +2878,25 @@ import {
 } from "./board-utils";
 ⋮----
 function createTestBoard(): Cell[]
+</file>
+
+<file path="src/test/helpers/auth-test-helpers.ts">
+import { ulid } from "ulid";
+import { vi } from "vitest";
+import type { AuthContextType } from "@/contexts/AuthContext";
+import type { User } from "@/types/schema";
+⋮----
+export function createMockUser(overrides: Partial<User> =
+⋮----
+export function mockAuthGuard()
+⋮----
+export function mockAuthenticatedUser(
+  userOverrides: Partial<User> = {},
+): AuthContextType
+⋮----
+export function mockUnauthenticatedUser(): AuthContextType
+⋮----
+export function mockLoadingAuthState(): AuthContextType
 </file>
 
 <file path="Dockerfile">

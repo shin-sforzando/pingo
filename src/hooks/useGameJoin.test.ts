@@ -104,12 +104,13 @@ describe("useGameJoin", () => {
           participationId: "participation-123",
         },
       };
+      const refreshError = new Error("Refresh failed");
 
       mockAuthenticatedFetch.mockResolvedValue({
         ok: true,
         json: async () => mockResponse,
       });
-      mockRefreshUser.mockRejectedValue(new Error("Refresh failed"));
+      mockRefreshUser.mockRejectedValue(refreshError);
 
       const { result } = renderHook(() => useGameJoin());
 
@@ -121,7 +122,7 @@ describe("useGameJoin", () => {
       expect(mockRefreshUser).toHaveBeenCalledTimes(1);
       expect(consoleSpy).toHaveBeenCalledWith(
         "Failed to refresh user after game join:",
-        new Error("Refresh failed"),
+        refreshError,
       );
 
       consoleSpy.mockRestore();
