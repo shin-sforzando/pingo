@@ -143,9 +143,7 @@ if (!skipSubjectsCheck) {
 
 ### High Priority
 
-1. ~~APIキーのセキュリティレビュー~~ (後回し)
-2. ~~デバッグログの削除~~ (開発中は有用)
-3. 本番デプロイ前の最終チェック
+1. 本番デプロイ前の最終チェック
 
 ### Medium Priority
 

@@ -3,6 +3,20 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { User } from "@/types/schema";
 import { useParticipatingGames } from "./useParticipatingGames";
 
+// Mock AuthContext (not used by this hook but imported by dependencies)
+vi.mock("@/contexts/AuthContext", () => ({
+  useAuth: () => ({
+    user: null,
+    loading: false,
+    error: null,
+    login: vi.fn(),
+    register: vi.fn(),
+    logout: vi.fn(),
+    updateUser: vi.fn(),
+    refreshUser: vi.fn(),
+  }),
+}));
+
 // Mock Firebase auth
 const mockGetIdToken = vi.fn();
 vi.mock("@/lib/firebase/client", () => ({

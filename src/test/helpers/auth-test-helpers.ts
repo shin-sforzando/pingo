@@ -55,6 +55,7 @@ export function mockAuthenticatedUser(
     register: vi.fn(),
     logout: vi.fn(),
     updateUser: vi.fn(),
+    refreshUser: vi.fn(),
   };
 }
 
@@ -71,6 +72,7 @@ export function mockUnauthenticatedUser(): AuthContextType {
     register: vi.fn(),
     logout: vi.fn(),
     updateUser: vi.fn(),
+    refreshUser: vi.fn(),
   };
 }
 
@@ -87,5 +89,6 @@ export function mockLoadingAuthState(): AuthContextType {
     register: vi.fn(),
     logout: vi.fn(),
     updateUser: vi.fn(),
+    refreshUser: vi.fn(),
   };
 }

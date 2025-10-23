@@ -12,6 +12,341 @@
 8. **DRY原則を遵守** - 重複コードを避け、再利用可能なコンポーネント/型を作成
 9. **マジックナンバーを使用しない** - 定数として集約し、単一の真実の源を維持
 
+## React Context のキャッシュ無効化パターン
+
+### 原則: 外部データ変更後は明示的なキャッシュ無効化が必要
+
+ReactのContext APIで管理される状態は、外部システム（Firestore等）での更新を自動検知しない。
+外部データ更新後は、明示的に`refresh`関数を呼び出してキャッシュを無効化する必要がある。
+
+### 実例: AuthContextのrefreshUserパターン
+
+**問題**: ゲーム参加・作成後、Firestoreの`users/{userId}.participatingGames`は更新されるが、
+AuthContextのユーザー状態が古いままでページリロードまで反映されない。
+
+**解決策**: `refreshUser()`メソッドを実装し、外部データ更新後に明示的に呼び出す
+
+#### 1. Contextに refresh メソッドを追加
+
+```typescript
+// src/contexts/AuthContext.tsx
+
+export interface AuthContextType {
+  user: User | null;
+  loading: boolean;
+  error: Error | null;
+  login: (username: string, password: string) => Promise<void>;
+  register: (username: string, password: string, isTestUser?: boolean) => Promise<void>;
+  logout: () => Promise<void>;
+  updateUser: (userData: Partial<User>) => Promise<void>;
+  refreshUser: () => Promise<void>; // キャッシュ無効化メソッド
+}
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  // Refresh user function
+  // Why: Invalidate cache and fetch latest user data from Firestore
+  // Use cases: After game creation, game join, or other operations that modify participatingGames
+  const refreshUser = useCallback(async () => {
+    if (!user) {
+      return;
+    }
+
+    setError(null);
+    try {
+      const token = await auth.currentUser?.getIdToken();
+      if (!token) {
+        throw new Error("Not authenticated");
+      }
+
+      const response = await fetch("/api/auth/me", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch user data");
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        setUser(data.data.user);
+      } else {
+        throw new Error(data.error.message);
+      }
+    } catch (err) {
+      console.error("Refresh user error:", err);
+      setError(err instanceof Error ? err : new Error(String(err)));
+      throw err;
+    }
+  }, [user]);
+
+  const value = useMemo(
+    () => ({
+      user,
+      loading,
+      error,
+      login,
+      register,
+      logout,
+      updateUser,
+      refreshUser,
+    }),
+    [user, loading, error, login, register, logout, updateUser, refreshUser],
+  );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+```
+
+#### 2. 外部データ更新後にrefreshUserを呼び出し
+
+```typescript
+// src/hooks/useGameJoin.ts
+
+export function useGameJoin(): UseGameJoinReturn {
+  const { refreshUser } = useAuth();
+  const { authenticatedFetch } = useAuthenticatedFetch();
+
+  const joinGame = useCallback(
+    async (gameId: string): Promise<GameJoinResult> => {
+      setIsJoining(true);
+      setError(null);
+
+      try {
+        const response = await authenticatedFetch(`/api/game/${gameId}/join`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        const responseData: GameJoinResult = await response.json();
+
+        if (!response.ok || !responseData.success) {
+          // エラー処理...
+          return { success: false, error: responseData.error };
+        }
+
+        // Successfully joined the game
+        // Refresh user data to update participatingGames array
+        // Why: The join operation updates user's participatingGames in Firestore,
+        // but AuthContext cache is not automatically invalidated
+        try {
+          await refreshUser();
+        } catch (refreshErr) {
+          // Log but don't fail the join operation if refresh fails
+          console.error("Failed to refresh user after game join:", refreshErr);
+        }
+
+        return {
+          success: true,
+          data: responseData.data,
+        };
+      } catch (err) {
+        // エラーハンドリング...
+      } finally {
+        setIsJoining(false);
+      }
+    },
+    [authenticatedFetch, refreshUser],
+  );
+
+  return { joinGame, isJoining, error, clearError };
+}
+```
+
+```typescript
+// src/app/game/create/page.tsx
+
+export default function CreateGamePage() {
+  const { refreshUser } = useAuth();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      // ゲーム作成API呼び出し...
+      const responseData = await response.json();
+
+      if (!responseData.success) {
+        throw new Error(responseData.error?.message || t("Game.errors.creationFailed"));
+      }
+
+      // Refresh user data to update participatingGames array
+      // Why: Game creation automatically adds the creator as a participant,
+      // but AuthContext cache is not automatically invalidated
+      try {
+        await refreshUser();
+      } catch (refreshErr) {
+        // Log but don't fail the creation operation if refresh fails
+        console.error("Failed to refresh user after game creation:", refreshErr);
+      }
+
+      // Redirect to game share page
+      window.location.href = `/game/${responseData.data.gameId}/share`;
+    } catch (err) {
+      // エラーハンドリング...
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      {/* フォームコンテンツ */}
+    </form>
+  );
+}
+```
+
+#### 3. テストでrefreshUserをモックし検証
+
+```typescript
+// src/hooks/useGameJoin.test.ts
+
+// Mock AuthContext
+const mockRefreshUser = vi.fn();
+vi.mock("@/contexts/AuthContext", () => ({
+  useAuth: () => ({
+    refreshUser: mockRefreshUser,
+  }),
+}));
+
+describe("useGameJoin", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  describe("successful game join", () => {
+    it("should join game successfully and call refreshUser", async () => {
+      const mockResponse = {
+        success: true,
+        data: {
+          participationId: "participation-123",
+        },
+      };
+
+      mockAuthenticatedFetch.mockResolvedValue({
+        ok: true,
+        json: async () => mockResponse,
+      });
+      mockRefreshUser.mockResolvedValue(undefined);
+
+      const { result } = renderHook(() => useGameJoin());
+
+      const joinResult = await result.current.joinGame("GAME01");
+
+      expect(joinResult).toEqual(mockResponse);
+      expect(mockRefreshUser).toHaveBeenCalledTimes(1);
+      expect(result.current.error).toBeNull();
+    });
+
+    it("should succeed even if refreshUser fails", async () => {
+      const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+      const mockResponse = {
+        success: true,
+        data: {
+          participationId: "participation-123",
+        },
+      };
+
+      mockAuthenticatedFetch.mockResolvedValue({
+        ok: true,
+        json: async () => mockResponse,
+      });
+      mockRefreshUser.mockRejectedValue(new Error("Refresh failed"));
+
+      const { result } = renderHook(() => useGameJoin());
+
+      const joinResult = await result.current.joinGame("GAME01");
+
+      // Join should still succeed even if refresh fails
+      expect(joinResult).toEqual(mockResponse);
+      expect(result.current.error).toBeNull();
+      expect(mockRefreshUser).toHaveBeenCalledTimes(1);
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "Failed to refresh user after game join:",
+        new Error("Refresh failed"),
+      );
+
+      consoleSpy.mockRestore();
+    });
+  });
+
+  describe("error handling", () => {
+    it("should not call refreshUser on failure", async () => {
+      mockAuthenticatedFetch.mockResolvedValue({
+        ok: false,
+        json: async () => ({
+          success: false,
+          error: {
+            code: "GAME_NOT_FOUND",
+            message: "Game not found",
+          },
+        }),
+      });
+
+      const { result } = renderHook(() => useGameJoin());
+
+      await result.current.joinGame("GAME01");
+
+      // refreshUser should not be called on failure
+      expect(mockRefreshUser).not.toHaveBeenCalled();
+    });
+  });
+});
+```
+
+```typescript
+// 他のテストファイルでも AuthContext をモック
+
+// src/hooks/useParticipatingGames.test.ts
+// src/hooks/useGameParticipation.test.ts
+// src/hooks/useAuthenticatedFetch.test.ts
+// src/app/game/create/page.browser.test.tsx
+
+vi.mock("@/contexts/AuthContext", () => ({
+  useAuth: () => ({
+    user: null,
+    loading: false,
+    error: null,
+    login: vi.fn(),
+    register: vi.fn(),
+    logout: vi.fn(),
+    updateUser: vi.fn(),
+    refreshUser: vi.fn(), // 新しいメソッドを必ずモックに含める
+  }),
+}));
+```
+
+### キャッシュ無効化パターンの適用箇所
+
+| ユースケース | 更新される外部データ | 呼び出すrefreshメソッド | 実装箇所 |
+|------------|-------------------|---------------------|---------|
+| ゲーム参加 | `users/{userId}.participatingGames` | `refreshUser()` | `useGameJoin.ts` |
+| ゲーム作成 | `users/{userId}.participatingGames` | `refreshUser()` | `game/create/page.tsx` |
+| プロフィール更新 | `users/{userId}` | `refreshUser()` | `updateUser()`内で自動実行 |
+| ゲーム削除 | `users/{userId}.gameHistory` | `refreshUser()` | 未実装（将来） |
+
+### 設計上の重要ポイント
+
+1. **エラー処理の粒度**: `refreshUser()`失敗時も主要操作（ゲーム参加・作成）は成功とする
+   - Why: UXの観点から「主要な操作」と「付随する操作（キャッシュ更新）」を分離
+
+2. **テストの包括性**: Contextにメソッドを追加した場合、全モックファイルの更新が必須
+   - Why: モックが不完全だとテストが失敗する
+   - 対象ファイル: `*.test.ts`, `*.browser.test.tsx` 全て
+
+3. **依存配列への追加**: `refreshUser`を`useCallback`でラップし、依存配列に含める
+   - Why: 関数が安定した参照を持つことで、呼び出し側のuseEffectが適切に動作する
+
 ## LLM出力処理のベストプラクティス
 
 ### 原則: LLMの出力は不完全であることを前提とする
@@ -96,7 +431,6 @@ const analysis = {
 **改善点**:
 
 - ✅ LLMの不整合な出力に対応
-- ✅ デバッグログでフォールバック発生を追跡可能
 - ✅ 共有ユーティリティとして複数箇所で再利用
 - ✅ ユーザー体験を損なわない（正しいセルを開ける）
 
@@ -169,12 +503,7 @@ export const analysisResultSchema = z.object({
    - Gemini APIにresponseSchemaを渡す
    - Zodスキーマで`.nullable().optional()`を使用（undefinedも許容）
    - フォールバック処理も実装（スキーマ違反時の対処）
-
-2. **デバッグログの追加**
-   - LLMの実際の出力を記録
-   - フォールバック発生時にログ出力
-
-3. **テストでフォールバックをカバー**
+2. **テストでフォールバックをカバー**
    - LLMが件名を返すケース
    - LLMが存在しない値を返すケース
    - LLMがフィールドを省略するケース
@@ -1150,6 +1479,35 @@ const mockPlayerBoard = {
 - 機能追加（シャッフル機能）でデータ構造が変更された場合、テストモックも更新が必要
 - `PlayerBoard`型に`cells`配列が追加されたため、テストでも同様に提供する
 - 不完全なモックデータはテスト失敗の原因になる
+
+#### テストでContextモックを忘れずに追加
+
+Contextにメソッドを追加した場合、**全てのテストファイル**でモックを更新する
+
+```typescript
+// Context に新しいメソッドを追加した場合
+export interface AuthContextType {
+  user: User | null;
+  // ... 既存のメソッド
+  refreshUser: () => Promise<void>; // NEW
+}
+
+// 全てのテストファイルでモックを更新
+vi.mock("@/contexts/AuthContext", () => ({
+  useAuth: () => ({
+    user: null,
+    loading: false,
+    error: null,
+    login: vi.fn(),
+    register: vi.fn(),
+    logout: vi.fn(),
+    updateUser: vi.fn(),
+    refreshUser: vi.fn(), // モックに追加を忘れずに
+  }),
+}));
+```
+
+**Why**: モックが不完全だと「Cannot read properties of undefined」エラーが発生する
 
 ## Gitとブランチ規約
 
