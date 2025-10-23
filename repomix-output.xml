@@ -396,6 +396,30 @@ function parseArguments(args: string[]):
 async function main(): Promise<void>
 </file>
 
+<file path="src/app/api/auth/logout/route.ts">
+import { type NextRequest, NextResponse } from "next/server";
+⋮----
+import { AdminUserService } from "@/lib/firebase/admin-collections";
+import type { ApiResponse } from "@/types/common";
+⋮----
+export async function POST(
+  request: NextRequest,
+): Promise<NextResponse<ApiResponse<
+</file>
+
+<file path="src/app/api/auth/me/route.ts">
+import { type NextRequest, NextResponse } from "next/server";
+⋮----
+import { adminAuth } from "@/lib/firebase/admin";
+import { AdminUserService } from "@/lib/firebase/admin-collections";
+import type { ApiResponse } from "@/types/common";
+import type { User } from "@/types/schema";
+⋮----
+export async function GET(
+  request: NextRequest,
+): Promise<NextResponse<ApiResponse<
+</file>
+
 <file path="src/app/api/health/route.test.ts">
 import { NextResponse } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -1148,26 +1172,16 @@ import { withMockAuthContext } from "./decorators";
 import nextIntl from "./next-intl";
 </file>
 
-<file path="src/app/api/auth/logout/route.ts">
+<file path="src/app/api/auth/update/route.ts">
+import bcrypt from "bcrypt";
 import { type NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 ⋮----
 import { AdminUserService } from "@/lib/firebase/admin-collections";
 import type { ApiResponse } from "@/types/common";
+import { type User, userCreationSchema, userSchema } from "@/types/schema";
 ⋮----
-export async function POST(
-  request: NextRequest,
-): Promise<NextResponse<ApiResponse<
-</file>
-
-<file path="src/app/api/auth/me/route.ts">
-import { type NextRequest, NextResponse } from "next/server";
-⋮----
-import { adminAuth } from "@/lib/firebase/admin";
-import { AdminUserService } from "@/lib/firebase/admin-collections";
-import type { ApiResponse } from "@/types/common";
-import type { User } from "@/types/schema";
-⋮----
-export async function GET(
+export async function PUT(
   request: NextRequest,
 ): Promise<NextResponse<ApiResponse<
 </file>
@@ -2207,6 +2221,48 @@ async function deleteGameSubcollections(
 export async function teardown()
 </file>
 
+<file path="src/app/api/auth/login/route.test.ts">
+import bcrypt from "bcrypt";
+import type { NextResponse } from "next/server";
+import { ulid } from "ulid";
+import {
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
+import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
+import {
+  cleanupTestUsers,
+  createApiRequest,
+  generateTestUsername,
+} from "@/test/helpers/api-test-helpers";
+import { userToFirestoreForTest } from "@/test/helpers/firebase-test-helpers";
+import type { ApiResponse } from "@/types/common";
+⋮----
+import type { User } from "@/types/schema";
+⋮----
+import { POST } from "./route";
+</file>
+
+<file path="src/app/api/auth/login/route.ts">
+import bcrypt from "bcrypt";
+import { type NextRequest, NextResponse } from "next/server";
+⋮----
+import { adminAuth } from "@/lib/firebase/admin";
+import { AdminUserService } from "@/lib/firebase/admin-collections";
+import type { ApiResponse } from "@/types/common";
+import type { User } from "@/types/schema";
+import { userLoginSchema } from "@/types/schema";
+⋮----
+export async function POST(
+  request: NextRequest,
+): Promise<NextResponse<ApiResponse<
+</file>
+
 <file path="src/app/api/auth/logout/route.test.ts">
 import bcrypt from "bcrypt";
 import type { NextResponse } from "next/server";
@@ -2234,18 +2290,98 @@ import type { User } from "@/types/schema";
 import { POST } from "./route";
 </file>
 
-<file path="src/app/api/auth/update/route.ts">
+<file path="src/app/api/auth/me/route.test.ts">
+import bcrypt from "bcrypt";
+import type { NextResponse } from "next/server";
+import { ulid } from "ulid";
+import {
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
+import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
+import {
+  cleanupTestUsers,
+  createApiRequest,
+  generateTestUsername,
+} from "@/test/helpers/api-test-helpers";
+import { userToFirestoreForTest } from "@/test/helpers/firebase-test-helpers";
+import type { ApiResponse } from "@/types/common";
+⋮----
+import type { User } from "@/types/schema";
+⋮----
+import { GET } from "./route";
+</file>
+
+<file path="src/app/api/auth/register/route.test.ts">
+import type { NextResponse } from "next/server";
+import {
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
+import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
+import {
+  cleanupTestUsers,
+  createApiRequest,
+  generateTestUsername,
+} from "@/test/helpers/api-test-helpers";
+import { userToFirestoreForTest } from "@/test/helpers/firebase-test-helpers";
+import type { ApiResponse } from "@/types/common";
+import type { User } from "@/types/schema";
+⋮----
+import { POST } from "./route";
+</file>
+
+<file path="src/app/api/auth/register/route.ts">
 import bcrypt from "bcrypt";
 import { type NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
+import { ulid } from "ulid";
 ⋮----
+import { adminAuth } from "@/lib/firebase/admin";
 import { AdminUserService } from "@/lib/firebase/admin-collections";
 import type { ApiResponse } from "@/types/common";
-import { type User, userCreationSchema, userSchema } from "@/types/schema";
+import type { User } from "@/types/schema";
+import { userCreationSchema } from "@/types/schema";
 ⋮----
-export async function PUT(
+export async function POST(
   request: NextRequest,
 ): Promise<NextResponse<ApiResponse<
+</file>
+
+<file path="src/app/api/auth/update/route.test.ts">
+import bcrypt from "bcrypt";
+import type { NextResponse } from "next/server";
+import { ulid } from "ulid";
+import {
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
+import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
+import {
+  cleanupTestUsers,
+  createApiRequest,
+  generateTestUsername,
+} from "@/test/helpers/api-test-helpers";
+import { userToFirestoreForTest } from "@/test/helpers/firebase-test-helpers";
+import type { ApiResponse } from "@/types/common";
+⋮----
+import type { User } from "@/types/schema";
+⋮----
+import { PUT } from "./route";
 </file>
 
 <file path="src/app/api/game/[gameId]/events/route.test.ts">
@@ -2766,12 +2902,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useAuthenticatedFetch } from "./useAuthenticatedFetch";
 </file>
 
-<file path="src/hooks/useGameJoin.test.ts">
-import { renderHook, waitFor } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { useGameJoin } from "./useGameJoin";
-</file>
-
 <file path="src/hooks/useGameJoin.ts">
 import { useCallback, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -2996,142 +3126,6 @@ EXPOSE 8080
 # Command to run the application
 # Uses the Node.js server included in the standalone output
 CMD ["node", "server.js"]
-</file>
-
-<file path="src/app/api/auth/login/route.test.ts">
-import bcrypt from "bcrypt";
-import type { NextResponse } from "next/server";
-import { ulid } from "ulid";
-import {
-  afterAll,
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from "vitest";
-import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
-import {
-  cleanupTestUsers,
-  createApiRequest,
-  generateTestUsername,
-} from "@/test/helpers/api-test-helpers";
-import { userToFirestoreForTest } from "@/test/helpers/firebase-test-helpers";
-import type { ApiResponse } from "@/types/common";
-⋮----
-import type { User } from "@/types/schema";
-⋮----
-import { POST } from "./route";
-</file>
-
-<file path="src/app/api/auth/login/route.ts">
-import bcrypt from "bcrypt";
-import { type NextRequest, NextResponse } from "next/server";
-⋮----
-import { adminAuth } from "@/lib/firebase/admin";
-import { AdminUserService } from "@/lib/firebase/admin-collections";
-import type { ApiResponse } from "@/types/common";
-import type { User } from "@/types/schema";
-import { userLoginSchema } from "@/types/schema";
-⋮----
-export async function POST(
-  request: NextRequest,
-): Promise<NextResponse<ApiResponse<
-</file>
-
-<file path="src/app/api/auth/me/route.test.ts">
-import bcrypt from "bcrypt";
-import type { NextResponse } from "next/server";
-import { ulid } from "ulid";
-import {
-  afterAll,
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from "vitest";
-import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
-import {
-  cleanupTestUsers,
-  createApiRequest,
-  generateTestUsername,
-} from "@/test/helpers/api-test-helpers";
-import { userToFirestoreForTest } from "@/test/helpers/firebase-test-helpers";
-import type { ApiResponse } from "@/types/common";
-⋮----
-import type { User } from "@/types/schema";
-⋮----
-import { GET } from "./route";
-</file>
-
-<file path="src/app/api/auth/register/route.test.ts">
-import type { NextResponse } from "next/server";
-import {
-  afterAll,
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from "vitest";
-import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
-import {
-  cleanupTestUsers,
-  createApiRequest,
-  generateTestUsername,
-} from "@/test/helpers/api-test-helpers";
-import { userToFirestoreForTest } from "@/test/helpers/firebase-test-helpers";
-import type { ApiResponse } from "@/types/common";
-import type { User } from "@/types/schema";
-⋮----
-import { POST } from "./route";
-</file>
-
-<file path="src/app/api/auth/register/route.ts">
-import bcrypt from "bcrypt";
-import { type NextRequest, NextResponse } from "next/server";
-import { ulid } from "ulid";
-⋮----
-import { adminAuth } from "@/lib/firebase/admin";
-import { AdminUserService } from "@/lib/firebase/admin-collections";
-import type { ApiResponse } from "@/types/common";
-import type { User } from "@/types/schema";
-import { userCreationSchema } from "@/types/schema";
-⋮----
-export async function POST(
-  request: NextRequest,
-): Promise<NextResponse<ApiResponse<
-</file>
-
-<file path="src/app/api/auth/update/route.test.ts">
-import bcrypt from "bcrypt";
-import type { NextResponse } from "next/server";
-import { ulid } from "ulid";
-import {
-  afterAll,
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from "vitest";
-import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
-import {
-  cleanupTestUsers,
-  createApiRequest,
-  generateTestUsername,
-} from "@/test/helpers/api-test-helpers";
-import { userToFirestoreForTest } from "@/test/helpers/firebase-test-helpers";
-import type { ApiResponse } from "@/types/common";
-⋮----
-import type { User } from "@/types/schema";
-⋮----
-import { PUT } from "./route";
 </file>
 
 <file path="src/app/api/game/[gameId]/events/route.ts">
@@ -3437,6 +3431,12 @@ const ConfettiButtonComponent = ({
 }: ConfettiButtonProps) =>
 ⋮----
 const handleClick = async (event: React.MouseEvent<HTMLButtonElement>) =>
+</file>
+
+<file path="src/hooks/useGameJoin.test.ts">
+import { renderHook, waitFor } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { useGameJoin } from "./useGameJoin";
 </file>
 
 <file path="src/lib/board-utils.ts">
@@ -4653,7 +4653,6 @@ Pingoは、AIによる画像判定を活用したビンゴゲームです。
 ### セキュリティ・本番対応（高）
 
 - APIキーのセキュリティレビュー
-- デバッグログの削除
 
 ## メモリーバンクファイル
 
