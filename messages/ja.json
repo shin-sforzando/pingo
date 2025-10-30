@@ -172,7 +172,7 @@
       "analysis": "AI分析結果:",
       "confidence": "確信度: {confidence}% (閾値: {threshold}%)",
       "confidenceLabel": "確信度",
-      "matchedCell": "マッチしたセル:",
+      "matchedCell": "マッチしたセル",
       "status": {
         "accepted": "承認",
         "inappropriate_content": "不適切なコンテンツ",
@@ -211,7 +211,7 @@
       "description": "まずはアカウントを作成してログインしよう。",
       "step1": {
         "title": "アカウントを登録",
-        "description": "まずはユーザー登録をしよう。ユーザー名、メールアドレス、パスワードを入力して「登録」ボタンをクリックしてね。",
+        "description": "まずはユーザー登録をしよう。ユーザー名、パスワードを入力して「登録」ボタンをクリックしてね。",
         "image": "/images/howtoplay/00-register.png"
       },
       "step2": {

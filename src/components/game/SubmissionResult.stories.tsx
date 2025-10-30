@@ -41,7 +41,6 @@ export const Accepted: Story = {
     critique_en:
       "The image clearly shows a red apple on a wooden table. The apple is the main subject of the photo and matches the 'apple' cell perfectly. The image quality is good and the subject is easily identifiable.",
     acceptanceStatus: AcceptanceStatus.ACCEPTED,
-    matchedCellId: "cell_1",
     matchedCellSubject: "Apple",
     confidenceThreshold: 0.7,
   },
@@ -55,7 +54,6 @@ export const NoMatch: Story = {
     critique_en:
       "The image shows a banana, but there is no 'banana' cell available in the current bingo board. While the image quality is good and the subject is clear, it doesn't match any of the available subjects.",
     acceptanceStatus: AcceptanceStatus.NO_MATCH,
-    matchedCellId: null,
     matchedCellSubject: null,
     confidenceThreshold: 0.7,
   },
@@ -69,7 +67,6 @@ export const InappropriateContent: Story = {
     critique_en:
       "The image contains content that is not appropriate for all ages. Please upload a different image that follows the game guidelines.",
     acceptanceStatus: AcceptanceStatus.INAPPROPRIATE_CONTENT,
-    matchedCellId: null,
     matchedCellSubject: null,
     confidenceThreshold: 0.7,
   },
@@ -83,7 +80,6 @@ export const LowConfidence: Story = {
     critique_en:
       "The image appears to show something that might be related to 'car', but the image is blurry and the subject is not clearly visible. The confidence level is below the required threshold.",
     acceptanceStatus: AcceptanceStatus.NO_MATCH,
-    matchedCellId: "cell_5",
     matchedCellSubject: "Car",
     confidenceThreshold: 0.7,
   },
@@ -97,7 +93,6 @@ export const HighConfidenceAccepted: Story = {
     critique_en:
       "Excellent match! The image shows a beautiful golden retriever dog in a park setting. The dog is clearly the main subject and perfectly matches the 'dog' cell. High confidence in this match.",
     acceptanceStatus: AcceptanceStatus.ACCEPTED,
-    matchedCellId: "cell_3",
     matchedCellSubject: "Dog",
     confidenceThreshold: 0.7,
   },
@@ -111,7 +106,6 @@ export const EdgeCaseAccepted: Story = {
     critique_en:
       "The image shows a cat sleeping on a couch. While the lighting is somewhat dim, the cat is clearly visible and identifiable. This meets the minimum confidence threshold for acceptance.",
     acceptanceStatus: AcceptanceStatus.ACCEPTED,
-    matchedCellId: "cell_7",
     matchedCellSubject: "Cat",
     confidenceThreshold: 0.7,
   },
@@ -125,7 +119,6 @@ export const LongCritique: Story = {
     critique_en:
       "This is a very detailed analysis of the submitted image. The photograph shows a modern smartphone placed on a white desk surface. The device appears to be an iPhone with a black case, and the screen is clearly visible showing the home screen with various app icons. The image quality is excellent with good lighting and sharp focus. The smartphone is positioned at a slight angle, making it easy to identify as a mobile phone device. This clearly matches the 'smartphone' cell in the bingo board with high confidence. The background is clean and uncluttered, which helps emphasize the main subject. Overall, this is an excellent submission that clearly demonstrates the requested subject matter.",
     acceptanceStatus: AcceptanceStatus.ACCEPTED,
-    matchedCellId: "cell_12",
     matchedCellSubject: "Smartphone",
     confidenceThreshold: 0.6,
   },
@@ -139,7 +132,6 @@ export const WithCustomClassName: Story = {
     critique_en:
       "The image shows a beautiful sunset over the ocean with vibrant orange and pink colors in the sky.",
     acceptanceStatus: AcceptanceStatus.ACCEPTED,
-    matchedCellId: "cell_9",
     matchedCellSubject: "Sunset",
     confidenceThreshold: 0.5,
     className: "max-w-md",

@@ -111,7 +111,6 @@ const mockSubmissions = [
     critique_ja: "写真に赤い自転車がはっきりと写っています。",
     critique_en: "The photo clearly shows a red bicycle.",
     acceptanceStatus: AcceptanceStatus.ACCEPTED,
-    matchedCellId: "cell_0",
   },
 ];
 

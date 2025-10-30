@@ -201,7 +201,6 @@ export default function GamePage() {
                 acceptanceStatus={
                   latestSubmission.acceptanceStatus || AcceptanceStatus.NO_MATCH
                 }
-                matchedCellId={latestSubmission.matchedCellId}
                 matchedCellSubject={matchedCellSubject}
                 confidenceThreshold={game.confidenceThreshold}
                 imageUrl={latestSubmission.imageUrl}

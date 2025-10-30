@@ -172,7 +172,7 @@
       "analysis": "AI Analysis:",
       "confidence": "Confidence: {confidence}% (Threshold: {threshold}%)",
       "confidenceLabel": "Confidence",
-      "matchedCell": "Matched Cell:",
+      "matchedCell": "Matched Cell",
       "status": {
         "accepted": "Accepted",
         "inappropriate_content": "Inappropriate Content",
@@ -211,7 +211,7 @@
       "description": "Let's create an account and log in!",
       "step1": {
         "title": "Register an Account",
-        "description": "Let's start by creating a user account. Enter your username, email address, and password, then click the \"Register\" button.",
+        "description": "Let's start by creating a user account. Enter your username and password, then click the \"Register\" button.",
         "image": "/images/howtoplay/00-register.png"
       },
       "step2": {

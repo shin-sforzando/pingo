@@ -589,14 +589,6 @@ className={cn(
   );
 </file>
 
-<file path="src/components/ui/accordion.tsx">
-import { ChevronDown } from "lucide-react";
-⋮----
-import { cn } from "@/lib/utils";
-⋮----
-className=
-</file>
-
 <file path="src/components/ui/avatar.tsx">
 import { cn } from "@/lib/utils";
 ⋮----
@@ -1832,6 +1824,14 @@ import type { Meta, StoryObj } from "@storybook/nextjs";
 import { ShineBorder } from "./shine-border";
 ⋮----
 type Story = StoryObj<typeof meta>;
+</file>
+
+<file path="src/components/ui/accordion.tsx">
+import { ChevronDown } from "lucide-react";
+⋮----
+import { cn } from "@/lib/utils";
+⋮----
+className=
 </file>
 
 <file path="src/components/ui/badge.tsx">
@@ -3318,21 +3318,6 @@ interface GameHeaderProps {
 }
 </file>
 
-<file path="src/app/page.browser.test.tsx">
-import { page } from "@vitest/browser/context";
-import { NextIntlClientProvider } from "next-intl";
-import { ulid } from "ulid";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { render } from "vitest-browser-react";
-import { AuthProvider } from "@/contexts/AuthContext";
-import type { User } from "@/types/schema";
-import enMessages from "../../messages/en.json";
-import jaMessages from "../../messages/ja.json";
-import HomePage from "./page";
-⋮----
-beforeEach(() =>
-</file>
-
 <file path="src/components/game/BingoCell.stories.tsx">
 import { fakerJA as faker } from "@faker-js/faker";
 import type { Meta, StoryObj } from "@storybook/nextjs";
@@ -3641,40 +3626,19 @@ import { auth } from "@/lib/firebase/client";
 type Story = StoryObj<typeof meta>;
 </file>
 
-<file path="src/app/page.tsx">
-import Image from "next/image";
-import Link from "next/link";
-import { useTranslations } from "next-intl";
-import { useState } from "react";
+<file path="src/app/page.browser.test.tsx">
+import { page } from "@vitest/browser/context";
+import { NextIntlClientProvider } from "next-intl";
+import { ulid } from "ulid";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { render } from "vitest-browser-react";
+import { AuthProvider } from "@/contexts/AuthContext";
+import type { User } from "@/types/schema";
+import enMessages from "../../messages/en.json";
+import jaMessages from "../../messages/ja.json";
+import HomePage from "./page";
 ⋮----
-import { LoginForm } from "@/components/auth/LoginForm";
-import { RegisterForm } from "@/components/auth/RegisterForm";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useAuth } from "@/contexts/AuthContext";
-⋮----
-const handleAuthSuccess = () =>
-⋮----
-const handleAuthError = (error: Error) =>
-⋮----
-<Link href="/game/create">
-⋮----
-<Link href="/game/join">
-⋮----
-<TabsTrigger value="login">
-<TabsTrigger value="register">
-⋮----
-
-⋮----
-src=
-alt=
+beforeEach(() =>
 </file>
 
 <file path="src/components/game/BingoBoard.stories.tsx">
@@ -3778,10 +3742,6 @@ export interface SubmissionResultProps {
 
 
   acceptanceStatus: AcceptanceStatus;
-
-
-
-  matchedCellId?: string | null;
 
 
 
@@ -4204,6 +4164,42 @@ const handleJoinClick = async () =>
 ⋮----
 title=
 value=
+</file>
+
+<file path="src/app/page.tsx">
+import Image from "next/image";
+import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { useState } from "react";
+⋮----
+import { LoginForm } from "@/components/auth/LoginForm";
+import { RegisterForm } from "@/components/auth/RegisterForm";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuth } from "@/contexts/AuthContext";
+⋮----
+const handleAuthSuccess = () =>
+⋮----
+const handleAuthError = (error: Error) =>
+⋮----
+<Link href="/game/create">
+⋮----
+<Link href="/game/join">
+⋮----
+<TabsTrigger value="login">
+<TabsTrigger value="register">
+⋮----
+
+⋮----
+src=
+alt=
 </file>
 
 <file path="src/components/game/ParticipantsList.tsx">
