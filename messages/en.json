@@ -172,7 +172,7 @@
       "analysis": "AI Analysis:",
       "confidence": "Confidence: {confidence}% (Threshold: {threshold}%)",
       "confidenceLabel": "Confidence",
-      "matchedCell": "Matched Cell:",
+      "matchedCell": "Matched Cell",
       "status": {
         "accepted": "Accepted",
         "inappropriate_content": "Inappropriate Content",
@@ -205,7 +205,64 @@
     "createGame": "Create Game",
     "editFile": "Get started by editing src/app/page.tsx.",
     "howToPlay": "How to Play",
-    "howToPlayDescription": "Pingo is a bingo game where AI judges based on photos.",
+    "howToPlayDescription": "Pingo is a bingo game where AI judges based on photos. Take photos, upload them, and let AI identify the subjects to progress through your bingo board.",
+    "loginSection": {
+      "title": "1. Login (Registration)",
+      "description": "Let's create an account and log in!",
+      "step1": {
+        "title": "Register an Account",
+        "description": "Let's start by creating a user account. Enter your username and password, then click the \"Register\" button.",
+        "image": "/images/howtoplay/00-register.png"
+      },
+      "step2": {
+        "title": "Top Page After Login",
+        "description": "After logging in, you'll see two buttons: \"Create Game\" and \"Join Game\". Choose one to get started!",
+        "image": "/images/howtoplay/01-top-page-after-login.png"
+      }
+    },
+    "createGameSection": {
+      "title": "2. Create a Game",
+      "description": "Become the host, create a game, and invite your friends!",
+      "step1": {
+        "title": "Create a Game",
+        "description": "Click the \"Create Game\" button and enter a game title and theme.",
+        "image": "/images/howtoplay/02-create-game-empty.png"
+      },
+      "step2": {
+        "title": "Generate Subject Candidates",
+        "description": "Click the \"Generate subjects with AI\" button, and AI will automatically generate subject candidates based on your theme. You can freely edit the suggestions!",
+        "image": "/images/howtoplay/03-create-game-with-subjects.png"
+      },
+      "step3": {
+        "title": "Share the Game",
+        "description": "Once you've created the game, you can invite friends using the game ID or QR code on the share page. Turn on \"Public Settings\" to display a QR code.",
+        "image": "/images/howtoplay/04-game-share-page.png"
+      }
+    },
+    "playGameSection": {
+      "title": "3. Play the Game",
+      "description": "Both created and joined games are played the same way!",
+      "step1": {
+        "title": "Play on the Bingo Board",
+        "description": "The game page displays a 5×5 bingo board. The center cell is \"FREE\" and already open. Photograph each cell's subject and aim for bingo!",
+        "image": "/images/howtoplay/05-bingo-board.png"
+      },
+      "step2": {
+        "title": "Upload an Image",
+        "description": "Click the \"Upload Image\" button and select a photo of the subject. The image will be previewed with file information!",
+        "image": "/images/howtoplay/06-image-selected.png"
+      },
+      "step3": {
+        "title": "AI Judges the Photo",
+        "description": "AI will analyze your uploaded image. If the subject matches, it'll be \"Accepted\" with a confidence score and detailed evaluation comments!",
+        "image": "/images/howtoplay/07-image-accepted.png"
+      },
+      "step4": {
+        "title": "Achieve Bingo",
+        "description": "Complete a vertical, horizontal, or diagonal line to achieve bingo! You'll be celebrated with a confetti animation. Try to complete multiple lines!",
+        "image": "/images/howtoplay/09-bingo-achieved.png"
+      }
+    },
     "joinGame": "Join Game",
     "saveChanges": "Save and see your changes instantly.",
     "title": "Pingo",

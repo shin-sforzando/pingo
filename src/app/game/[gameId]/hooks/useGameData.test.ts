@@ -62,8 +62,8 @@ describe("useGameData", () => {
             success: true,
             data: {
               cells: [
-                { id: "cell-1", subject: "Subject 1" },
-                { id: "cell-2", subject: "Subject 2" },
+                { id: "cell_1", subject: "Subject 1" },
+                { id: "cell_2", subject: "Subject 2" },
               ],
             },
           }),

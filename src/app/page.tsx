@@ -6,6 +6,13 @@ import { useState } from "react";
 
 import { LoginForm } from "@/components/auth/LoginForm";
 import { RegisterForm } from "@/components/auth/RegisterForm";
+import { StepCard } from "@/components/home/StepCard";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -36,12 +43,7 @@ export default function Home() {
             <Button asChild size="lg" className="h-16 text-lg">
               <Link href="/game/create">{t("HomePage.createGame")}</Link>
             </Button>
-            <Button
-              asChild
-              size="lg"
-              variant="outline"
-              className="h-16 text-lg"
-            >
+            <Button asChild size="lg" className="h-16 text-lg">
               <Link href="/game/join">{t("HomePage.joinGame")}</Link>
             </Button>
           </div>
@@ -96,12 +98,136 @@ export default function Home() {
       </section>
 
       {/* How to Play section (displayed for all users) */}
-      <section className="mx-auto mt-8 max-w-2xl">
+      <section className="mx-auto mt-12 max-w-4xl">
         <div className="rounded-lg border bg-card p-6 shadow-md">
-          <h2 className="mb-4 font-bold text-xl">{t("HomePage.howToPlay")}</h2>
-          <div className="space-y-4">
-            <p>{t("HomePage.howToPlayDescription")}</p>
-          </div>
+          <h2 className="mb-2 font-bold text-2xl">{t("HomePage.howToPlay")}</h2>
+          <p className="mb-8 text-muted-foreground">
+            {t("HomePage.howToPlayDescription")}
+          </p>
+
+          <Accordion type="multiple" className="w-full">
+            {/* Section 1: Login (Registration) */}
+            <AccordionItem value="login" className="mb-6">
+              <AccordionTrigger className="hover:no-underline">
+                <div className="flex flex-col items-start gap-1 text-left">
+                  <h3 className="font-bold text-primary text-xl">
+                    {t("HomePage.loginSection.title")}
+                  </h3>
+                  <p className="text-muted-foreground text-sm font-normal">
+                    {t("HomePage.loginSection.description")}
+                  </p>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="grid gap-6 pt-4">
+                  <StepCard
+                    title={t("HomePage.loginSection.step1.title")}
+                    description={t("HomePage.loginSection.step1.description")}
+                    imageSrc={t("HomePage.loginSection.step1.image")}
+                    imageAlt={t("HomePage.loginSection.step1.title")}
+                  />
+                  <StepCard
+                    title={t("HomePage.loginSection.step2.title")}
+                    description={t("HomePage.loginSection.step2.description")}
+                    imageSrc={t("HomePage.loginSection.step2.image")}
+                    imageAlt={t("HomePage.loginSection.step2.title")}
+                  />
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* Section 2: Create Game */}
+            <AccordionItem value="create" className="mb-6">
+              <AccordionTrigger className="hover:no-underline">
+                <div className="flex flex-col items-start gap-1 text-left">
+                  <h3 className="font-bold text-primary text-xl">
+                    {t("HomePage.createGameSection.title")}
+                  </h3>
+                  <p className="text-muted-foreground text-sm font-normal">
+                    {t("HomePage.createGameSection.description")}
+                  </p>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="grid gap-6 pt-4">
+                  <StepCard
+                    title={t("HomePage.createGameSection.step1.title")}
+                    description={t(
+                      "HomePage.createGameSection.step1.description",
+                    )}
+                    imageSrc={t("HomePage.createGameSection.step1.image")}
+                    imageAlt={t("HomePage.createGameSection.step1.title")}
+                  />
+                  <StepCard
+                    title={t("HomePage.createGameSection.step2.title")}
+                    description={t(
+                      "HomePage.createGameSection.step2.description",
+                    )}
+                    imageSrc={t("HomePage.createGameSection.step2.image")}
+                    imageAlt={t("HomePage.createGameSection.step2.title")}
+                  />
+                  <StepCard
+                    title={t("HomePage.createGameSection.step3.title")}
+                    description={t(
+                      "HomePage.createGameSection.step3.description",
+                    )}
+                    imageSrc={t("HomePage.createGameSection.step3.image")}
+                    imageAlt={t("HomePage.createGameSection.step3.title")}
+                  />
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* Section 3: Play Game */}
+            <AccordionItem value="play" className="mb-6">
+              <AccordionTrigger className="hover:no-underline">
+                <div className="flex flex-col items-start gap-1 text-left">
+                  <h3 className="font-bold text-primary text-xl">
+                    {t("HomePage.playGameSection.title")}
+                  </h3>
+                  <p className="text-muted-foreground text-sm font-normal">
+                    {t("HomePage.playGameSection.description")}
+                  </p>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="grid gap-6 pt-4">
+                  <StepCard
+                    title={t("HomePage.playGameSection.step1.title")}
+                    description={t(
+                      "HomePage.playGameSection.step1.description",
+                    )}
+                    imageSrc={t("HomePage.playGameSection.step1.image")}
+                    imageAlt={t("HomePage.playGameSection.step1.title")}
+                  />
+                  <StepCard
+                    title={t("HomePage.playGameSection.step2.title")}
+                    description={t(
+                      "HomePage.playGameSection.step2.description",
+                    )}
+                    imageSrc={t("HomePage.playGameSection.step2.image")}
+                    imageAlt={t("HomePage.playGameSection.step2.title")}
+                  />
+                  <StepCard
+                    title={t("HomePage.playGameSection.step3.title")}
+                    description={t(
+                      "HomePage.playGameSection.step3.description",
+                    )}
+                    imageSrc={t("HomePage.playGameSection.step3.image")}
+                    imageAlt={t("HomePage.playGameSection.step3.title")}
+                  />
+                  <StepCard
+                    title={t("HomePage.playGameSection.step4.title")}
+                    description={t(
+                      "HomePage.playGameSection.step4.description",
+                    )}
+                    imageSrc={t("HomePage.playGameSection.step4.image")}
+                    imageAlt={t("HomePage.playGameSection.step4.title")}
+                  />
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         </div>
       </section>
     </div>

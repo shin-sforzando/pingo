@@ -210,6 +210,25 @@ vi.mock("next/link", () => ({
   }) => <a href={href}>{children}</a>,
 }));
 
+// Mock next/image
+vi.mock("next/image", () => ({
+  __esModule: true,
+  default: ({
+    src,
+    alt,
+    className,
+  }: {
+    src: string;
+    alt: string;
+    className?: string;
+    fill?: boolean;
+    sizes?: string;
+  }) => (
+    // biome-ignore lint/performance/noImgElement: Mock for testing purposes
+    <img src={src} alt={alt} className={className} />
+  ),
+}));
+
 describe("HomePage", () => {
   beforeEach(() => {
     // Reset mocks
@@ -258,6 +277,218 @@ describe("HomePage", () => {
         .toBeVisible();
       await expect
         .element(page.getByText(enMessages.HomePage.howToPlayDescription))
+        .toBeVisible();
+    });
+
+    it("renders all three sections in how to play", async () => {
+      render(
+        <NextIntlClientProvider locale="en" messages={enMessages}>
+          <AuthProvider>
+            <HomePage />
+          </AuthProvider>
+        </NextIntlClientProvider>,
+      );
+
+      // Check for section titles (in accordion triggers)
+      await expect
+        .element(page.getByText(enMessages.HomePage.loginSection.title))
+        .toBeVisible();
+      await expect
+        .element(page.getByText(enMessages.HomePage.createGameSection.title))
+        .toBeVisible();
+      await expect
+        .element(page.getByText(enMessages.HomePage.playGameSection.title))
+        .toBeVisible();
+
+      // Check for section descriptions (in accordion triggers)
+      await expect
+        .element(page.getByText(enMessages.HomePage.loginSection.description))
+        .toBeVisible();
+      await expect
+        .element(
+          page.getByText(enMessages.HomePage.createGameSection.description),
+        )
+        .toBeVisible();
+      await expect
+        .element(
+          page.getByText(enMessages.HomePage.playGameSection.description),
+        )
+        .toBeVisible();
+    });
+
+    it("renders all step titles in how to play", async () => {
+      render(
+        <NextIntlClientProvider locale="en" messages={enMessages}>
+          <AuthProvider>
+            <HomePage />
+          </AuthProvider>
+        </NextIntlClientProvider>,
+      );
+
+      // Open login section accordion
+      await page.getByText(enMessages.HomePage.loginSection.title).click();
+
+      // Login section steps
+      await expect
+        .element(
+          page.getByText(enMessages.HomePage.loginSection.step1.title, {
+            exact: true,
+          }),
+        )
+        .toBeVisible();
+      await expect
+        .element(
+          page.getByText(enMessages.HomePage.loginSection.step2.title, {
+            exact: true,
+          }),
+        )
+        .toBeVisible();
+
+      // Open create game section accordion
+      await page.getByText(enMessages.HomePage.createGameSection.title).click();
+
+      // Create game section steps
+      await expect
+        .element(
+          page.getByText(enMessages.HomePage.createGameSection.step1.title, {
+            exact: true,
+          }),
+        )
+        .toBeVisible();
+      await expect
+        .element(
+          page.getByText(enMessages.HomePage.createGameSection.step2.title, {
+            exact: true,
+          }),
+        )
+        .toBeVisible();
+      await expect
+        .element(
+          page.getByText(enMessages.HomePage.createGameSection.step3.title, {
+            exact: true,
+          }),
+        )
+        .toBeVisible();
+
+      // Open play game section accordion
+      await page.getByText(enMessages.HomePage.playGameSection.title).click();
+
+      // Play game section steps
+      await expect
+        .element(
+          page.getByText(enMessages.HomePage.playGameSection.step1.title, {
+            exact: true,
+          }),
+        )
+        .toBeVisible();
+      await expect
+        .element(
+          page.getByText(enMessages.HomePage.playGameSection.step2.title, {
+            exact: true,
+          }),
+        )
+        .toBeVisible();
+      await expect
+        .element(
+          page.getByText(enMessages.HomePage.playGameSection.step3.title, {
+            exact: true,
+          }),
+        )
+        .toBeVisible();
+      await expect
+        .element(
+          page.getByText(enMessages.HomePage.playGameSection.step4.title, {
+            exact: true,
+          }),
+        )
+        .toBeVisible();
+    });
+
+    it("renders all images with correct alt text", async () => {
+      render(
+        <NextIntlClientProvider locale="en" messages={enMessages}>
+          <AuthProvider>
+            <HomePage />
+          </AuthProvider>
+        </NextIntlClientProvider>,
+      );
+
+      // Open login section accordion
+      await page.getByText(enMessages.HomePage.loginSection.title).click();
+
+      // Check for login section images
+      await expect
+        .element(
+          page.getByRole("img", {
+            name: enMessages.HomePage.loginSection.step1.title,
+          }),
+        )
+        .toBeVisible();
+      await expect
+        .element(
+          page.getByRole("img", {
+            name: enMessages.HomePage.loginSection.step2.title,
+          }),
+        )
+        .toBeVisible();
+
+      // Open create game section accordion
+      await page.getByText(enMessages.HomePage.createGameSection.title).click();
+
+      // Check for create game section images
+      await expect
+        .element(
+          page.getByRole("img", {
+            name: enMessages.HomePage.createGameSection.step1.title,
+          }),
+        )
+        .toBeVisible();
+      await expect
+        .element(
+          page.getByRole("img", {
+            name: enMessages.HomePage.createGameSection.step2.title,
+          }),
+        )
+        .toBeVisible();
+      await expect
+        .element(
+          page.getByRole("img", {
+            name: enMessages.HomePage.createGameSection.step3.title,
+          }),
+        )
+        .toBeVisible();
+
+      // Open play game section accordion
+      await page.getByText(enMessages.HomePage.playGameSection.title).click();
+
+      // Check for play game section images
+      await expect
+        .element(
+          page.getByRole("img", {
+            name: enMessages.HomePage.playGameSection.step1.title,
+          }),
+        )
+        .toBeVisible();
+      await expect
+        .element(
+          page.getByRole("img", {
+            name: enMessages.HomePage.playGameSection.step2.title,
+          }),
+        )
+        .toBeVisible();
+      await expect
+        .element(
+          page.getByRole("img", {
+            name: enMessages.HomePage.playGameSection.step3.title,
+          }),
+        )
+        .toBeVisible();
+      await expect
+        .element(
+          page.getByRole("img", {
+            name: enMessages.HomePage.playGameSection.step4.title,
+          }),
+        )
         .toBeVisible();
     });
 

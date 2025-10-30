@@ -42,7 +42,7 @@ const generateSampleCells = (): Cell[] => {
       const isFree = index === CENTER_CELL_INDEX; // Center cell is FREE
 
       cells.push({
-        id: `cell-${index}`,
+        id: `cell_${index}`,
         position: { x, y },
         subject: isFree
           ? "FREE"
@@ -111,7 +111,6 @@ const mockSubmissions = [
     critique_ja: "写真に赤い自転車がはっきりと写っています。",
     critique_en: "The photo clearly shows a red bicycle.",
     acceptanceStatus: AcceptanceStatus.ACCEPTED,
-    matchedCellId: "cell-0",
   },
 ];
 
@@ -245,6 +244,7 @@ const meta = {
           register: async () => {},
           logout: async () => {},
           updateUser: async () => {},
+          refreshUser: async () => {},
         }}
       >
         <Story />

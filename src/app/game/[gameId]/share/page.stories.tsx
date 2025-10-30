@@ -18,7 +18,7 @@ const generateSampleCells = (): Cell[] => {
       const isFree = index === CENTER_CELL_INDEX; // Center cell is FREE
 
       cells.push({
-        id: `cell-${index}`,
+        id: `cell_${index}`,
         position: { x, y },
         subject: isFree
           ? "FREE"

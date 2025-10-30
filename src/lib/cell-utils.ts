@@ -15,11 +15,32 @@ export function resolveCellId(
   matchedCellId: string | null,
   availableCells: Cell[],
 ): string | null {
-  if (!matchedCellId) return null;
+  console.log("ℹ️ XXX: ~ cell-utils.ts ~ resolveCellId called", {
+    matchedCellId,
+    availableCellsCount: availableCells.length,
+  });
 
-  // If it already looks like a cell ID, return as-is
-  if (matchedCellId.startsWith("cell")) {
+  if (!matchedCellId) {
+    console.log("ℹ️ XXX: ~ cell-utils.ts ~ matchedCellId is null or undefined");
+    return null;
+  }
+
+  // If it's already in correct format (cell_N), return as-is
+  if (matchedCellId.startsWith("cell_")) {
+    console.log("ℹ️ XXX: ~ cell-utils.ts ~ Cell ID already in correct format", {
+      matchedCellId,
+    });
     return matchedCellId;
+  }
+
+  // If it's in incorrect format (cell-N), normalize to cell_N
+  if (matchedCellId.startsWith("cell-")) {
+    const normalized = matchedCellId.replace("cell-", "cell_");
+    console.log("ℹ️ XXX: ~ cell-utils.ts ~ Normalized cell-N to cell_N", {
+      original: matchedCellId,
+      normalized,
+    });
+    return normalized;
   }
 
   // Otherwise, treat it as a subject name and search for the cell
@@ -43,6 +64,10 @@ export function resolveCellId(
 
   console.log("ℹ️ XXX: ~ cell-utils.ts ~ Could not find cell with subject", {
     matchedCellId,
+    availableCells: availableCells.map((c) => ({
+      id: c.id,
+      subject: c.subject,
+    })),
   });
   return null;
 }

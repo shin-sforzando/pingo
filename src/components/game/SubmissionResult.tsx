@@ -25,10 +25,6 @@ export interface SubmissionResultProps {
    */
   acceptanceStatus: AcceptanceStatus;
   /**
-   * ID of matched cell (if any)
-   */
-  matchedCellId?: string | null;
-  /**
    * Subject of matched cell (if any)
    */
   matchedCellSubject?: string | null;
@@ -55,7 +51,6 @@ export function SubmissionResult({
   critique_ja,
   critique_en,
   acceptanceStatus,
-  // matchedCellId,
   matchedCellSubject,
   confidenceThreshold,
   imageUrl,
@@ -152,9 +147,8 @@ export function SubmissionResult({
         {acceptanceStatus === "accepted" && matchedCellSubject && (
           <div className="rounded-md bg-green-100 p-3">
             <p className="font-medium text-green-800 text-sm">
-              {t("Game.SubmissionResult.matchedCell")}
+              {t("Game.SubmissionResult.matchedCell")}: {matchedCellSubject}
             </p>
-            <p className="text-green-700 text-sm">{matchedCellSubject}</p>
           </div>
         )}
 

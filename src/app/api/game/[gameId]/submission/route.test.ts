@@ -142,7 +142,7 @@ describe("/api/game/[gameId]/submission", () => {
       const mockGameBoard = {
         cells: [
           {
-            id: "cell-1",
+            id: "cell_1",
             subject: "赤い自転車",
             position: { x: 0, y: 0 },
             isFree: false,
@@ -154,7 +154,7 @@ describe("/api/game/[gameId]/submission", () => {
         userId: mockUserId,
         cells: [
           {
-            id: "cell-1",
+            id: "cell_1",
             subject: "赤い自転車",
             position: { x: 0, y: 0 },
             isFree: false,
@@ -180,7 +180,7 @@ describe("/api/game/[gameId]/submission", () => {
 
       const submissionId = ulid();
       const analysisResult: AnalysisResult = {
-        matchedCellId: "cell-1",
+        matchedCellId: "cell_1",
         confidence: 0.85,
         critique_ja: "赤い自転車が写真にはっきりと写っています。",
         critique_en: "A red bicycle is clearly visible in the photo.",
@@ -231,7 +231,7 @@ describe("/api/game/[gameId]/submission", () => {
         expect.objectContaining({
           userId: mockUserId,
           cellStates: expect.objectContaining({
-            "cell-1": expect.objectContaining({
+            cell_1: expect.objectContaining({
               isOpen: true,
             }),
           }),
@@ -243,7 +243,7 @@ describe("/api/game/[gameId]/submission", () => {
     it("should return 401 for missing authorization", async () => {
       const submissionId = ulid();
       const analysisResult: AnalysisResult = {
-        matchedCellId: "cell-1",
+        matchedCellId: "cell_1",
         confidence: 0.85,
         critique_ja: "テスト",
         critique_en: "Test",
@@ -287,7 +287,7 @@ describe("/api/game/[gameId]/submission", () => {
         submissionId: ulid(),
         imageUrl: "invalid-url", // Should be valid URL
         analysisResult: {
-          matchedCellId: "cell-1",
+          matchedCellId: "cell_1",
           confidence: 0.85,
           critique_ja: "テスト",
           critique_en: "Test",
@@ -330,7 +330,7 @@ describe("/api/game/[gameId]/submission", () => {
 
       const submissionId = ulid();
       const analysisResult: AnalysisResult = {
-        matchedCellId: "cell-1",
+        matchedCellId: "cell_1",
         confidence: 0.85,
         critique_ja: "テスト",
         critique_en: "Test",
@@ -377,7 +377,7 @@ describe("/api/game/[gameId]/submission", () => {
 
       const submissionId = ulid();
       const analysisResult: AnalysisResult = {
-        matchedCellId: "cell-1",
+        matchedCellId: "cell_1",
         confidence: 0.85,
         critique_ja: "テスト",
         critique_en: "Test",

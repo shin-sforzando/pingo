@@ -182,11 +182,13 @@ Analysis Criteria:
 4. Confidence threshold will be applied by the system (you provide raw confidence)
 
 Provide:
-- matchedCellId: The ID of the best matching cell (null if no good match)
+- matchedCellId: The EXACT cell ID from the list above (e.g., "cell_0", "cell_13"). MUST use the exact format with underscore "_", NOT hyphen "-". Return null if no good match.
 - confidence: Confidence score from 0.0 to 1.0 (be conservative but fair)
 - critique_ja: Comprehensive explanation in Japanese (minimum 3-4 sentences). Describe in detail: what specific objects/scenes you see in the image, their visual characteristics and context, how they relate to each available bingo cell subject, and a thorough explanation of why they match or don't match. (日本語で最低3-4文の包括的な説明。画像内の具体的な物体・シーン、その視覚的特徴と文脈、各利用可能なビンゴセルの被写体との関連性、そしてマッチする/しない理由を詳しく説明してください。)
 - critique_en: Comprehensive explanation in English (minimum 3-4 sentences). Describe in detail: what specific objects/scenes you see in the image, their visual characteristics and context, how they relate to each available bingo cell subject, and a thorough explanation of why they match or don't match.
 - acceptanceStatus: "accepted" (good match), "no_match" (no suitable match), or "inappropriate_content" (inappropriate image)
+
+IMPORTANT: When returning matchedCellId, copy the EXACT cell ID from the "Available Cells" list above. Use underscore "_" format (e.g., "cell_0", "cell_13"), NOT hyphen "-" format (e.g., "cell-0", "cell-13").
 
 Be thorough in your analysis but conservative in matching. Only match if you're reasonably confident the image shows the requested subject.`;
 }
