@@ -250,6 +250,7 @@ src/
       shine-border.tsx
       ShineBorder.stories.tsx
     ui/
+      accordion.tsx
       avatar.tsx
       badge.tsx
       Button.stories.tsx
@@ -586,6 +587,14 @@ className={cn(
       {...props}
     />
   );
+</file>
+
+<file path="src/components/ui/accordion.tsx">
+import { ChevronDown } from "lucide-react";
+⋮----
+import { cn } from "@/lib/utils";
+⋮----
+className=
 </file>
 
 <file path="src/components/ui/avatar.tsx">
@@ -2581,21 +2590,6 @@ export async function generateMetadata(): Promise<Metadata>
 export default async function TermsPage()
 </file>
 
-<file path="src/app/page.browser.test.tsx">
-import { page } from "@vitest/browser/context";
-import { NextIntlClientProvider } from "next-intl";
-import { ulid } from "ulid";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { render } from "vitest-browser-react";
-import { AuthProvider } from "@/contexts/AuthContext";
-import type { User } from "@/types/schema";
-import enMessages from "../../messages/en.json";
-import jaMessages from "../../messages/ja.json";
-import HomePage from "./page";
-⋮----
-beforeEach(() =>
-</file>
-
 <file path="src/components/game/GameInfo.tsx">
 import {
   Calendar,
@@ -3324,34 +3318,19 @@ interface GameHeaderProps {
 }
 </file>
 
-<file path="src/app/page.tsx">
-import Image from "next/image";
-import Link from "next/link";
-import { useTranslations } from "next-intl";
-import { useState } from "react";
+<file path="src/app/page.browser.test.tsx">
+import { page } from "@vitest/browser/context";
+import { NextIntlClientProvider } from "next-intl";
+import { ulid } from "ulid";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { render } from "vitest-browser-react";
+import { AuthProvider } from "@/contexts/AuthContext";
+import type { User } from "@/types/schema";
+import enMessages from "../../messages/en.json";
+import jaMessages from "../../messages/ja.json";
+import HomePage from "./page";
 ⋮----
-import { LoginForm } from "@/components/auth/LoginForm";
-import { RegisterForm } from "@/components/auth/RegisterForm";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useAuth } from "@/contexts/AuthContext";
-⋮----
-const handleAuthSuccess = () =>
-⋮----
-const handleAuthError = (error: Error) =>
-⋮----
-<Link href="/game/create">
-⋮----
-<Link href="/game/join">
-⋮----
-<TabsTrigger value="login">
-<TabsTrigger value="register">
-⋮----
-
-⋮----
-src=
-alt=
+beforeEach(() =>
 </file>
 
 <file path="src/components/game/BingoCell.stories.tsx">
@@ -3662,6 +3641,42 @@ import { auth } from "@/lib/firebase/client";
 type Story = StoryObj<typeof meta>;
 </file>
 
+<file path="src/app/page.tsx">
+import Image from "next/image";
+import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { useState } from "react";
+⋮----
+import { LoginForm } from "@/components/auth/LoginForm";
+import { RegisterForm } from "@/components/auth/RegisterForm";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuth } from "@/contexts/AuthContext";
+⋮----
+const handleAuthSuccess = () =>
+⋮----
+const handleAuthError = (error: Error) =>
+⋮----
+<Link href="/game/create">
+⋮----
+<Link href="/game/join">
+⋮----
+<TabsTrigger value="login">
+<TabsTrigger value="register">
+⋮----
+
+⋮----
+src=
+alt=
+</file>
+
 <file path="src/components/game/BingoBoard.stories.tsx">
 import { fakerJA as faker } from "@faker-js/faker";
 import type { Meta, StoryObj } from "@storybook/nextjs";
@@ -3694,6 +3709,102 @@ import { GameInfo } from "./GameInfo";
 type Story = StoryObj<typeof meta>;
 </file>
 
+<file path="src/components/game/ImageUpload.tsx">
+import { Image as ImageIcon, Loader2, Upload, X } from "lucide-react";
+import Image from "next/image";
+import { useTranslations } from "next-intl";
+import { useCallback, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { useAuth } from "@/contexts/AuthContext";
+import {
+  createImagePreviewUrl,
+  isValidFileSize,
+  isValidImageFile,
+  processImage,
+  revokeImagePreviewUrl,
+} from "@/lib/image-utils";
+import { cn } from "@/lib/utils";
+import { submitImage } from "@/services/image-upload";
+import type {
+  ImageSubmissionResult,
+  ImageUploadProps,
+  ProcessedImage,
+} from "@/types/schema";
+⋮----
+interface ImagePreview {
+  file: File;
+  previewUrl: string;
+  processedImage?: ProcessedImage;
+  error?: string;
+}
+⋮----
+// Create preview URL from processed JPEG blob
+⋮----
+// For other formats, create preview first then process
+⋮----
+// Process image
+⋮----
+// Handle upload
+⋮----
+console.error("Image preview error:", error);
+⋮----
+e.stopPropagation();
+handleUpload();
+</file>
+
+<file path="src/components/game/SubmissionResult.tsx">
+import { AlertTriangle, CheckCircle, XCircle } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+import type { AcceptanceStatus } from "@/types/common";
+⋮----
+export interface SubmissionResultProps {
+
+
+
+  confidence: number;
+
+
+
+  critique_ja: string;
+
+
+
+  critique_en: string;
+
+
+
+  acceptanceStatus: AcceptanceStatus;
+
+
+
+  matchedCellId?: string | null;
+
+
+
+  matchedCellSubject?: string | null;
+
+
+
+  confidenceThreshold: number;
+
+
+
+  imageUrl?: string;
+
+
+
+  className?: string;
+}
+⋮----
+const getStatusConfig = () =>
+⋮----
+<StatusIcon className=
+</file>
+
 <file path="src/components/layout/UserMenu.stories.tsx">
 import { faker } from "@faker-js/faker";
 import type { Meta, StoryObj } from "@storybook/nextjs";
@@ -3703,6 +3814,22 @@ import { UserMenu } from "./UserMenu";
 const mockFetchForParticipatingGames = (_gameIds: string[]) =>
 ⋮----
 type Story = StoryObj<typeof meta>;
+</file>
+
+<file path="src/services/image-upload.ts">
+import type {
+  ImageSubmissionData,
+  ImageSubmissionResult,
+  ProcessedImage,
+} from "@/types/schema";
+⋮----
+export async function submitImage(
+  processedImage: ProcessedImage,
+  submissionData: ImageSubmissionData,
+  authToken: string,
+): Promise<ImageSubmissionResult>
+⋮----
+// Step 4: Analyze image for bingo matching
 </file>
 
 <file path="src/test/helpers/api-test-helpers.ts">
@@ -3719,6 +3846,171 @@ export const createApiRequest = (
 ) =>
 ⋮----
 export const cleanupTestUsers = async (userIds: string[]) =>
+</file>
+
+<file path="src/types/game.ts">
+import type {
+  AcceptanceStatus,
+  GameStatus,
+  LineType,
+  ProcessingStatus,
+  Role,
+} from "./common";
+import type { TimestampInterface } from "./firestore";
+import { dateToTimestamp, timestampToDate } from "./firestore";
+import type {
+  Cell,
+  CellState,
+  CompletedLine,
+  Event,
+  Game,
+  GameBoard,
+  GameParticipation,
+  PlayerBoard,
+  Submission,
+} from "./schema";
+⋮----
+export interface GameDocument {
+  id: string;
+  title: string;
+  theme: string;
+  creatorId: string;
+  createdAt: TimestampInterface;
+  updatedAt?: TimestampInterface | null;
+  expiresAt: TimestampInterface;
+  isPublic: boolean;
+  isPhotoSharingEnabled: boolean;
+  skipImageCheck: boolean;
+  isShuffleEnabled: boolean;
+  requiredBingoLines: number;
+  confidenceThreshold: number;
+  maxSubmissionsPerUser: number;
+  notes?: string;
+  status: GameStatus;
+}
+⋮----
+export interface GameBoardDocument {
+  cells: CellDocument[];
+}
+⋮----
+export interface CellDocument {
+  id: string;
+  position: {
+    x: number;
+    y: number;
+  };
+  subject: string;
+  isFree: boolean;
+}
+⋮----
+export interface PlayerBoardDocument {
+  userId: string;
+  cells: CellDocument[];
+  cellStates: Record<string, CellStateDocument>;
+  completedLines: CompletedLineDocument[];
+}
+⋮----
+export interface CellStateDocument {
+  isOpen: boolean;
+  openedAt: TimestampInterface | null;
+  openedBySubmissionId: string | null;
+}
+⋮----
+export interface CompletedLineDocument {
+  type: LineType;
+  index: number;
+  completedAt: TimestampInterface;
+}
+⋮----
+export interface GameParticipationDocument {
+  userId: string;
+  gameId: string;
+  role: Role;
+  joinedAt: TimestampInterface;
+  createdAt: TimestampInterface;
+  updatedAt?: TimestampInterface | null;
+  completedLines?: number;
+  lastCompletedAt?: TimestampInterface | null;
+  submissionCount?: number;
+}
+⋮----
+export interface SubmissionDocument {
+  id: string;
+  userId: string;
+  imageUrl: string;
+  submittedAt: TimestampInterface;
+  analyzedAt: TimestampInterface | null;
+  critique_ja: string;
+  critique_en: string;
+  matchedCellId: string | null;
+  confidence: number | null;
+  processingStatus: ProcessingStatus;
+  acceptanceStatus: AcceptanceStatus | null;
+  errorMessage: string | null;
+  createdAt: TimestampInterface;
+  updatedAt?: TimestampInterface | null;
+  memo?: string;
+}
+⋮----
+export interface EventDocument {
+  id: string;
+  type: string;
+  userId: string;
+  timestamp: TimestampInterface;
+  details?: Record<string, unknown>;
+  createdAt: TimestampInterface;
+  updatedAt?: TimestampInterface | null;
+}
+⋮----
+export function gameFromFirestore(doc: GameDocument): Game
+⋮----
+export function gameToFirestore(game: Game): GameDocument
+⋮----
+export function gameBoardFromFirestore(doc: GameBoardDocument): GameBoard
+⋮----
+export function gameBoardToFirestore(board: GameBoard): GameBoardDocument
+⋮----
+export function cellFromFirestore(doc: CellDocument): Cell
+⋮----
+export function cellToFirestore(cell: Cell): CellDocument
+⋮----
+export function playerBoardFromFirestore(
+  doc: PlayerBoardDocument,
+): PlayerBoard
+⋮----
+export function playerBoardToFirestore(
+  board: PlayerBoard,
+): PlayerBoardDocument
+⋮----
+export function cellStateFromFirestore(doc: CellStateDocument): CellState
+⋮----
+export function cellStateToFirestore(state: CellState): CellStateDocument
+⋮----
+export function completedLineFromFirestore(
+  doc: CompletedLineDocument,
+): CompletedLine
+⋮----
+export function completedLineToFirestore(
+  line: CompletedLine,
+): CompletedLineDocument
+⋮----
+export function gameParticipationFromFirestore(
+  doc: GameParticipationDocument,
+): GameParticipation
+⋮----
+export function gameParticipationToFirestore(
+  participation: GameParticipation,
+): GameParticipationDocument
+⋮----
+export function submissionFromFirestore(doc: SubmissionDocument): Submission
+⋮----
+export function submissionToFirestore(
+  submission: Submission,
+): SubmissionDocument
+⋮----
+export function eventFromFirestore(doc: EventDocument): Event
+⋮----
+export function eventToFirestore(event: Event): EventDocument
 </file>
 
 <file path="src/app/api/game/[gameId]/join/route.test.ts">
@@ -3914,50 +4206,6 @@ title=
 value=
 </file>
 
-<file path="src/components/game/ImageUpload.tsx">
-import { Image as ImageIcon, Loader2, Upload, X } from "lucide-react";
-import Image from "next/image";
-import { useTranslations } from "next-intl";
-import { useCallback, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { useAuth } from "@/contexts/AuthContext";
-import {
-  createImagePreviewUrl,
-  isValidFileSize,
-  isValidImageFile,
-  processImage,
-  revokeImagePreviewUrl,
-} from "@/lib/image-utils";
-import { cn } from "@/lib/utils";
-import { submitImage } from "@/services/image-upload";
-import type {
-  ImageSubmissionResult,
-  ImageUploadProps,
-  ProcessedImage,
-} from "@/types/schema";
-⋮----
-interface ImagePreview {
-  file: File;
-  previewUrl: string;
-  processedImage?: ProcessedImage;
-  error?: string;
-}
-⋮----
-// Create preview URL from processed JPEG blob
-⋮----
-// For other formats, create preview first then process
-⋮----
-// Process image
-⋮----
-// Handle upload
-⋮----
-console.error("Image preview error:", error);
-⋮----
-e.stopPropagation();
-handleUpload();
-</file>
-
 <file path="src/components/game/ParticipantsList.tsx">
 import { Crown, Trophy, Users } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -4014,239 +4262,6 @@ export interface ParticipantsListProps {
 }
 ⋮----
 const getRoleBadge = (role?: Role) =>
-</file>
-
-<file path="src/components/game/SubmissionResult.tsx">
-import { AlertTriangle, CheckCircle, XCircle } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
-import type { AcceptanceStatus } from "@/types/common";
-⋮----
-export interface SubmissionResultProps {
-
-
-
-  confidence: number;
-
-
-
-  critique_ja: string;
-
-
-
-  critique_en: string;
-
-
-
-  acceptanceStatus: AcceptanceStatus;
-
-
-
-  matchedCellId?: string | null;
-
-
-
-  matchedCellSubject?: string | null;
-
-
-
-  confidenceThreshold: number;
-
-
-
-  imageUrl?: string;
-
-
-
-  className?: string;
-}
-⋮----
-const getStatusConfig = () =>
-⋮----
-<StatusIcon className=
-</file>
-
-<file path="src/services/image-upload.ts">
-import type {
-  ImageSubmissionData,
-  ImageSubmissionResult,
-  ProcessedImage,
-} from "@/types/schema";
-⋮----
-export async function submitImage(
-  processedImage: ProcessedImage,
-  submissionData: ImageSubmissionData,
-  authToken: string,
-): Promise<ImageSubmissionResult>
-⋮----
-// Step 4: Analyze image for bingo matching
-</file>
-
-<file path="src/types/game.ts">
-import type {
-  AcceptanceStatus,
-  GameStatus,
-  LineType,
-  ProcessingStatus,
-  Role,
-} from "./common";
-import type { TimestampInterface } from "./firestore";
-import { dateToTimestamp, timestampToDate } from "./firestore";
-import type {
-  Cell,
-  CellState,
-  CompletedLine,
-  Event,
-  Game,
-  GameBoard,
-  GameParticipation,
-  PlayerBoard,
-  Submission,
-} from "./schema";
-⋮----
-export interface GameDocument {
-  id: string;
-  title: string;
-  theme: string;
-  creatorId: string;
-  createdAt: TimestampInterface;
-  updatedAt?: TimestampInterface | null;
-  expiresAt: TimestampInterface;
-  isPublic: boolean;
-  isPhotoSharingEnabled: boolean;
-  skipImageCheck: boolean;
-  isShuffleEnabled: boolean;
-  requiredBingoLines: number;
-  confidenceThreshold: number;
-  maxSubmissionsPerUser: number;
-  notes?: string;
-  status: GameStatus;
-}
-⋮----
-export interface GameBoardDocument {
-  cells: CellDocument[];
-}
-⋮----
-export interface CellDocument {
-  id: string;
-  position: {
-    x: number;
-    y: number;
-  };
-  subject: string;
-  isFree: boolean;
-}
-⋮----
-export interface PlayerBoardDocument {
-  userId: string;
-  cells: CellDocument[];
-  cellStates: Record<string, CellStateDocument>;
-  completedLines: CompletedLineDocument[];
-}
-⋮----
-export interface CellStateDocument {
-  isOpen: boolean;
-  openedAt: TimestampInterface | null;
-  openedBySubmissionId: string | null;
-}
-⋮----
-export interface CompletedLineDocument {
-  type: LineType;
-  index: number;
-  completedAt: TimestampInterface;
-}
-⋮----
-export interface GameParticipationDocument {
-  userId: string;
-  gameId: string;
-  role: Role;
-  joinedAt: TimestampInterface;
-  createdAt: TimestampInterface;
-  updatedAt?: TimestampInterface | null;
-  completedLines?: number;
-  lastCompletedAt?: TimestampInterface | null;
-  submissionCount?: number;
-}
-⋮----
-export interface SubmissionDocument {
-  id: string;
-  userId: string;
-  imageUrl: string;
-  submittedAt: TimestampInterface;
-  analyzedAt: TimestampInterface | null;
-  critique_ja: string;
-  critique_en: string;
-  matchedCellId: string | null;
-  confidence: number | null;
-  processingStatus: ProcessingStatus;
-  acceptanceStatus: AcceptanceStatus | null;
-  errorMessage: string | null;
-  createdAt: TimestampInterface;
-  updatedAt?: TimestampInterface | null;
-  memo?: string;
-}
-⋮----
-export interface EventDocument {
-  id: string;
-  type: string;
-  userId: string;
-  timestamp: TimestampInterface;
-  details?: Record<string, unknown>;
-  createdAt: TimestampInterface;
-  updatedAt?: TimestampInterface | null;
-}
-⋮----
-export function gameFromFirestore(doc: GameDocument): Game
-⋮----
-export function gameToFirestore(game: Game): GameDocument
-⋮----
-export function gameBoardFromFirestore(doc: GameBoardDocument): GameBoard
-⋮----
-export function gameBoardToFirestore(board: GameBoard): GameBoardDocument
-⋮----
-export function cellFromFirestore(doc: CellDocument): Cell
-⋮----
-export function cellToFirestore(cell: Cell): CellDocument
-⋮----
-export function playerBoardFromFirestore(
-  doc: PlayerBoardDocument,
-): PlayerBoard
-⋮----
-export function playerBoardToFirestore(
-  board: PlayerBoard,
-): PlayerBoardDocument
-⋮----
-export function cellStateFromFirestore(doc: CellStateDocument): CellState
-⋮----
-export function cellStateToFirestore(state: CellState): CellStateDocument
-⋮----
-export function completedLineFromFirestore(
-  doc: CompletedLineDocument,
-): CompletedLine
-⋮----
-export function completedLineToFirestore(
-  line: CompletedLine,
-): CompletedLineDocument
-⋮----
-export function gameParticipationFromFirestore(
-  doc: GameParticipationDocument,
-): GameParticipation
-⋮----
-export function gameParticipationToFirestore(
-  participation: GameParticipation,
-): GameParticipationDocument
-⋮----
-export function submissionFromFirestore(doc: SubmissionDocument): Submission
-⋮----
-export function submissionToFirestore(
-  submission: Submission,
-): SubmissionDocument
-⋮----
-export function eventFromFirestore(doc: EventDocument): Event
-⋮----
-export function eventToFirestore(event: Event): EventDocument
 </file>
 
 <file path="vitest.config.mts">
@@ -4314,6 +4329,21 @@ export async function POST(
 ): Promise<NextResponse<ApiResponse<
 </file>
 
+<file path="src/app/api/image/check/route.test.ts">
+import type { DecodedIdToken } from "firebase-admin/auth";
+import type { NextRequest } from "next/server";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { adminAuth } from "@/lib/firebase/admin";
+import { AdminGameService } from "@/lib/firebase/admin-collections";
+import type { Game } from "@/types/schema";
+import { POST } from "./route";
+⋮----
+const createMockRequest = (
+    body: unknown,
+    authHeader?: string,
+): NextRequest =>
+</file>
+
 <file path="src/app/api/subjects/generate/route.ts">
 import { GoogleGenAI, Type } from "@google/genai";
 import { type NextRequest, NextResponse } from "next/server";
@@ -4358,21 +4388,6 @@ interface GameDataState {
 export function useGameData(gameId: string)
 ⋮----
 const setupRealtimeListener = async () =>
-</file>
-
-<file path="src/app/api/image/check/route.test.ts">
-import type { DecodedIdToken } from "firebase-admin/auth";
-import type { NextRequest } from "next/server";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { adminAuth } from "@/lib/firebase/admin";
-import { AdminGameService } from "@/lib/firebase/admin-collections";
-import type { Game } from "@/types/schema";
-import { POST } from "./route";
-⋮----
-const createMockRequest = (
-    body: unknown,
-    authHeader?: string,
-): NextRequest =>
 </file>
 
 <file path="src/app/game/create/page.tsx">
@@ -4511,102 +4526,6 @@ import { setUserLocale } from "@/services/locale";
 const toggleLocale = async (): Promise<void> =>
 ⋮----
 const handleLogout = async (): Promise<void> =>
-</file>
-
-<file path="src/app/api/game/[gameId]/submission/route.ts">
-import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
-import { z } from "zod";
-import { detectCompletedLines } from "@/lib/bingo-logic";
-import { adminAuth } from "@/lib/firebase/admin";
-import {
-  AdminGameBoardService,
-  AdminGameParticipationService,
-  AdminGameService,
-  AdminPlayerBoardService,
-  AdminSubmissionService,
-  AdminTransactionService,
-} from "@/lib/firebase/admin-collections";
-import type { ApiResponse } from "@/types/common";
-import { AcceptanceStatus, ProcessingStatus } from "@/types/common";
-import type { Submission } from "@/types/schema";
-import { analysisResultSchema } from "@/types/schema";
-⋮----
-interface SubmissionResponse {
-  newlyCompletedLines: number;
-  totalCompletedLines: number;
-  requiredBingoLines: number;
-}
-⋮----
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ gameId: string }> },
-): Promise<NextResponse<ApiResponse<SubmissionResponse>>>
-⋮----
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ gameId: string }> },
-): Promise<NextResponse<ApiResponse<Submission[]>>>
-</file>
-
-<file path="src/app/game/join/page.tsx">
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
-import { useLocale, useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
-import { type SubmitHandler, useForm } from "react-hook-form";
-import { z } from "zod";
-import { AuthGuard } from "@/components/auth/AuthGuard";
-import { GameInfoCard } from "@/components/game/GameInfoCard";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { TranslatedFormMessage } from "@/components/ui/translated-form-message";
-import { useAuth } from "@/contexts/AuthContext";
-import { useGameJoin } from "@/hooks/useGameJoin";
-import { useParticipatingGames } from "@/hooks/useParticipatingGames";
-import { GAME_ID_LENGTH, GAME_ID_PATTERN } from "@/lib/constants";
-import { auth } from "@/lib/firebase/client";
-import type { GameInfo } from "@/types/schema";
-⋮----
-type JoinGameFormValues = z.infer<typeof joinGameSchema>;
-⋮----
-// Watch the gameId field for changes
-⋮----
-const fetchAvailableGames = async () =>
-⋮----
-const handleGameIdChange = (value: string) =>
-⋮----
-const verifyGame = async () =>
-⋮----
-const onSubmit: SubmitHandler<JoinGameFormValues> = async (data) =>
-⋮----
-<form onSubmit=
-⋮----
-<CardTitle>
-⋮----
-
-⋮----
-router.push(`/game/$
-⋮----
-onClick=
-⋮----
-const result = await joinGame(game.id);
-if (result.success)
 </file>
 
 <file path="src/lib/firebase/admin-collections.ts">
@@ -4816,6 +4735,102 @@ export async function joinGame(
     userId: string,
     eventId: string,
 ): Promise<
+</file>
+
+<file path="src/app/api/game/[gameId]/submission/route.ts">
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import { z } from "zod";
+import { detectCompletedLines } from "@/lib/bingo-logic";
+import { adminAuth } from "@/lib/firebase/admin";
+import {
+  AdminGameBoardService,
+  AdminGameParticipationService,
+  AdminGameService,
+  AdminPlayerBoardService,
+  AdminSubmissionService,
+  AdminTransactionService,
+} from "@/lib/firebase/admin-collections";
+import type { ApiResponse } from "@/types/common";
+import { AcceptanceStatus, ProcessingStatus } from "@/types/common";
+import type { Submission } from "@/types/schema";
+import { analysisResultSchema } from "@/types/schema";
+⋮----
+interface SubmissionResponse {
+  newlyCompletedLines: number;
+  totalCompletedLines: number;
+  requiredBingoLines: number;
+}
+⋮----
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ gameId: string }> },
+): Promise<NextResponse<ApiResponse<SubmissionResponse>>>
+⋮----
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ gameId: string }> },
+): Promise<NextResponse<ApiResponse<Submission[]>>>
+</file>
+
+<file path="src/app/game/join/page.tsx">
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
+import { type SubmitHandler, useForm } from "react-hook-form";
+import { z } from "zod";
+import { AuthGuard } from "@/components/auth/AuthGuard";
+import { GameInfoCard } from "@/components/game/GameInfoCard";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { TranslatedFormMessage } from "@/components/ui/translated-form-message";
+import { useAuth } from "@/contexts/AuthContext";
+import { useGameJoin } from "@/hooks/useGameJoin";
+import { useParticipatingGames } from "@/hooks/useParticipatingGames";
+import { GAME_ID_LENGTH, GAME_ID_PATTERN } from "@/lib/constants";
+import { auth } from "@/lib/firebase/client";
+import type { GameInfo } from "@/types/schema";
+⋮----
+type JoinGameFormValues = z.infer<typeof joinGameSchema>;
+⋮----
+// Watch the gameId field for changes
+⋮----
+const fetchAvailableGames = async () =>
+⋮----
+const handleGameIdChange = (value: string) =>
+⋮----
+const verifyGame = async () =>
+⋮----
+const onSubmit: SubmitHandler<JoinGameFormValues> = async (data) =>
+⋮----
+<form onSubmit=
+⋮----
+<CardTitle>
+⋮----
+
+⋮----
+router.push(`/game/$
+⋮----
+onClick=
+⋮----
+const result = await joinGame(game.id);
+if (result.success)
 </file>
 
 <file path="src/types/schema.ts">
@@ -5171,6 +5186,7 @@ import {
     "@dnd-kit/utilities": "^3.2.2",
     "@google/genai": "^1.28.0",
     "@hookform/resolvers": "^5.2.2",
+    "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-dropdown-menu": "^2.1.16",
