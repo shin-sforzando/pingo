@@ -223,7 +223,10 @@ vi.mock("next/image", () => ({
     className?: string;
     fill?: boolean;
     sizes?: string;
-  }) => <img src={src} alt={alt} className={className} />,
+  }) => (
+    // biome-ignore lint/performance/noImgElement: Mock for testing purposes
+    <img src={src} alt={alt} className={className} />
+  ),
 }));
 
 describe("HomePage", () => {

@@ -99,190 +99,244 @@ export default function Home() {
             {t("HomePage.howToPlayDescription")}
           </p>
 
-          <div className="grid gap-6">
-            {/* Step 1 */}
-            <Card>
-              <CardHeader>
-                <CardTitle>
-                  {t("HomePage.howToPlaySteps.step1.title")}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="mb-4 text-muted-foreground text-sm">
-                  {t("HomePage.howToPlaySteps.step1.description")}
-                </p>
-                <div className="relative aspect-[9/16] w-full max-w-sm overflow-hidden rounded-lg border">
-                  <Image
-                    src={t("HomePage.howToPlaySteps.step1.image")}
-                    alt={t("HomePage.howToPlaySteps.step1.title")}
-                    fill
-                    className="object-contain"
-                    sizes="(max-width: 640px) 100vw, 384px"
-                  />
-                </div>
-              </CardContent>
-            </Card>
+          {/* Section 1: Login (Registration) */}
+          <div className="mb-12">
+            <div className="mb-6 border-primary border-l-4 bg-muted/50 pl-4 py-2">
+              <h3 className="mb-1 font-bold text-primary text-xl">
+                {t("HomePage.loginSection.title")}
+              </h3>
+              <p className="text-muted-foreground text-sm">
+                {t("HomePage.loginSection.description")}
+              </p>
+            </div>
 
-            {/* Step 2 */}
-            <Card>
-              <CardHeader>
-                <CardTitle>
-                  {t("HomePage.howToPlaySteps.step2.title")}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="mb-4 text-muted-foreground text-sm">
-                  {t("HomePage.howToPlaySteps.step2.description")}
-                </p>
-                <div className="relative aspect-[9/16] w-full max-w-sm overflow-hidden rounded-lg border">
-                  <Image
-                    src={t("HomePage.howToPlaySteps.step2.image")}
-                    alt={t("HomePage.howToPlaySteps.step2.title")}
-                    fill
-                    className="object-contain"
-                    sizes="(max-width: 640px) 100vw, 384px"
-                  />
-                </div>
-              </CardContent>
-            </Card>
+            <div className="grid gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>
+                    {t("HomePage.loginSection.step1.title")}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="mb-4 text-muted-foreground text-sm">
+                    {t("HomePage.loginSection.step1.description")}
+                  </p>
+                  <div className="relative aspect-[9/16] w-full max-w-sm overflow-hidden rounded-lg border-4 border-gray-300 shadow-xl">
+                    <Image
+                      src={t("HomePage.loginSection.step1.image")}
+                      alt={t("HomePage.loginSection.step1.title")}
+                      fill
+                      className="object-contain"
+                      sizes="(max-width: 640px) 100vw, 384px"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
 
-            {/* Step 3 */}
-            <Card>
-              <CardHeader>
-                <CardTitle>
-                  {t("HomePage.howToPlaySteps.step3.title")}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="mb-4 text-muted-foreground text-sm">
-                  {t("HomePage.howToPlaySteps.step3.description")}
-                </p>
-                <div className="relative aspect-[9/16] w-full max-w-sm overflow-hidden rounded-lg border">
-                  <Image
-                    src={t("HomePage.howToPlaySteps.step3.image")}
-                    alt={t("HomePage.howToPlaySteps.step3.title")}
-                    fill
-                    className="object-contain"
-                    sizes="(max-width: 640px) 100vw, 384px"
-                  />
-                </div>
-              </CardContent>
-            </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>
+                    {t("HomePage.loginSection.step2.title")}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="mb-4 text-muted-foreground text-sm">
+                    {t("HomePage.loginSection.step2.description")}
+                  </p>
+                  <div className="relative aspect-[9/16] w-full max-w-sm overflow-hidden rounded-lg border-4 border-gray-300 shadow-xl">
+                    <Image
+                      src={t("HomePage.loginSection.step2.image")}
+                      alt={t("HomePage.loginSection.step2.title")}
+                      fill
+                      className="object-contain"
+                      sizes="(max-width: 640px) 100vw, 384px"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
 
-            {/* Step 4 */}
-            <Card>
-              <CardHeader>
-                <CardTitle>
-                  {t("HomePage.howToPlaySteps.step4.title")}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="mb-4 text-muted-foreground text-sm">
-                  {t("HomePage.howToPlaySteps.step4.description")}
-                </p>
-                <div className="relative aspect-[9/16] w-full max-w-sm overflow-hidden rounded-lg border">
-                  <Image
-                    src={t("HomePage.howToPlaySteps.step4.image")}
-                    alt={t("HomePage.howToPlaySteps.step4.title")}
-                    fill
-                    className="object-contain"
-                    sizes="(max-width: 640px) 100vw, 384px"
-                  />
-                </div>
-              </CardContent>
-            </Card>
+          {/* Section 2: Create Game */}
+          <div className="mb-12">
+            <div className="mb-6 border-primary border-l-4 bg-muted/50 pl-4 py-2">
+              <h3 className="mb-1 font-bold text-primary text-xl">
+                {t("HomePage.createGameSection.title")}
+              </h3>
+              <p className="text-muted-foreground text-sm">
+                {t("HomePage.createGameSection.description")}
+              </p>
+            </div>
 
-            {/* Step 5 */}
-            <Card>
-              <CardHeader>
-                <CardTitle>
-                  {t("HomePage.howToPlaySteps.step5.title")}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="mb-4 text-muted-foreground text-sm">
-                  {t("HomePage.howToPlaySteps.step5.description")}
-                </p>
-                <div className="relative aspect-[9/16] w-full max-w-sm overflow-hidden rounded-lg border">
-                  <Image
-                    src={t("HomePage.howToPlaySteps.step5.image")}
-                    alt={t("HomePage.howToPlaySteps.step5.title")}
-                    fill
-                    className="object-contain"
-                    sizes="(max-width: 640px) 100vw, 384px"
-                  />
-                </div>
-              </CardContent>
-            </Card>
+            <div className="grid gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>
+                    {t("HomePage.createGameSection.step1.title")}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="mb-4 text-muted-foreground text-sm">
+                    {t("HomePage.createGameSection.step1.description")}
+                  </p>
+                  <div className="relative aspect-[9/16] w-full max-w-sm overflow-hidden rounded-lg border-4 border-gray-300 shadow-xl">
+                    <Image
+                      src={t("HomePage.createGameSection.step1.image")}
+                      alt={t("HomePage.createGameSection.step1.title")}
+                      fill
+                      className="object-contain"
+                      sizes="(max-width: 640px) 100vw, 384px"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
 
-            {/* Step 6 */}
-            <Card>
-              <CardHeader>
-                <CardTitle>
-                  {t("HomePage.howToPlaySteps.step6.title")}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="mb-4 text-muted-foreground text-sm">
-                  {t("HomePage.howToPlaySteps.step6.description")}
-                </p>
-                <div className="relative aspect-[9/16] w-full max-w-sm overflow-hidden rounded-lg border">
-                  <Image
-                    src={t("HomePage.howToPlaySteps.step6.image")}
-                    alt={t("HomePage.howToPlaySteps.step6.title")}
-                    fill
-                    className="object-contain"
-                    sizes="(max-width: 640px) 100vw, 384px"
-                  />
-                </div>
-              </CardContent>
-            </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>
+                    {t("HomePage.createGameSection.step2.title")}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="mb-4 text-muted-foreground text-sm">
+                    {t("HomePage.createGameSection.step2.description")}
+                  </p>
+                  <div className="relative aspect-[9/16] w-full max-w-sm overflow-hidden rounded-lg border-4 border-gray-300 shadow-xl">
+                    <Image
+                      src={t("HomePage.createGameSection.step2.image")}
+                      alt={t("HomePage.createGameSection.step2.title")}
+                      fill
+                      className="object-contain"
+                      sizes="(max-width: 640px) 100vw, 384px"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
 
-            {/* Step 7 */}
-            <Card>
-              <CardHeader>
-                <CardTitle>
-                  {t("HomePage.howToPlaySteps.step7.title")}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="mb-4 text-muted-foreground text-sm">
-                  {t("HomePage.howToPlaySteps.step7.description")}
-                </p>
-                <div className="relative aspect-[9/16] w-full max-w-sm overflow-hidden rounded-lg border">
-                  <Image
-                    src={t("HomePage.howToPlaySteps.step7.image")}
-                    alt={t("HomePage.howToPlaySteps.step7.title")}
-                    fill
-                    className="object-contain"
-                    sizes="(max-width: 640px) 100vw, 384px"
-                  />
-                </div>
-              </CardContent>
-            </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>
+                    {t("HomePage.createGameSection.step3.title")}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="mb-4 text-muted-foreground text-sm">
+                    {t("HomePage.createGameSection.step3.description")}
+                  </p>
+                  <div className="relative aspect-[9/16] w-full max-w-sm overflow-hidden rounded-lg border-4 border-gray-300 shadow-xl">
+                    <Image
+                      src={t("HomePage.createGameSection.step3.image")}
+                      alt={t("HomePage.createGameSection.step3.title")}
+                      fill
+                      className="object-contain"
+                      sizes="(max-width: 640px) 100vw, 384px"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
 
-            {/* Step 8 */}
-            <Card>
-              <CardHeader>
-                <CardTitle>
-                  {t("HomePage.howToPlaySteps.step8.title")}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="mb-4 text-muted-foreground text-sm">
-                  {t("HomePage.howToPlaySteps.step8.description")}
-                </p>
-                <div className="relative aspect-[9/16] w-full max-w-sm overflow-hidden rounded-lg border">
-                  <Image
-                    src={t("HomePage.howToPlaySteps.step8.image")}
-                    alt={t("HomePage.howToPlaySteps.step8.title")}
-                    fill
-                    className="object-contain"
-                    sizes="(max-width: 640px) 100vw, 384px"
-                  />
-                </div>
-              </CardContent>
-            </Card>
+          {/* Section 3: Play Game */}
+          <div className="mb-8">
+            <div className="mb-6 border-primary border-l-4 bg-muted/50 pl-4 py-2">
+              <h3 className="mb-1 font-bold text-primary text-xl">
+                {t("HomePage.playGameSection.title")}
+              </h3>
+              <p className="text-muted-foreground text-sm">
+                {t("HomePage.playGameSection.description")}
+              </p>
+            </div>
+
+            <div className="grid gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>
+                    {t("HomePage.playGameSection.step1.title")}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="mb-4 text-muted-foreground text-sm">
+                    {t("HomePage.playGameSection.step1.description")}
+                  </p>
+                  <div className="relative aspect-[9/16] w-full max-w-sm overflow-hidden rounded-lg border-4 border-gray-300 shadow-xl">
+                    <Image
+                      src={t("HomePage.playGameSection.step1.image")}
+                      alt={t("HomePage.playGameSection.step1.title")}
+                      fill
+                      className="object-contain"
+                      sizes="(max-width: 640px) 100vw, 384px"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>
+                    {t("HomePage.playGameSection.step2.title")}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="mb-4 text-muted-foreground text-sm">
+                    {t("HomePage.playGameSection.step2.description")}
+                  </p>
+                  <div className="relative aspect-[9/16] w-full max-w-sm overflow-hidden rounded-lg border-4 border-gray-300 shadow-xl">
+                    <Image
+                      src={t("HomePage.playGameSection.step2.image")}
+                      alt={t("HomePage.playGameSection.step2.title")}
+                      fill
+                      className="object-contain"
+                      sizes="(max-width: 640px) 100vw, 384px"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>
+                    {t("HomePage.playGameSection.step3.title")}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="mb-4 text-muted-foreground text-sm">
+                    {t("HomePage.playGameSection.step3.description")}
+                  </p>
+                  <div className="relative aspect-[9/16] w-full max-w-sm overflow-hidden rounded-lg border-4 border-gray-300 shadow-xl">
+                    <Image
+                      src={t("HomePage.playGameSection.step3.image")}
+                      alt={t("HomePage.playGameSection.step3.title")}
+                      fill
+                      className="object-contain"
+                      sizes="(max-width: 640px) 100vw, 384px"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>
+                    {t("HomePage.playGameSection.step4.title")}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="mb-4 text-muted-foreground text-sm">
+                    {t("HomePage.playGameSection.step4.description")}
+                  </p>
+                  <div className="relative aspect-[9/16] w-full max-w-sm overflow-hidden rounded-lg border-4 border-gray-300 shadow-xl">
+                    <Image
+                      src={t("HomePage.playGameSection.step4.image")}
+                      alt={t("HomePage.playGameSection.step4.title")}
+                      fill
+                      className="object-contain"
+                      sizes="(max-width: 640px) 100vw, 384px"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
       </section>
