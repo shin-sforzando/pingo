@@ -9,6 +9,7 @@ pingo/
 │   │   ├── api/               # API ルート
 │   │   ├── game/              # ゲーム関連ページ
 │   │   │   └── [gameId]/hooks/ # ゲーム固有のカスタムフック
+│   │   ├── terms/             # 利用規約ページ
 │   │   └── debug/             # デバッグ用ユーティリティ
 │   ├── components/            # React コンポーネント
 │   │   ├── ui/               # shadcn/ui ベースコンポーネント
@@ -393,11 +394,17 @@ export async function submitImage(
 
 ### 実装済みページ
 
-**認証不要**:
+#### 認証不要
 
 - `/` - ホームページ（ランディングページ）
+- `/terms` - 利用規約ページ
+  - 日本語版・英語版を1ページに記載
+  - サーバーコンポーネント（静的コンテンツ）
+  - リーガルチェック済みの法的文書を直接記述
+  - セマンティックHTML（`lang="ja"`, `lang="en"`属性）
+  - モバイルフレンドリーなレスポンシブレイアウト
 
-**認証必要**:
+#### 認証必要
 
 - `/game/create` - ゲーム作成ページ
   - 被写体生成、設定
@@ -411,7 +418,7 @@ export async function submitImage(
   - `playerBoard.cells` を優先表示（個別配置、シャッフル対応）
 - `/game/[gameId]/share` - ゲーム共有ページ（QRコード、参加者一覧）
 
-**デバッグ**:
+#### デバッグ
 
 - `/debug/*` - 開発用デバッグツール
 
@@ -502,5 +509,5 @@ export async function submitImage(
 ### 開発ツール
 
 - **Biome**: 2.2.4（ESLint + Prettierの代替）
-- **Storybook**: 9.1.6
+- **Storybook**: 9.1.6（experimentalRSC有効でServer Components対応）
 - **lefthook**: 1.13.0（Gitフック管理）
