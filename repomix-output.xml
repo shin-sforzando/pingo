@@ -167,6 +167,8 @@ src/
         page.stories.tsx
         page.tsx
     terms/
+      content.tsx
+      page.browser.test.tsx
       page.stories.tsx
       page.tsx
     favicon.ico
@@ -429,18 +431,15 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { GET } from "./route";
 </file>
 
-<file path="src/app/terms/page.stories.tsx">
-import type { Meta, StoryObj } from "@storybook/nextjs";
-import TermsPage from "./page";
-⋮----
-type Story = StoryObj<typeof meta>;
+<file path="src/app/terms/content.tsx">
+
 </file>
 
-<file path="src/app/terms/page.tsx">
-import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
-⋮----
-export async function generateMetadata(): Promise<Metadata>
+<file path="src/app/terms/page.browser.test.tsx">
+import { page } from "@vitest/browser/context";
+import { beforeEach, describe, expect, it } from "vitest";
+import { render } from "vitest-browser-react";
+import { TermsPageContent } from "./content";
 </file>
 
 <file path="src/app/globals.css">
@@ -1176,10 +1175,6 @@ import { config } from "dotenv";
 
 </file>
 
-<file path=".storybook/main.ts">
-import type { StorybookConfig } from "@storybook/nextjs";
-</file>
-
 <file path=".storybook/preview.ts">
 import type { Preview } from "@storybook/nextjs";
 import { MINIMAL_VIEWPORTS } from "storybook/viewport";
@@ -1286,15 +1281,21 @@ import jaMessages from "../../../../messages/ja.json";
 import JoinGamePage from "./page";
 </file>
 
-<file path="src/app/game/join/page.stories.tsx">
-import { fakerJA as faker } from "@faker-js/faker";
+<file path="src/app/terms/page.stories.tsx">
 import type { Meta, StoryObj } from "@storybook/nextjs";
-import { AuthContext } from "@/contexts/AuthContext";
-import JoinGamePage from "./page";
-⋮----
-import { auth } from "@/lib/firebase/client";
+import { TermsPageContent } from "./content";
 ⋮----
 type Story = StoryObj<typeof meta>;
+</file>
+
+<file path="src/app/terms/page.tsx">
+import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
+import { TermsPageContent } from "./content";
+⋮----
+export async function generateMetadata(): Promise<Metadata>
+⋮----
+export default async function TermsPage()
 </file>
 
 <file path="src/app/layout.tsx">
@@ -2238,6 +2239,10 @@ async function deleteGameSubcollections(
 export async function teardown()
 </file>
 
+<file path=".storybook/main.ts">
+import type { StorybookConfig } from "@storybook/nextjs";
+</file>
+
 <file path="src/app/api/auth/login/route.test.ts">
 import bcrypt from "bcrypt";
 import type { NextResponse } from "next/server";
@@ -2620,6 +2625,17 @@ import type { Meta, StoryObj } from "@storybook/nextjs";
 ⋮----
 import { AuthContext } from "@/contexts/AuthContext";
 import CreateGamePage from "./page";
+⋮----
+import { auth } from "@/lib/firebase/client";
+⋮----
+type Story = StoryObj<typeof meta>;
+</file>
+
+<file path="src/app/game/join/page.stories.tsx">
+import { fakerJA as faker } from "@faker-js/faker";
+import type { Meta, StoryObj } from "@storybook/nextjs";
+import { AuthContext } from "@/contexts/AuthContext";
+import JoinGamePage from "./page";
 ⋮----
 import { auth } from "@/lib/firebase/client";
 ⋮----

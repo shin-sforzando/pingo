@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/nextjs";
-import TermsPage from "./page";
+import { TermsPageContent } from "./content";
 
 const meta = {
   title: "Pages/Terms",
-  component: TermsPage,
+  component: TermsPageContent,
   parameters: {
     layout: "fullscreen",
     docs: {
@@ -14,7 +14,7 @@ const meta = {
     },
   },
   tags: ["autodocs"],
-} satisfies Meta<typeof TermsPage>;
+} satisfies Meta<typeof TermsPageContent>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
