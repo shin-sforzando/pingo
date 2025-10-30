@@ -166,6 +166,9 @@ src/
         page.browser.test.tsx
         page.stories.tsx
         page.tsx
+    terms/
+      page.stories.tsx
+      page.tsx
     favicon.ico
     globals.css
     layout.tsx
@@ -424,6 +427,20 @@ export async function GET(
 import { NextResponse } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { GET } from "./route";
+</file>
+
+<file path="src/app/terms/page.stories.tsx">
+import type { Meta, StoryObj } from "@storybook/nextjs";
+import TermsPage from "./page";
+⋮----
+type Story = StoryObj<typeof meta>;
+</file>
+
+<file path="src/app/terms/page.tsx">
+import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
+⋮----
+export async function generateMetadata(): Promise<Metadata>
 </file>
 
 <file path="src/app/globals.css">
@@ -2641,6 +2658,39 @@ import { BingoCell } from "./BingoCell";
 type Story = StoryObj<typeof meta>;
 </file>
 
+<file path="src/components/game/GameInfo.tsx">
+import {
+  Calendar,
+  Camera,
+  Eye,
+  EyeOff,
+  Globe,
+  Lock,
+  Target,
+  TrendingUp,
+} from "lucide-react";
+import { useTranslations } from "next-intl";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { formatDate } from "@/lib/utils";
+import { GameStatus } from "@/types/common";
+import type { Game } from "@/types/schema";
+⋮----
+export interface GameInfoProps {
+
+
+
+  game: Game;
+
+
+
+  className?: string;
+}
+⋮----
+const getStatusConfig = () =>
+</file>
+
 <file path="src/components/game/GameInfoCard.tsx">
 import { formatDistanceToNow } from "date-fns";
 import { enUS, ja } from "date-fns/locale";
@@ -2666,6 +2716,13 @@ export interface GameInfoCardProps {
 
   className?: string;
 }
+</file>
+
+<file path="src/components/game/SubmissionResult.stories.tsx">
+import type { Meta, StoryObj } from "@storybook/nextjs";
+import { SubmissionResult } from "./SubmissionResult";
+⋮----
+type Story = StoryObj<typeof meta>;
 </file>
 
 <file path="src/components/layout/Footer.tsx">
@@ -3327,44 +3384,28 @@ const generateCompletedLines = (
 ): number[][] =>
 </file>
 
-<file path="src/components/game/GameInfo.tsx">
-import {
-  Calendar,
-  Camera,
-  Eye,
-  EyeOff,
-  Globe,
-  Lock,
-  Target,
-  TrendingUp,
-} from "lucide-react";
-import { useTranslations } from "next-intl";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { formatDate } from "@/lib/utils";
-import { GameStatus } from "@/types/common";
-import type { Game } from "@/types/schema";
-⋮----
-export interface GameInfoProps {
-
-
-
-  game: Game;
-
-
-
-  className?: string;
-}
-⋮----
-const getStatusConfig = () =>
-</file>
-
-<file path="src/components/game/SubmissionResult.stories.tsx">
+<file path="src/components/game/ParticipantsList.stories.tsx">
+import { faker } from "@faker-js/faker";
 import type { Meta, StoryObj } from "@storybook/nextjs";
-import { SubmissionResult } from "./SubmissionResult";
+import { Role } from "@/types/common";
+import { ParticipantsList } from "./ParticipantsList";
 ⋮----
 type Story = StoryObj<typeof meta>;
+⋮----
+const generateParticipant = (role: Role, completedLines = 0) => (
+</file>
+
+<file path="src/components/game/SubmissionResult.browser.test.tsx">
+import { page } from "@vitest/browser/context";
+import { NextIntlClientProvider } from "next-intl";
+import { describe, expect, it } from "vitest";
+import { render } from "vitest-browser-react";
+import { AcceptanceStatus } from "@/types/common";
+import enMessages from "../../../messages/en.json";
+import jaMessages from "../../../messages/ja.json";
+import { SubmissionResult } from "./SubmissionResult";
+⋮----
+const renderWithIntl = (component: React.ReactElement, locale: "en" | "ja") =>
 </file>
 
 <file path="src/components/magicui/Confetti.stories.tsx">
@@ -3607,30 +3648,6 @@ export function useImageSubmission({
 const randomInRange = (min: number, max: number)
 </file>
 
-<file path="src/components/game/ParticipantsList.stories.tsx">
-import { faker } from "@faker-js/faker";
-import type { Meta, StoryObj } from "@storybook/nextjs";
-import { Role } from "@/types/common";
-import { ParticipantsList } from "./ParticipantsList";
-⋮----
-type Story = StoryObj<typeof meta>;
-⋮----
-const generateParticipant = (role: Role, completedLines = 0) => (
-</file>
-
-<file path="src/components/game/SubmissionResult.browser.test.tsx">
-import { page } from "@vitest/browser/context";
-import { NextIntlClientProvider } from "next-intl";
-import { describe, expect, it } from "vitest";
-import { render } from "vitest-browser-react";
-import { AcceptanceStatus } from "@/types/common";
-import enMessages from "../../../messages/en.json";
-import jaMessages from "../../../messages/ja.json";
-import { SubmissionResult } from "./SubmissionResult";
-⋮----
-const renderWithIntl = (component: React.ReactElement, locale: "en" | "ja") =>
-</file>
-
 <file path="src/components/layout/UserMenu.stories.tsx">
 import { faker } from "@faker-js/faker";
 import type { Meta, StoryObj } from "@storybook/nextjs";
@@ -3851,6 +3868,17 @@ title=
 value=
 </file>
 
+<file path="src/components/game/GameInfo.stories.tsx">
+import { faker } from "@faker-js/faker";
+import type { Meta, StoryObj } from "@storybook/nextjs";
+import { GAME_ID_LENGTH } from "@/lib/constants";
+import { GameStatus } from "@/types/common";
+import type { Game } from "@/types/schema";
+import { GameInfo } from "./GameInfo";
+⋮----
+type Story = StoryObj<typeof meta>;
+</file>
+
 <file path="src/components/game/ImageUpload.tsx">
 import { Image as ImageIcon, Loader2, Upload, X } from "lucide-react";
 import Image from "next/image";
@@ -3893,6 +3921,64 @@ console.error("Image preview error:", error);
 ⋮----
 e.stopPropagation();
 handleUpload();
+</file>
+
+<file path="src/components/game/ParticipantsList.tsx">
+import { Crown, Trophy, Users } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatRelativeDate } from "@/lib/utils";
+import { Role } from "@/types/common";
+⋮----
+export interface Participant {
+
+
+
+  id: string;
+
+
+
+  username: string;
+
+
+
+  role?: Role;
+
+
+
+  joinedAt?: Date;
+
+
+
+  completedLines: number;
+
+
+
+  submissionCount: number;
+
+
+
+  lastCompletedAt?: Date | null;
+}
+⋮----
+export interface ParticipantsListProps {
+
+
+
+  participants: Participant[];
+
+
+
+  currentUserId?: string;
+
+
+
+  className?: string;
+}
+⋮----
+const getRoleBadge = (role?: Role) =>
 </file>
 
 <file path="src/services/image-upload.ts">
@@ -3982,73 +4068,56 @@ export function useGameData(gameId: string)
 const setupRealtimeListener = async () =>
 </file>
 
-<file path="src/components/game/GameInfo.stories.tsx">
-import { faker } from "@faker-js/faker";
-import type { Meta, StoryObj } from "@storybook/nextjs";
-import { GAME_ID_LENGTH } from "@/lib/constants";
-import { GameStatus } from "@/types/common";
-import type { Game } from "@/types/schema";
-import { GameInfo } from "./GameInfo";
-⋮----
-type Story = StoryObj<typeof meta>;
-</file>
-
-<file path="src/components/game/ParticipantsList.tsx">
-import { Crown, Trophy, Users } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+<file path="src/components/game/SubmissionResult.tsx">
+import { AlertTriangle, CheckCircle, XCircle } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatRelativeDate } from "@/lib/utils";
-import { Role } from "@/types/common";
+import { cn } from "@/lib/utils";
+import type { AcceptanceStatus } from "@/types/common";
 ⋮----
-export interface Participant {
+export interface SubmissionResultProps {
 
 
 
-  id: string;
+  confidence: number;
 
 
 
-  username: string;
+  critique_ja: string;
 
 
 
-  role?: Role;
+  critique_en: string;
 
 
 
-  joinedAt?: Date;
+  acceptanceStatus: AcceptanceStatus;
 
 
 
-  completedLines: number;
+  matchedCellId?: string | null;
 
 
 
-  submissionCount: number;
+  matchedCellSubject?: string | null;
 
 
 
-  lastCompletedAt?: Date | null;
-}
-⋮----
-export interface ParticipantsListProps {
+  confidenceThreshold: number;
 
 
 
-  participants: Participant[];
-
-
-
-  currentUserId?: string;
+  imageUrl?: string;
 
 
 
   className?: string;
 }
 ⋮----
-const getRoleBadge = (role?: Role) =>
+const getStatusConfig = () =>
+⋮----
+<StatusIcon className=
 </file>
 
 <file path="src/types/game.ts">
@@ -4271,56 +4340,47 @@ const createMockRequest = (
 ): NextRequest =>
 </file>
 
-<file path="src/components/game/SubmissionResult.tsx">
-import { AlertTriangle, CheckCircle, XCircle } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
-import type { AcceptanceStatus } from "@/types/common";
+<file path="src/app/api/game/[gameId]/submission/analyze/route.ts">
+import { GoogleGenAI, Type } from "@google/genai";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import { z } from "zod";
+import { resolveCellId } from "@/lib/cell-utils";
+import { GEMINI_MODEL, GEMINI_THINKING_BUDGET } from "@/lib/constants";
+import { adminAuth } from "@/lib/firebase/admin";
+import {
+  AdminGameBoardService,
+  AdminGameParticipationService,
+  AdminGameService,
+  AdminPlayerBoardService,
+} from "@/lib/firebase/admin-collections";
+import type { ApiResponse } from "@/types/common";
+import { AcceptanceStatus } from "@/types/common";
+import type { AnalysisResult, Cell } from "@/types/schema";
+import { analysisResultSchema } from "@/types/schema";
 ⋮----
-export interface SubmissionResultProps {
-
-
-
-  confidence: number;
-
-
-
-  critique_ja: string;
-
-
-
-  critique_en: string;
-
-
-
-  acceptanceStatus: AcceptanceStatus;
-
-
-
-  matchedCellId?: string | null;
-
-
-
-  matchedCellSubject?: string | null;
-
-
-
-  confidenceThreshold: number;
-
-
-
-  imageUrl?: string;
-
-
-
-  className?: string;
-}
+async function authenticateUser(
+  request: NextRequest,
+): Promise<string | NextResponse<ApiResponse<never>>>
 ⋮----
-const getStatusConfig = () =>
+async function verifyGameParticipant(
+  gameId: string,
+  userId: string,
+): Promise<NextResponse<ApiResponse<never>> | null>
 ⋮----
-<StatusIcon className=
+async function getAvailableCells(
+  gameId: string,
+  userId: string,
+): Promise<Cell[]>
+⋮----
+function getAnalysisPrompt(availableCells: Cell[], gameTheme: string): string
+⋮----
+async function fetchImageAsBase64(imageUrl: string): Promise<string>
+⋮----
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ gameId: string }> },
+): Promise<NextResponse<ApiResponse<AnalysisResult>>>
 </file>
 
 <file path="src/app/game/create/page.tsx">
@@ -4391,49 +4451,6 @@ const onSubmit: SubmitHandler<GameCreateFormValues> = async (data) =>
 <CardTitle>
 ⋮----
 disabled=
-</file>
-
-<file path="src/app/api/game/[gameId]/submission/analyze/route.ts">
-import { GoogleGenAI, Type } from "@google/genai";
-import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
-import { z } from "zod";
-import { resolveCellId } from "@/lib/cell-utils";
-import { GEMINI_MODEL, GEMINI_THINKING_BUDGET } from "@/lib/constants";
-import { adminAuth } from "@/lib/firebase/admin";
-import {
-  AdminGameBoardService,
-  AdminGameParticipationService,
-  AdminGameService,
-  AdminPlayerBoardService,
-} from "@/lib/firebase/admin-collections";
-import type { ApiResponse } from "@/types/common";
-import { AcceptanceStatus } from "@/types/common";
-import type { AnalysisResult, Cell } from "@/types/schema";
-import { analysisResultSchema } from "@/types/schema";
-⋮----
-async function authenticateUser(
-  request: NextRequest,
-): Promise<string | NextResponse<ApiResponse<never>>>
-⋮----
-async function verifyGameParticipant(
-  gameId: string,
-  userId: string,
-): Promise<NextResponse<ApiResponse<never>> | null>
-⋮----
-async function getAvailableCells(
-  gameId: string,
-  userId: string,
-): Promise<Cell[]>
-⋮----
-function getAnalysisPrompt(availableCells: Cell[], gameTheme: string): string
-⋮----
-async function fetchImageAsBase64(imageUrl: string): Promise<string>
-⋮----
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ gameId: string }> },
-): Promise<NextResponse<ApiResponse<AnalysisResult>>>
 </file>
 
 <file path="src/components/layout/UserMenu.tsx">
@@ -4924,28 +4941,6 @@ Pingoは、AIによる画像判定を活用したビンゴゲームです。
 - [Testing Library](https://testing-library.com/docs/react-testing-library/intro/)
 </file>
 
-<file path="src/app/api/image/check/route.ts">
-import { GoogleGenAI, Type } from "@google/genai";
-import { type NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
-import { GEMINI_MODEL, GEMINI_THINKING_BUDGET } from "@/lib/constants";
-import { adminAuth } from "@/lib/firebase/admin";
-import { AdminGameService } from "@/lib/firebase/admin-collections";
-import type { ApiResponse } from "@/types/common";
-⋮----
-async function authenticateUser(
-  request: NextRequest,
-): Promise<string | NextResponse<ApiResponse<never>>>
-⋮----
-export async function POST(
-  request: NextRequest,
-): Promise<
-  NextResponse<ApiResponse<{ appropriate: boolean; reason?: string }>>
-> {
-  try {
-    console.log("ℹ️ XXX: ~ image/check/route.ts ~ POST called");
-</file>
-
 <file path="src/types/schema.ts">
 import { z } from "zod";
 import {
@@ -5049,6 +5044,28 @@ export interface GameInfo {
   isPublic?: boolean;
   isParticipating?: boolean;
 }
+</file>
+
+<file path="src/app/api/image/check/route.ts">
+import { GoogleGenAI, Type } from "@google/genai";
+import { type NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import { GEMINI_MODEL, GEMINI_THINKING_BUDGET } from "@/lib/constants";
+import { adminAuth } from "@/lib/firebase/admin";
+import { AdminGameService } from "@/lib/firebase/admin-collections";
+import type { ApiResponse } from "@/types/common";
+⋮----
+async function authenticateUser(
+  request: NextRequest,
+): Promise<string | NextResponse<ApiResponse<never>>>
+⋮----
+export async function POST(
+  request: NextRequest,
+): Promise<
+  NextResponse<ApiResponse<{ appropriate: boolean; reason?: string }>>
+> {
+  try {
+    console.log("ℹ️ XXX: ~ image/check/route.ts ~ POST called");
 </file>
 
 <file path="src/app/game/[gameId]/page.tsx">

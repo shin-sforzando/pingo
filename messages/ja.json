@@ -254,5 +254,9 @@
     },
     "submissions": "投稿",
     "title": "参加者一覧"
+  },
+  "Terms": {
+    "pageTitle": "Pingo 利用規約",
+    "pageDescription": "Pingoの利用規約とプライバシーポリシー"
   }
 }

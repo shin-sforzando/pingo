@@ -1,0 +1,65 @@
+import type { Meta, StoryObj } from "@storybook/nextjs";
+import TermsPage from "./page";
+
+const meta = {
+  title: "Pages/Terms",
+  component: TermsPage,
+  parameters: {
+    layout: "fullscreen",
+    docs: {
+      description: {
+        component:
+          "Terms of Service page with both Japanese and English versions on a single page.",
+      },
+    },
+  },
+  tags: ["autodocs"],
+} satisfies Meta<typeof TermsPage>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+/**
+ * Default view - Terms of Service page with Japanese version at top and English version below
+ *
+ * Features:
+ * - Japanese terms of service (legal document)
+ * - Clear divider between languages
+ * - English terms of service below
+ * - Responsive layout for mobile and desktop
+ * - Semantic HTML with lang attributes
+ */
+export const Default: Story = {};
+
+/**
+ * Mobile view - optimized for small screens
+ */
+export const Mobile: Story = {
+  parameters: {
+    viewport: {
+      defaultViewport: "mobile1",
+    },
+  },
+};
+
+/**
+ * Tablet view
+ */
+export const Tablet: Story = {
+  parameters: {
+    viewport: {
+      defaultViewport: "tablet",
+    },
+  },
+};
+
+/**
+ * Desktop view - full width layout
+ */
+export const Desktop: Story = {
+  parameters: {
+    viewport: {
+      defaultViewport: "desktop",
+    },
+  },
+};

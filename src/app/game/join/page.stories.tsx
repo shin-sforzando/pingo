@@ -212,6 +212,7 @@ const meta = {
           register: async () => {},
           logout: async () => {},
           updateUser: async () => {},
+          refreshUser: async () => {},
         }}
       >
         <Story />
