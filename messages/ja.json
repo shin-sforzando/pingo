@@ -205,7 +205,49 @@
     "createGame": "ゲームを作成",
     "editFile": "src/app/page.tsxを編集して始めましょう。",
     "howToPlay": "遊び方",
-    "howToPlayDescription": "Pingoは、AIが写真に基づいて判定するビンゴゲームです。",
+    "howToPlayDescription": "Pingoは、AIが写真に基づいて判定するビンゴゲームです。写真を撮影してアップロードすると、AIが被写体を判定してビンゴを進めることができます。",
+    "howToPlaySteps": {
+      "step1": {
+        "title": "1. アカウントを登録",
+        "description": "まずはユーザー登録を行います。ユーザー名、メールアドレス、パスワードを入力して「登録」ボタンをクリックしてください。",
+        "image": "/images/howtoplay/00-register.png"
+      },
+      "step2": {
+        "title": "2. ゲームを作成",
+        "description": "ログイン後、トップページから「ゲームを作成」ボタンをクリックします。ゲームタイトルとテーマを入力してください。",
+        "image": "/images/howtoplay/02-create-game-empty.png"
+      },
+      "step3": {
+        "title": "3. 被写体候補を生成",
+        "description": "「AIで被写体候補を生成」ボタンをクリックすると、テーマに基づいてAIが24個の被写体候補を自動生成します。生成された候補は自由に編集できます。",
+        "image": "/images/howtoplay/03-create-game-with-subjects.png"
+      },
+      "step4": {
+        "title": "4. ゲームを共有",
+        "description": "ゲームを作成したら、共有ページでゲームIDやQRコードを使って友達を招待できます。「公開設定」をONにすると、QRコードが表示されます。",
+        "image": "/images/howtoplay/04-game-share-page.png"
+      },
+      "step5": {
+        "title": "5. ビンゴボードで遊ぶ",
+        "description": "ゲームページでは5×5のビンゴボードが表示されます。中央のセルは「FREE」で最初から開いています。各セルの被写体を撮影してビンゴを目指しましょう。",
+        "image": "/images/howtoplay/05-bingo-board.png"
+      },
+      "step6": {
+        "title": "6. 画像をアップロード",
+        "description": "「画像をアップロード」ボタンをクリックして、被写体の写真を選択します。選択した画像はプレビュー表示され、ファイル情報も確認できます。",
+        "image": "/images/howtoplay/06-image-selected.png"
+      },
+      "step7": {
+        "title": "7. AIが判定",
+        "description": "アップロードした画像をAIが解析します。被写体が一致すると「承認」され、信頼度スコアと詳細な評価コメントが表示されます。",
+        "image": "/images/howtoplay/07-image-accepted.png"
+      },
+      "step8": {
+        "title": "8. ビンゴを達成",
+        "description": "縦・横・斜めのいずれかの列を完成させるとビンゴ達成！紙吹雪のアニメーションでお祝いされます。複数ライン達成を目指して遊びましょう。",
+        "image": "/images/howtoplay/09-bingo-achieved.png"
+      }
+    },
     "joinGame": "ゲームに参加",
     "saveChanges": "保存して変更をすぐに確認できます。",
     "title": "Pingo",

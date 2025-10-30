@@ -29,14 +29,14 @@ type Story = StoryObj<typeof meta>;
 
 // Sample cell data
 const sampleCell = {
-  id: "cell-1",
+  id: "cell_1",
   position: { x: 0, y: 0 },
   subject: faker.lorem.word({ length: { min: 5, max: 20 } }),
   isFree: false,
 };
 
 const longTextCell = {
-  id: "cell-2",
+  id: "cell_2",
   position: { x: 1, y: 0 },
   subject:
     "A very long subject that should be truncated after three lines of text",
@@ -44,7 +44,7 @@ const longTextCell = {
 };
 
 const freeCell = {
-  id: "cell-3",
+  id: "cell_3",
   position: { x: BOARD_CENTER_COORD, y: BOARD_CENTER_COORD },
   subject: "FREE",
   isFree: true,

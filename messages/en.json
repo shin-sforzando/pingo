@@ -205,7 +205,49 @@
     "createGame": "Create Game",
     "editFile": "Get started by editing src/app/page.tsx.",
     "howToPlay": "How to Play",
-    "howToPlayDescription": "Pingo is a bingo game where AI judges based on photos.",
+    "howToPlayDescription": "Pingo is a bingo game where AI judges based on photos. Take photos, upload them, and let AI identify the subjects to progress through your bingo board.",
+    "howToPlaySteps": {
+      "step1": {
+        "title": "1. Register an Account",
+        "description": "Start by creating a user account. Enter your username, email address, and password, then click the \"Register\" button.",
+        "image": "/images/howtoplay/00-register.png"
+      },
+      "step2": {
+        "title": "2. Create a Game",
+        "description": "After logging in, click the \"Create Game\" button on the top page. Enter a game title and theme for your bingo game.",
+        "image": "/images/howtoplay/02-create-game-empty.png"
+      },
+      "step3": {
+        "title": "3. Generate Subject Candidates",
+        "description": "Click the \"Generate subjects with AI\" button to automatically generate 24 subject candidates based on your theme. You can freely edit the generated suggestions.",
+        "image": "/images/howtoplay/03-create-game-with-subjects.png"
+      },
+      "step4": {
+        "title": "4. Share the Game",
+        "description": "Once created, use the game ID or QR code on the share page to invite friends. Turn on \"Public Settings\" to display a QR code.",
+        "image": "/images/howtoplay/04-game-share-page.png"
+      },
+      "step5": {
+        "title": "5. Play on the Bingo Board",
+        "description": "The game page displays a 5×5 bingo board. The center cell is \"FREE\" and already open. Photograph each cell's subject to aim for bingo.",
+        "image": "/images/howtoplay/05-bingo-board.png"
+      },
+      "step6": {
+        "title": "6. Upload an Image",
+        "description": "Click the \"Upload Image\" button and select a photo of the subject. The selected image will be previewed with file information displayed.",
+        "image": "/images/howtoplay/06-image-selected.png"
+      },
+      "step7": {
+        "title": "7. AI Judges the Photo",
+        "description": "AI analyzes your uploaded image. If the subject matches, it will be \"Accepted\" with a confidence score and detailed evaluation comments displayed.",
+        "image": "/images/howtoplay/07-image-accepted.png"
+      },
+      "step8": {
+        "title": "8. Achieve Bingo",
+        "description": "Complete a vertical, horizontal, or diagonal line to achieve bingo! Celebrate with a confetti animation. Try to complete multiple lines!",
+        "image": "/images/howtoplay/09-bingo-achieved.png"
+      }
+    },
     "joinGame": "Join Game",
     "saveChanges": "Save and see your changes instantly.",
     "title": "Pingo",

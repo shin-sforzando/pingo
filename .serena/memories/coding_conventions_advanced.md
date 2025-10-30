@@ -81,7 +81,7 @@ LLMの出力は不完全であることを前提とし、フォールバック�
 ```typescript
 // Gemini APIレスポンス例
 {
-  matchedCellId: "牛乳",  // ❌ セルID（"cell-xxx"）を期待したが件名
+  matchedCellId: "牛乳",  // ❌ セルID（"cell_xxx"）を期待したが件名
   confidence: 0.85
 }
 ```

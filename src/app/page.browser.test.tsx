@@ -210,6 +210,22 @@ vi.mock("next/link", () => ({
   }) => <a href={href}>{children}</a>,
 }));
 
+// Mock next/image
+vi.mock("next/image", () => ({
+  __esModule: true,
+  default: ({
+    src,
+    alt,
+    className,
+  }: {
+    src: string;
+    alt: string;
+    className?: string;
+    fill?: boolean;
+    sizes?: string;
+  }) => <img src={src} alt={alt} className={className} />,
+}));
+
 describe("HomePage", () => {
   beforeEach(() => {
     // Reset mocks

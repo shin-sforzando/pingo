@@ -143,13 +143,13 @@ describe("/api/game/[gameId]/submission/analyze", () => {
 
     const mockCells: Cell[] = [
       {
-        id: "cell-1",
+        id: "cell_1",
         position: { x: 0, y: 0 },
         subject: "赤い自転車",
         isFree: false,
       },
       {
-        id: "cell-2",
+        id: "cell_2",
         position: { x: 1, y: 0 },
         subject: "青いポスト",
         isFree: false,
@@ -198,7 +198,7 @@ describe("/api/game/[gameId]/submission/analyze", () => {
 
       // Mock Gemini API response with bilingual critique
       const mockGeminiResponse = {
-        matchedCellId: "cell-1",
+        matchedCellId: "cell_1",
         confidence: 0.85,
         critique_ja: "赤い自転車が写真にはっきりと写っています。",
         critique_en: "A red bicycle is clearly visible in the photo.",
@@ -234,7 +234,7 @@ describe("/api/game/[gameId]/submission/analyze", () => {
       expect(response.status).toBe(200);
       expect(responseData.success).toBe(true);
       expect(responseData.data).toBeDefined();
-      expect(responseData.data?.matchedCellId).toBe("cell-1");
+      expect(responseData.data?.matchedCellId).toBe("cell_1");
       expect(responseData.data?.confidence).toBe(0.85);
       expect(responseData.data?.critique_ja).toBe(
         "赤い自転車が写真にはっきりと写っています。",
@@ -338,12 +338,12 @@ describe("/api/game/[gameId]/submission/analyze", () => {
       vi.mocked(AdminPlayerBoardService.getPlayerBoard).mockResolvedValue({
         userId: mockUserId,
         cellStates: {
-          "cell-1": {
+          cell_1: {
             isOpen: true,
             openedAt: new Date(),
             openedBySubmissionId: ulid(),
           },
-          "cell-2": {
+          cell_2: {
             isOpen: true,
             openedAt: new Date(),
             openedBySubmissionId: ulid(),
@@ -410,7 +410,7 @@ describe("/api/game/[gameId]/submission/analyze", () => {
 
       // Mock Gemini API response with low confidence
       const mockGeminiResponse = {
-        matchedCellId: "cell-1",
+        matchedCellId: "cell_1",
         confidence: 0.5, // Below threshold (0.7)
         critique_ja: "赤い自転車らしきものが見えますが、確信が持てません。",
         critique_en:
@@ -591,7 +591,7 @@ describe("/api/game/[gameId]/submission/analyze", () => {
       expect(responseData.success).toBe(true);
 
       // The matchedCellId should be converted from subject name to cell ID
-      expect(responseData.data?.matchedCellId).toBe("cell-1");
+      expect(responseData.data?.matchedCellId).toBe("cell_1");
       expect(responseData.data?.confidence).toBe(0.85);
       expect(responseData.data?.acceptanceStatus).toBe(
         AcceptanceStatus.ACCEPTED,

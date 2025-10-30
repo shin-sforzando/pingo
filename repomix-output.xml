@@ -63,6 +63,18 @@ public/
       clear.png
       ng.png
       ok.png
+    howtoplay/
+      00-register.png
+      00-top-page-before-login.png
+      01-top-page-after-login.png
+      02-create-game-empty.png
+      03-create-game-with-subjects.png
+      04-game-share-page.png
+      05-bingo-board.png
+      06-image-selected.png
+      07-image-accepted.png
+      08-image-rejected.png
+      09-bingo-achieved.png
     guest-avatar-placeholder.png
     hacking-papa_512x512.png
     pingo_512x512.png
@@ -429,17 +441,6 @@ export async function GET(
 import { NextResponse } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { GET } from "./route";
-</file>
-
-<file path="src/app/terms/content.tsx">
-
-</file>
-
-<file path="src/app/terms/page.browser.test.tsx">
-import { page } from "@vitest/browser/context";
-import { beforeEach, describe, expect, it } from "vitest";
-import { render } from "vitest-browser-react";
-import { TermsPageContent } from "./content";
 </file>
 
 <file path="src/app/globals.css">
@@ -1281,21 +1282,15 @@ import jaMessages from "../../../../messages/ja.json";
 import JoinGamePage from "./page";
 </file>
 
-<file path="src/app/terms/page.stories.tsx">
-import type { Meta, StoryObj } from "@storybook/nextjs";
-import { TermsPageContent } from "./content";
-⋮----
-type Story = StoryObj<typeof meta>;
+<file path="src/app/terms/content.tsx">
+
 </file>
 
-<file path="src/app/terms/page.tsx">
-import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+<file path="src/app/terms/page.browser.test.tsx">
+import { page } from "@vitest/browser/context";
+import { beforeEach, describe, expect, it } from "vitest";
+import { render } from "vitest-browser-react";
 import { TermsPageContent } from "./content";
-⋮----
-export async function generateMetadata(): Promise<Metadata>
-⋮----
-export default async function TermsPage()
 </file>
 
 <file path="src/app/layout.tsx">
@@ -1328,6 +1323,8 @@ import type { User } from "@/types/schema";
 import enMessages from "../../messages/en.json";
 import jaMessages from "../../messages/ja.json";
 import HomePage from "./page";
+⋮----
+beforeEach(() =>
 </file>
 
 <file path="src/components/auth/AuthGuard.tsx">
@@ -2642,7 +2639,25 @@ import { auth } from "@/lib/firebase/client";
 type Story = StoryObj<typeof meta>;
 </file>
 
+<file path="src/app/terms/page.stories.tsx">
+import type { Meta, StoryObj } from "@storybook/nextjs";
+import { TermsPageContent } from "./content";
+⋮----
+type Story = StoryObj<typeof meta>;
+</file>
+
+<file path="src/app/terms/page.tsx">
+import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
+import { TermsPageContent } from "./content";
+⋮----
+export async function generateMetadata(): Promise<Metadata>
+⋮----
+export default async function TermsPage()
+</file>
+
 <file path="src/app/page.tsx">
+import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
@@ -2650,7 +2665,7 @@ import { useState } from "react";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { RegisterForm } from "@/components/auth/RegisterForm";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 ⋮----
@@ -2660,9 +2675,15 @@ const handleAuthError = (error: Error) =>
 ⋮----
 <Link href="/game/create">
 ⋮----
+<Link href="/game/join">
+⋮----
 <TabsTrigger value="login">
 <TabsTrigger value="register">
 ⋮----
+
+⋮----
+src=
+alt=
 </file>
 
 <file path="src/components/game/BingoCell.stories.tsx">
@@ -2736,6 +2757,7 @@ export interface GameInfoCardProps {
 
 <file path="src/components/game/SubmissionResult.stories.tsx">
 import type { Meta, StoryObj } from "@storybook/nextjs";
+import { AcceptanceStatus } from "@/types/common";
 import { SubmissionResult } from "./SubmissionResult";
 ⋮----
 type Story = StoryObj<typeof meta>;
@@ -2789,7 +2811,6 @@ type Story = StoryObj<typeof NotificationDrawer>;
 </file>
 
 <file path="src/components/layout/NotificationDrawer.tsx">
-import { faker } from "@faker-js/faker";
 import { useTranslations } from "next-intl";
 import type { ReactElement } from "react";
 import { Button } from "@/components/ui/button";
@@ -2802,7 +2823,6 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { NotificationDisplayType, NotificationType } from "@/types/common";
 import type { Notification } from "@/types/schema";
 ⋮----
 type NotificationDrawerProps = {

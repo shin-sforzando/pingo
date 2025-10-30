@@ -66,7 +66,7 @@ const mockPlayerBoard = {
   userId: mockUserId,
   cells: [  // 必須フィールド
     {
-      id: "cell-1",
+      id: "cell_1",
       subject: "赤い自転車",
       position: { x: 0, y: 0 },
       isFree: false,

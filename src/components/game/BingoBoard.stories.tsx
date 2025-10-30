@@ -33,7 +33,7 @@ const generateSampleCells = (): Cell[] => {
       const isFree = index === CENTER_CELL_INDEX; // Center cell is FREE
 
       cells.push({
-        id: `cell-${index}`,
+        id: `cell_${index}`,
         position: { x, y },
         subject: isFree
           ? "FREE"
@@ -53,7 +53,7 @@ const generateSampleCellStates = (
   const states: Record<string, BingoCellState> = {};
 
   for (let i = 0; i < 25; i++) {
-    const cellId = `cell-${i}`;
+    const cellId = `cell_${i}`;
 
     if (i === 12) {
       // Center is always FREE
