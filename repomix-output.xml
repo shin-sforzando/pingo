@@ -221,6 +221,9 @@ src/
       SubmissionResult.browser.test.tsx
       SubmissionResult.stories.tsx
       SubmissionResult.tsx
+    home/
+      StepCard.stories.tsx
+      StepCard.tsx
     layout/
       Footer.browser.test.tsx
       Footer.stories.tsx
@@ -512,6 +515,37 @@ export interface InfoCardProps {
 }
 ⋮----
 export function InfoCard(
+</file>
+
+<file path="src/components/home/StepCard.stories.tsx">
+import type { Meta, StoryObj } from "@storybook/react";
+import { StepCard } from "./StepCard";
+⋮----
+type Story = StoryObj<typeof meta>;
+</file>
+
+<file path="src/components/home/StepCard.tsx">
+import Image from "next/image";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+⋮----
+export interface StepCardProps {
+
+
+
+  title: string;
+
+
+
+  description: string;
+
+
+
+  imageSrc: string;
+
+
+
+  imageAlt: string;
+}
 </file>
 
 <file path="src/components/magicui/animated-grid-pattern.tsx">
@@ -3338,14 +3372,6 @@ type Story = StoryObj<typeof meta>;
 const generateParticipant = (role: Role, completedLines = 0) => (
 </file>
 
-<file path="src/components/game/SubmissionResult.stories.tsx">
-import type { Meta, StoryObj } from "@storybook/nextjs";
-import { AcceptanceStatus } from "@/types/common";
-import { SubmissionResult } from "./SubmissionResult";
-⋮----
-type Story = StoryObj<typeof meta>;
-</file>
-
 <file path="src/components/layout/NotificationDrawer.tsx">
 import { useTranslations } from "next-intl";
 import type { ReactElement } from "react";
@@ -3610,22 +3636,6 @@ export function useImageSubmission({
 const randomInRange = (min: number, max: number)
 </file>
 
-<file path="src/app/game/[gameId]/page.stories.tsx">
-import { fakerJA as faker } from "@faker-js/faker";
-import type { Meta, StoryObj } from "@storybook/nextjs";
-import { AuthContext } from "@/contexts/AuthContext";
-import { BOARD_SIZE, CENTER_CELL_INDEX } from "@/lib/constants";
-import { AcceptanceStatus, GameStatus } from "@/types/common";
-import type { Cell } from "@/types/schema";
-import GamePage from "./page";
-⋮----
-const generateSampleCells = (): Cell[] =>
-⋮----
-import { auth } from "@/lib/firebase/client";
-⋮----
-type Story = StoryObj<typeof meta>;
-</file>
-
 <file path="src/app/page.browser.test.tsx">
 import { page } from "@vitest/browser/context";
 import { NextIntlClientProvider } from "next-intl";
@@ -3717,52 +3727,12 @@ e.stopPropagation();
 handleUpload();
 </file>
 
-<file path="src/components/game/SubmissionResult.tsx">
-import { AlertTriangle, CheckCircle, XCircle } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
-import type { AcceptanceStatus } from "@/types/common";
+<file path="src/components/game/SubmissionResult.stories.tsx">
+import type { Meta, StoryObj } from "@storybook/nextjs";
+import { AcceptanceStatus } from "@/types/common";
+import { SubmissionResult } from "./SubmissionResult";
 ⋮----
-export interface SubmissionResultProps {
-
-
-
-  confidence: number;
-
-
-
-  critique_ja: string;
-
-
-
-  critique_en: string;
-
-
-
-  acceptanceStatus: AcceptanceStatus;
-
-
-
-  matchedCellSubject?: string | null;
-
-
-
-  confidenceThreshold: number;
-
-
-
-  imageUrl?: string;
-
-
-
-  className?: string;
-}
-⋮----
-const getStatusConfig = () =>
-⋮----
-<StatusIcon className=
+type Story = StoryObj<typeof meta>;
 </file>
 
 <file path="src/components/layout/UserMenu.stories.tsx">
@@ -4166,14 +4136,30 @@ title=
 value=
 </file>
 
+<file path="src/app/game/[gameId]/page.stories.tsx">
+import { fakerJA as faker } from "@faker-js/faker";
+import type { Meta, StoryObj } from "@storybook/nextjs";
+import { AuthContext } from "@/contexts/AuthContext";
+import { BOARD_SIZE, CENTER_CELL_INDEX } from "@/lib/constants";
+import { AcceptanceStatus, GameStatus } from "@/types/common";
+import type { Cell } from "@/types/schema";
+import GamePage from "./page";
+⋮----
+const generateSampleCells = (): Cell[] =>
+⋮----
+import { auth } from "@/lib/firebase/client";
+⋮----
+type Story = StoryObj<typeof meta>;
+</file>
+
 <file path="src/app/page.tsx">
-import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 ⋮----
 import { LoginForm } from "@/components/auth/LoginForm";
 import { RegisterForm } from "@/components/auth/RegisterForm";
+import { StepCard } from "@/components/home/StepCard";
 import {
   Accordion,
   AccordionContent,
@@ -4181,7 +4167,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 ⋮----
@@ -4198,8 +4184,10 @@ const handleAuthError = (error: Error) =>
 ⋮----
 
 ⋮----
-src=
-alt=
+title=
+description=
+imageSrc=
+imageAlt=
 </file>
 
 <file path="src/components/game/ParticipantsList.tsx">
@@ -4258,6 +4246,54 @@ export interface ParticipantsListProps {
 }
 ⋮----
 const getRoleBadge = (role?: Role) =>
+</file>
+
+<file path="src/components/game/SubmissionResult.tsx">
+import { AlertTriangle, CheckCircle, XCircle } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+import type { AcceptanceStatus } from "@/types/common";
+⋮----
+export interface SubmissionResultProps {
+
+
+
+  confidence: number;
+
+
+
+  critique_ja: string;
+
+
+
+  critique_en: string;
+
+
+
+  acceptanceStatus: AcceptanceStatus;
+
+
+
+  matchedCellSubject?: string | null;
+
+
+
+  confidenceThreshold: number;
+
+
+
+  imageUrl?: string;
+
+
+
+  className?: string;
+}
+⋮----
+const getStatusConfig = () =>
+⋮----
+<StatusIcon className=
 </file>
 
 <file path="vitest.config.mts">

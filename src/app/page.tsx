@@ -1,12 +1,12 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { LoginForm } from "@/components/auth/LoginForm";
 import { RegisterForm } from "@/components/auth/RegisterForm";
+import { StepCard } from "@/components/home/StepCard";
 import {
   Accordion,
   AccordionContent,
@@ -14,7 +14,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -120,51 +120,18 @@ export default function Home() {
               </AccordionTrigger>
               <AccordionContent>
                 <div className="grid gap-6 pt-4">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>
-                        {t("HomePage.loginSection.step1.title")}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="mb-4 text-muted-foreground text-sm">
-                        {t("HomePage.loginSection.step1.description")}
-                      </p>
-                      <div className="relative aspect-[9/16] w-full max-w-sm overflow-hidden rounded-lg border-4 border-gray-300 shadow-xl">
-                        <Image
-                          src={t("HomePage.loginSection.step1.image")}
-                          alt={t("HomePage.loginSection.step1.title")}
-                          fill
-                          loading="lazy"
-                          className="object-contain"
-                          sizes="(max-width: 640px) 100vw, 384px"
-                        />
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>
-                        {t("HomePage.loginSection.step2.title")}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="mb-4 text-muted-foreground text-sm">
-                        {t("HomePage.loginSection.step2.description")}
-                      </p>
-                      <div className="relative aspect-[9/16] w-full max-w-sm overflow-hidden rounded-lg border-4 border-gray-300 shadow-xl">
-                        <Image
-                          src={t("HomePage.loginSection.step2.image")}
-                          alt={t("HomePage.loginSection.step2.title")}
-                          fill
-                          loading="lazy"
-                          className="object-contain"
-                          sizes="(max-width: 640px) 100vw, 384px"
-                        />
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <StepCard
+                    title={t("HomePage.loginSection.step1.title")}
+                    description={t("HomePage.loginSection.step1.description")}
+                    imageSrc={t("HomePage.loginSection.step1.image")}
+                    imageAlt={t("HomePage.loginSection.step1.title")}
+                  />
+                  <StepCard
+                    title={t("HomePage.loginSection.step2.title")}
+                    description={t("HomePage.loginSection.step2.description")}
+                    imageSrc={t("HomePage.loginSection.step2.image")}
+                    imageAlt={t("HomePage.loginSection.step2.title")}
+                  />
                 </div>
               </AccordionContent>
             </AccordionItem>
@@ -183,74 +150,30 @@ export default function Home() {
               </AccordionTrigger>
               <AccordionContent>
                 <div className="grid gap-6 pt-4">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>
-                        {t("HomePage.createGameSection.step1.title")}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="mb-4 text-muted-foreground text-sm">
-                        {t("HomePage.createGameSection.step1.description")}
-                      </p>
-                      <div className="relative aspect-[9/16] w-full max-w-sm overflow-hidden rounded-lg border-4 border-gray-300 shadow-xl">
-                        <Image
-                          src={t("HomePage.createGameSection.step1.image")}
-                          alt={t("HomePage.createGameSection.step1.title")}
-                          fill
-                          loading="lazy"
-                          className="object-contain"
-                          sizes="(max-width: 640px) 100vw, 384px"
-                        />
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>
-                        {t("HomePage.createGameSection.step2.title")}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="mb-4 text-muted-foreground text-sm">
-                        {t("HomePage.createGameSection.step2.description")}
-                      </p>
-                      <div className="relative aspect-[9/16] w-full max-w-sm overflow-hidden rounded-lg border-4 border-gray-300 shadow-xl">
-                        <Image
-                          src={t("HomePage.createGameSection.step2.image")}
-                          alt={t("HomePage.createGameSection.step2.title")}
-                          fill
-                          loading="lazy"
-                          className="object-contain"
-                          sizes="(max-width: 640px) 100vw, 384px"
-                        />
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>
-                        {t("HomePage.createGameSection.step3.title")}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="mb-4 text-muted-foreground text-sm">
-                        {t("HomePage.createGameSection.step3.description")}
-                      </p>
-                      <div className="relative aspect-[9/16] w-full max-w-sm overflow-hidden rounded-lg border-4 border-gray-300 shadow-xl">
-                        <Image
-                          src={t("HomePage.createGameSection.step3.image")}
-                          alt={t("HomePage.createGameSection.step3.title")}
-                          fill
-                          loading="lazy"
-                          className="object-contain"
-                          sizes="(max-width: 640px) 100vw, 384px"
-                        />
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <StepCard
+                    title={t("HomePage.createGameSection.step1.title")}
+                    description={t(
+                      "HomePage.createGameSection.step1.description",
+                    )}
+                    imageSrc={t("HomePage.createGameSection.step1.image")}
+                    imageAlt={t("HomePage.createGameSection.step1.title")}
+                  />
+                  <StepCard
+                    title={t("HomePage.createGameSection.step2.title")}
+                    description={t(
+                      "HomePage.createGameSection.step2.description",
+                    )}
+                    imageSrc={t("HomePage.createGameSection.step2.image")}
+                    imageAlt={t("HomePage.createGameSection.step2.title")}
+                  />
+                  <StepCard
+                    title={t("HomePage.createGameSection.step3.title")}
+                    description={t(
+                      "HomePage.createGameSection.step3.description",
+                    )}
+                    imageSrc={t("HomePage.createGameSection.step3.image")}
+                    imageAlt={t("HomePage.createGameSection.step3.title")}
+                  />
                 </div>
               </AccordionContent>
             </AccordionItem>
@@ -269,97 +192,38 @@ export default function Home() {
               </AccordionTrigger>
               <AccordionContent>
                 <div className="grid gap-6 pt-4">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>
-                        {t("HomePage.playGameSection.step1.title")}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="mb-4 text-muted-foreground text-sm">
-                        {t("HomePage.playGameSection.step1.description")}
-                      </p>
-                      <div className="relative aspect-[9/16] w-full max-w-sm overflow-hidden rounded-lg border-4 border-gray-300 shadow-xl">
-                        <Image
-                          src={t("HomePage.playGameSection.step1.image")}
-                          alt={t("HomePage.playGameSection.step1.title")}
-                          fill
-                          loading="lazy"
-                          className="object-contain"
-                          sizes="(max-width: 640px) 100vw, 384px"
-                        />
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>
-                        {t("HomePage.playGameSection.step2.title")}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="mb-4 text-muted-foreground text-sm">
-                        {t("HomePage.playGameSection.step2.description")}
-                      </p>
-                      <div className="relative aspect-[9/16] w-full max-w-sm overflow-hidden rounded-lg border-4 border-gray-300 shadow-xl">
-                        <Image
-                          src={t("HomePage.playGameSection.step2.image")}
-                          alt={t("HomePage.playGameSection.step2.title")}
-                          fill
-                          loading="lazy"
-                          className="object-contain"
-                          sizes="(max-width: 640px) 100vw, 384px"
-                        />
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>
-                        {t("HomePage.playGameSection.step3.title")}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="mb-4 text-muted-foreground text-sm">
-                        {t("HomePage.playGameSection.step3.description")}
-                      </p>
-                      <div className="relative aspect-[9/16] w-full max-w-sm overflow-hidden rounded-lg border-4 border-gray-300 shadow-xl">
-                        <Image
-                          src={t("HomePage.playGameSection.step3.image")}
-                          alt={t("HomePage.playGameSection.step3.title")}
-                          fill
-                          loading="lazy"
-                          className="object-contain"
-                          sizes="(max-width: 640px) 100vw, 384px"
-                        />
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>
-                        {t("HomePage.playGameSection.step4.title")}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="mb-4 text-muted-foreground text-sm">
-                        {t("HomePage.playGameSection.step4.description")}
-                      </p>
-                      <div className="relative aspect-[9/16] w-full max-w-sm overflow-hidden rounded-lg border-4 border-gray-300 shadow-xl">
-                        <Image
-                          src={t("HomePage.playGameSection.step4.image")}
-                          alt={t("HomePage.playGameSection.step4.title")}
-                          fill
-                          loading="lazy"
-                          className="object-contain"
-                          sizes="(max-width: 640px) 100vw, 384px"
-                        />
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <StepCard
+                    title={t("HomePage.playGameSection.step1.title")}
+                    description={t(
+                      "HomePage.playGameSection.step1.description",
+                    )}
+                    imageSrc={t("HomePage.playGameSection.step1.image")}
+                    imageAlt={t("HomePage.playGameSection.step1.title")}
+                  />
+                  <StepCard
+                    title={t("HomePage.playGameSection.step2.title")}
+                    description={t(
+                      "HomePage.playGameSection.step2.description",
+                    )}
+                    imageSrc={t("HomePage.playGameSection.step2.image")}
+                    imageAlt={t("HomePage.playGameSection.step2.title")}
+                  />
+                  <StepCard
+                    title={t("HomePage.playGameSection.step3.title")}
+                    description={t(
+                      "HomePage.playGameSection.step3.description",
+                    )}
+                    imageSrc={t("HomePage.playGameSection.step3.image")}
+                    imageAlt={t("HomePage.playGameSection.step3.title")}
+                  />
+                  <StepCard
+                    title={t("HomePage.playGameSection.step4.title")}
+                    description={t(
+                      "HomePage.playGameSection.step4.description",
+                    )}
+                    imageSrc={t("HomePage.playGameSection.step4.image")}
+                    imageAlt={t("HomePage.playGameSection.step4.title")}
+                  />
                 </div>
               </AccordionContent>
             </AccordionItem>
