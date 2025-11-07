@@ -8,6 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import {
+  trackBingoAchieved,
+  trackCellMatched,
+  trackImageUploaded,
+} from "@/lib/analytics";
+import {
   createImagePreviewUrl,
   isValidFileSize,
   isValidImageFile,
@@ -273,6 +278,9 @@ export function ImageUpload({
 
       console.log("ℹ️ XXX: ~ ImageUpload.tsx ~ Upload successful", { result });
 
+      // Track image upload event
+      trackImageUploaded(gameId, result.matchedCellId || "unknown");
+
       // Check if image was deemed inappropriate
       if (!result.appropriate) {
         console.log(
@@ -290,6 +298,23 @@ export function ImageUpload({
           result.reason || "Image content was deemed inappropriate",
         );
         return;
+      }
+
+      // Track cell match event if successful
+      if (result.matchedCellId) {
+        // Note: We don't have the subject name here, so we use the cell ID
+        trackCellMatched(gameId, result.matchedCellId, result.matchedCellId);
+      }
+
+      // Track bingo achievement if new lines were completed
+      if (
+        result.newlyCompletedLines > 0 &&
+        result.totalCompletedLines >= (result.requiredBingoLines || 1)
+      ) {
+        trackBingoAchieved(
+          gameId,
+          `${result.newlyCompletedLines} line(s) completed`,
+        );
       }
 
       // Clear preview after successful upload

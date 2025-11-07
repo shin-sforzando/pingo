@@ -31,6 +31,7 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { TranslatedFormMessage } from "@/components/ui/translated-form-message";
 import { useAuth } from "@/contexts/AuthContext";
+import { trackGameCreated } from "@/lib/analytics";
 import {
   BOARD_CENTER_COORD,
   BOARD_SIZE,
@@ -388,6 +389,9 @@ export default function CreateGamePage() {
           refreshErr,
         );
       }
+
+      // Track game creation event
+      trackGameCreated(responseData.data.gameId, BOARD_SIZE);
 
       // Redirect to game share page
       window.location.href = `/game/${responseData.data.gameId}/share`;
