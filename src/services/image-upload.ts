@@ -1,3 +1,8 @@
+import {
+  GeminiAnalysisError,
+  ImageRejectedError,
+  ImageUploadError,
+} from "@/types/errors";
 import type {
   ImageSubmissionData,
   ImageSubmissionResult,
@@ -24,7 +29,10 @@ export async function submitImage(
 
   if (!uploadUrlResponse.ok) {
     const errorData = await uploadUrlResponse.json();
-    throw new Error(errorData.error || "Failed to get upload URL");
+    throw new ImageUploadError(
+      errorData.error || "Failed to get upload URL",
+      "url_generation",
+    );
   }
 
   const { signedUrl, filePath, submissionId } = await uploadUrlResponse.json();
@@ -57,8 +65,9 @@ export async function submitImage(
       headers: Object.fromEntries(uploadResponse.headers.entries()),
       body: errorText,
     });
-    throw new Error(
+    throw new ImageUploadError(
       `Failed to upload image to storage: ${uploadResponse.status} ${uploadResponse.statusText} - ${errorText}`,
+      "storage_upload",
     );
   }
 
@@ -84,35 +93,43 @@ export async function submitImage(
 
   if (!checkResponse.ok) {
     const errorData = await checkResponse.json();
-    throw new Error(
-      errorData.error?.message || "Failed to check image appropriateness",
-    );
+    // Determine error type based on response status and content
+    const errorMessage =
+      errorData.error?.message || "Failed to check image appropriateness";
+
+    // Check if it's a Gemini-specific error
+    if (
+      errorData.error?.code === "GEMINI_API_ERROR" ||
+      errorMessage.toLowerCase().includes("gemini") ||
+      errorMessage.toLowerCase().includes("api error")
+    ) {
+      // Classify Gemini error type
+      let errorType: "timeout" | "rate_limit" | "api_error" = "api_error";
+      if (errorMessage.toLowerCase().includes("timeout")) {
+        errorType = "timeout";
+      } else if (errorMessage.toLowerCase().includes("rate limit")) {
+        errorType = "rate_limit";
+      }
+      throw new GeminiAnalysisError(errorMessage, errorType);
+    }
+
+    // Generic error during check process
+    throw new GeminiAnalysisError(errorMessage, "api_error");
   }
 
   const checkResult = await checkResponse.json();
 
-  // If inappropriate, return early without analysis
+  // If inappropriate, throw ImageRejectedError instead of returning
+  // This allows proper error tracking and consistent error handling
   if (!checkResult.data.appropriate) {
+    const reason = checkResult.data.reason || "Content policy violation";
     console.log(
-      "ℹ️ XXX: ~ image-upload.ts ~ Image inappropriate, skipping analysis",
+      "ℹ️ XXX: ~ image-upload.ts ~ Image inappropriate, throwing rejection error",
       {
-        reason: checkResult.data.reason,
+        reason,
       },
     );
-    return {
-      submissionId,
-      imageUrl: publicUrl,
-      appropriate: false,
-      reason: checkResult.data.reason,
-      confidence: undefined,
-      matchedCellId: undefined,
-      acceptanceStatus: undefined,
-      critique_ja: "",
-      critique_en: "",
-      newlyCompletedLines: 0,
-      totalCompletedLines: 0,
-      requiredBingoLines: 0,
-    };
+    throw new ImageRejectedError(`Image rejected due to: ${reason}`, reason);
   }
 
   // Step 4: Analyze image for bingo matching
@@ -134,9 +151,18 @@ export async function submitImage(
 
   if (!analyzeResponse.ok) {
     const errorData = await analyzeResponse.json();
-    throw new Error(
-      errorData.error?.message || "Failed to analyze image content",
-    );
+    const errorMessage =
+      errorData.error?.message || "Failed to analyze image content";
+
+    // Classify Gemini error type based on error message
+    let errorType: "timeout" | "rate_limit" | "api_error" = "api_error";
+    if (errorMessage.toLowerCase().includes("timeout")) {
+      errorType = "timeout";
+    } else if (errorMessage.toLowerCase().includes("rate limit")) {
+      errorType = "rate_limit";
+    }
+
+    throw new GeminiAnalysisError(errorMessage, errorType);
   }
 
   const analyzeResult = await analyzeResponse.json();
@@ -166,7 +192,10 @@ export async function submitImage(
 
   if (!submissionResponse.ok) {
     const errorData = await submissionResponse.json();
-    throw new Error(errorData.error?.message || "Failed to create submission");
+    throw new ImageUploadError(
+      errorData.error?.message || "Failed to create submission",
+      "submission_creation",
+    );
   }
 
   const submissionResult = await submissionResponse.json();

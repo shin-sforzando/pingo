@@ -127,15 +127,15 @@ describe("analytics", () => {
   describe("trackEvent", () => {
     it("should not send events when user has not consented", () => {
       localStorageMock.pingo_analytics_consent = "denied";
-      trackEvent("test_event", { test: "data" });
+      trackEvent("game_created", { game_id: "test-game", board_size: "3x3" });
       expect(gtagMock).not.toHaveBeenCalled();
     });
 
     it("should send events when user has consented", () => {
       localStorageMock.pingo_analytics_consent = "granted";
-      trackEvent("test_event", { test: "data" });
-      expect(gtagMock).toHaveBeenCalledWith("event", "test_event", {
-        test: "data",
+      trackEvent("game_joined", { game_id: "test-game" });
+      expect(gtagMock).toHaveBeenCalledWith("event", "game_joined", {
+        game_id: "test-game",
       });
     });
 
@@ -143,7 +143,7 @@ describe("analytics", () => {
       localStorageMock.pingo_analytics_consent = "granted";
       delete process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 
-      trackEvent("test_event");
+      trackEvent("game_started", { game_id: "test-game" });
       expect(gtagMock).not.toHaveBeenCalled();
     });
 
@@ -151,7 +151,7 @@ describe("analytics", () => {
       localStorageMock.pingo_analytics_consent = "granted";
       global.window.gtag = undefined;
 
-      trackEvent("test_event");
+      trackEvent("game_started", { game_id: "test-game" });
       expect(gtagMock).not.toHaveBeenCalled();
     });
 
@@ -165,7 +165,7 @@ describe("analytics", () => {
         throw new Error("gtag error");
       });
 
-      trackEvent("test_event");
+      trackEvent("game_completed", { game_id: "test-game" });
       expect(consoleErrorSpy).not.toHaveBeenCalled();
 
       consoleErrorSpy.mockRestore();
@@ -181,7 +181,7 @@ describe("analytics", () => {
         throw new Error("gtag error");
       });
 
-      trackEvent("test_event");
+      trackEvent("image_no_match", { game_id: "test-game" });
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         "Analytics tracking error:",
         expect.any(Error),

@@ -7,7 +7,7 @@
 ```typescript
 // src/lib/analytics.ts - 中核となるアナリティクスモジュール
 // src/components/analytics/GoogleAnalytics.tsx - GAスクリプトロード
-// src/components/analytics/CookieConsentBanner.tsx - 同意UI
+// src/components/analytics/CookieConsentBanner.tsx - 同意UI（Drawerコンポーネント使用）
 ```
 
 ### 型安全なイベントトラッキング
@@ -105,6 +105,30 @@ export function setUserConsent(granted: boolean): void {
 }
 ```
 
+### 同意チェックの一貫性
+
+**重要な設計原則**: 同意チェックは`trackEvent()`関数内で一元管理
+
+```typescript
+// ❌ 古いパターン（非推奨）
+const canTrack = hasUserConsent();
+if (canTrack) {
+  trackImageUploaded(gameId, cellId);
+  trackCellMatched(gameId, cellId, subject);
+}
+
+// ✅ 新しいパターン（推奨）
+// trackXxx関数内でhasUserConsent()がチェックされる
+trackImageUploaded(gameId, cellId);
+trackCellMatched(gameId, cellId, subject);
+```
+
+**Why**:
+
+- DRY原則の遵守（重複コード削減）
+- 一貫性の確保（すべてのtrackXxx関数が同じパターン）
+- メンテナンス性の向上（変更箇所が1箇所）
+
 ### 同一タブでの同意状態同期
 
 #### カスタムイベントによるリアルタイム反映
@@ -141,13 +165,24 @@ useEffect(() => {
 - `pingo:analytics-consent` - 同一タブ内の変更を即座に反映（ページリロード不要）
 - `storage` イベント - 別タブでの変更を検知
 
-### Cookie同意バナー実装
+### Cookie同意バナー実装（Drawerコンポーネント使用）
+
+**重要**: Drawerコンポーネント（vaul）を使用してUIの一貫性とアクセシビリティを確保
 
 ```typescript
 // src/components/analytics/CookieConsentBanner.tsx
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
+
 export function CookieConsentBanner() {
-  const t = useTranslations(); // 名前空間省略（規約準拠）
-  const [isVisible, setIsVisible] = useState(false);
+  const t = useTranslations();
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -156,84 +191,195 @@ export function CookieConsentBanner() {
     
     // 未決定の場合のみ表示
     if (!consentValue) {
-      setTimeout(() => setIsVisible(true), 1000); // UX向上のための遅延
+      setTimeout(() => setIsOpen(true), 1000); // UX向上のための遅延
     }
   }, []);
 
   const handleAccept = () => {
     setUserConsent(true);
-    setIsVisible(false);
+    setIsOpen(false);
   };
 
   const handleDecline = () => {
     setUserConsent(false);
-    setIsVisible(false);
+    setIsOpen(false);
   };
 
-  if (!isVisible) return null;
-
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 p-4 sm:p-6">
-      <Card>
-        <CardContent>
-          <h3>{t("CookieConsent.title")}</h3>
-          <p>{t("CookieConsent.message")}</p>
-          <Link href="/terms">{t("CookieConsent.learnMore")}</Link>
-        </CardContent>
-        <CardFooter>
-          <Button variant="outline" onClick={handleDecline}>
-            {t("CookieConsent.decline")}
-          </Button>
-          <Button onClick={handleAccept}>
-            {t("CookieConsent.accept")}
-          </Button>
-        </CardFooter>
-      </Card>
-    </div>
+    <Drawer open={isOpen} onOpenChange={setIsOpen} direction="bottom">
+      <DrawerContent>
+        <div className="mx-auto w-full max-w-4xl">
+          <DrawerHeader>
+            <DrawerTitle>{t("CookieConsent.title")}</DrawerTitle>
+            <DrawerDescription>{t("CookieConsent.message")}</DrawerDescription>
+            <Link href="/terms">{t("CookieConsent.learnMore")}</Link>
+          </DrawerHeader>
+          <DrawerFooter>
+            <Button variant="outline" onClick={handleDecline}>
+              {t("CookieConsent.decline")}
+            </Button>
+            <Button onClick={handleAccept}>
+              {t("CookieConsent.accept")}
+            </Button>
+          </DrawerFooter>
+        </div>
+      </DrawerContent>
+    </Drawer>
   );
 }
 ```
 
-#### 重要ポイント
+#### Drawerコンポーネント使用の重要ポイント
 
-- ✅ 未決定の場合のみ表示（accept/declineどちらかを選択後は非表示）
-- ✅ オプトイン方式（同意するまでトラッキングしない）
-- ✅ 利用規約へのリンク提供
-- ✅ スライドアップアニメーション（UX向上）
+- ✅ **styled-jsx不使用** - Tailwind CSSのみで一貫性確保
+- ✅ **vaulライブラリ** - アクセシビリティ対応（ARIA属性、フォーカストラップ自動）
+- ✅ **既存UIパターンとの一貫性** - NotificationDrawerと同じパターン
+- ✅ **direction="bottom"** - 下からスライドアップアニメーション内蔵
+- ✅ **オプトイン方式** - 同意するまでトラッキングしない
+- ✅ **利用規約へのリンク提供** - GDPR/CCPA準拠
 
-## パフォーマンス最適化
-
-### 同意確認の呼び出し削減
-
-#### Before（非効率）
+#### アンチパターン（使用禁止）
 
 ```typescript
-// 複数回hasUserConsent()を呼び出し（5-6回）
-if (hasUserConsent()) trackImageUploaded(gameId, cellId);
-if (hasUserConsent()) trackCellMatched(gameId, cellId, subject);
-if (hasUserConsent()) trackBingoAchieved(gameId, pattern);
+// ❌ styled-jsx使用（Tailwind CSSプロジェクトで一貫性がない）
+<style jsx>{`
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+`}</style>
+
+// ❌ Card/CardContentで独自実装（車輪の再発明）
+<Card className="...">
+  <CardContent>...</CardContent>
+</Card>
 ```
 
-#### After（最適化）
+**Why避けるべきか**:
+
+- styled-jsxはTailwind CSSプロジェクトで一貫性を欠く
+- vaulベースのDrawerは既にアクセシビリティ対応済み
+- アニメーションロジックの重複を避ける（DRY原則）
+
+## 型安全なエラーハンドリングパターン
+
+### カスタムエラークラスの設計
+
+**問題**: 文字列マッチング（`includes("Failed to...")`）は脆弱
+
+- エラーメッセージ変更時に分類ロジックが破綻
+- コンパイル時エラー検出不可
+- テストが困難
+
+**解決策**: カスタムエラークラスで型安全性を確保
 
 ```typescript
-// 1回のチェックで全イベントトラッキング
-const canTrack = hasUserConsent();
-
-if (canTrack) {
-  try {
-    trackImageUploaded(gameId, cellId);
-    trackCellMatched(gameId, cellId, subject);
-    if (newlyCompletedLines > 0) {
-      trackBingoAchieved(gameId, `${newlyCompletedLines} line(s)`);
+// src/types/errors.ts
+export class ImageUploadError extends Error {
+  constructor(
+    message: string,
+    public readonly phase:
+      | "url_generation"
+      | "storage_upload"
+      | "submission_creation",
+  ) {
+    super(message);
+    this.name = "ImageUploadError";
+    
+    // Proper stack trace (V8)
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, ImageUploadError);
     }
-  } catch (error) {
-    console.error("Failed to track analytics events:", error);
+  }
+}
+
+export class GeminiAnalysisError extends Error {
+  constructor(
+    message: string,
+    public readonly errorType: "api_error" | "timeout" | "rate_limit",
+  ) {
+    super(message);
+    this.name = "GeminiAnalysisError";
+    
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, GeminiAnalysisError);
+    }
+  }
+}
+
+export class ImageRejectedError extends Error {
+  constructor(
+    message: string,
+    public readonly reason: string,
+  ) {
+    super(message);
+    this.name = "ImageRejectedError";
+    
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, ImageRejectedError);
+    }
   }
 }
 ```
 
-**Why**: localStorageアクセスを削減し、パフォーマンス向上
+### エラーのthrowパターン
+
+```typescript
+// src/services/image-upload.ts
+
+// ❌ 古いパターン（文字列マッチング依存）
+throw new Error("Failed to upload image to storage");
+
+// ✅ 新しいパターン（型安全）
+throw new ImageUploadError(
+  "Failed to upload image to storage",
+  "storage_upload"
+);
+```
+
+### 型安全なエラーハンドリング
+
+```typescript
+// src/components/game/ImageUpload.tsx
+
+// ❌ 古いパターン（文字列マッチング）
+try {
+  // ...
+} catch (error) {
+  const errorMessage = error instanceof Error ? error.message : "Upload failed";
+  
+  if (errorMessage.includes("Failed to get upload URL")) {
+    trackImageUploadFailed(gameId, "url_generation", errorMessage);
+  } else if (errorMessage.includes("Failed to upload image to storage")) {
+    trackImageUploadFailed(gameId, "storage_upload", errorMessage);
+  }
+  // ...
+}
+
+// ✅ 新しいパターン（型安全）
+try {
+  // ...
+} catch (error) {
+  if (error instanceof ImageUploadError) {
+    trackImageUploadFailed(gameId, error.phase, error.message);
+  } else if (error instanceof GeminiAnalysisError) {
+    trackGeminiAnalysisFailed(gameId, error.errorType, error.message);
+  } else if (error instanceof ImageRejectedError) {
+    trackImageRejected(gameId, error.reason);
+    handleRemove(); // Clear preview
+  } else {
+    trackImageUploadFailed(gameId, "unknown", String(error));
+  }
+}
+```
+
+**メリット**:
+
+- ✅ コンパイル時型チェック（instanceof）
+- ✅ エラーメッセージ変更に強い（ロジックが文字列に依存しない）
+- ✅ IDEの自動補完とリファクタリング支援
+- ✅ テストしやすい（モックが容易）
+- ✅ デバッグ情報が構造化（スタックトレース保持）
 
 ## エラートラッキングの分類
 
@@ -260,19 +406,93 @@ trackImageRejected(gameId, reason);
 
 **Why**: エラーの原因を正確に分類し、デバッグとモニタリングを容易に
 
+## テスト戦略
+
+### エラークラスのテスト（src/types/errors.test.ts）
+
+```typescript
+describe("Custom Error Classes", () => {
+  describe("ImageUploadError", () => {
+    it("should create error with correct properties", () => {
+      const error = new ImageUploadError("Test", "storage_upload");
+      
+      expect(error).toBeInstanceOf(Error);
+      expect(error).toBeInstanceOf(ImageUploadError);
+      expect(error.name).toBe("ImageUploadError");
+      expect(error.phase).toBe("storage_upload");
+      expect(error.stack).toBeDefined();
+    });
+  });
+
+  describe("Type discrimination with instanceof", () => {
+    it("should correctly discriminate between error types", () => {
+      const uploadError = new ImageUploadError("Upload failed", "storage_upload");
+      const geminiError = new GeminiAnalysisError("Analysis failed", "api_error");
+      
+      expect(uploadError instanceof ImageUploadError).toBe(true);
+      expect(uploadError instanceof GeminiAnalysisError).toBe(false);
+      
+      expect(geminiError instanceof GeminiAnalysisError).toBe(true);
+      expect(geminiError instanceof ImageUploadError).toBe(false);
+    });
+  });
+});
+```
+
+### アナリティクスのテスト（src/lib/analytics.test.ts）
+
+**重要**: テストでは実際に定義されたイベント型を使用
+
+```typescript
+// ❌ 型安全性を損なうパターン
+trackEvent("test_event", { test: "data" }); // コンパイルエラー
+
+// ✅ 正しいパターン
+trackEvent("game_created", { game_id: "test-game", board_size: "3x3" });
+trackEvent("game_joined", { game_id: "test-game" });
+```
+
+**Why**: 型システムの利点を活かし、リファクタリング時の安全性を確保
+
+- 同意管理のテスト（hasUserConsent, setUserConsent）
+- イベント送信のテスト（trackXxx関数）
+- エラーハンドリングのテスト
+- カバレッジ: 94.11%
+
 ## 実装チェックリスト
 
 新しいアナリティクスイベントを追加する場合：
 
 - [ ] `AnalyticsEvent` Union型に新イベント定義を追加
 - [ ] `trackXxx()` ヘルパー関数を作成（JSDocコメント付き）
-- [ ] イベント送信前に `hasUserConsent()` チェック
+- [ ] **同意チェックは不要**（`trackEvent()`内で自動的に行われる）
 - [ ] エラーハンドリングを実装（try-catchで囲む）
-- [ ] テストを作成（`lib/analytics.test.ts`）
+- [ ] テストを作成（`lib/analytics.test.ts`）- 実際のイベント型を使用
+
+新しいエラー種別を追加する場合：
+
+- [ ] カスタムエラークラスを作成（`src/types/errors.ts`）
+- [ ] `Error.captureStackTrace()`でスタックトレース保持
+- [ ] `readonly`プロパティで分類情報を保持
+- [ ] throw箇所を修正（該当サービス/API）
+- [ ] catch箇所で`instanceof`チェック
+- [ ] テストを作成（`src/types/errors.test.ts`）
+
+UIコンポーネント実装時：
+
+- [ ] **既存のshadcn/uiコンポーネントを優先**（車輪の再発明を避ける）
+- [ ] **styled-jsx使用禁止** - Tailwind CSSのみ使用
+- [ ] Drawerが適切な場合は必ず使用（モーダル的UI）
+- [ ] NotificationDrawer等の既存パターンを参考に
 
 ## 参考実装
 
 - `src/lib/analytics.ts` - アナリティクス中核機能
+- `src/types/errors.ts` - カスタムエラークラス
+- `src/services/image-upload.ts` - エラーthrowの実装例
+- `src/components/game/ImageUpload.tsx` - エラーハンドリングの実装例
 - `src/components/analytics/GoogleAnalytics.tsx` - GAスクリプトロード
-- `src/components/analytics/CookieConsentBanner.tsx` - 同意UI
-- `src/components/game/ImageUpload.tsx` - 最適化された使用例
+- `src/components/analytics/CookieConsentBanner.tsx` - 同意UI（Drawer使用）
+- `src/components/layout/NotificationDrawer.tsx` - Drawerコンポーネント使用例
+- `src/lib/analytics.test.ts` - アナリティクステスト
+- `src/types/errors.test.ts` - エラークラステスト
