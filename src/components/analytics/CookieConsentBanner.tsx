@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { hasUserConsent, setUserConsent } from "@/lib/analytics";
+import { setUserConsent } from "@/lib/analytics";
 
 /**
  * Cookie consent banner component
@@ -19,22 +19,16 @@ import { hasUserConsent, setUserConsent } from "@/lib/analytics";
  * - Link to privacy policy
  */
 export function CookieConsentBanner() {
-  const t = useTranslations("CookieConsent");
+  const t = useTranslations();
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    // Check if user has already made a choice
-    // If consent key exists in localStorage, don't show banner
-    const _hasConsent = hasUserConsent();
-    const _hasDeclined =
-      typeof window !== "undefined" &&
-      localStorage.getItem("pingo_analytics_consent") === "denied";
+    if (typeof window === "undefined") return;
 
-    // Show banner only if user hasn't made any choice yet
-    if (
-      typeof window !== "undefined" &&
-      !localStorage.getItem("pingo_analytics_consent")
-    ) {
+    const consentValue = localStorage.getItem("pingo_analytics_consent");
+
+    // Show banner only if no decision has been made
+    if (!consentValue) {
       // Small delay for better UX
       setTimeout(() => setIsVisible(true), 1000);
     }
@@ -65,13 +59,17 @@ export function CookieConsentBanner() {
         <CardContent className="pb-4 pt-6">
           <div className="flex items-start gap-4">
             <div className="flex-1">
-              <h3 className="mb-2 text-lg font-semibold">{t("title")}</h3>
-              <p className="text-sm text-muted-foreground">{t("message")}</p>
+              <h3 className="mb-2 text-lg font-semibold">
+                {t("CookieConsent.title")}
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                {t("CookieConsent.message")}
+              </p>
               <Link
                 href="/terms"
                 className="mt-2 inline-block text-sm text-primary hover:underline"
               >
-                {t("learnMore")}
+                {t("CookieConsent.learnMore")}
               </Link>
             </div>
           </div>
@@ -82,10 +80,10 @@ export function CookieConsentBanner() {
             onClick={handleDecline}
             className="w-full sm:w-auto"
           >
-            {t("decline")}
+            {t("CookieConsent.decline")}
           </Button>
           <Button onClick={handleAccept} className="w-full sm:w-auto">
-            {t("accept")}
+            {t("CookieConsent.accept")}
           </Button>
         </CardFooter>
       </Card>

@@ -7,16 +7,79 @@
 // LocalStorage key for storing analytics consent
 const CONSENT_KEY = "pingo_analytics_consent";
 
-// Extend window object to include gtag
+// GA4 Event parameter types
+type GtagEventParams = Record<string, string | number | boolean | undefined>;
+type GtagConsentParams = {
+  analytics_storage: "granted" | "denied";
+};
+
+// Extend window object to include gtag with proper typing
 declare global {
   interface Window {
-    gtag?: (
-      command: "config" | "event" | "set" | "consent",
-      targetId: string,
-      config?: Record<string, unknown>,
-    ) => void;
+    gtag?: {
+      (command: "config", targetId: string, config?: GtagEventParams): void;
+      (command: "event", eventName: string, params?: GtagEventParams): void;
+      (command: "set", params: GtagEventParams): void;
+      (command: "consent", action: "update", params: GtagConsentParams): void;
+    };
   }
 }
+
+/**
+ * Analytics event definitions
+ *
+ * Defines all possible analytics events with their required parameters.
+ * This ensures type safety when tracking events.
+ */
+type AnalyticsEvent =
+  | {
+      name: "game_created";
+      params: { game_id: string; board_size: string };
+    }
+  | {
+      name: "game_joined";
+      params: { game_id: string };
+    }
+  | {
+      name: "game_started";
+      params: { game_id: string };
+    }
+  | {
+      name: "image_uploaded";
+      params: { game_id: string; cell_id: string };
+    }
+  | {
+      name: "cell_matched";
+      params: { game_id: string; cell_id: string; subject: string };
+    }
+  | {
+      name: "bingo_achieved";
+      params: { game_id: string; pattern_type: string };
+    }
+  | {
+      name: "game_completed";
+      params: { game_id: string };
+    }
+  | {
+      name: "image_upload_failed";
+      params: {
+        game_id: string;
+        failure_phase: string;
+        error_message?: string;
+      };
+    }
+  | {
+      name: "image_rejected";
+      params: { game_id: string; rejection_reason: string };
+    }
+  | {
+      name: "gemini_analysis_failed";
+      params: { game_id: string; error_type: string; error_message?: string };
+    }
+  | {
+      name: "image_no_match";
+      params: { game_id: string };
+    };
 
 /**
  * Check if user has given consent for analytics tracking.
@@ -71,7 +134,7 @@ export function setUserConsent(granted: boolean): void {
 }
 
 /**
- * Sends a custom event to Google Analytics.
+ * Sends a custom event to Google Analytics with type safety.
  *
  * Events are only sent if:
  * 1. GA is properly configured (NEXT_PUBLIC_GA_MEASUREMENT_ID is set)
@@ -79,12 +142,12 @@ export function setUserConsent(granted: boolean): void {
  * 3. User has given consent (GDPR/CCPA compliance)
  *
  * @param eventName - Name of the event to track
- * @param eventParams - Optional parameters to send with the event
+ * @param eventParams - Event parameters matching the event name
  */
-export function trackEvent(
-  eventName: string,
-  eventParams?: Record<string, unknown>,
-) {
+export function trackEvent<T extends AnalyticsEvent>(
+  eventName: T["name"],
+  eventParams: T["params"],
+): void {
   // Check user consent first (GDPR/CCPA compliance)
   if (!hasUserConsent()) {
     return;
@@ -97,7 +160,7 @@ export function trackEvent(
     process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID
   ) {
     try {
-      window.gtag("event", eventName, eventParams);
+      window.gtag("event", eventName, eventParams as GtagEventParams);
     } catch (error) {
       // Silently fail in production to avoid disrupting user experience
       if (process.env.NODE_ENV === "development") {

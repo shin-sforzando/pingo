@@ -15,6 +15,7 @@ pingo/
 │   │   ├── ui/               # shadcn/ui ベースコンポーネント
 │   │   ├── magicui/          # Magic UI アニメーション
 │   │   ├── auth/             # 認証コンポーネント
+│   │   ├── analytics/        # アナリティクスとプライバシー管理
 │   │   ├── layout/           # Header、Footer、Navigation
 │   │   └── game/             # ゲーム専用コンポーネント
 │   ├── contexts/             # React Context プロバイダー
@@ -46,7 +47,7 @@ pingo/
 ### コンポーネントアーキテクチャ
 
 - **UIコンポーネント**: 再利用可能なshadcn/ui + Magic UI
-- **機能コンポーネント**: Game、Auth、Layout専用
+- **機能コンポーネント**: Game、Auth、Layout、Analytics専用
 - **各コンポーネントには以下が必要**:
   - TypeScriptインターフェース
   - Storybookストーリー
@@ -317,6 +318,13 @@ function detectCompletedLines(playerBoard) {
 - `UserMenu.tsx`: ユーザープロフィールドロップダウン
 - `NotificationIcon.tsx` + `NotificationDrawer.tsx`: リアルタイム通知
 
+### アナリティクスとプライバシー（src/components/analytics/）
+
+- `GoogleAnalytics.tsx`: GA4スクリプトローダー（同意状態に応じた動的ロード）
+- `CookieConsentBanner.tsx`: GDPR/CCPA準拠の同意バナー（オプトイン方式）
+
+**詳細**: `analytics_privacy_patterns` メモリー参照
+
 ### カスタムフック
 
 **グローバルフック（src/hooks/）**:
@@ -386,6 +394,11 @@ export async function submitImage(
   - `shuffleBoardCells()`: Fisher-Yates アルゴリズムで position をシャッフル
     - FREE セル（中央）は常に (2,2) に配置
     - cell_id と subject は変更しない（全プレイヤーで統一）
+- `analytics.ts`: Google Analytics 4統合（型安全なイベントトラッキング）
+  - Union型とジェネリクスによる完全な型安全性
+  - GDPR/CCPA準拠の同意管理（オプトイン方式）
+  - カスタムイベントによる同一タブ同期
+  - 詳細: `analytics_privacy_patterns` メモリー参照
 - `api-utils.ts`: APIレスポンスヘルパー、エラーハンドリング
 - `utils.ts`: 汎用ユーティリティ（cn、日付フォーマット、バリデーション）
 - `constants.ts`: アプリケーション定数（URL、制限値、Gemini設定）
@@ -467,6 +480,7 @@ export async function submitImage(
 ### エントリーポイント
 
 - `src/app/layout.tsx`: プロバイダー付きルートレイアウト
+  - `GoogleAnalytics` および `CookieConsentBanner` を含む
 - `src/app/page.tsx`: ホームページ
 - `middleware.ts`: 認証ミドルウェア（ルート階層）
 - `src/lib/firebase/`: Firebase設定とユーティリティ
@@ -482,6 +496,7 @@ export async function submitImage(
 - **パフォーマンス**: 画像最適化、コード分割
 - **AI品質保証**: プロンプトエンジニアリング + 内部検証で安定性向上
 - **開発環境最適化**: チェックスキップ機能で開発効率向上
+- **プライバシーファースト**: GDPR/CCPA準拠のオプトイン方式アナリティクス
 
 ## 最新技術仕様
 
@@ -493,6 +508,7 @@ export async function submitImage(
 - **Tailwind CSS**: 4系
 - **Firebase**: 12.2.1
 - **Google Gemini**: @google/genai 1.19.0
+- **Google Analytics**: GA4（NEXT_PUBLIC_GA_MEASUREMENT_ID）
 
 ### テスト環境
 
