@@ -21,6 +21,11 @@ export function GoogleAnalytics() {
     // Check consent status on mount and update state
     setHasConsent(hasUserConsent());
 
+    // Listen for custom event to detect consent changes in same tab
+    const handleConsentChange = () => {
+      setHasConsent(hasUserConsent());
+    };
+
     // Listen for storage events to detect consent changes from other tabs
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === "pingo_analytics_consent") {
@@ -28,9 +33,14 @@ export function GoogleAnalytics() {
       }
     };
 
+    window.addEventListener("pingo:analytics-consent", handleConsentChange);
     window.addEventListener("storage", handleStorageChange);
 
     return () => {
+      window.removeEventListener(
+        "pingo:analytics-consent",
+        handleConsentChange,
+      );
       window.removeEventListener("storage", handleStorageChange);
     };
   }, []);

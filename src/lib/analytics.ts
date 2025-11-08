@@ -62,6 +62,9 @@ export function setUserConsent(granted: boolean): void {
         analytics_storage: granted ? "granted" : "denied",
       });
     }
+
+    // Dispatch custom event to notify same-tab listeners
+    window.dispatchEvent(new CustomEvent("pingo:analytics-consent"));
   } catch (error) {
     console.error("Failed to set analytics consent:", error);
   }
@@ -204,6 +207,7 @@ export function trackGameCompleted(gameId: string) {
  * - Signed URL generation
  * - Cloud Storage upload
  * - Submission record creation
+ * - Unknown error types (non-Gemini related)
  *
  * @param gameId - The ID of the game
  * @param phase - The phase where the upload failed
@@ -211,7 +215,11 @@ export function trackGameCompleted(gameId: string) {
  */
 export function trackImageUploadFailed(
   gameId: string,
-  phase: "url_generation" | "storage_upload" | "submission_creation",
+  phase:
+    | "url_generation"
+    | "storage_upload"
+    | "submission_creation"
+    | "unknown",
   errorMessage?: string,
 ) {
   trackEvent("image_upload_failed", {

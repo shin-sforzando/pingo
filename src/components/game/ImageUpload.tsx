@@ -369,8 +369,8 @@ export function ImageUpload({
         } else if (errorMessage.includes("Failed to create submission")) {
           trackImageUploadFailed(gameId, "submission_creation", errorMessage);
         } else {
-          // Unknown error type
-          trackGeminiAnalysisFailed(gameId, "unknown", errorMessage);
+          // Unknown error type - not necessarily Gemini-related
+          trackImageUploadFailed(gameId, "unknown", errorMessage);
         }
       } catch (trackingError) {
         console.error("Failed to track upload failure:", trackingError);
