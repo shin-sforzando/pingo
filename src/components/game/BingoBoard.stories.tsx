@@ -174,19 +174,6 @@ export const Interactive: Story = {
   },
 };
 
-// Responsive display
-export const Responsive: Story = {
-  args: {
-    cells: generateSampleCells(),
-    cellStates: generateSampleCellStates("random"),
-  },
-  parameters: {
-    viewport: {
-      defaultViewport: "mobile1",
-    },
-  },
-};
-
 // With fewer than 25 cells (should auto-fill)
 export const FewerCells: Story = {
   args: {

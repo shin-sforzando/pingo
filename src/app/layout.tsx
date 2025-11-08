@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getTranslations } from "next-intl/server";
+import { CookieConsentBanner } from "@/components/analytics/CookieConsentBanner";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
@@ -46,6 +47,7 @@ export default async function RootLayout({
               {children}
             </main>
             <Footer />
+            <CookieConsentBanner />
           </AuthProvider>
         </NextIntlClientProvider>
       </body>

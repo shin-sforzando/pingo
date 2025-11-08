@@ -191,6 +191,8 @@ src/
     page.tsx
   components/
     analytics/
+      CookieConsentBanner.stories.tsx
+      CookieConsentBanner.tsx
       GoogleAnalytics.test.tsx
       GoogleAnalytics.tsx
     auth/
@@ -467,6 +469,26 @@ body {
 import { HyperText } from "@/components/magicui/hyper-text";
 ⋮----
 export default function Loading()
+</file>
+
+<file path="src/components/analytics/CookieConsentBanner.stories.tsx">
+import type { Meta, StoryObj } from "@storybook/react";
+import { CookieConsentBanner } from "./CookieConsentBanner";
+⋮----
+type Story = StoryObj<typeof meta>;
+</file>
+
+<file path="src/components/analytics/CookieConsentBanner.tsx">
+import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { hasUserConsent, setUserConsent } from "@/lib/analytics";
+⋮----
+const handleAccept = () =>
+⋮----
+const handleDecline = () =>
 </file>
 
 <file path="src/components/auth/LoginForm.tsx">
@@ -2648,6 +2670,7 @@ export default async function TermsPage()
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getTranslations } from "next-intl/server";
+import { CookieConsentBanner } from "@/components/analytics/CookieConsentBanner";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
@@ -2655,18 +2678,6 @@ import { AnimatedGridPattern } from "@/components/magicui/animated-grid-pattern"
 import { AuthProvider } from "@/contexts/AuthContext";
 ⋮----
 export async function generateMetadata(): Promise<Metadata>
-</file>
-
-<file path="src/components/analytics/GoogleAnalytics.tsx">
-import { GoogleAnalytics as NextGoogleAnalytics } from "@next/third-parties/google";
-import { useEffect, useState } from "react";
-import { hasUserConsent } from "@/lib/analytics";
-⋮----
-export function GoogleAnalytics()
-⋮----
-const handleConsentChange = () =>
-⋮----
-const handleStorageChange = (e: StorageEvent) =>
 </file>
 
 <file path="src/components/game/GameInfo.tsx">
@@ -3002,63 +3013,6 @@ const fetchParticipatingGames = async () =>
 // Silently fail participant count fetch
 ⋮----
 // Silently skip games that return 404 or other errors
-</file>
-
-<file path="src/lib/analytics.ts">
-interface Window {
-    gtag?: (
-      command: "config" | "event" | "set" | "consent",
-      targetId: string,
-      config?: Record<string, unknown>,
-    ) => void;
-  }
-⋮----
-export function hasUserConsent(): boolean
-⋮----
-export function setUserConsent(granted: boolean): void
-⋮----
-export function trackEvent(
-  eventName: string,
-  eventParams?: Record<string, unknown>,
-)
-⋮----
-export function trackGameCreated(gameId: string, boardSize: number)
-⋮----
-export function trackGameJoined(gameId: string)
-⋮----
-export function trackGameStarted(gameId: string)
-⋮----
-export function trackImageUploaded(gameId: string, cellId: string)
-⋮----
-export function trackCellMatched(
-  gameId: string,
-  cellId: string,
-  subject: string,
-)
-⋮----
-export function trackBingoAchieved(gameId: string, patternType: string)
-⋮----
-export function trackGameCompleted(gameId: string)
-⋮----
-export function trackImageUploadFailed(
-  gameId: string,
-  phase:
-    | "url_generation"
-    | "storage_upload"
-    | "submission_creation"
-    | "unknown",
-  errorMessage?: string,
-)
-⋮----
-export function trackImageRejected(gameId: string, reason?: string)
-⋮----
-export function trackGeminiAnalysisFailed(
-  gameId: string,
-  errorType: "api_error" | "timeout" | "rate_limit" | "unknown",
-  errorMessage?: string,
-)
-⋮----
-export function trackImageNoMatch(gameId: string)
 </file>
 
 <file path="src/lib/board-utils.test.ts">
@@ -3413,6 +3367,18 @@ interface GameHeaderProps {
 }
 </file>
 
+<file path="src/components/analytics/GoogleAnalytics.tsx">
+import { GoogleAnalytics as NextGoogleAnalytics } from "@next/third-parties/google";
+import { useEffect, useState } from "react";
+import { hasUserConsent } from "@/lib/analytics";
+⋮----
+export function GoogleAnalytics()
+⋮----
+const handleConsentChange = () =>
+⋮----
+const handleStorageChange = (e: StorageEvent) =>
+</file>
+
 <file path="src/components/game/BingoCell.stories.tsx">
 import { fakerJA as faker } from "@faker-js/faker";
 import type { Meta, StoryObj } from "@storybook/nextjs";
@@ -3629,6 +3595,63 @@ interface UseGameJoinReturn {
 export function useGameJoin(): UseGameJoinReturn
 </file>
 
+<file path="src/lib/analytics.ts">
+interface Window {
+    gtag?: (
+      command: "config" | "event" | "set" | "consent",
+      targetId: string,
+      config?: Record<string, unknown>,
+    ) => void;
+  }
+⋮----
+export function hasUserConsent(): boolean
+⋮----
+export function setUserConsent(granted: boolean): void
+⋮----
+export function trackEvent(
+  eventName: string,
+  eventParams?: Record<string, unknown>,
+)
+⋮----
+export function trackGameCreated(gameId: string, boardSize: number)
+⋮----
+export function trackGameJoined(gameId: string)
+⋮----
+export function trackGameStarted(gameId: string)
+⋮----
+export function trackImageUploaded(gameId: string, cellId: string)
+⋮----
+export function trackCellMatched(
+  gameId: string,
+  cellId: string,
+  subject: string,
+)
+⋮----
+export function trackBingoAchieved(gameId: string, patternType: string)
+⋮----
+export function trackGameCompleted(gameId: string)
+⋮----
+export function trackImageUploadFailed(
+  gameId: string,
+  phase:
+    | "url_generation"
+    | "storage_upload"
+    | "submission_creation"
+    | "unknown",
+  errorMessage?: string,
+)
+⋮----
+export function trackImageRejected(gameId: string, reason?: string)
+⋮----
+export function trackGeminiAnalysisFailed(
+  gameId: string,
+  errorType: "api_error" | "timeout" | "rate_limit" | "unknown",
+  errorMessage?: string,
+)
+⋮----
+export function trackImageNoMatch(gameId: string)
+</file>
+
 <file path="src/lib/board-utils.ts">
 import { BOARD_CENTER_COORD, BOARD_SIZE, TOTAL_CELLS } from "@/lib/constants";
 import type { Cell } from "@/types/schema";
@@ -3745,18 +3768,6 @@ const createMockRequest = (
     body: unknown,
     authHeader?: string,
 ): NextRequest =>
-</file>
-
-<file path="src/app/api/subjects/check/route.test.ts">
-import { beforeAll, describe, expect, it } from "vitest";
-import { createApiRequest } from "@/test/helpers/api-test-helpers";
-import { POST as generatePOST } from "../generate/route";
-import { POST } from "./route";
-⋮----
-interface CheckIssue {
-  subject: string;
-  reason: string;
-}
 </file>
 
 <file path="src/app/api/subjects/check/route.ts">
@@ -4200,6 +4211,18 @@ interface SubmissionResponse {
       }
 </file>
 
+<file path="src/app/api/subjects/check/route.test.ts">
+import { beforeAll, describe, expect, it } from "vitest";
+import { createApiRequest } from "@/test/helpers/api-test-helpers";
+import { POST as generatePOST } from "../generate/route";
+import { POST } from "./route";
+⋮----
+interface CheckIssue {
+  subject: string;
+  reason: string;
+}
+</file>
+
 <file path="src/app/game/[gameId]/share/page.stories.tsx">
 import { fakerJA as faker } from "@faker-js/faker";
 import type { Meta, StoryObj } from "@storybook/nextjs";
@@ -4490,6 +4513,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import {
+  hasUserConsent,
   trackBingoAchieved,
   trackCellMatched,
   trackGeminiAnalysisFailed,
