@@ -8,6 +8,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import {
+  trackBingoAchieved,
+  trackCellMatched,
+  trackGeminiAnalysisFailed,
+  trackImageNoMatch,
+  trackImageRejected,
+  trackImageUploaded,
+  trackImageUploadFailed,
+} from "@/lib/analytics";
+import {
   createImagePreviewUrl,
   isValidFileSize,
   isValidImageFile,
@@ -16,6 +25,11 @@ import {
 } from "@/lib/image-utils";
 import { cn } from "@/lib/utils";
 import { submitImage } from "@/services/image-upload";
+import {
+  GeminiAnalysisError,
+  ImageRejectedError,
+  ImageUploadError,
+} from "@/types/errors";
 import type {
   ImageSubmissionResult,
   ImageUploadProps,
@@ -273,23 +287,35 @@ export function ImageUpload({
 
       console.log("ℹ️ XXX: ~ ImageUpload.tsx ~ Upload successful", { result });
 
-      // Check if image was deemed inappropriate
-      if (!result.appropriate) {
-        console.log(
-          "ℹ️ XXX: ~ ImageUpload.tsx ~ Image inappropriate, treating as failure",
-          {
-            reason: result.reason,
-          },
-        );
-        // Clear preview since upload technically succeeded, but content was rejected
-        handleRemove();
-        // Treat as failure from UI perspective
-        onUploadComplete?.(
-          false,
-          result,
-          result.reason || "Image content was deemed inappropriate",
-        );
-        return;
+      // Track analytics based on match result
+      // Note: hasUserConsent() check is now done inside each trackXxx function
+      if (result.matchedCellId) {
+        // Track successful image upload with matched cell
+        try {
+          trackImageUploaded(gameId, result.matchedCellId);
+          // Track cell match event - using cellId as subject since API doesn't provide subject name
+          trackCellMatched(gameId, result.matchedCellId, result.matchedCellId);
+
+          // Track bingo achievement if new lines were completed
+          if (
+            result.newlyCompletedLines > 0 &&
+            result.totalCompletedLines >= (result.requiredBingoLines || 1)
+          ) {
+            trackBingoAchieved(
+              gameId,
+              `${result.newlyCompletedLines} line(s) completed`,
+            );
+          }
+        } catch (error) {
+          console.error("Failed to track analytics events:", error);
+        }
+      } else {
+        // Track when image was analyzed but didn't match any cell
+        try {
+          trackImageNoMatch(gameId);
+        } catch (error) {
+          console.error("Failed to track no match:", error);
+        }
       }
 
       // Clear preview after successful upload
@@ -303,6 +329,29 @@ export function ImageUpload({
         error,
         errorMessage,
       });
+
+      // Track upload failure using type-safe error classification
+      // Note: hasUserConsent() check is now done inside each trackXxx function
+      try {
+        if (error instanceof ImageUploadError) {
+          // Infrastructure error (URL generation, storage upload, submission creation)
+          trackImageUploadFailed(gameId, error.phase, error.message);
+        } else if (error instanceof GeminiAnalysisError) {
+          // Gemini AI analysis error (API, timeout, rate limit)
+          trackGeminiAnalysisFailed(gameId, error.errorType, error.message);
+        } else if (error instanceof ImageRejectedError) {
+          // Image rejected due to inappropriate content
+          trackImageRejected(gameId, error.reason);
+          // Clear preview since upload succeeded but content was rejected
+          handleRemove();
+        } else {
+          // Unknown error type - track as generic upload failure
+          trackImageUploadFailed(gameId, "unknown", errorMessage);
+        }
+      } catch (trackingError) {
+        console.error("Failed to track upload failure:", trackingError);
+      }
+
       onUploadComplete?.(false, undefined, errorMessage);
     }
   }, [

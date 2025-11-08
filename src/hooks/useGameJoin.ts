@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { trackGameJoined } from "@/lib/analytics";
 import { useAuthenticatedFetch } from "./useAuthenticatedFetch";
 
 interface GameJoinResult {
@@ -127,6 +128,9 @@ export function useGameJoin(): UseGameJoinReturn {
           // Log but don't fail the join operation if refresh fails
           console.error("Failed to refresh user after game join:", refreshErr);
         }
+
+        // Track game join event
+        trackGameJoined(gameId);
 
         return {
           success: true,

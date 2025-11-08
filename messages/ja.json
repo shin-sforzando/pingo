@@ -315,5 +315,12 @@
   "Terms": {
     "pageTitle": "Pingo 利用規約",
     "pageDescription": "Pingoの利用規約とプライバシーポリシー"
+  },
+  "CookieConsent": {
+    "title": "クッキーとプライバシー",
+    "message": "当サイトではGoogle Analyticsを使用してサービス向上のため匿名のアクセス情報を収集しています。続行することで、クッキーの使用に同意したものとみなされます。",
+    "learnMore": "詳しく見る",
+    "accept": "同意する",
+    "decline": "拒否する"
   }
 }

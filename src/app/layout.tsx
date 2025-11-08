@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getTranslations } from "next-intl/server";
+import { CookieConsentBanner } from "@/components/analytics/CookieConsentBanner";
+import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { AnimatedGridPattern } from "@/components/magicui/animated-grid-pattern";
@@ -26,6 +28,7 @@ export default async function RootLayout({
   return (
     <html lang={locale}>
       <body className={"antialiased"}>
+        <GoogleAnalytics />
         <NextIntlClientProvider locale={locale}>
           <AuthProvider>
             <div className="-z-10 fixed inset-0">
@@ -44,6 +47,7 @@ export default async function RootLayout({
               {children}
             </main>
             <Footer />
+            <CookieConsentBanner />
           </AuthProvider>
         </NextIntlClientProvider>
       </body>

@@ -315,5 +315,12 @@
   "Terms": {
     "pageTitle": "Pingo Terms of Service",
     "pageDescription": "Pingo Terms of Service and Privacy Policy"
+  },
+  "CookieConsent": {
+    "title": "Cookies & Privacy",
+    "message": "We use Google Analytics to collect anonymous usage data to improve our service. By continuing, you consent to the use of cookies.",
+    "learnMore": "Learn more",
+    "accept": "Accept",
+    "decline": "Decline"
   }
 }

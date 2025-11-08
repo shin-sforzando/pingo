@@ -30,36 +30,3 @@ type Story = StoryObj<typeof meta>;
  * - Semantic HTML with lang attributes
  */
 export const Default: Story = {};
-
-/**
- * Mobile view - optimized for small screens
- */
-export const Mobile: Story = {
-  parameters: {
-    viewport: {
-      defaultViewport: "mobile1",
-    },
-  },
-};
-
-/**
- * Tablet view
- */
-export const Tablet: Story = {
-  parameters: {
-    viewport: {
-      defaultViewport: "tablet",
-    },
-  },
-};
-
-/**
- * Desktop view - full width layout
- */
-export const Desktop: Story = {
-  parameters: {
-    viewport: {
-      defaultViewport: "desktop",
-    },
-  },
-};

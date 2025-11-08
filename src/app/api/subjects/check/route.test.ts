@@ -436,7 +436,6 @@ describe("subjects/check API", () => {
       expect(checkResponse.status).toBe(200);
       expect(checkData.ok).toBe(true);
     },
-    45000, // 45 second timeout for Gemini API (internal validation should improve stability)
   );
 
   it(
@@ -476,7 +475,6 @@ describe("subjects/check API", () => {
       expect(checkResponse.status).toBe(200);
       expect(checkData.ok).toBe(true);
     },
-    45000, // 45 second timeout for Gemini API (internal validation should improve stability)
   );
 
   it("should detect issues with problematic subjects mixed with generated ones in English", async () => {

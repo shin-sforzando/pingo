@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { useGameParticipation } from "@/hooks/useGameParticipation";
+import { trackGameStarted } from "@/lib/analytics";
 import { AcceptanceStatus } from "@/types/common";
 import { ErrorDisplay } from "./components/ErrorDisplay";
 import { GameHeader } from "./components/GameHeader";
@@ -58,6 +59,9 @@ export default function GamePage() {
   // Confetti ref for celebrations
   const confettiRef = useRef<ConfettiRef>(null);
 
+  // Track whether game started event has been sent
+  const hasTrackedGameStart = useRef(false);
+
   // Image submission workflow
   const { submissionError, handleUploadComplete, handleUploadStart } =
     useImageSubmission({
@@ -79,6 +83,14 @@ export default function GamePage() {
   const completedCellIndices = convertCompletedLinesToIndices(
     playerBoard?.completedLines || [],
   );
+
+  // Track game started event once when participating
+  useEffect(() => {
+    if (isParticipating === true && !hasTrackedGameStart.current) {
+      trackGameStarted(gameId);
+      hasTrackedGameStart.current = true;
+    }
+  }, [isParticipating, gameId]);
 
   // Redirect to share page if not participating (only after check completes)
   useEffect(() => {
