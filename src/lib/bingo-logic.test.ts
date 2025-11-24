@@ -175,28 +175,27 @@ describe("detectCompletedLines", () => {
   });
 
   describe("Column completion", () => {
-    it.each([0, 1, 2, 3, 4])(
-      "should detect completed column %i",
-      (colIndex) => {
-        const playerBoard = createTestPlayerBoard();
+    it.each([
+      0, 1, 2, 3, 4,
+    ])("should detect completed column %i", (colIndex) => {
+      const playerBoard = createTestPlayerBoard();
 
-        // Open all cells in the specified column
-        const positions = Array.from({ length: BOARD_SIZE }, (_, y) => ({
-          x: colIndex,
-          y,
-        }));
-        openCellsAtPositions(playerBoard, positions);
+      // Open all cells in the specified column
+      const positions = Array.from({ length: BOARD_SIZE }, (_, y) => ({
+        x: colIndex,
+        y,
+      }));
+      openCellsAtPositions(playerBoard, positions);
 
-        const result = detectCompletedLines(playerBoard);
+      const result = detectCompletedLines(playerBoard);
 
-        expect(result).toHaveLength(1);
-        expect(result[0]).toMatchObject({
-          type: LineType.COLUMN,
-          index: colIndex,
-        });
-        expect(result[0].completedAt).toBeInstanceOf(Date);
-      },
-    );
+      expect(result).toHaveLength(1);
+      expect(result[0]).toMatchObject({
+        type: LineType.COLUMN,
+        index: colIndex,
+      });
+      expect(result[0].completedAt).toBeInstanceOf(Date);
+    });
 
     it("should detect column 2 (middle column with FREE cell)", () => {
       const playerBoard = createTestPlayerBoard();

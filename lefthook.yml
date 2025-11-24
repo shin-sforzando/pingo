@@ -10,6 +10,13 @@ pre-commit:
       glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}"
       run: npm run check -- --no-errors-on-unmatched --colors=off {staged_files}
       stage_fixed: true
+    similarity:
+      priority: 2
+      glob: "*.{js,ts,jsx,tsx}"
+      run: |
+        if command -v similarity-ts >/dev/null 2>&1; then
+          similarity-ts --no-fast --no-types --print
+        fi
     test:
       glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx}"
       run: npm run test -- --no-coverage

@@ -552,23 +552,11 @@ export interface AnimatedGridPatternProps
   repeatDelay?: number;
 }
 ⋮----
-export function AnimatedGridPattern({
-  width = 40,
-  height = 40,
-  x = -1,
-  y = -1,
-  strokeDasharray = 0,
-  numSquares = 50,
-  className,
-  maxOpacity = 0.5,
-  duration = 4,
-  repeatDelay = 0.5,
-  ...props
-}: AnimatedGridPatternProps)
-⋮----
 const updateSquarePosition = (id: number) =>
 ⋮----
 className=
+⋮----
+onAnimationComplete=
 </file>
 
 <file path="src/components/magicui/shine-border.tsx">
@@ -592,31 +580,29 @@ interface ShineBorderProps extends React.HTMLAttributes<HTMLDivElement> {
   shineColor?: string | string[];
 }
 ⋮----
-className={cn(
-        "pointer-events-none absolute inset-0 size-full rounded-[inherit] will-change-[background-position] motion-safe:animate-shine",
-        className,
-      )}
-      {...props}
-    />
-  );
+className=
 </file>
 
 <file path="src/components/ui/avatar.tsx">
 import { cn } from "@/lib/utils";
 ⋮----
-className={cn(
-        "flex size-full items-center justify-center rounded-full bg-muted",
-        className,
-      )}
-      {...props}
-    />
-  );
+function Avatar({
+  className,
+  ...props
+}: React.ComponentProps<typeof AvatarPrimitive.Root>)
+⋮----
+className=
+⋮----
+function AvatarFallback({
+  className,
+  ...props
+}: React.ComponentProps<typeof AvatarPrimitive.Fallback>)
 </file>
 
 <file path="src/components/ui/card.tsx">
 import { cn } from "@/lib/utils";
 ⋮----
-function CardContent(
+className=
 </file>
 
 <file path="src/components/ui/drawer.tsx">
@@ -624,29 +610,14 @@ import { Drawer as DrawerPrimitive } from "vaul";
 ⋮----
 import { cn } from "@/lib/utils";
 ⋮----
-function Drawer({
-  ...props
-}: React.ComponentProps<typeof DrawerPrimitive.Root>)
-⋮----
-function DrawerTrigger({
-  ...props
-}: React.ComponentProps<typeof DrawerPrimitive.Trigger>)
-⋮----
-function DrawerPortal({
-  ...props
-}: React.ComponentProps<typeof DrawerPrimitive.Portal>)
-⋮----
-function DrawerClose({
-  ...props
-}: React.ComponentProps<typeof DrawerPrimitive.Close>)
-⋮----
-function DrawerContent({
+function DrawerOverlay({
   className,
-  children,
   ...props
-}: React.ComponentProps<typeof DrawerPrimitive.Content>)
+}: React.ComponentProps<typeof DrawerPrimitive.Overlay>)
 ⋮----
 className=
+⋮----
+function DrawerHeader(
 </file>
 
 <file path="src/components/ui/dropdown-menu.tsx">
@@ -666,11 +637,41 @@ function DropdownMenuTrigger({
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Trigger>)
 ⋮----
+function DropdownMenuContent({
+  className,
+  sideOffset = 4,
+  ...props
+}: React.ComponentProps<typeof DropdownMenuPrimitive.Content>)
+⋮----
+function DropdownMenuItem({
+  className,
+  inset,
+  variant = "default",
+  ...props
+}: React.ComponentProps<typeof DropdownMenuPrimitive.Item> & {
+  inset?: boolean;
+  variant?: "default" | "destructive";
+})
+⋮----
 className=
 ⋮----
-function DropdownMenuSub({
+function DropdownMenuRadioGroup({
   ...props
-}: React.ComponentProps<typeof DropdownMenuPrimitive.Sub>)
+}: React.ComponentProps<typeof DropdownMenuPrimitive.RadioGroup>)
+⋮----
+function DropdownMenuRadioItem({
+  className,
+  children,
+  ...props
+}: React.ComponentProps<typeof DropdownMenuPrimitive.RadioItem>)
+⋮----
+function DropdownMenuLabel({
+  className,
+  inset,
+  ...props
+}: React.ComponentProps<typeof DropdownMenuPrimitive.Label> & {
+  inset?: boolean;
+})
 ⋮----
 function DropdownMenuSubTrigger({
   className,
@@ -718,18 +719,11 @@ type FormItemContextValue = {
   id: string;
 };
 ⋮----
-function FormItem(
-⋮----
-function FormLabel({
-  className,
-  ...props
-}: React.ComponentProps<typeof LabelPrimitive.Root>)
-⋮----
 className=
 ⋮----
 function FormControl(
 ⋮----
-function FormMessage(
+function FormDescription(
 </file>
 
 <file path="src/components/ui/input.tsx">
@@ -743,21 +737,14 @@ className=
 <file path="src/components/ui/label.tsx">
 import { cn } from "@/lib/utils";
 ⋮----
-className={cn(
-        "flex select-none items-center gap-2 font-medium text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-50 group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50",
-        className,
-      )}
-      {...props}
-    />
-  );
+function Label({
+  className,
+  ...props
+}: React.ComponentProps<typeof LabelPrimitive.Root>)
 </file>
 
 <file path="src/components/ui/popover.tsx">
 import { cn } from "@/lib/utils";
-⋮----
-function Popover({
-  ...props
-}: React.ComponentProps<typeof PopoverPrimitive.Root>)
 ⋮----
 function PopoverTrigger({
   ...props
@@ -767,49 +754,44 @@ function PopoverTrigger({
 <file path="src/components/ui/separator.tsx">
 import { cn } from "@/lib/utils";
 ⋮----
-className={cn(
-        "shrink-0 bg-border data-[orientation=horizontal]:h-px data-[orientation=vertical]:h-full data-[orientation=horizontal]:w-full data-[orientation=vertical]:w-px",
-        className,
-      )}
-      {...props}
-    />
-  );
+function Separator({
+  className,
+  orientation = "horizontal",
+  decorative = true,
+  ...props
+}: React.ComponentProps<typeof SeparatorPrimitive.Root>)
 </file>
 
 <file path="src/components/ui/skeleton.tsx">
 import { cn } from "@/lib/utils";
 ⋮----
-className={cn("animate-pulse rounded-md bg-accent", className)}
-      {...props}
-    />
-  );
+className=
 </file>
 
 <file path="src/components/ui/switch.tsx">
 import { cn } from "@/lib/utils";
 ⋮----
-className=
+function Switch({
+  className,
+  ...props
+}: React.ComponentProps<typeof SwitchPrimitive.Root>)
 </file>
 
 <file path="src/components/ui/tabs.tsx">
 import { cn } from "@/lib/utils";
 ⋮----
-className={cn("flex-1 outline-none", className)}
-      {...props}
-    />
-  );
+function Tabs({
+  className,
+  ...props
+}: React.ComponentProps<typeof TabsPrimitive.Root>)
+⋮----
+className=
 </file>
 
 <file path="src/components/ui/textarea.tsx">
 import { cn } from "@/lib/utils";
 ⋮----
-className={cn(
-        "field-sizing-content flex min-h-16 w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs outline-none transition-[color,box-shadow] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 md:text-sm",
-        className,
-      )}
-      {...props}
-    />
-  );
+className=
 </file>
 
 <file path="src/i18n/config.ts">
@@ -1003,41 +985,6 @@ export interface ApiResponse<T> {
     details?: unknown;
   };
 }
-</file>
-
-<file path="src/types/errors.test.ts">
-import { describe, expect, it } from "vitest";
-import {
-  GeminiAnalysisError,
-  ImageRejectedError,
-  ImageUploadError,
-} from "./errors";
-</file>
-
-<file path="src/types/errors.ts">
-export class ImageUploadError extends Error
-⋮----
-constructor(
-    message: string,
-    public readonly phase:
-      | "url_generation"
-      | "storage_upload"
-      | "submission_creation",
-)
-⋮----
-export class GeminiAnalysisError extends Error
-⋮----
-constructor(
-    message: string,
-    public readonly errorType: "api_error" | "timeout" | "rate_limit",
-)
-⋮----
-export class ImageRejectedError extends Error
-⋮----
-constructor(
-    message: string,
-    public readonly reason: string,
-)
 </file>
 
 <file path="src/types/user.ts">
@@ -1342,6 +1289,18 @@ export function findMatchedCellSubject(
 ): string | null
 </file>
 
+<file path="src/app/game/create/page.stories.tsx">
+import { fakerJA as faker } from "@faker-js/faker";
+import type { Meta, StoryObj } from "@storybook/nextjs";
+⋮----
+import { AuthContext } from "@/contexts/AuthContext";
+import CreateGamePage from "./page";
+⋮----
+import { auth } from "@/lib/firebase/client";
+⋮----
+type Story = StoryObj<typeof meta>;
+</file>
+
 <file path="src/app/game/join/page.browser.test.tsx">
 import { faker } from "@faker-js/faker";
 import { page, userEvent } from "@vitest/browser/context";
@@ -1484,19 +1443,26 @@ export interface BingoBoardProps {
   onCellClick?: (cellId: string) => void;
 }
 ⋮----
+export function BingoBoard({
+  cells,
+  cellStates = {},
+  completedLines = [],
+  className,
+  onCellClick,
+}: BingoBoardProps)
+⋮----
+<div className=
+⋮----
 // Sort cells by position
 ⋮----
 // Create a flat array of all cell indices that are part of completed lines
 ⋮----
 // Check if a cell is part of a completed line
-const isCellInCompletedLine = (index: number) =>
 ⋮----
 // Get the state for a cell
-const getCellState = (cell: Cell, index: number): BingoCellState =>
 ⋮----
 // Center cell is always FREE
 ⋮----
-state=
 isPartOfCompletedLine=
 </file>
 
@@ -1536,25 +1502,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render } from "vitest-browser-react";
 import type { GameInfo } from "@/types/schema";
 import { GameInfoCard } from "./GameInfoCard";
-⋮----
-expect(container.textContent).not.toContain("Family friendly game");
-⋮----
-const usersIcon = container.querySelector('svg[class*="lucide-users"]');
-expect(usersIcon).toBeNull();
-⋮----
-const calendarIcon = container.querySelector(
-        'svg[class*="lucide-calendar"]',
-      );
-expect(calendarIcon).toBeNull();
-⋮----
-const card = page.getByText("Summer Adventure");
-await userEvent.click(card);
-⋮----
-expect(mockOnClick).toHaveBeenCalledTimes(1);
-expect(mockOnClick).toHaveBeenCalledWith(mockGame);
-⋮----
-expect(card).toBeDefined();
-expect(card?.className).toContain("hover:bg-muted/50");
 </file>
 
 <file path="src/components/game/GameInfoCard.stories.tsx">
@@ -1663,6 +1610,8 @@ export interface SubjectItemProps {
 const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) =>
 ⋮----
 const handleInputBlur = () =>
+⋮----
+className=
 </file>
 
 <file path="src/components/game/SubjectList.stories.tsx">
@@ -1679,6 +1628,8 @@ const generateSampleSubjects = (
 ): Subject[] =>
 ⋮----
 const renderWithState = (args: React.ComponentProps<typeof SubjectList>) =>
+⋮----
+onSubjectsChange=
 </file>
 
 <file path="src/components/game/SubjectList.tsx">
@@ -1743,6 +1694,8 @@ const handleAddSubject = () =>
 const handleDragEnd = (event: DragEndEvent) =>
 ⋮----
 // Dynamic import DndContextWrapper with SSR disabled
+⋮----
+<div className=
 </file>
 
 <file path="src/components/home/StepCard.stories.tsx">
@@ -1774,6 +1727,13 @@ export interface StepCardProps {
 
   imageAlt: string;
 }
+⋮----
+export function StepCard({
+  title,
+  description,
+  imageSrc,
+  imageAlt,
+}: StepCardProps)
 </file>
 
 <file path="src/components/layout/Footer.browser.test.tsx">
@@ -1860,6 +1820,10 @@ import { NotificationDrawer } from "./NotificationDrawer";
 type NotificationIconProps = {
   hasUnreadNotifications?: boolean;
 };
+⋮----
+export function NotificationIcon({
+  hasUnreadNotifications = false,
+}: NotificationIconProps): ReactElement
 </file>
 
 <file path="src/components/layout/UserMenu.browser.test.tsx">
@@ -1916,6 +1880,18 @@ interface HyperTextProps extends MotionProps {
 ⋮----
 const getRandomInt = (max: number): number
 ⋮----
+export function HyperText({
+  children,
+  className,
+  duration = 800,
+  delay = 0,
+  as: Component = "div",
+  startOnView = false,
+  animateOnHover = true,
+  characterSet = DEFAULT_CHARACTER_SET,
+  ...props
+}: HyperTextProps)
+⋮----
 const handleAnimationTrigger = () =>
 ⋮----
 // Handle animation start based on view or delay
@@ -1936,8 +1912,6 @@ type Story = StoryObj<typeof meta>;
 import { ChevronDown } from "lucide-react";
 ⋮----
 import { cn } from "@/lib/utils";
-⋮----
-className=
 </file>
 
 <file path="src/components/ui/badge.tsx">
@@ -1946,10 +1920,69 @@ import { cva, type VariantProps } from "class-variance-authority";
 ⋮----
 import { cn } from "@/lib/utils";
 ⋮----
-className={cn(badgeVariants({ variant }), className)}
-      {...props}
-    />
-  );
+function Badge({
+  className,
+  variant,
+  asChild = false,
+  ...props
+}: React.ComponentProps<"span"> &
+VariantProps<typeof badgeVariants> &
+⋮----
+className=
+</file>
+
+<file path="src/components/ui/Calendar.stories.tsx">
+import type { Meta, StoryObj } from "@storybook/nextjs";
+import { Calendar } from "./calendar";
+⋮----
+type Story = StoryObj<typeof meta>;
+⋮----
+render: () => <Calendar disabled=
+</file>
+
+<file path="src/components/ui/calendar.tsx">
+import {
+  ChevronDownIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+} from "lucide-react";
+⋮----
+import {
+  type DayButton,
+  DayPicker,
+  getDefaultClassNames,
+} from "react-day-picker";
+⋮----
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+⋮----
+function CalendarRoot({
+  className,
+  rootRef,
+  ...props
+}: {
+  className?: string;
+  rootRef?: React.Ref<HTMLDivElement>;
+  children?: React.ReactNode;
+})
+⋮----
+function CalendarChevron({
+  className,
+  orientation,
+  ...props
+}: {
+  className?: string;
+  orientation?: "left" | "right" | "up" | "down";
+})
+⋮----
+function CalendarWeekNumber({
+  children,
+  ...props
+}: {
+  children?: React.ReactNode;
+})
+⋮----
+className=
 </file>
 
 <file path="src/components/ui/Card.stories.tsx">
@@ -2043,26 +2076,6 @@ import { describe, expect, it } from "vitest";
 import { adminAuth, adminFirestore } from "./admin";
 </file>
 
-<file path="src/lib/analytics.test.ts">
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  hasUserConsent,
-  setUserConsent,
-  trackBingoAchieved,
-  trackCellMatched,
-  trackEvent,
-  trackGameCompleted,
-  trackGameCreated,
-  trackGameJoined,
-  trackGameStarted,
-  trackGeminiAnalysisFailed,
-  trackImageNoMatch,
-  trackImageRejected,
-  trackImageUploaded,
-  trackImageUploadFailed,
-} from "./analytics";
-</file>
-
 <file path="src/lib/bingo-logic.test.ts">
 import { describe, expect, it } from "vitest";
 import {
@@ -2146,6 +2159,41 @@ export function userToFirestoreForTest(
 ): UserDocument
 ⋮----
 // Create base document without optional fields
+</file>
+
+<file path="src/types/errors.test.ts">
+import { describe, expect, it } from "vitest";
+import {
+  GeminiAnalysisError,
+  ImageRejectedError,
+  ImageUploadError,
+} from "./errors";
+</file>
+
+<file path="src/types/errors.ts">
+export class ImageUploadError extends Error
+⋮----
+constructor(
+    message: string,
+    public readonly phase:
+      | "url_generation"
+      | "storage_upload"
+      | "submission_creation",
+)
+⋮----
+export class GeminiAnalysisError extends Error
+⋮----
+constructor(
+    message: string,
+    public readonly errorType: "api_error" | "timeout" | "rate_limit",
+)
+⋮----
+export class ImageRejectedError extends Error
+⋮----
+constructor(
+    message: string,
+    public readonly reason: string,
+)
 </file>
 
 <file path="src/types/firestore.ts">
@@ -2650,18 +2698,6 @@ import jaMessages from "../../../../messages/ja.json";
 import CreateGamePage from "./page";
 </file>
 
-<file path="src/app/game/create/page.stories.tsx">
-import { fakerJA as faker } from "@faker-js/faker";
-import type { Meta, StoryObj } from "@storybook/nextjs";
-⋮----
-import { AuthContext } from "@/contexts/AuthContext";
-import CreateGamePage from "./page";
-⋮----
-import { auth } from "@/lib/firebase/client";
-⋮----
-type Story = StoryObj<typeof meta>;
-</file>
-
 <file path="src/app/game/join/page.stories.tsx">
 import { fakerJA as faker } from "@faker-js/faker";
 import type { Meta, StoryObj } from "@storybook/nextjs";
@@ -2681,26 +2717,6 @@ import { TermsPageContent } from "./content";
 export async function generateMetadata(): Promise<Metadata>
 ⋮----
 export default async function TermsPage()
-</file>
-
-<file path="src/components/analytics/CookieConsentBanner.tsx">
-import Link from "next/link";
-import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/components/ui/drawer";
-import { setUserConsent } from "@/lib/analytics";
-⋮----
-const handleAccept = () =>
-⋮----
-const handleDecline = () =>
 </file>
 
 <file path="src/components/game/GameInfo.tsx">
@@ -2734,6 +2750,8 @@ export interface GameInfoProps {
 }
 ⋮----
 const getStatusConfig = () =>
+⋮----
+<p className="mb-2 font-medium text-sm">
 </file>
 
 <file path="src/components/game/GameInfoCard.tsx">
@@ -2761,6 +2779,14 @@ export interface GameInfoCardProps {
 
   className?: string;
 }
+⋮----
+export function GameInfoCard({
+  game,
+  onClick,
+  locale,
+  className,
+}: GameInfoCardProps)
+onClick=
 </file>
 
 <file path="src/components/game/ParticipantsList.tsx">
@@ -2857,7 +2883,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { NotificationIcon } from "./NotificationIcon";
 import { UserMenu } from "./UserMenu";
-⋮----
 </file>
 
 <file path="src/components/layout/LanguageSwitcher.tsx">
@@ -2866,8 +2891,6 @@ import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { setUserLocale } from "@/services/locale";
-⋮----
-export function LanguageSwitcher()
 ⋮----
 const toggleLocale = async () =>
 </file>
@@ -2879,6 +2902,10 @@ import { Button } from "@/components/ui/button";
 import { NotificationDrawer } from "./NotificationDrawer";
 ⋮----
 type Story = StoryObj<typeof NotificationDrawer>;
+⋮----
+const NotificationDrawerWithTrigger = () =>
+⋮----
+<Button onClick=
 </file>
 
 <file path="src/components/ui/Button.stories.tsx">
@@ -2903,62 +2930,11 @@ import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 ⋮----
 import { cn } from "@/lib/utils";
-</file>
-
-<file path="src/components/ui/Calendar.stories.tsx">
-import type { Meta, StoryObj } from "@storybook/nextjs";
-import { Calendar } from "./calendar";
 ⋮----
-type Story = StoryObj<typeof meta>;
-⋮----
-render: () => <Calendar disabled=
-</file>
-
-<file path="src/components/ui/calendar.tsx">
-import {
-  ChevronDownIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-} from "lucide-react";
-⋮----
-import {
-  type DayButton,
-  DayPicker,
-  getDefaultClassNames,
-} from "react-day-picker";
-⋮----
-import { Button, buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-⋮----
-function CalendarRoot({
-  className,
-  rootRef,
-  ...props
-}: {
-  className?: string;
-  rootRef?: React.Ref<HTMLDivElement>;
-  children?: React.ReactNode;
-})
-⋮----
-function CalendarChevron({
-  className,
-  orientation,
-  ...props
-}: {
-  className?: string;
-  orientation?: "left" | "right" | "up" | "down";
-})
-⋮----
-function CalendarWeekNumber({
-  children,
-  ...props
-}: {
-  children?: React.ReactNode;
-})
-⋮----
-data-day=
-⋮----
-className=
+className={cn(buttonVariants({ variant, size, className }))}
+      {...props}
+    />
+  );
 </file>
 
 <file path="src/components/ui/Form.stories.tsx">
@@ -3094,6 +3070,26 @@ const fetchParticipatingGames = async () =>
 // Silently fail participant count fetch
 ⋮----
 // Silently skip games that return 404 or other errors
+</file>
+
+<file path="src/lib/analytics.test.ts">
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  hasUserConsent,
+  setUserConsent,
+  trackBingoAchieved,
+  trackCellMatched,
+  trackEvent,
+  trackGameCompleted,
+  trackGameCreated,
+  trackGameJoined,
+  trackGameStarted,
+  trackGeminiAnalysisFailed,
+  trackImageNoMatch,
+  trackImageRejected,
+  trackImageUploaded,
+  trackImageUploadFailed,
+} from "./analytics";
 </file>
 
 <file path="src/lib/board-utils.test.ts">
@@ -3469,6 +3465,26 @@ import { AuthProvider } from "@/contexts/AuthContext";
 export async function generateMetadata(): Promise<Metadata>
 </file>
 
+<file path="src/components/analytics/CookieConsentBanner.tsx">
+import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
+import { setUserConsent } from "@/lib/analytics";
+⋮----
+const handleAccept = () =>
+⋮----
+const handleDecline = () =>
+</file>
+
 <file path="src/components/analytics/GoogleAnalytics.tsx">
 import { GoogleAnalytics as NextGoogleAnalytics } from "@next/third-parties/google";
 import { useEffect, useState } from "react";
@@ -3521,8 +3537,10 @@ type NotificationDrawerProps = {
   onOpenChange: (open: boolean) => void;
 };
 ⋮----
-<DrawerTitle>
-⋮----
+export function NotificationDrawer({
+  open,
+  onOpenChange,
+}: NotificationDrawerProps): ReactElement
 </file>
 
 <file path="src/components/magicui/Confetti.stories.tsx">
@@ -3539,7 +3557,9 @@ const handleFireworksConfetti = () =>
 ⋮----
 const randomInRange = (min: number, max: number)
 ⋮----
-const confettiRef = useRef<ConfettiRef>(null);
+const handleLineComplete = () =>
+⋮----
+const handleGameComplete = () =>
 </file>
 
 <file path="src/components/magicui/confetti.tsx">
@@ -3986,8 +4006,6 @@ import type { User } from "@/types/schema";
 import enMessages from "../../messages/en.json";
 import jaMessages from "../../messages/ja.json";
 import HomePage from "./page";
-⋮----
-beforeEach(() =>
 </file>
 
 <file path="src/components/game/GameInfo.stories.tsx">
@@ -4131,25 +4149,6 @@ export function trackGeminiAnalysisFailed(
 )
 ⋮----
 export function trackImageNoMatch(gameId: string)
-</file>
-
-<file path="src/services/image-upload.ts">
-import {
-  GeminiAnalysisError,
-  ImageRejectedError,
-  ImageUploadError,
-} from "@/types/errors";
-import type {
-  ImageSubmissionData,
-  ImageSubmissionResult,
-  ProcessedImage,
-} from "@/types/schema";
-⋮----
-export async function submitImage(
-  processedImage: ProcessedImage,
-  submissionData: ImageSubmissionData,
-  authToken: string,
-): Promise<ImageSubmissionResult>
 </file>
 
 <file path="src/test/helpers/api-test-helpers.ts">
@@ -4370,7 +4369,6 @@ const handleJoinClick = async () =>
 {/* Game settings information */}
 ⋮----
 title=
-value=
 </file>
 
 <file path="src/app/game/[gameId]/page.stories.tsx">
@@ -4455,7 +4453,29 @@ export interface SubmissionResultProps {
 ⋮----
 const getStatusConfig = () =>
 ⋮----
+className=
+⋮----
 <StatusIcon className=
+⋮----
+</file>
+
+<file path="src/services/image-upload.ts">
+import {
+  GeminiAnalysisError,
+  ImageRejectedError,
+  ImageUploadError,
+} from "@/types/errors";
+import type {
+  ImageSubmissionData,
+  ImageSubmissionResult,
+  ProcessedImage,
+} from "@/types/schema";
+⋮----
+export async function submitImage(
+  processedImage: ProcessedImage,
+  submissionData: ImageSubmissionData,
+  authToken: string,
+): Promise<ImageSubmissionResult>
 </file>
 
 <file path="vitest.config.mts">
@@ -4465,8 +4485,7 @@ import { coverageConfigDefaults, defineConfig } from "vitest/config";
 ⋮----
 envDir: ".", // Load .env files from root directory
 ⋮----
-// Limit concurrency to avoid Gemini API rate limits
-maxForks: 3, // Run at most 3 test files in parallel
+fileParallelism: false, // Disable file-level parallelism for Firebase 12.6.0 compatibility
 ⋮----
 testTimeout: 30000, // Increase timeout for Gemini API operations
 ⋮----
@@ -4592,19 +4611,11 @@ const handleAuthSuccess = () =>
 ⋮----
 const handleAuthError = (error: Error) =>
 ⋮----
-<Link href="/game/create">
-⋮----
-<Link href="/game/join">
-⋮----
-<TabsTrigger value="login">
-<TabsTrigger value="register">
-⋮----
-
-⋮----
 title=
-description=
+⋮----
 imageSrc=
-imageAlt=
+⋮----
+description=
 </file>
 
 <file path="src/lib/firebase/admin-collections.ts">
@@ -4882,9 +4893,51 @@ const onSubmit: SubmitHandler<GameCreateFormValues> = async (data) =>
 ⋮----
 <form onSubmit=
 ⋮----
-<CardTitle>
+setSubjects([]);
+setCells([]);
+</file>
+
+<file path="src/app/api/game/[gameId]/submission/analyze/route.ts">
+import { GoogleGenAI, Type } from "@google/genai";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import { z } from "zod";
+import { resolveCellId } from "@/lib/cell-utils";
+import { GEMINI_MODEL, GEMINI_THINKING_BUDGET } from "@/lib/constants";
+import { adminAuth } from "@/lib/firebase/admin";
+import {
+  AdminGameBoardService,
+  AdminGameParticipationService,
+  AdminGameService,
+  AdminPlayerBoardService,
+} from "@/lib/firebase/admin-collections";
+import type { ApiResponse } from "@/types/common";
+import { AcceptanceStatus } from "@/types/common";
+import type { AnalysisResult, Cell } from "@/types/schema";
+import { analysisResultSchema } from "@/types/schema";
 ⋮----
-disabled=
+async function authenticateUser(
+  request: NextRequest,
+): Promise<string | NextResponse<ApiResponse<never>>>
+⋮----
+async function verifyGameParticipant(
+  gameId: string,
+  userId: string,
+): Promise<NextResponse<ApiResponse<never>> | null>
+⋮----
+async function getAvailableCells(
+  gameId: string,
+  userId: string,
+): Promise<Cell[]>
+⋮----
+function getAnalysisPrompt(availableCells: Cell[], gameTheme: string): string
+⋮----
+async function fetchImageAsBase64(imageUrl: string): Promise<string>
+⋮----
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ gameId: string }> },
+): Promise<NextResponse<ApiResponse<AnalysisResult>>>
 </file>
 
 <file path="src/components/game/ImageUpload.tsx">
@@ -4939,53 +4992,14 @@ interface ImagePreview {
 ⋮----
 // Handle upload
 ⋮----
+className=
+⋮----
+
+⋮----
 console.error("Image preview error:", error);
 ⋮----
 e.stopPropagation();
 handleUpload();
-</file>
-
-<file path="src/app/api/game/[gameId]/submission/analyze/route.ts">
-import { GoogleGenAI, Type } from "@google/genai";
-import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
-import { z } from "zod";
-import { resolveCellId } from "@/lib/cell-utils";
-import { GEMINI_MODEL, GEMINI_THINKING_BUDGET } from "@/lib/constants";
-import { adminAuth } from "@/lib/firebase/admin";
-import {
-  AdminGameBoardService,
-  AdminGameParticipationService,
-  AdminGameService,
-  AdminPlayerBoardService,
-} from "@/lib/firebase/admin-collections";
-import type { ApiResponse } from "@/types/common";
-import { AcceptanceStatus } from "@/types/common";
-import type { AnalysisResult, Cell } from "@/types/schema";
-import { analysisResultSchema } from "@/types/schema";
-⋮----
-async function authenticateUser(
-  request: NextRequest,
-): Promise<string | NextResponse<ApiResponse<never>>>
-⋮----
-async function verifyGameParticipant(
-  gameId: string,
-  userId: string,
-): Promise<NextResponse<ApiResponse<never>> | null>
-⋮----
-async function getAvailableCells(
-  gameId: string,
-  userId: string,
-): Promise<Cell[]>
-⋮----
-function getAnalysisPrompt(availableCells: Cell[], gameTheme: string): string
-⋮----
-async function fetchImageAsBase64(imageUrl: string): Promise<string>
-⋮----
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ gameId: string }> },
-): Promise<NextResponse<ApiResponse<AnalysisResult>>>
 </file>
 
 <file path="src/components/layout/UserMenu.tsx">
@@ -5118,17 +5132,6 @@ const verifyGame = async () =>
 const onSubmit: SubmitHandler<JoinGameFormValues> = async (data) =>
 ⋮----
 <form onSubmit=
-⋮----
-<CardTitle>
-⋮----
-
-⋮----
-router.push(`/game/$
-⋮----
-onClick=
-⋮----
-const result = await joinGame(game.id);
-if (result.success)
 </file>
 
 <file path="src/types/schema.ts">
@@ -5461,9 +5464,9 @@ import {
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
-    "@google/genai": "^1.29.0",
+    "@google/genai": "^1.30.0",
     "@hookform/resolvers": "^5.2.2",
-    "@next/third-parties": "^16.0.1",
+    "@next/third-parties": "^16.0.3",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-avatar": "^1.1.11",
     "@radix-ui/react-dialog": "^1.1.15",
@@ -5479,27 +5482,27 @@ import {
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
-    "firebase": "^12.5.0",
+    "firebase": "^12.6.0",
     "firebase-admin": "^13.6.0",
     "heic2any": "^0.0.4",
-    "lucide-react": "^0.553.0",
+    "lucide-react": "^0.554.0",
     "motion": "^12.23.24",
     "next": "^15.5.6",
-    "next-intl": "^4.5.0",
+    "next-intl": "^4.5.5",
     "qrcode.react": "^4.2.0",
     "react": "^19.2.0",
-    "react-day-picker": "^9.11.1",
+    "react-day-picker": "^9.11.2",
     "react-dom": "^19.2.0",
-    "react-hook-form": "^7.66.0",
-    "tailwind-merge": "^3.3.1",
+    "react-hook-form": "^7.66.1",
+    "tailwind-merge": "^3.4.0",
     "ulid": "^3.0.1",
     "vaul": "^1.1.2",
-    "zod": "^4.1.12"
+    "zod": "^4.1.13"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.3.4",
+    "@biomejs/biome": "2.3.7",
     "@faker-js/faker": "^10.1.0",
-    "@lingual/i18n-check": "^0.8.12",
+    "@lingual/i18n-check": "^0.8.14",
     "@playwright/test": "^1.56.1",
     "@storybook/addon-a11y": "^9.1.13",
     "@storybook/addon-docs": "^9.1.13",
@@ -5513,13 +5516,13 @@ import {
     "@types/node": "^24",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@vitejs/plugin-react": "^5.0.4",
+    "@vitejs/plugin-react": "^5.1.1",
     "@vitest/browser": "^3.2.4",
     "@vitest/coverage-istanbul": "^3.2.4",
     "dotenv": "^17.2.3",
-    "jsdom": "^27.1.0",
-    "knip": "^5.68.0",
-    "lefthook": "^2.0.2",
+    "jsdom": "^27.2.0",
+    "knip": "^5.70.1",
+    "lefthook": "^2.0.4",
     "playwright": "^1.56.1",
     "shadcn": "^3.5.0",
     "storybook": "^9.1.13",
