@@ -19,8 +19,8 @@
 - 実ブラウザ（webkit + Playwright）でコンポーネント/ページテスト
 - DOM操作、ユーザーインタラクションの統合テスト
 - ファイルパターン: `src/**/*.browser.test.{ts,tsx}`
-- 設定: `vitest.config.mts`のbrowserプロジェクト
-- **注意**: `page.queryByText()`は存在しない → `container.textContent`または`page.getByText()`使用
+- 設定: `vitest.config.mts` のbrowserプロジェクト
+- **注意**: `page.queryByText()` は存在しない → `container.textContent` または `page.getByText()` 使用
 
 ## テストデータ
 
@@ -108,8 +108,8 @@ vi.mock("@/contexts/AuthContext", () => ({
 
 **Why**: モック不完全だと「Cannot read properties of undefined」エラー
 
-**対象ファイル**: `*.test.ts`, `*.browser.test.tsx`全て
-**実例**: `src/hooks/useGameJoin.test.ts`参照
+**対象ファイル**: `*.test.ts`, `*.browser.test.tsx` 全て
+**実例**: `src/hooks/useGameJoin.test.ts` 参照
 
 ## テストパターン
 
@@ -145,7 +145,7 @@ describe("detectCompletedLines", () => {
 ## Storybookの使用
 
 - 新コンポーネントには必ずストーリー作成
-- `npm run storybook`でローカル確認
+- `npm run storybook` でローカル確認
 - 各バリエーション（状態、Props）をカバー
 
 **例**: `src/components/game/GameInfoCard.stories.tsx`
@@ -172,3 +172,4 @@ export const Expired: Story = {
 - `src/lib/bingo-logic.test.ts` - 包括的なテスト例
 - `src/hooks/useGameJoin.test.ts` - モック更新例
 - `src/components/game/GameInfoCard.stories.tsx` - Storybook例
+- `vitest.config.mts` - テスト設定の完全な例

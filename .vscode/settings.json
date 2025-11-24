@@ -85,5 +85,11 @@
   },
   "i18n-ally.displayLanguage": "ja",
   "i18n-ally.keystyle": "nested",
-  "i18n-ally.localesPaths": ["messages", "src/i18n"]
+  "i18n-ally.localesPaths": ["messages", "src/i18n"],
+  "workbench.colorCustomizations": {
+    "titleBar.activeBackground": "#08D9D6",
+    "titleBar.activeForeground": "#FFFFFF",
+    "titleBar.inactiveBackground": "#08D9D6",
+    "titleBar.inactiveForeground": "#FFFFFF"
+  }
 }

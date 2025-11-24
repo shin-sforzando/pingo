@@ -7,12 +7,7 @@ export default defineConfig({
   envDir: ".", // Load .env files from root directory
   test: {
     pool: "forks",
-    poolOptions: {
-      forks: {
-        // Limit concurrency to avoid Gemini API rate limits
-        maxForks: 3, // Run at most 3 test files in parallel
-      },
-    },
+    fileParallelism: false, // Disable file-level parallelism for Firebase 12.6.0 compatibility
     projects: [
       {
         extends: true,

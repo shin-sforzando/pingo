@@ -17,14 +17,14 @@ jobs:
     #   github.event.pull_request.user.login == 'external-contributor' ||
     #   github.event.pull_request.user.login == 'new-developer' ||
     #   github.event.pull_request.author_association == 'FIRST_TIME_CONTRIBUTOR'
-    
+
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: read
-      issues: read
+      pull-requests: write
+      issues: write
       id-token: write
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -49,8 +49,7 @@ jobs:
             レビュー結果をPRにコメントとして残すため、Bashツールで `gh pr comment` を使用してください。
 
             必ず日本語で応答し、すべてのコメントやレスポンスを日本語で行ってください。
-          
+
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
           # or https://docs.anthropic.com/en/docs/claude-code/sdk#command-line for available options
           claude_args: '--system-prompt "必ず日本語で応答してください。コメントやレスポンスはすべて日本語で行い、ユーザとの応答は必ず日本語で対応してください。" --allowed-tools "Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*)"'
-
