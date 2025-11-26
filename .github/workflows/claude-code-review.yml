@@ -36,20 +36,30 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          # Enable progress tracking to post comments on PRs
+          track_progress: true
+          # Enable commit signing for security
+          use_commit_signing: true
+
           prompt: |
-            このプルリクエストを日本語でレビューし、以下の点についてフィードバックを提供してください:
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+
+            このプルリクエストをレビューして、以下の観点からフィードバックを提供してください:
             - コード品質とベストプラクティス
-            - 潜在的なバグや問題
-            - パフォーマンス考慮事項
-            - セキュリティ上の懸念
-            - テストカバレッジ
+            - 既存コードとの一貫性
+            - パフォーマンスやセキュリティ上の懸念
 
-            スタイルと規約についてはリポジトリのCLAUDE.mdを参考にしてください。建設的で有用なフィードバックを心がけてください。
-
-            レビュー結果をPRにコメントとして残すため、Bashツールで `gh pr comment` を使用してください。
-
-            必ず日本語で応答し、すべてのコメントやレスポンスを日本語で行ってください。
+            リポジトリのCLAUDE.mdをスタイルと規約のガイダンスとして使用してください。
+            レビューが完了したら、`gh pr comment` コマンドを使用してレビュー結果をコメント投稿してください。
+            **重要: 全てのコメントは必ず日本語で記述してください。**
 
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
-          # or https://docs.anthropic.com/en/docs/claude-code/sdk#command-line for available options
-          claude_args: '--system-prompt "必ず日本語で応答してください。コメントやレスポンスはすべて日本語で行い、ユーザとの応答は必ず日本語で対応してください。" --allowed-tools "Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*)"'
+          # or https://docs.claude.com/en/docs/claude-code/cli-reference for available options
+          claude_args: |
+            --allowedTools "mcp__github_inline_comment__create_inline_comment"
+            --allowedTools "Bash(gh pr comment:*)"
+            --allowedTools "Bash(gh pr diff:*)"
+            --allowedTools "Bash(gh pr list:*)"
+            --allowedTools "Bash(gh pr view:*)"

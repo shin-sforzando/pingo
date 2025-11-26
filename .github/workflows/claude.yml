@@ -35,11 +35,23 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          # Enable progress tracking to post comments on PRs
+          track_progress: true
+          # Enable commit signing for security
+          use_commit_signing: true
 
-          # Optional: Give a custom prompt to Claude. If this is not specified, Claude will perform the instructions specified in the comment that tagged it.
-          # prompt: 'Update the pull request description to include a summary of changes.'
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
 
-          # Optional: Add claude_args to customize behavior and configuration
-          # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
-          # or https://docs.anthropic.com/en/docs/claude-code/sdk#command-line for available options
-          claude_args: '--system-prompt "必ず日本語で応答してください。コメントやレスポンスはすべて日本語で行い、ユーザとの応答は必ず日本語で対応してください。"'
+            重要: PRレビューの際は、必ず最新のコミットの内容を確認して回答してください。古いコミットの内容で回答しないよう注意してください。
+            @CLAUDE.md を参照し、プロジェクトの開発方針を理解した上で回答してください。
+            **重要: 全てのコメントは必ず日本語で記述してください。**
+
+          claude_args: |
+            --allowedTools "mcp__github_inline_comment__create_inline_comment"
+            --allowedTools "Bash(gh pr comment:*)"
+            --allowedTools "Bash(gh pr diff:*)"
+            --allowedTools "Bash(gh pr list:*)"
+            --allowedTools "Bash(gh pr view:*)"
