@@ -2,6 +2,7 @@
  * Admin SDK data access layer with type safety
  * Provides consistent data access patterns for server-side operations
  */
+
 import { Role } from "../../types/common";
 import {
   dateToTimestamp,
@@ -39,6 +40,7 @@ import {
   userFromFirestore,
   userToFirestore,
 } from "../../types/user";
+import { MAX_GAMES_PER_USER, MAX_PARTICIPANTS_PER_GAME } from "../constants";
 import { adminFirestore } from "./admin";
 
 /**
@@ -176,15 +178,17 @@ export namespace AdminGameParticipationService {
 
   /**
    * Get participant count for a game
+   * Uses count() query for efficiency (no document data transfer)
    */
   export async function getParticipantCount(gameId: string): Promise<number> {
     const snapshot = await adminFirestore
       .collection("games")
       .doc(gameId)
       .collection("participants")
+      .count()
       .get();
 
-    return snapshot.size;
+    return snapshot.data().count;
   }
 
   /**
@@ -956,15 +960,28 @@ export namespace AdminTransactionService {
           .doc(gameId)
           .collection("events")
           .doc(eventId);
+        const participantCountRef = adminFirestore
+          .collection("games")
+          .doc(gameId)
+          .collection("participants")
+          .count();
 
         // IMPORTANT: All reads must be executed before any writes in Firestore transactions
-        const [gameDoc, participantDoc, gameBoardDoc, playerBoardDoc] =
-          await Promise.all([
-            transaction.get(gameRef),
-            transaction.get(participantRef),
-            transaction.get(gameBoardRef),
-            transaction.get(playerBoardRef),
-          ]);
+        const [
+          gameDoc,
+          participantDoc,
+          gameBoardDoc,
+          playerBoardDoc,
+          userDoc,
+          participantsCountSnapshot,
+        ] = await Promise.all([
+          transaction.get(gameRef),
+          transaction.get(participantRef),
+          transaction.get(gameBoardRef),
+          transaction.get(playerBoardRef),
+          transaction.get(userRef),
+          participantCountRef.get(),
+        ]);
 
         // Verify game exists
         if (!gameDoc.exists) {
@@ -984,6 +1001,32 @@ export namespace AdminTransactionService {
         // Check if player board already exists (shouldn't happen, but validate)
         if (playerBoardDoc.exists) {
           throw new Error("Player board already exists");
+        }
+
+        // Verify user exists
+        if (!userDoc.exists) {
+          throw new Error("User not found");
+        }
+
+        // Get user data and check limits
+        const userData = userDoc.data() as UserDocument;
+        const gameHistory = userData.gameHistory || [];
+        const isTestUser = userData.isTestUser || false;
+
+        // Check gameHistory limit (final atomic check)
+        // Skip for test users
+        if (!isTestUser && gameHistory.length >= MAX_GAMES_PER_USER) {
+          throw new Error(
+            `User has reached the maximum number of games (${MAX_GAMES_PER_USER})`,
+          );
+        }
+
+        // Check participant count limit
+        const currentParticipantCount = participantsCountSnapshot.data().count;
+        if (currentParticipantCount >= MAX_PARTICIPANTS_PER_GAME) {
+          throw new Error(
+            `Game has reached the maximum number of participants (${MAX_PARTICIPANTS_PER_GAME})`,
+          );
         }
 
         const game = gameFromFirestore(gameDoc.data() as GameDocument);
@@ -1055,6 +1098,7 @@ export namespace AdminTransactionService {
         transaction.set(playerBoardRef, playerBoardData);
         transaction.update(userRef, {
           participatingGames: FieldValue.arrayUnion(gameId),
+          gameHistory: FieldValue.arrayUnion(gameId),
           updatedAt: timestamp,
         });
         transaction.set(eventRef, eventData);

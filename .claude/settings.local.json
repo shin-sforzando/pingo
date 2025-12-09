@@ -92,10 +92,6 @@
     ]
   },
   "enableAllProjectMcpServers": true,
-  "enabledMcpjsonServers": [
-    "playwright",
-    "serena",
-    "shadcn"
-  ],
+  "enabledMcpjsonServers": ["playwright", "serena", "shadcn"],
   "outputStyle": "Explanatory"
 }

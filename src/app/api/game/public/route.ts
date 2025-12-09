@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { MAX_PARTICIPANTS_PER_GAME } from "@/lib/constants";
 import { adminAuth } from "@/lib/firebase/admin";
 import {
   AdminGameParticipationService,
@@ -55,6 +56,11 @@ export async function GET(request: Request): Promise<
         const participantCount =
           await AdminGameParticipationService.getParticipantCount(game.id);
 
+        // Exclude full games from the list
+        if (participantCount >= MAX_PARTICIPANTS_PER_GAME) {
+          return null;
+        }
+
         const gameData: Partial<Game> & {
           isParticipating?: boolean;
           participantCount: number;
@@ -83,8 +89,13 @@ export async function GET(request: Request): Promise<
       }),
     );
 
+    // Filter out null entries (full games)
+    const availableGames = gamesWithMetadata.filter(
+      (game): game is NonNullable<typeof game> => game !== null,
+    );
+
     // Sort by creation date (newest first)
-    gamesWithMetadata.sort((a, b) => {
+    availableGames.sort((a, b) => {
       const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
       const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
       return dateB - dateA;
@@ -92,7 +103,7 @@ export async function GET(request: Request): Promise<
 
     return NextResponse.json({
       success: true,
-      data: { games: gamesWithMetadata },
+      data: { games: availableGames },
     });
   } catch (error) {
     console.error("Error fetching public games:", error);
