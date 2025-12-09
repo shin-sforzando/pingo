@@ -32,6 +32,12 @@ pre-commit:
     # repomix:
     #   run: npm run repomix && git add repomix-output.xml
 
+    # Sort Claude settings
+    sort-settings:
+      glob: ".claude/settings.local.json"
+      run: jq --indent 2 '.permissions.allow |= sort' .claude/settings.local.json > temp.json && mv temp.json .claude/settings.local.json
+      stage_fixed: true
+
 # post-checkout:
 #   commands:
 #     reveal:
