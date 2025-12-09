@@ -980,7 +980,7 @@ export namespace AdminTransactionService {
           transaction.get(gameBoardRef),
           transaction.get(playerBoardRef),
           transaction.get(userRef),
-          participantCountRef.get(),
+          transaction.get(participantCountRef),
         ]);
 
         // Verify game exists

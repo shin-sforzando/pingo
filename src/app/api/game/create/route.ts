@@ -32,6 +32,7 @@ import {
   gameCreationSchema,
   type PlayerBoard,
 } from "../../../../types/schema";
+import type { UserDocument } from "../../../../types/user";
 
 // Constants
 const PROD_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -173,10 +174,7 @@ export async function POST(
       );
     }
 
-    const userData = userDoc.data() as {
-      gameHistory?: string[];
-      isTestUser?: boolean;
-    };
+    const userData = userDoc.data() as UserDocument;
     const gameHistory = userData.gameHistory || [];
     const isTestUser = userData.isTestUser || false;
 
@@ -207,6 +205,23 @@ export async function POST(
 
     // Run in a transaction to ensure all operations succeed or fail together
     await adminFirestore.runTransaction(async (transaction) => {
+      // 0. Re-check user's game history limit within transaction (atomic check)
+      const userDocRefForCheck = adminFirestore.collection("users").doc(userId);
+      const userDocInTx = await transaction.get(userDocRefForCheck);
+
+      if (!userDocInTx.exists) {
+        throw new Error("User not found");
+      }
+
+      const userDataInTx = userDocInTx.data() as UserDocument;
+      const gameHistoryInTx = userDataInTx?.gameHistory || [];
+      const isTestUserInTx = userDataInTx?.isTestUser || false;
+
+      // Final atomic check within transaction (prevents race conditions)
+      if (!isTestUserInTx && gameHistoryInTx.length >= MAX_GAMES_PER_USER) {
+        throw new Error(`Maximum games limit (${MAX_GAMES_PER_USER}) reached`);
+      }
+
       // 1. Create the game document
       const gameDocRef = adminFirestore.collection("games").doc(gameId);
 
@@ -335,7 +350,7 @@ export async function POST(
       const eventDoc = eventToFirestore(event);
       transaction.set(eventDocRef, eventDoc);
 
-      // 7. Update the user's participating games and game history
+      // 6. Update the user's participating games and game history
       const userDocRef = adminFirestore.collection("users").doc(userId);
       transaction.update(userDocRef, {
         participatingGames: FieldValue.arrayUnion(gameId),
