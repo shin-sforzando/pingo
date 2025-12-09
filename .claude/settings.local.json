@@ -83,7 +83,11 @@
       "WebFetch(domain:www.radix-ui.com)",
       "WebFetch(domain:www.tailwind-variants.org)",
       "WebFetch(domain:zod.dev)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(npm info:*)",
+      "mcp__serena__initial_instructions",
+      "Bash(gcloud secrets versions list:*)",
+      "Bash(gcloud run services describe:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

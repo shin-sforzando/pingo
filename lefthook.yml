@@ -29,8 +29,8 @@ pre-commit:
     knip:
       glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx}"
       run: npm run knip -- --production --no-exit-code
-    repomix:
-      run: npm run repomix && git add repomix-output.xml
+    # repomix:
+    #   run: npm run repomix && git add repomix-output.xml
 
 # post-checkout:
 #   commands:
