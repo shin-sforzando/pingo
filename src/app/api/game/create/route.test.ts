@@ -1,11 +1,13 @@
 import type { NextResponse } from "next/server";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import { MAX_GAMES_PER_USER } from "@/lib/constants";
 import { adminAuth, adminFirestore } from "@/lib/firebase/admin";
 import {
   cleanupTestUsers,
   createApiRequest,
   generateTestUsername,
 } from "@/test/helpers/api-test-helpers";
+import { createTestUserWithGameHistory } from "@/test/helpers/firebase-test-helpers";
 import {
   cleanupTestGames,
   generateTestCells,
@@ -200,12 +202,13 @@ describe("Game Creation API Integration Test", () => {
     expect(eventsQuery.empty).toBe(false);
     expect(eventsQuery.docs[0].data().userId).toBe(testUserId);
 
-    // Verify user's participating games
+    // Verify user's participating games and gameHistory
     const userDoc = await adminFirestore
       .collection("users")
       .doc(testUserId)
       .get();
     expect(userDoc.data()?.participatingGames).toContain(gameId);
+    expect(userDoc.data()?.gameHistory).toContain(gameId);
   });
 
   it("should return error when not authenticated", async () => {
@@ -288,5 +291,131 @@ describe("Game Creation API Integration Test", () => {
     expect(response.status).toBe(400);
     expect(responseData.success).toBe(false);
     expect(responseData.error.code).toBe("validation/invalid-input");
+  });
+
+  it("should reject game creation when user has reached game history limit", async () => {
+    // Create test user with MAX_GAMES_PER_USER games in history
+    const dummyGameIds = Array.from(
+      { length: MAX_GAMES_PER_USER },
+      (_, i) => `GAME${String(i).padStart(2, "0")}`,
+    );
+    const limitUser = await createTestUserWithGameHistory(dummyGameIds, false);
+    testUserIds.push(limitUser.uid);
+
+    // Create custom token for this user
+    const limitUserToken = await adminAuth.createCustomToken(limitUser.uid);
+
+    // Mock verifyIdToken to return this user
+    const originalMock = vi
+      .spyOn(adminAuth, "verifyIdToken")
+      .mockResolvedValueOnce({
+        uid: limitUser.uid,
+        aud: "test",
+        auth_time: 0,
+        exp: 0,
+        firebase: {
+          identities: {},
+          sign_in_provider: "custom",
+        },
+        iat: 0,
+        iss: "test",
+        sub: "test",
+      });
+
+    const testRequestData = {
+      title: generateTestGameTitle(),
+      theme: "Test Theme",
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+      isPublic: true,
+      isPhotoSharingEnabled: true,
+      skipImageCheck: false,
+      requiredBingoLines: 3,
+      confidenceThreshold: 0.7,
+      notes: "Test notes",
+      cells: generateTestCells(),
+    };
+
+    const req = createApiRequest("/api/game/create", "POST", testRequestData, {
+      Authorization: `Bearer ${limitUserToken}`,
+    });
+
+    // Execute API
+    const response = await POST(req);
+    const responseData = await response.json();
+
+    // Verify error
+    expect(response.status).toBe(400);
+    expect(responseData.success).toBe(false);
+    expect(responseData.error.code).toBe("MAX_GAMES_REACHED");
+    expect(responseData.error.message).toContain(
+      `Maximum games limit (${MAX_GAMES_PER_USER})`,
+    );
+
+    // Restore original mock
+    originalMock.mockRestore();
+  });
+
+  it("should allow test users to bypass game history limit", async () => {
+    // Create test user with MAX_GAMES_PER_USER games in history but isTestUser=true
+    const dummyGameIds = Array.from(
+      { length: MAX_GAMES_PER_USER },
+      (_, i) => `GAME${String(i + 10).padStart(2, "0")}`,
+    );
+    const testUser = await createTestUserWithGameHistory(dummyGameIds, true);
+    testUserIds.push(testUser.uid);
+
+    // Create custom token for this user
+    const testUserToken = await adminAuth.createCustomToken(testUser.uid);
+
+    // Mock verifyIdToken to return this user
+    const originalMock = vi
+      .spyOn(adminAuth, "verifyIdToken")
+      .mockResolvedValueOnce({
+        uid: testUser.uid,
+        aud: "test",
+        auth_time: 0,
+        exp: 0,
+        firebase: {
+          identities: {},
+          sign_in_provider: "custom",
+        },
+        iat: 0,
+        iss: "test",
+        sub: "test",
+      });
+
+    const testRequestData = {
+      title: generateTestGameTitle(),
+      theme: "Test Theme",
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+      isPublic: true,
+      isPhotoSharingEnabled: true,
+      skipImageCheck: false,
+      requiredBingoLines: 3,
+      confidenceThreshold: 0.7,
+      notes: "Test notes",
+      cells: generateTestCells(),
+    };
+
+    const req = createApiRequest("/api/game/create", "POST", testRequestData, {
+      Authorization: `Bearer ${testUserToken}`,
+    });
+
+    // Execute API
+    const response = await POST(req);
+    const responseData = await response.json();
+
+    // Verify success (test users bypass limit)
+    expect(response.status).toBe(200);
+    expect(responseData.success).toBe(true);
+    expect(responseData.data?.gameId).toBeDefined();
+
+    // Record created game ID for cleanup
+    if (responseData.data?.gameId) {
+      testGameIds.push(responseData.data.gameId);
+    }
+
+    // Restore original mock
+    originalMock.mockRestore();
   });
 });
