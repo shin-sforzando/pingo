@@ -94,6 +94,8 @@
       "notEnoughValidSubjects": "有効な被写体候補が不足しています。もう一度お試しください。",
       "subjectsRequired": "被写体候補を1つ以上追加してください",
       "submissionLimitExceeded": "投稿回数の上限に達しました",
+      "maxGamesReached": "ゲーム作成・参加数の上限（累計{0}個）に達しました",
+      "maxParticipantsReached": "このゲームは参加者数の上限（{0}人）に達しています",
       "themeRequired": "テーマを入力してください",
       "themeTooLong": "テーマは50文字以内で入力してください",
       "titleAndThemeRequired": "タイトルとテーマを入力してください",

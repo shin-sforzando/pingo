@@ -94,6 +94,8 @@
       "notEnoughValidSubjects": "Not enough valid subjects. Please try again.",
       "subjectsRequired": "At least one subject is required",
       "submissionLimitExceeded": "Submission limit exceeded",
+      "maxGamesReached": "You have reached the maximum number of games (cumulative: {0})",
+      "maxParticipantsReached": "This game has reached the maximum number of participants ({0})",
       "themeRequired": "Theme is required",
       "themeTooLong": "Theme must be at most 50 characters",
       "titleAndThemeRequired": "Title and theme are required",

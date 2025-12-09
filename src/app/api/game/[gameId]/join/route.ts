@@ -1,6 +1,7 @@
 import { getFirestore } from "firebase-admin/firestore";
 import { NextResponse } from "next/server";
 import { ulid } from "ulid";
+import { MAX_GAMES_PER_USER } from "@/lib/constants";
 import { adminAuth } from "@/lib/firebase/admin";
 import {
   AdminGameService,
@@ -63,6 +64,23 @@ export async function POST(
           },
         },
         { status: 404 },
+      );
+    }
+
+    // Check user's game history limit (quick check before transaction)
+    const gameHistory = user.gameHistory || [];
+    const isTestUser = user.isTestUser || false;
+
+    if (!isTestUser && gameHistory.length >= MAX_GAMES_PER_USER) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "MAX_GAMES_REACHED",
+            message: `Maximum games limit (${MAX_GAMES_PER_USER}) reached`,
+          },
+        },
+        { status: 400 },
       );
     }
 
@@ -137,6 +155,34 @@ export async function POST(
             alreadyParticipating: true,
           },
         });
+      }
+
+      // Handle game history limit error
+      if (errorMessage.includes("maximum number of games")) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              code: "MAX_GAMES_REACHED",
+              message: errorMessage,
+            },
+          },
+          { status: 400 },
+        );
+      }
+
+      // Handle participant count limit error
+      if (errorMessage.includes("maximum number of participants")) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              code: "MAX_PARTICIPANTS_REACHED",
+              message: errorMessage,
+            },
+          },
+          { status: 400 },
+        );
       }
 
       if (errorMessage.includes("Game board not found")) {

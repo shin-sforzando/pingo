@@ -1,6 +1,7 @@
 import type { DecodedIdToken } from "firebase-admin/auth";
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { MAX_GAMES_PER_USER, MAX_PARTICIPANTS_PER_GAME } from "@/lib/constants";
 import type { Game, User } from "@/types/schema";
 import { POST } from "./route";
 
@@ -531,5 +532,346 @@ describe("POST /api/game/[gameId]/join", () => {
     expect(data.success).toBe(false);
     expect(data.error.code).toBe("GAME_BOARD_NOT_FOUND");
     expect(data.error.message).toContain("Game board data is missing");
+  });
+
+  it("should reject join when user has reached game history limit", async () => {
+    const { adminAuth } = await import("@/lib/firebase/admin");
+    const { AdminUserService, AdminGameService } = await import(
+      "@/lib/firebase/admin-collections"
+    );
+
+    vi.mocked(adminAuth.verifyIdToken).mockResolvedValue({
+      uid: "test-user-id",
+    } as DecodedIdToken);
+
+    // Create user with MAX_GAMES_PER_USER games in history
+    const dummyGameIds = Array.from(
+      { length: MAX_GAMES_PER_USER },
+      (_, i) => `GAME${String(i).padStart(2, "0")}`,
+    );
+
+    vi.mocked(AdminUserService.getUser).mockResolvedValue({
+      id: "test-user-id",
+      username: "test-user",
+      participatingGames: [],
+      createdAt: new Date(),
+      lastLoginAt: null,
+      gameHistory: dummyGameIds,
+      isTestUser: false,
+    } as MockUser);
+
+    const futureDate = new Date();
+    futureDate.setDate(futureDate.getDate() + 1);
+
+    vi.mocked(AdminGameService.getGame).mockResolvedValue({
+      id: "ABC123",
+      title: "Test Game",
+      theme: "Test Theme",
+      creatorId: "creator-id",
+      expiresAt: futureDate,
+      isPublic: true,
+      isPhotoSharingEnabled: true,
+      requiredBingoLines: 1,
+      confidenceThreshold: 0.7,
+      maxSubmissionsPerUser: 100,
+      status: "active" as const,
+      createdAt: new Date(),
+    } as MockGame);
+
+    const request = new NextRequest("http://localhost/api/game/ABC123/join", {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer test-token",
+      },
+    });
+
+    const response = await POST(request, {
+      params: Promise.resolve({ gameId: "ABC123" }),
+    });
+    const data = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(data.success).toBe(false);
+    expect(data.error.code).toBe("MAX_GAMES_REACHED");
+    expect(data.error.message).toContain(
+      `Maximum games limit (${MAX_GAMES_PER_USER})`,
+    );
+  });
+
+  it("should allow test users to bypass game history limit", async () => {
+    const { adminAuth } = await import("@/lib/firebase/admin");
+    const { AdminUserService, AdminGameService, AdminTransactionService } =
+      await import("@/lib/firebase/admin-collections");
+    const { getFirestore } = await import("firebase-admin/firestore");
+
+    vi.mocked(adminAuth.verifyIdToken).mockResolvedValue({
+      uid: "test-user-id",
+    } as DecodedIdToken);
+
+    // Create test user with MAX_GAMES_PER_USER games in history but isTestUser=true
+    const dummyGameIds = Array.from(
+      { length: MAX_GAMES_PER_USER },
+      (_, i) => `GAME${String(i + 10).padStart(2, "0")}`,
+    );
+
+    vi.mocked(AdminUserService.getUser).mockResolvedValue({
+      id: "test-user-id",
+      username: "test-user",
+      participatingGames: [],
+      createdAt: new Date(),
+      lastLoginAt: null,
+      gameHistory: dummyGameIds,
+      isTestUser: true, // Test user bypasses limit
+    } as MockUser);
+
+    const futureDate = new Date();
+    futureDate.setDate(futureDate.getDate() + 1);
+
+    vi.mocked(AdminGameService.getGame).mockResolvedValue({
+      id: "ABC123",
+      title: "Test Game",
+      theme: "Test Theme",
+      creatorId: "creator-id",
+      expiresAt: futureDate,
+      isPublic: true,
+      isPhotoSharingEnabled: true,
+      requiredBingoLines: 1,
+      confidenceThreshold: 0.7,
+      maxSubmissionsPerUser: 100,
+      status: "active" as const,
+      createdAt: new Date(),
+    } as MockGame);
+
+    // Mock user not yet participating
+    vi.mocked(getFirestore).mockReturnValue({
+      collection: vi.fn().mockImplementation((collectionName: string) => {
+        if (collectionName === "games") {
+          return {
+            doc: vi.fn(() => ({
+              collection: vi
+                .fn()
+                .mockImplementation((subCollectionName: string) => {
+                  if (subCollectionName === "participants") {
+                    return {
+                      doc: vi.fn(() => ({
+                        get: vi.fn().mockResolvedValue({
+                          exists: false,
+                        }),
+                      })),
+                    };
+                  }
+                  return {};
+                }),
+            })),
+          };
+        }
+        return {};
+      }),
+    } as unknown as ReturnType<typeof getFirestore>);
+
+    // Mock successful transaction
+    vi.mocked(AdminTransactionService.joinGame).mockResolvedValue({
+      success: true,
+    });
+
+    const request = new NextRequest("http://localhost/api/game/ABC123/join", {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer test-token",
+      },
+    });
+
+    const response = await POST(request, {
+      params: Promise.resolve({ gameId: "ABC123" }),
+    });
+    const data = await response.json();
+
+    // Should succeed (test users bypass limit)
+    expect(response.status).toBe(200);
+    expect(data.success).toBe(true);
+  });
+
+  it("should reject join when game has reached participant limit", async () => {
+    const { adminAuth } = await import("@/lib/firebase/admin");
+    const { AdminUserService, AdminGameService, AdminTransactionService } =
+      await import("@/lib/firebase/admin-collections");
+    const { getFirestore } = await import("firebase-admin/firestore");
+
+    vi.mocked(adminAuth.verifyIdToken).mockResolvedValue({
+      uid: "test-user-id",
+    } as DecodedIdToken);
+
+    vi.mocked(AdminUserService.getUser).mockResolvedValue({
+      id: "test-user-id",
+      username: "test-user",
+      participatingGames: [],
+      createdAt: new Date(),
+      lastLoginAt: null,
+      gameHistory: [],
+      isTestUser: false,
+    } as MockUser);
+
+    const futureDate = new Date();
+    futureDate.setDate(futureDate.getDate() + 1);
+
+    vi.mocked(AdminGameService.getGame).mockResolvedValue({
+      id: "ABC123",
+      title: "Test Game",
+      theme: "Test Theme",
+      creatorId: "creator-id",
+      expiresAt: futureDate,
+      isPublic: true,
+      isPhotoSharingEnabled: true,
+      requiredBingoLines: 1,
+      confidenceThreshold: 0.7,
+      maxSubmissionsPerUser: 100,
+      status: "active" as const,
+      createdAt: new Date(),
+    } as MockGame);
+
+    // Mock user not yet participating
+    vi.mocked(getFirestore).mockReturnValue({
+      collection: vi.fn().mockImplementation((collectionName: string) => {
+        if (collectionName === "games") {
+          return {
+            doc: vi.fn(() => ({
+              collection: vi
+                .fn()
+                .mockImplementation((subCollectionName: string) => {
+                  if (subCollectionName === "participants") {
+                    return {
+                      doc: vi.fn(() => ({
+                        get: vi.fn().mockResolvedValue({
+                          exists: false,
+                        }),
+                      })),
+                    };
+                  }
+                  return {};
+                }),
+            })),
+          };
+        }
+        return {};
+      }),
+    } as unknown as ReturnType<typeof getFirestore>);
+
+    // Mock transaction failure due to participant limit
+    vi.mocked(AdminTransactionService.joinGame).mockResolvedValue({
+      success: false,
+      error: `Game has reached the maximum number of participants (${MAX_PARTICIPANTS_PER_GAME})`,
+    });
+
+    const request = new NextRequest("http://localhost/api/game/ABC123/join", {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer test-token",
+      },
+    });
+
+    const response = await POST(request, {
+      params: Promise.resolve({ gameId: "ABC123" }),
+    });
+    const data = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(data.success).toBe(false);
+    expect(data.error.code).toBe("MAX_PARTICIPANTS_REACHED");
+    expect(data.error.message).toContain(`maximum number of participants`);
+  });
+
+  it("should update gameHistory when joining (tested via integration)", async () => {
+    // Note: gameHistory update is handled in AdminTransactionService.joinGame transaction
+    // This test verifies the API properly calls the transaction service
+    const { adminAuth } = await import("@/lib/firebase/admin");
+    const { AdminUserService, AdminGameService, AdminTransactionService } =
+      await import("@/lib/firebase/admin-collections");
+    const { getFirestore } = await import("firebase-admin/firestore");
+
+    vi.mocked(adminAuth.verifyIdToken).mockResolvedValue({
+      uid: "test-user-id",
+    } as DecodedIdToken);
+
+    vi.mocked(AdminUserService.getUser).mockResolvedValue({
+      id: "test-user-id",
+      username: "test-user",
+      participatingGames: [],
+      createdAt: new Date(),
+      lastLoginAt: null,
+      gameHistory: [],
+      isTestUser: false,
+    } as MockUser);
+
+    const futureDate = new Date();
+    futureDate.setDate(futureDate.getDate() + 1);
+
+    vi.mocked(AdminGameService.getGame).mockResolvedValue({
+      id: "ABC123",
+      title: "Test Game",
+      theme: "Test Theme",
+      creatorId: "creator-id",
+      expiresAt: futureDate,
+      isPublic: true,
+      isPhotoSharingEnabled: true,
+      requiredBingoLines: 1,
+      confidenceThreshold: 0.7,
+      maxSubmissionsPerUser: 100,
+      status: "active" as const,
+      createdAt: new Date(),
+    } as MockGame);
+
+    // Mock user not yet participating
+    vi.mocked(getFirestore).mockReturnValue({
+      collection: vi.fn().mockImplementation((collectionName: string) => {
+        if (collectionName === "games") {
+          return {
+            doc: vi.fn(() => ({
+              collection: vi
+                .fn()
+                .mockImplementation((subCollectionName: string) => {
+                  if (subCollectionName === "participants") {
+                    return {
+                      doc: vi.fn(() => ({
+                        get: vi.fn().mockResolvedValue({
+                          exists: false,
+                        }),
+                      })),
+                    };
+                  }
+                  return {};
+                }),
+            })),
+          };
+        }
+        return {};
+      }),
+    } as unknown as ReturnType<typeof getFirestore>);
+
+    // Mock successful transaction
+    vi.mocked(AdminTransactionService.joinGame).mockResolvedValue({
+      success: true,
+    });
+
+    const request = new NextRequest("http://localhost/api/game/ABC123/join", {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer test-token",
+      },
+    });
+
+    const response = await POST(request, {
+      params: Promise.resolve({ gameId: "ABC123" }),
+    });
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data.success).toBe(true);
+
+    // Verify transaction was called (which includes gameHistory update)
+    expect(AdminTransactionService.joinGame).toHaveBeenCalledWith(
+      "ABC123",
+      "test-user-id",
+      expect.any(String),
+    );
   });
 });

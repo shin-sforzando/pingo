@@ -38,3 +38,9 @@ export const TOTAL_CELLS = BOARD_SIZE * BOARD_SIZE; // 25
 export const BOARD_CENTER_COORD = Math.floor(BOARD_SIZE / 2); // 2 (center of [0,1,2,3,4])
 export const CENTER_CELL_INDEX = Math.floor(TOTAL_CELLS / 2); // 12 (center of 0-24 array)
 export const NON_FREE_CELLS = TOTAL_CELLS - 1; // 24 (excluding center FREE cell)
+
+/**
+ * Game and user limits
+ */
+export const MAX_GAMES_PER_USER = 10; // Maximum games per user (cumulative, including ended games)
+export const MAX_PARTICIPANTS_PER_GAME = 30; // Maximum participants per game

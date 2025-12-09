@@ -10,7 +10,7 @@ import { customAlphabet } from "nanoid";
 import { type NextRequest, NextResponse } from "next/server";
 import { ulid } from "ulid";
 import { z } from "zod";
-import { GAME_ID_LENGTH } from "../../../../lib/constants";
+import { GAME_ID_LENGTH, MAX_GAMES_PER_USER } from "../../../../lib/constants";
 import { adminAuth, adminFirestore } from "../../../../lib/firebase/admin";
 import { AdminGameService } from "../../../../lib/firebase/admin-collections";
 import { type ApiResponse, GameStatus, Role } from "../../../../types/common";
@@ -32,6 +32,7 @@ import {
   gameCreationSchema,
   type PlayerBoard,
 } from "../../../../types/schema";
+import type { UserDocument } from "../../../../types/user";
 
 // Constants
 const PROD_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -158,6 +159,39 @@ export async function POST(
 
     const gameData = validationResult.data;
 
+    // Check user's game history limit (quick check before transaction)
+    const userDoc = await adminFirestore.collection("users").doc(userId).get();
+    if (!userDoc.exists) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "USER_NOT_FOUND",
+            message: "User not found",
+          },
+        },
+        { status: 404 },
+      );
+    }
+
+    const userData = userDoc.data() as UserDocument;
+    const gameHistory = userData.gameHistory || [];
+    const isTestUser = userData.isTestUser || false;
+
+    // Check game history limit (skip for test users)
+    if (!isTestUser && gameHistory.length >= MAX_GAMES_PER_USER) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "MAX_GAMES_REACHED",
+            message: `Maximum games limit (${MAX_GAMES_PER_USER}) reached`,
+          },
+        },
+        { status: 400 },
+      );
+    }
+
     // Determine if we're in a test environment
     // For simplicity, we'll consider it a test if the title contains "TEST"
     const isTest = gameData.title.includes("TEST");
@@ -171,6 +205,23 @@ export async function POST(
 
     // Run in a transaction to ensure all operations succeed or fail together
     await adminFirestore.runTransaction(async (transaction) => {
+      // 0. Re-check user's game history limit within transaction (atomic check)
+      const userDocRefForCheck = adminFirestore.collection("users").doc(userId);
+      const userDocInTx = await transaction.get(userDocRefForCheck);
+
+      if (!userDocInTx.exists) {
+        throw new Error("User not found");
+      }
+
+      const userDataInTx = userDocInTx.data() as UserDocument;
+      const gameHistoryInTx = userDataInTx?.gameHistory || [];
+      const isTestUserInTx = userDataInTx?.isTestUser || false;
+
+      // Final atomic check within transaction (prevents race conditions)
+      if (!isTestUserInTx && gameHistoryInTx.length >= MAX_GAMES_PER_USER) {
+        throw new Error(`Maximum games limit (${MAX_GAMES_PER_USER}) reached`);
+      }
+
       // 1. Create the game document
       const gameDocRef = adminFirestore.collection("games").doc(gameId);
 
@@ -299,10 +350,11 @@ export async function POST(
       const eventDoc = eventToFirestore(event);
       transaction.set(eventDocRef, eventDoc);
 
-      // 7. Update the user's participating games
+      // 6. Update the user's participating games and game history
       const userDocRef = adminFirestore.collection("users").doc(userId);
       transaction.update(userDocRef, {
         participatingGames: FieldValue.arrayUnion(gameId),
+        gameHistory: FieldValue.arrayUnion(gameId),
       });
     });
 
