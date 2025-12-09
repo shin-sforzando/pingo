@@ -364,9 +364,19 @@ export default function CreateGamePage() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(
-          errorData.error?.message || t("Game.errors.creationFailed"),
-        );
+
+        // Handle specific error codes
+        const errorCode = errorData.error?.code;
+        const errorMessage = errorData.error?.message;
+
+        if (
+          errorCode === "MAX_GAMES_REACHED" ||
+          errorMessage?.includes("maximum number of games")
+        ) {
+          throw new Error(t("Game.errors.maxGamesReached", { 0: 10 }));
+        }
+
+        throw new Error(errorMessage || t("Game.errors.creationFailed"));
       }
 
       const responseData = await response.json();

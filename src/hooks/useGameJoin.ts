@@ -1,6 +1,8 @@
+import { useTranslations } from "next-intl";
 import { useCallback, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { trackGameJoined } from "@/lib/analytics";
+import { MAX_GAMES_PER_USER, MAX_PARTICIPANTS_PER_GAME } from "@/lib/constants";
 import { useAuthenticatedFetch } from "./useAuthenticatedFetch";
 
 interface GameJoinResult {
@@ -53,10 +55,39 @@ interface UseGameJoinReturn {
  * };
  */
 export function useGameJoin(): UseGameJoinReturn {
+  const t = useTranslations();
   const { refreshUser } = useAuth();
   const { authenticatedFetch } = useAuthenticatedFetch();
   const [isJoining, setIsJoining] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  /**
+   * Get localized error message based on error code
+   */
+  const getErrorMessage = useCallback(
+    (errorCode?: string, errorMessage?: string): string => {
+      // Handle specific error codes
+      if (
+        errorCode === "MAX_GAMES_REACHED" ||
+        errorMessage?.includes("maximum number of games")
+      ) {
+        return t("Game.errors.maxGamesReached", { 0: MAX_GAMES_PER_USER });
+      }
+
+      if (
+        errorCode === "MAX_PARTICIPANTS_REACHED" ||
+        errorMessage?.includes("maximum number of participants")
+      ) {
+        return t("Game.errors.maxParticipantsReached", {
+          0: MAX_PARTICIPANTS_PER_GAME,
+        });
+      }
+
+      // Return original message or default
+      return errorMessage || t("Game.errors.joinFailed");
+    },
+    [t],
+  );
 
   /**
    * Clear the current error state
@@ -90,30 +121,38 @@ export function useGameJoin(): UseGameJoinReturn {
 
         if (!response.ok) {
           // Server returned an error response
-          const errorMessage =
-            responseData.error?.message || "Failed to join game";
+          const errorCode = responseData.error?.code;
+          const errorMessage = getErrorMessage(
+            errorCode,
+            responseData.error?.message,
+          );
           setError(errorMessage);
 
           return {
             success: false,
-            error: responseData.error || {
-              code: "JOIN_FAILED",
+            error: {
+              code: errorCode || "JOIN_FAILED",
               message: errorMessage,
+              details: responseData.error?.details,
             },
           };
         }
 
         if (!responseData.success) {
           // Response was OK but API indicates failure
-          const errorMessage =
-            responseData.error?.message || "Failed to join game";
+          const errorCode = responseData.error?.code;
+          const errorMessage = getErrorMessage(
+            errorCode,
+            responseData.error?.message,
+          );
           setError(errorMessage);
 
           return {
             success: false,
-            error: responseData.error || {
-              code: "JOIN_FAILED",
+            error: {
+              code: errorCode || "JOIN_FAILED",
               message: errorMessage,
+              details: responseData.error?.details,
             },
           };
         }
@@ -154,7 +193,7 @@ export function useGameJoin(): UseGameJoinReturn {
         setIsJoining(false);
       }
     },
-    [authenticatedFetch, refreshUser],
+    [authenticatedFetch, refreshUser, getErrorMessage],
   );
 
   return {

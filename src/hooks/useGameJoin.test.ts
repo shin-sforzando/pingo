@@ -2,6 +2,25 @@ import { renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useGameJoin } from "./useGameJoin";
 
+// Mock next-intl
+const mockT = vi.fn((key: string, params?: Record<string, unknown>) => {
+  // Return a simple translation for testing
+  if (key === "Game.errors.maxGamesReached") {
+    return `Maximum games limit (${params?.[0]}) reached`;
+  }
+  if (key === "Game.errors.maxParticipantsReached") {
+    return `Maximum participants (${params?.[0]}) reached`;
+  }
+  if (key === "Game.errors.joinFailed") {
+    return "Failed to join game";
+  }
+  return key;
+});
+
+vi.mock("next-intl", () => ({
+  useTranslations: () => mockT,
+}));
+
 // Mock AuthContext
 const mockRefreshUser = vi.fn();
 vi.mock("@/contexts/AuthContext", () => ({
@@ -23,6 +42,7 @@ describe("useGameJoin", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    mockT.mockClear();
   });
 
   describe("initial state", () => {
