@@ -162,7 +162,7 @@
     "restrictions": {
       "publicGameOnly": "During the limited release period, all games will be set to public.",
       "checksRequired": "During the limited release period, public order and morals checks are mandatory.",
-      "maxSubmissionsFixed": "During the private period, the number of posts is fixed at {count}.",
+      "maxSubmissionsFixed": "During the limited release period, the number of posts is fixed at {count}.",
       "confidenceRangeRestricted": "The higher the threshold, the stricter the judgment becomes."
     },
     "Share": {

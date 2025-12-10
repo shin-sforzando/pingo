@@ -40,6 +40,7 @@ import {
   FIXED_MAX_SUBMISSIONS_PER_USER,
   MAX_CONFIDENCE_THRESHOLD,
   MAX_GAME_EXPIRATION_DAYS,
+  MAX_GAMES_PER_USER,
   MIN_CONFIDENCE_THRESHOLD,
   NON_FREE_CELLS,
   TEMPORARY_GAME_RESTRICTIONS,
@@ -385,7 +386,9 @@ export default function CreateGamePage() {
           errorCode === "MAX_GAMES_REACHED" ||
           errorMessage?.includes("maximum number of games")
         ) {
-          throw new Error(t("Game.errors.maxGamesReached", { 0: 10 }));
+          throw new Error(
+            t("Game.errors.maxGamesReached", { 0: MAX_GAMES_PER_USER }),
+          );
         }
 
         throw new Error(errorMessage || t("Game.errors.creationFailed"));
