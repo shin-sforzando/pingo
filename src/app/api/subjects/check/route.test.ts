@@ -604,4 +604,81 @@ describe("subjects/check API", () => {
     // At least 2 of the 4 problematic subjects should be detected
     expect(detectedCount).toBeGreaterThanOrEqual(2);
   });
+
+  // Tests for relaxed prompt template (should NOT reject these)
+  it("should approve food items with allergy concerns in English", async () => {
+    // Skip this test if GEMINI_API_KEY is not available
+    if (!process.env.GEMINI_API_KEY) {
+      return;
+    }
+
+    const req = createApiRequest("/api/subjects/check", "POST", {
+      subjects: ["Sushi", "Peanuts", "Milk", "Shellfish", "Eggs"],
+      language: "en",
+    });
+
+    const response = await POST(req);
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data.ok).toBe(true);
+    expect(data.issues).toBeUndefined();
+  });
+
+  it("should approve food items with allergy concerns in Japanese", async () => {
+    // Skip this test if GEMINI_API_KEY is not available
+    if (!process.env.GEMINI_API_KEY) {
+      return;
+    }
+
+    const req = createApiRequest("/api/subjects/check", "POST", {
+      subjects: ["お寿司", "ピーナッツ", "牛乳", "エビ", "卵"],
+      language: "ja",
+    });
+
+    const response = await POST(req);
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data.ok).toBe(true);
+    expect(data.issues).toBeUndefined();
+  });
+
+  it("should approve everyday objects with minor safety concerns in English", async () => {
+    // Skip this test if GEMINI_API_KEY is not available
+    if (!process.env.GEMINI_API_KEY) {
+      return;
+    }
+
+    const req = createApiRequest("/api/subjects/check", "POST", {
+      subjects: ["Ladder", "Kitchen knife", "Scissors", "Hammer", "Saw"],
+      language: "en",
+    });
+
+    const response = await POST(req);
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data.ok).toBe(true);
+    expect(data.issues).toBeUndefined();
+  });
+
+  it("should approve everyday objects with minor safety concerns in Japanese", async () => {
+    // Skip this test if GEMINI_API_KEY is not available
+    if (!process.env.GEMINI_API_KEY) {
+      return;
+    }
+
+    const req = createApiRequest("/api/subjects/check", "POST", {
+      subjects: ["はしご", "包丁", "はさみ", "金づち", "のこぎり"],
+      language: "ja",
+    });
+
+    const response = await POST(req);
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data.ok).toBe(true);
+    expect(data.issues).toBeUndefined();
+  });
 });

@@ -103,7 +103,8 @@
       "titleRequired": "タイトルを入力してください",
       "titleTooLong": "タイトルは50文字以内で入力してください",
       "validationFailed": "被写体候補の検証に失敗しました",
-      "verificationFailed": "ゲームの確認に失敗しました"
+      "verificationFailed": "ゲームの確認に失敗しました",
+      "expirationTooLong": "ゲームの有効期限は最長{maxDays}日です。"
     },
     "expirationDate": "有効期限",
     "expiresAt": "有効期限",
@@ -144,6 +145,7 @@
     "notesPlaceholder": "追加の備考を入力...",
     "off": "オフ",
     "on": "オン",
+    "fixed": "固定",
     "participatingGames": "参加中のゲーム",
     "participatingGamesDescription": "{count}件の参加中のゲーム",
     "photoSharing": "写真共有",
@@ -156,6 +158,13 @@
     "resetSubjects": "被写体候補をリセット",
     "selectDate": "日付を選択",
     "settings": "ゲーム設定",
+    "expiresAtMaxDays": "限定公開の期間中、最長は{maxDays}日です。",
+    "restrictions": {
+      "publicGameOnly": "限定公開の期間中、全てのゲームは公開設定になります。",
+      "checksRequired": "限定公開の期間中、公序良俗チェックは必須です。",
+      "maxSubmissionsFixed": "限定公開の期間中、投稿回数は{count}回に固定されています。",
+      "confidenceRangeRestricted": "閾値を高くするほど判定が厳しくなります。"
+    },
     "Share": {
       "bingoBoard": "ビンゴボード",
       "gameNotFound": "ゲームが見つかりません",

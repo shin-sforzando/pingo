@@ -44,3 +44,47 @@ export const NON_FREE_CELLS = TOTAL_CELLS - 1; // 24 (excluding center FREE cell
  */
 export const MAX_GAMES_PER_USER = 10; // Maximum games per user (cumulative, including ended games)
 export const MAX_PARTICIPANTS_PER_GAME = 30; // Maximum participants per game
+
+/**
+ * Game expiration configuration (Issue #157)
+ */
+export const DEFAULT_GAME_EXPIRATION_DAYS = 30; // Default expiration
+export const MAX_GAME_EXPIRATION_DAYS = 30; // Maximum expiration
+
+/**
+ * Temporary game creation restrictions (Issue #158)
+ * Set flags to false to remove restrictions in the future
+ */
+export const TEMPORARY_GAME_RESTRICTIONS = {
+  // Public game setting
+  forcePublicGame: true,
+  defaultIsPublic: true,
+
+  // Photo sharing setting
+  forcePhotoSharingOff: true,
+  hidePhotoSharingOption: true, // Completely hide from UI
+
+  // Skip checks settings
+  forceSubjectsCheckEnabled: true,
+  forceImageCheckEnabled: true,
+
+  // Confidence threshold limits
+  minConfidenceThreshold: 0.3, // Changed from 0.0
+  maxConfidenceThreshold: 0.9, // Changed from 1.0
+
+  // Max submissions per user
+  fixedMaxSubmissions: true,
+  maxSubmissionsValue: 30,
+} as const;
+
+/**
+ * Confidence threshold configuration (Issue #158)
+ */
+export const MIN_CONFIDENCE_THRESHOLD = 0.3; // Restricted from 0.0
+export const MAX_CONFIDENCE_THRESHOLD = 0.9; // Restricted from 1.0
+export const DEFAULT_CONFIDENCE_THRESHOLD = 0.5; // Unchanged
+
+/**
+ * Max submissions per user (Issue #158)
+ */
+export const FIXED_MAX_SUBMISSIONS_PER_USER = 30;

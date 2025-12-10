@@ -82,6 +82,27 @@ npm run knip
 npm run repomix
 ```
 
+### データメンテナンス
+
+```bash
+# デフォルト（7日より古いゲームを削除）
+npm run delete-game-data
+
+# 30日より古いゲームを削除
+npm run delete-game-data -- --days=30
+
+# 特定日付より前のゲームを削除
+npm run delete-game-data -- --before=2024-12-01
+
+# 全ゲームを削除（⚠️ 注意）
+npm run delete-game-data -- --all
+```
+
+**注意事項**:
+- ゲームデータは削除されますが、ユーザーアカウントは保持されます
+- Firestoreのゲームドキュメント、Storage画像、ユーザーのゲーム履歴が削除されます
+- 削除操作は取り消せません
+
 ## Git・セキュリティ
 
 ### git-secret関連

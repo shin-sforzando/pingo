@@ -50,9 +50,9 @@ const responseSchema = {
   required: ["ok"],
 };
 
-const getPromptTemplate = (params: CheckSubjectsRequest) => {
+// Original strict prompt template (kept for reference)
+const _getStrictPromptTemplate = (params: CheckSubjectsRequest) => {
   const { subjects, language } = params;
-  console.log("ℹ️ XXX: ~ route.ts ~ getPromptTemplate ~ params:", params);
 
   return `You are a content moderator for photo bingo game.
 Please check if the following subjects are appropriate for the game.
@@ -64,6 +64,35 @@ Each subject must meet ALL of the following criteria:
 - Be unambiguous and specific enough for players to understand what to photograph
 - Be appropriate for all ages (no offensive content, harmful elements, adult themes, violence, or illegal activities)
 - Be unique within the list (not duplicated or too similar to other subjects)
+
+Subjects to check:
+${subjects.map((subject) => `- "${subject}"`).join("\n")}
+
+If all subjects are appropriate, respond with ok: true.
+If there are issues, provide a list of issues with the subject and reason in ${language || "ja"}.
+Ensure reasons clearly explain which criteria were not met.`;
+};
+
+// Relaxed prompt template (current)
+const getPromptTemplate = (params: CheckSubjectsRequest) => {
+  const { subjects, language } = params;
+  console.log("ℹ️ XXX: ~ route.ts ~ getPromptTemplate ~ params:", params);
+
+  return `You are a content moderator for a photo bingo game.
+Please check if the following subjects are appropriate for the game.
+
+Each subject must meet ALL of the following criteria:
+- Be a concrete noun or short descriptive phrase that clearly identifies a photo target
+- Be visually identifiable in a photograph
+- Be unambiguous and specific enough for players to understand what to photograph
+- Contain NO explicit violence, illegal activities, or adult/sexual content
+- Be unique within the list (not duplicated or too similar to other subjects)
+
+IMPORTANT: Do NOT reject subjects based on:
+- Allergies or dietary restrictions (e.g., "sushi", "peanuts", "milk" are acceptable)
+- Religious or cultural sensitivities (e.g., foods, clothing, symbols are acceptable unless explicitly offensive)
+- Minor safety concerns (e.g., "ladder", "knife" as everyday objects are acceptable)
+- AI recognition difficulty (players can decide if they want challenging subjects)
 
 Subjects to check:
 ${subjects.map((subject) => `- "${subject}"`).join("\n")}

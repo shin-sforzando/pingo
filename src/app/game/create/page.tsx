@@ -36,7 +36,13 @@ import {
   BOARD_CENTER_COORD,
   BOARD_SIZE,
   CENTER_CELL_INDEX,
+  DEFAULT_GAME_EXPIRATION_DAYS,
+  FIXED_MAX_SUBMISSIONS_PER_USER,
+  MAX_CONFIDENCE_THRESHOLD,
+  MAX_GAME_EXPIRATION_DAYS,
+  MIN_CONFIDENCE_THRESHOLD,
   NON_FREE_CELLS,
+  TEMPORARY_GAME_RESTRICTIONS,
 } from "@/lib/constants";
 import { auth } from "@/lib/firebase/client";
 import { cn } from "@/lib/utils";
@@ -65,9 +71,15 @@ export default function CreateGamePage() {
   // State for skipping subjects check (UI-only, not persisted)
   const [skipSubjectsCheck, setSkipSubjectsCheck] = useState(false);
 
-  // Calculate default expiration date (1 day from now)
+  // Calculate default expiration date (30 days from now - Issue #157)
   const defaultExpiresAt = new Date();
-  defaultExpiresAt.setDate(defaultExpiresAt.getDate() + 1);
+  defaultExpiresAt.setDate(
+    defaultExpiresAt.getDate() + DEFAULT_GAME_EXPIRATION_DAYS,
+  );
+
+  // Calculate maximum expiration date (30 days from now - Issue #157)
+  const maxExpiresAt = new Date();
+  maxExpiresAt.setDate(maxExpiresAt.getDate() + MAX_GAME_EXPIRATION_DAYS);
 
   // Form setup with type assertion to resolve compatibility issues
   const form = useForm<GameCreateFormValues>({
@@ -76,14 +88,14 @@ export default function CreateGamePage() {
     defaultValues: {
       title: "",
       theme: "",
-      expiresAt: defaultExpiresAt,
-      isPublic: false,
-      isPhotoSharingEnabled: true,
-      skipImageCheck: false,
+      expiresAt: defaultExpiresAt, // Now 30 days (Issue #157)
+      isPublic: TEMPORARY_GAME_RESTRICTIONS.defaultIsPublic, // true (Issue #158)
+      isPhotoSharingEnabled: false, // Force OFF (Issue #158)
+      skipImageCheck: false, // Force checks ON (Issue #158)
       isShuffleEnabled: false,
       requiredBingoLines: 1,
       confidenceThreshold: 0.5,
-      maxSubmissionsPerUser: 30,
+      maxSubmissionsPerUser: FIXED_MAX_SUBMISSIONS_PER_USER, // 30 (Issue #158)
       notes: "",
     },
   });
@@ -592,11 +604,20 @@ export default function CreateGamePage() {
                             mode="single"
                             selected={field.value}
                             onSelect={field.onChange}
-                            disabled={(date) => date < new Date()}
+                            disabled={(date) => {
+                              const today = new Date();
+                              today.setHours(0, 0, 0, 0); // Start of today
+                              return date < today || date > maxExpiresAt; // Issue #157
+                            }}
                             initialFocus
                           />
                         </PopoverContent>
                       </Popover>
+                      <FormDescription className="text-xs text-muted-foreground">
+                        {t("Game.expiresAtMaxDays", {
+                          maxDays: MAX_GAME_EXPIRATION_DAYS,
+                        })}
+                      </FormDescription>
                       <TranslatedFormMessage />
                     </FormItem>
                   )}
@@ -612,38 +633,48 @@ export default function CreateGamePage() {
                         <FormDescription>
                           {t("Game.isPublicDescription")}
                         </FormDescription>
+                        {TEMPORARY_GAME_RESTRICTIONS.forcePublicGame && (
+                          <p className="text-xs text-muted-foreground italic">
+                            {t("Game.restrictions.publicGameOnly")}
+                          </p>
+                        )}
                       </div>
                       <FormControl>
                         <Switch
                           checked={field.value}
                           onCheckedChange={field.onChange}
+                          disabled={TEMPORARY_GAME_RESTRICTIONS.forcePublicGame}
                         />
                       </FormControl>
                     </FormItem>
                   )}
                 />
 
-                {/* Photo Sharing Setting */}
-                <FormField
-                  control={form.control}
-                  name="isPhotoSharingEnabled"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-                      <div className="space-y-0.5">
-                        <FormLabel>{t("Game.isPhotoSharingEnabled")}</FormLabel>
-                        <FormDescription>
-                          {t("Game.isPhotoSharingEnabledDescription")}
-                        </FormDescription>
-                      </div>
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
+                {/* Photo Sharing Setting - Issue #158: Hide completely */}
+                {!TEMPORARY_GAME_RESTRICTIONS.hidePhotoSharingOption && (
+                  <FormField
+                    control={form.control}
+                    name="isPhotoSharingEnabled"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                        <div className="space-y-0.5">
+                          <FormLabel>
+                            {t("Game.isPhotoSharingEnabled")}
+                          </FormLabel>
+                          <FormDescription>
+                            {t("Game.isPhotoSharingEnabledDescription")}
+                          </FormDescription>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                )}
 
                 {/* Skip Subjects Check Setting (UI-only) */}
                 <div className="flex flex-row items-center justify-between rounded-lg border p-3">
@@ -652,10 +683,18 @@ export default function CreateGamePage() {
                     <FormDescription>
                       {t("Game.skipSubjectsCheckDescription")}
                     </FormDescription>
+                    {TEMPORARY_GAME_RESTRICTIONS.forceSubjectsCheckEnabled && (
+                      <p className="text-xs text-muted-foreground italic">
+                        {t("Game.restrictions.checksRequired")}
+                      </p>
+                    )}
                   </div>
                   <Switch
                     checked={skipSubjectsCheck}
                     onCheckedChange={setSkipSubjectsCheck}
+                    disabled={
+                      TEMPORARY_GAME_RESTRICTIONS.forceSubjectsCheckEnabled
+                    }
                   />
                 </div>
 
@@ -670,11 +709,19 @@ export default function CreateGamePage() {
                         <FormDescription>
                           {t("Game.skipImageCheckDescription")}
                         </FormDescription>
+                        {TEMPORARY_GAME_RESTRICTIONS.forceImageCheckEnabled && (
+                          <p className="text-xs text-muted-foreground italic">
+                            {t("Game.restrictions.checksRequired")}
+                          </p>
+                        )}
                       </div>
                       <FormControl>
                         <Switch
                           checked={field.value}
                           onCheckedChange={field.onChange}
+                          disabled={
+                            TEMPORARY_GAME_RESTRICTIONS.forceImageCheckEnabled
+                          }
                         />
                       </FormControl>
                     </FormItem>
@@ -746,24 +793,34 @@ export default function CreateGamePage() {
                       <FormDescription>
                         {t("Game.confidenceThresholdDescription")}
                       </FormDescription>
+                      <p className="text-xs text-muted-foreground italic">
+                        {t("Game.restrictions.confidenceRangeRestricted", {
+                          min: MIN_CONFIDENCE_THRESHOLD,
+                          max: MAX_CONFIDENCE_THRESHOLD,
+                        })}
+                      </p>
                       <FormControl>
                         <div className="flex items-center space-x-2">
                           <Input
                             type="number"
-                            min={0}
-                            max={1}
+                            min={MIN_CONFIDENCE_THRESHOLD}
+                            max={MAX_CONFIDENCE_THRESHOLD}
                             step={0.1}
                             {...field}
                             onChange={(e) => {
                               const value = Number.parseFloat(e.target.value);
-                              if (0 <= value && value <= 1) {
+                              if (
+                                value >= MIN_CONFIDENCE_THRESHOLD &&
+                                value <= MAX_CONFIDENCE_THRESHOLD
+                              ) {
                                 field.onChange(value);
                               }
                             }}
                             className="w-20"
                           />
                           <span className="text-muted-foreground">
-                            (0.0-1.0)
+                            ({MIN_CONFIDENCE_THRESHOLD}-
+                            {MAX_CONFIDENCE_THRESHOLD})
                           </span>
                         </div>
                       </FormControl>
@@ -782,6 +839,13 @@ export default function CreateGamePage() {
                       <FormDescription>
                         {t("Game.maxSubmissionsPerUserDescription")}
                       </FormDescription>
+                      {TEMPORARY_GAME_RESTRICTIONS.fixedMaxSubmissions && (
+                        <p className="text-xs text-muted-foreground italic">
+                          {t("Game.restrictions.maxSubmissionsFixed", {
+                            count: FIXED_MAX_SUBMISSIONS_PER_USER,
+                          })}
+                        </p>
+                      )}
                       <FormControl>
                         <div className="flex items-center space-x-2">
                           <Input
@@ -789,15 +853,31 @@ export default function CreateGamePage() {
                             min={1}
                             max={100}
                             {...field}
+                            value={FIXED_MAX_SUBMISSIONS_PER_USER}
+                            disabled={
+                              TEMPORARY_GAME_RESTRICTIONS.fixedMaxSubmissions
+                            }
+                            readOnly={
+                              TEMPORARY_GAME_RESTRICTIONS.fixedMaxSubmissions
+                            }
                             onChange={(e) => {
-                              const value = Number.parseInt(e.target.value, 10);
-                              if (1 <= value && value <= 100) {
-                                field.onChange(value);
+                              if (
+                                !TEMPORARY_GAME_RESTRICTIONS.fixedMaxSubmissions
+                              ) {
+                                const value = Number.parseInt(
+                                  e.target.value,
+                                  10,
+                                );
+                                if (1 <= value && value <= 100) {
+                                  field.onChange(value);
+                                }
                               }
                             }}
                             className="w-20"
                           />
-                          <span className="text-muted-foreground">(1-100)</span>
+                          <span className="text-muted-foreground">
+                            ({t("Game.fixed")})
+                          </span>
                         </div>
                       </FormControl>
                       <TranslatedFormMessage />
