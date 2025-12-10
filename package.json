@@ -23,6 +23,7 @@
     "build-storybook": "storybook build",
     "docker": "npm run docker:build -- --run",
     "docker:build": "npx tsx scripts/docker-build.ts",
+    "delete-game-data": "npx tsx scripts/delete-game-data.ts",
     "ncu": "npx npm-check-updates",
     "knip": "npx knip",
     "repomix": "npx repomix"

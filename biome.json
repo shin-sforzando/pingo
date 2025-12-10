@@ -6,7 +6,9 @@
     "useIgnoreFile": true
   },
   "files": {
-    "ignoreUnknown": true
+    "ignoreUnknown": true,
+    "maxSize": 10485760,
+    "includes": ["**", "!!.claude"]
   },
   "formatter": {
     "enabled": true,

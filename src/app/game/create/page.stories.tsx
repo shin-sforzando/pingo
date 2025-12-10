@@ -199,3 +199,31 @@ export const FormFilled: Story = {
     }
   },
 };
+
+/**
+ * With Temporary Restrictions (Issue #157, #158)
+ * Demonstrates the temporary game creation restrictions:
+ * - Default/Max expiration: 30 days
+ * - Public game: Forced ON
+ * - Photo sharing: Hidden
+ * - Skip checks: Disabled
+ * - Confidence threshold: Limited to 0.3-0.9
+ * - Max submissions: Fixed at 30
+ */
+export const WithRestrictions: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: `
+          Demonstrates the temporary game creation restrictions (Issue #157, #158):
+          - **Expiration**: Default and maximum set to 30 days
+          - **Public game**: Forced ON (toggle disabled)
+          - **Photo sharing**: Completely hidden from UI
+          - **Content checks**: Forced ON (toggles disabled)
+          - **Confidence threshold**: Range restricted to 0.3-0.9
+          - **Max submissions**: Fixed at 30 (input disabled)
+        `,
+      },
+    },
+  },
+};
