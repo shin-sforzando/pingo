@@ -49,6 +49,30 @@ vi.mock("@/contexts/AuthContext", () => ({
   }),
 }));
 
+// Mock useParticipatingGames hook
+let mockParticipatingGames: {
+  participatingGames: Array<{
+    id: string;
+    title: string;
+    theme: string;
+    notes?: string;
+    expiresAt: Date;
+    createdAt: Date;
+    participantCount: number;
+    isParticipating: boolean;
+  }>;
+  isLoading: boolean;
+  error: Error | null;
+} = {
+  participatingGames: [],
+  isLoading: false,
+  error: null,
+};
+
+vi.mock("@/hooks/useParticipatingGames", () => ({
+  useParticipatingGames: () => mockParticipatingGames,
+}));
+
 // Mock AuthGuard to bypass authentication in tests
 mockAuthGuard();
 
@@ -65,6 +89,13 @@ describe("JoinGamePage", () => {
 
     // Reset participating games to empty array for most tests
     mockUser.participatingGames = [];
+
+    // Reset mock participating games
+    mockParticipatingGames = {
+      participatingGames: [],
+      isLoading: false,
+      error: null,
+    };
 
     // Default mock implementation for fetch
     mockFetch.mockImplementation((url: string) => {
@@ -287,6 +318,33 @@ describe("JoinGamePage", () => {
     beforeEach(() => {
       // Set participating games for this test
       mockUser.participatingGames = ["PART01", "PART02"];
+
+      // Mock participating games data
+      mockParticipatingGames = {
+        participatingGames: [
+          {
+            id: "PART01",
+            title: "Participating Game 1",
+            theme: "Test Theme",
+            notes: "Test notes",
+            expiresAt: new Date("2025-12-31"),
+            createdAt: new Date("2025-01-01"),
+            participantCount: 2,
+            isParticipating: true,
+          },
+          {
+            id: "PART02",
+            title: "Participating Game 2",
+            theme: "Test Theme 2",
+            expiresAt: new Date("2025-12-31"),
+            createdAt: new Date("2025-01-01"),
+            participantCount: 3,
+            isParticipating: true,
+          },
+        ],
+        isLoading: false,
+        error: null,
+      };
 
       // Mock fetch to return game info for participating games
       mockFetch.mockImplementation((url: string) => {

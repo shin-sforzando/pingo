@@ -65,7 +65,7 @@ export const TEMPORARY_GAME_RESTRICTIONS = {
   hidePhotoSharingOption: true, // Completely hide from UI
 
   // Skip checks settings
-  forceSubjectsCheckEnabled: true,
+  forceSubjectsCheckEnabled: false,
   forceImageCheckEnabled: true,
 
   // Confidence threshold limits
