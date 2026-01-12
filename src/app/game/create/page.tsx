@@ -686,11 +686,6 @@ export default function CreateGamePage() {
                     <FormDescription>
                       {t("Game.skipSubjectsCheckDescription")}
                     </FormDescription>
-                    {TEMPORARY_GAME_RESTRICTIONS.forceSubjectsCheckEnabled && (
-                      <p className="text-xs text-muted-foreground italic">
-                        {t("Game.restrictions.checksRequired")}
-                      </p>
-                    )}
                   </div>
                   <Switch
                     checked={skipSubjectsCheck}
